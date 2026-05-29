@@ -20,6 +20,4 @@ auxiliary-curve construction, generic projection, and cell bounds). The proof
 goes through a Szemerédi–Trotter-type argument that bottoms out in the multigraph
 crossing inequality, consumed from the sibling `crossing-lemma` module.
 
-This root aggregator wires in modules as they land; see `PLAN.md` for the
-statement surface and the proof route.
 -/

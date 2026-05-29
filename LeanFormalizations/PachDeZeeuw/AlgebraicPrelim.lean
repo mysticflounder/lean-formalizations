@@ -1509,12 +1509,6 @@ lemma zeroSet_subset_normalizedFactor_union
   refine ⟨by simpa [s] using hh, ?_⟩
   simpa [PlaneCurveZeroSet] using hhz
 
-/-!
-The historical Bezout, singularity, and Point4 topology packets below are not
-used by the active Lean import tree. They are currently under repair and are
-quarantined from the active build surface so the live endpoint route can
-compile against the minimal theorem interface it actually consumes.
--/
 
 /-- A finite cover of a real plane curve by irreducible components coming from its normalized factors. -/
 abbrev PlanePoly := MvPolynomial (Fin 2) ℝ
@@ -1596,16 +1590,7 @@ theorem boundedDegreeCurve_real_component_cover
       _ ≤ d := hpdeg
 
 
-/- Endpoint packaging. The affine-conjugation helper packet below is not used
-by the active import tree and is still under repair, so it stays out of the
-active build for now. -/
 
-/-!
-The richer endpoint-image packaging below is not needed by the active
-`EndpointThreshold` import path; that lane only uses the abstract component
-cover and the direct pigeonhole theorem above. Keep the convenience packaging
-out of the active build until the packet is finished.
--/
 
 /-- A real degree-four curve together with its finite irreducible component cover. -/
 structure DegreeFourIrreducibleComponentCover (C : Set Point2) where
@@ -1620,14 +1605,6 @@ noncomputable def degreeFourIrreducibleComponentCover_of_boundedDegreeCurve
   let witness := boundedDegreeCurve_real_component_cover (d := 4) (C := C) hC
   refine ⟨Classical.choose witness, Classical.choose_spec witness⟩
 
-/- Endpoint-image points lying on line or circle components of the degree-four cover. -/
 
-/-!
-The endpoint nonexceptional-component witness packet and the downstream
-conic/C5 stabilizer development below are not referenced by the active Lean
-tree. They are currently under construction and were breaking the entire
-`AlgebraicPrelim` import chain, so they are quarantined from the active build
-surface until they are finished and moved behind their own module boundary.
--/
 
 end PachDeZeeuw.Algebraic

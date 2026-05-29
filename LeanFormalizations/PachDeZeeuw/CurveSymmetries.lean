@@ -22,8 +22,6 @@ and Lemma 2.6 drives the conic case of Lemma 4.3. Lemma 2.5's proof invokes
 Bézout's inequality (Theorem 2.1, from the sibling `bezout` module): a symmetry
 fixing infinitely many points of an irreducible curve must fix the curve.
 
-This root aggregator wires in modules as they land; see `PLAN.md`.
-
 This file fixes the **statement surface** of §2.3: the isometry/affine and conic
 vocabulary, `Lemma25Statement` (≤ `4d` symmetries) and `Lemma26Statement` (the
 conic-stabilizer normal-form classification), defined locally (Mathlib-only; the

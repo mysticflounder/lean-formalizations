@@ -24,13 +24,9 @@ Theorem 2.1 is the workhorse intersection bound of the whole development: it
 underlies Lemma 2.5 (symmetries), Lemma 3.6, Lemmas 4.1–4.3, and the
 finite-intersection counts feeding the §3 incidence assembly.
 
-This root aggregator wires in modules as they land; see `PLAN.md` for the
-resultant-based proof route.
-
 This file fixes the **statement surface** of Theorem 2.1: the curve / degree /
 common-component vocabulary and the inequality `Bezout21Statement`, defined
-exactly as in the paper. The discharging term (a real resultant-based proof; see
-`PLAN.md`) is deferred — the `Prop` here is the named interface that the §3/§4
+exactly as in the paper. The discharging term (a real resultant-based proof) is deferred — the `Prop` here is the named interface that the §3/§4
 lemmas thread through.
 -/
 

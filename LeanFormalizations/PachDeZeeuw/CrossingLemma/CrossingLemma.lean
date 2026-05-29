@@ -24,9 +24,8 @@ No proofs live here: the file lays down carriers (`SimpleCurveArc`,
 `CrossingLemmaMultigraphStatement`. The statement is kept entirely in `ℕ` and
 entirely cubed (`e³ ≤ 64·M·v²·cr`), avoiding `Real.rpow` on the critical path.
 
-These definitions are transcribed from the verified spec
-`docs/formalization/problem-98-pdz-ps-crossing-lemma-spec-2026-05-25.md`
-(§3.4 / §4.1 / §4.2); the field structure, the `Fin numEdges` edge indexing,
+These definitions follow the Pach–de Zeeuw / Pach–Sharir crossing-lemma
+development (§3.4 / §4.1 / §4.2); the field structure, the `Fin numEdges` edge indexing,
 the `0 < M` and `4·M·v ≤ e` threshold, and the `e³ ≤ 64·M·v²·cr` conclusion are
 load-bearing and verified against arXiv 1308.0177.
 -/
@@ -108,9 +107,7 @@ def CrossingLemmaMultigraphStatement : Prop :=
 /-! ## BR-0 / BR-1 — drawing → genus-0-map bridge: rotation from geometry
 
 This section adds the route-(B) companion definitions (BR-0) and the analysis
-core (BR-1) of the PdZ drawing→genus-0-map bridge, following
-`docs/formalization/problem-98-pdz-ps-drawing-to-genus0-map-bridge-packet-2026-05-25.md`
-§4 and §6. Everything is additive: the carriers `SimpleCurveArc`,
+core (BR-1) of the drawing→genus-0-map bridge, §4 and §6. Everything is additive: the carriers `SimpleCurveArc`,
 `DrawnMultigraph` above are untouched.
 
 The deliverable is `vertexRotation`: under the **pinned** regularity hypothesis

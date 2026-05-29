@@ -506,7 +506,7 @@ lemma incidences_le_numEdges_add (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ
 /-- **Hypothesis `hcr`.** `crossings ≤ n²` holds by definition: the `crossings`
 field is set to `L.card ^ 2` (encoding B). The genuine geometric content
 (`crossingCount ≤ L.card²`) lives in `stMultigraph_wellDrawn`. -/
-@[simp] lemma stMultigraph_crossings_le (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ))) :
+lemma stMultigraph_crossings_le (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ))) :
     (stMultigraph P L).crossings ≤ L.card ^ 2 := le_refl _
 
 /-! #### Multiplicity bookkeeping (geometry-free combinatorics)
