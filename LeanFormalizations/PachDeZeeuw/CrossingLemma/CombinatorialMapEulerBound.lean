@@ -1,5 +1,5 @@
 /-
-Erdős 98 — Card BR-3a.
+Euler characteristic bound for a connected combinatorial map.
 
 Goal: a *connected* combinatorial map has Euler characteristic ≤ 2.
 
@@ -118,7 +118,7 @@ lemma vertexPerm_inv_eq_facePerm_edgePerm (d : D) :
 /-- `α d` and `φ d` lie in the same vertex orbit (`α = σ ∘ φ`). -/
 lemma vertexMk_edgePerm_eq_vertexMk_facePerm (d : D) :
     M.Vertex_mk (M.edgePerm d) = M.Vertex_mk (M.facePerm d) := by
-  -- α d = σ (φ d):  from `σ (φ x) = α x` (EU-2 engine `vertex_face_eq_edge`).
+  -- α d = σ (φ d):  from `σ (φ x) = α x` (`vertex_face_eq_edge`).
   have h : M.edgePerm d = M.vertexPerm (M.facePerm d) := (vertex_face_eq_edge (M := M) d).symm
   rw [h, vertexMk_vertexPerm]
 
@@ -517,7 +517,7 @@ lemma finrank_range_cobound1_eq_finrank_range_faceCobound [Fintype D] :
 
 /-! ### Top theorem: connected ⟹ `χ ≤ 2` -/
 
-/-- **BR-3a.** A connected combinatorial map has Euler characteristic `≤ 2`.
+/-- A connected combinatorial map has Euler characteristic `≤ 2`.
 
 Equivalently `χ = 2 − 2g ≤ 2` with genus `g ≥ 0`. Proved via the F₂ cochain
 complex `(Vertex → R) →[δ₀] (Edge → R) →[δ₁] (Face → R)`: connectivity makes

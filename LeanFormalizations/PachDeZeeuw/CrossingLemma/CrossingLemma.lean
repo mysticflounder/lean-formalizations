@@ -104,10 +104,10 @@ def CrossingLemmaMultigraphStatement : Prop :=
     4 * M * G.V.card ≤ G.numEdges →
       G.numEdges ^ 3 ≤ 64 * M * G.V.card ^ 2 * G.crossings
 
-/-! ## BR-0 / BR-1 — drawing → genus-0-map bridge: rotation from geometry
+/-! ## Drawing → genus-0-map bridge: rotation from geometry
 
-This section adds the route-(B) companion definitions (BR-0) and the analysis
-core (BR-1) of the drawing→genus-0-map bridge, §4 and §6. Everything is additive: the carriers `SimpleCurveArc`,
+This section adds the companion definitions and the analysis
+core of the drawing→genus-0-map bridge, §4 and §6. Everything is additive: the carriers `SimpleCurveArc`,
 `DrawnMultigraph` above are untouched.
 
 The deliverable is `vertexRotation`: under the **pinned** regularity hypothesis
@@ -182,9 +182,9 @@ theorem rotationOfOrder_congr {β : Type*} [Fintype β] (L₁ L₂ : LinearOrder
   intro a b hab
   exact (hlt _ _).mpr (isoFin_lt L₂ hab)
 
-/-! ### Layer 2 — BR-0 companion definitions (geometry) -/
+/-! ### Layer 2 — companion definitions (geometry) -/
 
-/-- **Geometric crossing-freeness (BR-0):** distinct edges have disjoint arc
+/-- **Geometric crossing-freeness:** distinct edges have disjoint arc
 interiors. -/
 def CrossingFree (G : DrawnMultigraph) : Prop :=
   ∀ i j : Fin G.numEdges, i ≠ j →
@@ -197,7 +197,7 @@ def endParam (b : Bool) : Set.Icc (0 : ℝ) 1 :=
 /-- The point in `ℝ²` where end `b` of arc `a` is anchored. -/
 def endAnchor (a : SimpleCurveArc) (b : Bool) : ℝ × ℝ := a.param (endParam b)
 
-/-- **Incident oriented ends at `p` (BR-1):** the finite set of pairs `(i, b)`
+/-- **Incident oriented ends at `p`:** the finite set of pairs `(i, b)`
 whose anchored endpoint equals `p`. `b = false` is the param-`0` end, `b = true`
 the param-`1` end. Indexed by `Fin G.numEdges × Bool`, avoiding any need for
 `DecidableEq SimpleCurveArc`. -/
@@ -249,7 +249,7 @@ def ArcsRotationRegular (G : DrawnMultigraph) : Prop :=
     (∀ e₁ ∈ incidentEnds G p, ∀ e₂ ∈ incidentEnds G p, ∀ r, 0 < r → r ≤ rp →
       ∀ r', 0 < r' → r' ≤ rp → (α e₁ r < α e₂ r ↔ α e₁ r' < α e₂ r'))
 
-/-! ### Layer 3 — BR-1: the vertex rotation, from ARR -/
+/-! ### Layer 3 — the vertex rotation, from ARR -/
 
 /-- The angle function `α` restricted to the *subtype* `↥(incidentEnds G p)` at
 radius `r`, used as the sorting key for the rotation. -/

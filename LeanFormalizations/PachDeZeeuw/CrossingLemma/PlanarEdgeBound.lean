@@ -1,18 +1,22 @@
 /-
-Erdős 98 — Euler / planar edge bound sub-project (EU cards).
+Euler's formula and the planar (multi)graph edge bound.
 
-Implements EU-1b..EU-4 per
-`docs/formalization/problem-98-pdz-euler-planar-edge-bound-implementation-plan-2026-05-25.md`,
-on top of the vendored `CombinatorialMap` carrier (mathlib PR #16074).
+On the vendored `CombinatorialMap` carrier, this proves the simple-graph edge
+bound `e ≤ 3v − 6` from Euler's formula `v − e + f = 2` (genus zero), via the
+standard counting argument:
+  * each edge of the fixed-point-free involution `edgePerm` is two darts, so the
+    dart count is `2e` (`two_card_edge_eq_card_darts`);
+  * the faces partition the darts, so their lengths sum to the dart count
+    (`sum_faceLength_eq_card_darts`), giving `2e = Σ face lengths`;
+  * in a simple, connected map with at least three vertices every face has length
+    at least three (`three_le_faceLength`), so `2e ≥ 3f`.
+It then lifts that to the multigraph bound `e ≤ M·(3v − 6)` for a multigraph
+whose edges carry multiplicity at most `M` over their endpoint pairs
+(`planar_multigraph_edge_bound`).
 
-NOT imported by the closure aggregator `CrossingLemma.lean` while it still
-contains `sorry`. Build in isolation:
-  lake build CrossingLemma.Combinatorics.PlanarEdgeBound
-
-Predicate encodings (EU-1b `Connected`, EU-1c `IsSimple`) are CANDIDATES; the
-spec `problem-98-pdz-euler-eu2-connectivity-spec-2026-05-25.md` may revise them.
-The mechanical statements (EU-3*, EU-4) take them only as hypotheses, so they are
-robust to that revision.
+The connectivity and simplicity predicates (`Connected`, `IsSimple`) enter the
+counting theorems only as hypotheses, so the development is robust to a different
+encoding of them.
 -/
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
 import Mathlib.Data.Sym.Sym2
@@ -27,7 +31,7 @@ noncomputable instance instFintypeFaceSameCycle [Fintype D] {w : D} :
     Fintype {u | M.facePerm.SameCycle w u} :=
   Fintype.ofFinite _
 
-/-- EU-1d. The length of a face is the number of darts in its `facePerm` orbit. -/
+/-- The length of a face is the number of darts in its `facePerm` orbit. -/
 noncomputable def Face.length [Fintype D] [DecidableEq D] (f : M.Face) : ℕ :=
   Quotient.lift (fun w ↦ Fintype.card {u | M.facePerm.SameCycle w u}) (fun w u h ↦ by
     simp [Set.coe_setOf, Set.mem_setOf_eq]
@@ -38,19 +42,17 @@ noncomputable def Face.length [Fintype D] [DecidableEq D] (f : M.Face) : ℕ :=
     ext
     exact ⟨h.symm.trans, h.trans⟩) f
 
-/-- EU-1b. Darts are mutually reachable by single `vertexPerm`/`vertexPerm⁻¹`/
-`edgePerm` steps — the map is connected. Encoding chosen by the EU-2 spec
-(`problem-98-pdz-euler-eu2-connectivity-spec-2026-05-25.md` §3.1): `ReflTransGen`
-over the one-step relation avoids `MulAction.orbit` plumbing and gives a free
-invariant-set closure lemma. (`edgePerm⁻¹ = edgePerm` since it is an
-involution, so no separate `edgePerm⁻¹` step is needed.) -/
+/-- The map is connected: any two darts are mutually reachable by single
+`vertexPerm`/`vertexPerm⁻¹`/`edgePerm` steps. Encoded as `ReflTransGen` over the
+one-step relation, which avoids `MulAction.orbit` plumbing and yields a free
+invariant-set closure lemma. (`edgePerm⁻¹ = edgePerm` since it is an involution,
+so no separate `edgePerm⁻¹` step is needed.) -/
 def Connected (M : CombinatorialMap D) : Prop :=
   ∀ d d' : D, Relation.ReflTransGen
     (fun a b ↦ b = M.vertexPerm a ∨ b = M.vertexPerm⁻¹ a ∨ b = M.edgePerm a) d d'
 
-/-- Lemma A (membership form, crux-pass copy). A `SameCycle` class of the
-fixed-point-free involution `edgePerm` is `{d, edgePerm d}`. (Duplicates
-`sameCycle_edgePerm_iff` below; kept verbatim from the verified EU-2 pass.) -/
+/-- A `SameCycle` class of the fixed-point-free involution `edgePerm` is
+`{d, edgePerm d}`. (Duplicates `sameCycle_edgePerm_iff` below.) -/
 lemma edge_sameCycle_iff (d d' : D) :
     M.edgePerm.SameCycle d d' ↔ d' = d ∨ d' = M.edgePerm d := by
   constructor
@@ -69,7 +71,7 @@ lemma edge_sameCycle_iff (d d' : D) :
     · exact Equiv.Perm.SameCycle.refl _ _
     · exact Equiv.Perm.sameCycle_apply_right.mpr (Equiv.Perm.SameCycle.refl _ _)
 
-/-- EU-1c helper. The unordered pair of endpoint vertices of an edge. -/
+/-- The unordered pair of endpoint vertices of an edge. -/
 noncomputable def Edge.ends (e : M.Edge) : Sym2 M.Vertex :=
   Quotient.lift
     (fun d : D => s(M.Vertex_mk d, M.Vertex_mk (M.edgePerm d)))
@@ -86,8 +88,8 @@ noncomputable def Edge.ends (e : M.Edge) : Sym2 M.Vertex :=
 lemma Edge.ends_mk (d : D) :
     Edge.ends (M.Edge_mk d) = s(M.Vertex_mk d, M.Vertex_mk (M.edgePerm d)) := rfl
 
-/-- EU-1c. The map is simple: no loops (no edge's endpoint pair is a diagonal)
-and no parallel edges (`Edge.ends` is injective). -/
+/-- The map is simple: no loops (no edge's endpoint pair is a diagonal) and no
+parallel edges (`Edge.ends` is injective). -/
 def IsSimple (M : CombinatorialMap D) : Prop :=
   (∀ e : M.Edge, ¬ (Edge.ends e).IsDiag) ∧
   Function.Injective (Edge.ends (M := M))
@@ -166,8 +168,8 @@ lemma card_edge_fiber [Fintype D] (e : M.Edge)
     exact M.edge_mk_eq_iff a d₀
   rw [hset, Set.toFinset_card, M.card_setOf_sameCycle_edgePerm d₀]
 
-/-- EU-3a. Every edge orbit of the fixed-point-free involution `edgePerm` has
-two darts, so the dart count is twice the edge count. -/
+/-- Every edge orbit of the fixed-point-free involution `edgePerm` has two
+darts, so the dart count is twice the edge count. -/
 theorem two_card_edge_eq_card_darts [Fintype D] :
     2 * Fintype.card M.Edge = Fintype.card D := by
   classical
@@ -198,8 +200,7 @@ lemma card_face_fiber [Fintype D] [DecidableEq D] (f : M.Face)
   rw [hset, Set.toFinset_card]
   rfl
 
-/-- EU-3b. Face orbits partition the darts, so their lengths sum to the dart
-count. -/
+/-- Face orbits partition the darts, so their lengths sum to the dart count. -/
 theorem sum_faceLength_eq_card_darts [Fintype D] [DecidableEq D] :
     ∑ f : M.Face, f.length = Fintype.card D := by
   classical
@@ -210,17 +211,17 @@ theorem sum_faceLength_eq_card_darts [Fintype D] [DecidableEq D] :
   rw [h]
   exact Finset.sum_congr rfl (fun f _ => (M.card_face_fiber f).symm)
 
-/-- EU-3. Combining EU-3a and EU-3b: twice the edge count is the total face
-length. -/
+/-- Combining the per-edge and per-face dart counts: twice the edge count is
+the total face length. -/
 theorem two_card_edge_eq_sum_faceLength [Fintype D] [DecidableEq D] :
     2 * Fintype.card M.Edge = ∑ f : M.Face, f.length := by
   rw [two_card_edge_eq_card_darts, ← sum_faceLength_eq_card_darts]
 
-/-- EU-2 engine. `σ(φ x) = α x`, from `facePerm = vertexPerm⁻¹ * edgePerm`. -/
+/-- `σ(φ x) = α x`, from `facePerm = vertexPerm⁻¹ * edgePerm`. -/
 lemma vertex_face_eq_edge (x : D) : M.vertexPerm (M.facePerm x) = M.edgePerm x := by
   rw [M.facePerm_eq, Equiv.Perm.mul_apply]; simp
 
-/-- EU-2 closure lemma. A set closed under `vertexPerm`/`vertexPerm⁻¹`/`edgePerm`
+/-- A set closed under `vertexPerm`/`vertexPerm⁻¹`/`edgePerm`
 contains everything reachable from one of its members. -/
 lemma reachable_mem_of_invariant {S : Set D} (d₀ : D) (hd₀ : d₀ ∈ S)
     (hσ : ∀ a ∈ S, M.vertexPerm a ∈ S) (hσ' : ∀ a ∈ S, M.vertexPerm⁻¹ a ∈ S)
@@ -237,8 +238,8 @@ lemma reachable_mem_of_invariant {S : Set D} (d₀ : D) (hd₀ : d₀ ∈ S)
       · exact hσ' _ ih
       · exact hα _ ih
 
-/-- EU-2 (crux). In a simple, connected map with at least three vertices, every
-face has length at least three. -/
+/-- In a simple, connected map with at least three vertices, every face has
+length at least three. -/
 theorem three_le_faceLength [Fintype D] [DecidableEq D]
     (hs : M.IsSimple) (hc : M.Connected) (hv : 3 ≤ Fintype.card M.Vertex)
     (f : M.Face) : 3 ≤ f.length := by
@@ -369,8 +370,9 @@ theorem three_le_faceLength [Fintype D] [DecidableEq D]
         rw [e1, ← e2]; exact Sym2.eq_swap
       exact hdiff (hs.2 hends)
 
-/-- EU-4. The simple-planar edge bound `e ≤ 3v − 6`, over `ℤ`, from Euler
-(`IsPlanar`), the face-length bound (EU-2), and `2e = Σ face lengths` (EU-3). -/
+/-- The simple-planar edge bound `e ≤ 3v − 6`, over `ℤ`, from Euler's formula
+(`IsPlanar`), the face-length bound (`three_le_faceLength`), and
+`2e = Σ face lengths` (`two_card_edge_eq_sum_faceLength`). -/
 theorem card_edge_le_three_card_vertex_sub_six [Fintype D]
     (hp : M.IsPlanar) (hc : M.Connected) (hs : M.IsSimple)
     (hv : 3 ≤ Fintype.card M.Vertex) :
@@ -392,9 +394,9 @@ theorem card_edge_le_three_card_vertex_sub_six [Fintype D]
 
 end CombinatorialMap
 
-/-- EU-5 public surface. Abstract carrier produced after the PS lane deletes one
-edge per crossing and forgets the drawing, retaining only the finite multigraph
-data needed by the planar edge bound. -/
+/-- Abstract carrier produced after one edge per crossing is deleted and the
+drawing is forgotten, retaining only the finite multigraph data needed by the
+planar edge bound. -/
 structure AbstractPlanarizedMultigraph where
   Vertex : Type
   Edge : Type
@@ -416,17 +418,19 @@ open Classical in
 into some simple, connected, genus-zero (Euler = 2) `CombinatorialMap` on the
 same vertex set, whose edge count dominates the number of distinct vertex pairs
 that occur as endpoints in `G`. Existential — the actual map is constructed by
-the PS bridge, so EU-5 stays a pure counting consequence of EU-4. -/
+the drawing→map bridge, so the multigraph bound stays a pure counting
+consequence of the simple-graph bound. -/
 def HasGenusZeroSimplePlanarization (G : AbstractPlanarizedMultigraph) : Prop :=
   ∃ (D : Type) (_ : Fintype D) (Mp : CombinatorialMap D),
     Mp.IsSimple ∧ Mp.Connected ∧ Mp.IsPlanar ∧
     Fintype.card Mp.Vertex = Fintype.card G.Vertex ∧
     (Finset.univ.image G.edgeVerts).card ≤ Fintype.card Mp.Edge
 
-/-- EU-5. The planar multigraph edge bound `e ≤ M·(3v−6)`: a mechanical
-multiplicity-collapse consequence of EU-4 (`e ≤ 3v−6` for the simple planar
-witness). The fibers of `edgeVerts` over the present pairs are each bounded by
-`M`; there are at most `3v−6` present pairs (EU-4 on the witness map); multiply. -/
+/-- The planar multigraph edge bound `e ≤ M·(3v−6)`: a mechanical
+multiplicity-collapse consequence of the simple-graph bound `e ≤ 3v−6` for the
+witness map. The fibers of `edgeVerts` over the present pairs are each bounded by
+`M`; there are at most `3v−6` present pairs
+(`card_edge_le_three_card_vertex_sub_six` on the witness map); multiply. -/
 theorem planar_multigraph_edge_bound (G : AbstractPlanarizedMultigraph) (M : ℕ)
     (hpl : HasGenusZeroSimplePlanarization G)
     (hmult : PairMultiplicityBound G M)
@@ -451,7 +455,7 @@ theorem planar_multigraph_edge_bound (G : AbstractPlanarizedMultigraph) (M : ℕ
           Finset.sum_le_sum (fun p _ => hmult p)
       _ = M * s := by
           rw [Finset.sum_const, smul_eq_mul, hsdef, Nat.mul_comm]
-  -- Step 3: EU-4 on the planar witness gives `s ≤ 3v − 6`.
+  -- Step 3: the simple-graph edge bound on the planar witness gives `s ≤ 3v − 6`.
   obtain ⟨D, _hD, Mp, hSimple, hConn, hPlanar, hVcard, hEcard⟩ := hpl
   have hEU4 : (Fintype.card Mp.Edge : ℤ) ≤ 3 * Fintype.card Mp.Vertex - 6 :=
     CombinatorialMap.card_edge_le_three_card_vertex_sub_six (M := Mp) hPlanar hConn hSimple

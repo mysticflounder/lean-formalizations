@@ -8,10 +8,10 @@ import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 
 /-!
-# PDZ BR-3b — the atomic rotation-splice coherence lemma (Front 2)
+# The atomic rotation-splice coherence lemma
 
 **This file is OFF the aggregator.** It is a standalone combinatorial lemma for
-card BR-3b of the Pach–de Zeeuw route-(B) bridge. No geometry, no Jordan curve
+the Pach–de Zeeuw drawing→combinatorial-map bridge. No geometry, no Jordan curve
 theorem: it is pure `Equiv.Perm` / `finRotate` / `Equiv.swap` combinatorics on
 `Fin (n+1)` vs `Fin n`, transported along the order isomorphisms supplied by
 `CrossingLemma.isoFin`.
@@ -45,7 +45,7 @@ inserting a new element `x` (here `Sum.inr () : β ⊕ Unit`) at some rank, gett
 with `σ := rotationOfOrder L`. This is exactly the single-corner-splice shape of
 `insVertexPerm` (with `a := Sum.inr ()`, `Sum.inl (σ c) = Sum.inl (M.vertexPerm
 c)`). It is the lemma that lets an `insertedEdgeMap`-tower built in angular order
-reproduce the angular `vertexRotation` — the crux of BR-3b's OBSTRUCTION B(ii).
+reproduce the angular `vertexRotation` — the crux of the rotation-splice step.
 
 The hypotheses are minimal and exactly pin `L'`:
 * `hmono` — `Sum.inl` is `L'`-strictly-monotone (i.e. `L'` restricts to `L` on

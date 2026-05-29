@@ -1,5 +1,5 @@
 /-
-BR-4 — PDZ route-(B) bridge: the forgetful map from a plane drawing
+The forgetful map from a plane drawing
 (`DrawnMultigraph`) to the abstract finite multigraph (`AbstractPlanarizedMultigraph`)
 consumed by the EU planar edge bound, with its cardinality identities.
 

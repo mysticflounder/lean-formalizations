@@ -9,7 +9,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
 
 /-!
-# BR-2 — Euler witness properties of the residual combinatorial map
+# Euler witness properties of the residual combinatorial map
 
 This file proves the two EU-witness hypotheses about the residual combinatorial
 map `residualMap G hARR` (built in `ResidualMap.lean`):

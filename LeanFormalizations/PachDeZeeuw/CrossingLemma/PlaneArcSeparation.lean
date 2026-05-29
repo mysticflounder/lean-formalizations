@@ -1,10 +1,10 @@
 /-
-Erdős 98 — Card BR-3b, geometric residual (MS): local arc-separation.
+Local arc-separation (MS): the geometric residual of the drawing→map bridge.
 
 # What this file is
 
 A **standalone, pure plane-topology** development of the (MS) lemma — the one
-research-grade geometric input of card BR-3b of the PDZ route-(B) bridge
+research-grade geometric input of the drawing→combinatorial-map bridge
 (`docs/formalization/problem-98-pdz-ps-drawing-to-genus0-map-bridge-packet-2026-05-25.md`,
 §7).  It is deliberately divorced from the combinatorial-map machinery: it does
 **not** import `CrossingLemma`, `CombinatorialMap`, or any `Branch2/` file, and it
@@ -319,7 +319,7 @@ phrasing "endpoints in the closure of `R`" is *not* sufficient for separation: a
 arc with an endpoint in the open interior of `R` (e.g. a chord both of whose ends
 sit inside a disk) does **not** separate `R` — its complement in `R` stays
 connected, so "splits into exactly two" is FALSE.  Separation needs the endpoints
-on `∂R`, i.e. the standard crosscut hypothesis.  In the BR-3b application the
+on `∂R`, i.e. the standard crosscut hypothesis.  In the arc-separation application the
 endpoints are existing vertices/points of the arrangement `A ⊆ ∂R`, so this is
 automatically met.  (Note `frontier R ⊆ closure R`, so the endpoint-closure facts
 of §2 still apply; frontier is strictly stronger.) -/
@@ -455,7 +455,7 @@ PROVEN-tractable** in Lean.  It is strictly weaker than the Jordan curve theorem
 `nthdegree get 01KSHGYWMT6QZV7N008TR123AV`), but "weaker than JCT" ≠ "short in
 Lean": mathlib has no plane-graph-faces / region-separation / Mayer–Vietoris API,
 so it is a from-scratch bespoke development.  Effort: the dominant remaining
-variance of card BR-3b (rated ~1–4 sessions in the route-(B) plan §7).
+variance of the arc-separation lemma.
 
 **OUT OF SCOPE (do NOT attempt here):** the full Jordan curve theorem; global
 plane separation of an arbitrary simple closed curve; `IsSemialgebraic` /

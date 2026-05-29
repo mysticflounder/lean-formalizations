@@ -1,8 +1,8 @@
 /-
-Erdős 98 — Card BR-3b, Objective 1 (combinatorial orbit-delta engine).
+Combinatorial orbit-delta engine for the drawing→combinatorial-map bridge.
 
-The BR-1-independent reusable orbit-count engine for card BR-3b of the PDZ
-route-(B) bridge. Pure permutation combinatorics — NO geometry, NO Jordan curve
+A reusable orbit-count engine for the drawing→combinatorial-map bridge,
+independent of the vertex rotation. Pure permutation combinatorics — NO geometry, NO Jordan curve
 theorem. Built on the vendored `CombinatorialMap` carrier (mathlib PR #16074).
 
 ## Status (this session)

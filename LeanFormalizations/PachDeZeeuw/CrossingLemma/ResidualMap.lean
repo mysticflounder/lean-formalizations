@@ -9,7 +9,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
 
 /-!
-# BR-1m — the residual combinatorial map of a plane drawing
+# The residual combinatorial map of a plane drawing
 
 This file assembles the **residual combinatorial map** of a `DrawnMultigraph`
 under the rotation-regularity hypothesis `ArcsRotationRegular` (ARR).
