@@ -30,7 +30,7 @@ The plane-curve predicates these lemmas range over. (In the source project these
 lived in a shared `External` namespace; inlined here so the file is
 self-contained and mathlib-only.) -/
 
-namespace External
+namespace PlaneCurve
 
 /-- `C` is the real zero set of a nonzero bivariate polynomial of total degree
 at most `k`. -/
@@ -45,16 +45,16 @@ def IsIrreducibleCurve (k : ℕ) (C : Set Point2) : Prop :=
     C = {x : Point2 | MvPolynomial.eval (fun i ↦ x i) p = 0}
 
 /-- `C` is a controlled-degenerate curve form: a line or a circle. -/
-def IsControlledDegenerate (C : Set Point2) : Prop :=
+def IsLineOrCircle (C : Set Point2) : Prop :=
   (∃ a b c : ℝ, (a, b) ≠ (0, 0) ∧
       C = {p : Point2 | a * p 0 + b * p 1 = c}) ∨
   (∃ (center : Point2) (radius : ℝ), C = Metric.sphere center radius)
 
 /-- The line-or-circle alternative, synonymously the controlled-degenerate case. -/
 def IsLineOrCircleComponent (C : Set Point2) : Prop :=
-  IsControlledDegenerate C
+  IsLineOrCircle C
 
-end External
+end PlaneCurve
 
 open EuclideanGeometry
 open scoped Topology
@@ -66,14 +66,14 @@ component. This is not the Bezout conclusion: it does not assert that
 -/
 def NoCommonCurveComponent (C₁ C₂ : Set Point2) : Prop :=
   ¬ ∃ e : ℕ, ∃ C : Set Point2,
-    External.IsIrreducibleCurve e C ∧ C.Infinite ∧ C ⊆ C₁ ∧ C ⊆ C₂
+    PlaneCurve.IsIrreducibleCurve e C ∧ C.Infinite ∧ C ⊆ C₁ ∧ C ⊆ C₂
 
 /-- Theorem 2.2, Bezout finite-intersection bound for plane curves. -/
 def Theorem22_BezoutStatement : Prop :=
   ∀ d₁ d₂ : ℕ, ∃ C : ℕ, 0 < C ∧
     ∀ C₁ C₂ : Set Point2,
-      External.IsBoundedDegreeCurve d₁ C₁ →
-      External.IsBoundedDegreeCurve d₂ C₂ →
+      PlaneCurve.IsBoundedDegreeCurve d₁ C₁ →
+      PlaneCurve.IsBoundedDegreeCurve d₂ C₂ →
       NoCommonCurveComponent C₁ C₂ →
       (C₁ ∩ C₂).Finite ∧ (C₁ ∩ C₂).ncard ≤ C
 
@@ -153,7 +153,7 @@ lemma noCommonCurveComponent_of_no_common_infinite_factor
   intro hcommon
   rcases hcommon with ⟨h, hirr, hinf, hp, hq⟩
   have hh0 : h ≠ 0 := hirr.ne_zero
-  have hcurve : External.IsIrreducibleCurve h.totalDegree (PlaneCurveZeroSet h) := by
+  have hcurve : PlaneCurve.IsIrreducibleCurve h.totalDegree (PlaneCurveZeroSet h) := by
     refine ⟨h, hh0, le_rfl, hirr, rfl⟩
   have hsubset₁ : PlaneCurveZeroSet h ⊆ C₁ := by
     rw [hC₁]
@@ -1521,7 +1521,7 @@ structure RealPlaneCurveComponentCover
     C = ⋃ component ∈ components, component.2
   each_irreducible :
     ∀ component, component ∈ components →
-      External.IsIrreducibleCurve component.1 component.2
+      PlaneCurve.IsIrreducibleCurve component.1 component.2
   each_degree_pos :
     ∀ component, component ∈ components → 0 < component.1
   each_degree_le :
@@ -1532,7 +1532,7 @@ structure RealPlaneCurveComponentCover
 /-- Every bounded-degree real plane curve admits a finite cover by irreducible factor curves. -/
 theorem boundedDegreeCurve_real_component_cover
     {d : ℕ} {C : Set Point2}
-    (hC : External.IsBoundedDegreeCurve d C) :
+    (hC : PlaneCurve.IsBoundedDegreeCurve d C) :
     ∃ components : Finset (Sigma fun e : ℕ => Set Point2),
       RealPlaneCurveComponentCover d C components := by
   classical
@@ -1599,7 +1599,7 @@ structure DegreeFourIrreducibleComponentCover (C : Set Point2) where
 
 /-- Extract the degree-four real component cover from a bounded-degree curve. -/
 noncomputable def degreeFourIrreducibleComponentCover_of_boundedDegreeCurve
-    {C : Set Point2} (hC : External.IsBoundedDegreeCurve 4 C) :
+    {C : Set Point2} (hC : PlaneCurve.IsBoundedDegreeCurve 4 C) :
     DegreeFourIrreducibleComponentCover C := by
   classical
   let witness := boundedDegreeCurve_real_component_cover (d := 4) (C := C) hC

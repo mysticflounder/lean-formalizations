@@ -15,11 +15,11 @@ the paper (Pach–de Zeeuw, Subsection 2.1):
 * `Point2` / `ℝ²` — the Euclidean plane.
 * `distinctDistances E` — the number of distinct distances determined by a
   finite point set.
-* `External.IsBoundedDegreeCurve d C` — `C = Z_ℝ(f)` for a nonzero
+* `PlaneCurve.IsBoundedDegreeCurve d C` — `C = Z_ℝ(f)` for a nonzero
   `f ∈ ℝ[x,y]` of total degree `≤ d` (a plane algebraic curve of degree `≤ d`).
-* `External.IsIrreducibleCurve d C` — the same with `f` irreducible over ℝ
+* `PlaneCurve.IsIrreducibleCurve d C` — the same with `f` irreducible over ℝ
   (an irreducible plane algebraic curve of degree `≤ d`).
-* `External.IsControlledDegenerate C` — `C` is a line or a circle: the
+* `PlaneCurve.IsLineOrCircle C` — `C` is a line or a circle: the
   configuration excluded by Theorem 1.1.
 
 The `External` namespace is retained from the original development; these
@@ -38,7 +38,7 @@ the cardinality of the set of pairwise distances over ordered distinct pairs. -/
 noncomputable def distinctDistances (E : Finset ℝ²) : ℕ :=
   (E.offDiag.image (fun pq => dist pq.1 pq.2)).card
 
-namespace External
+namespace PlaneCurve
 
 /-- A (plane) algebraic curve of degree `≤ d`: the real zero set `Z_ℝ(f)` of a
 nonzero polynomial `f ∈ ℝ[x,y]` of total degree `≤ d` (Pach–de Zeeuw, §2.1). -/
@@ -54,8 +54,8 @@ def IsIrreducibleCurve (d : ℕ) (C : Set Point2) : Prop :=
 
 /-- `C` is a line or a circle — the configuration Theorem 1.1 excludes. A line
 is `{p | a·p₀ + b·p₁ = c}` with `(a,b) ≠ (0,0)`; a circle is a metric sphere. -/
-def IsControlledDegenerate (C : Set Point2) : Prop :=
+def IsLineOrCircle (C : Set Point2) : Prop :=
   (∃ a b c : ℝ, (a, b) ≠ (0, 0) ∧ C = {p : Point2 | a * p 0 + b * p 1 = c}) ∨
   (∃ center : Point2, ∃ r : ℝ, C = Metric.sphere center r)
 
-end External
+end PlaneCurve

@@ -93,7 +93,7 @@ this file does not assert axiom-cleanliness.
 
 set_option linter.style.longLine false
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 open scoped BigOperators
 
@@ -294,4 +294,4 @@ theorem subsetAveraging_master (M s : ℕ) (hs4 : 4 ≤ s) (hsv : s ≤ G.V.card
 
 end IntegerRoute
 
-end CrossingLemma.PDZ
+end CrossingLemma

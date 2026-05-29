@@ -31,7 +31,7 @@ Everything is sorry-free and axiom-clean.
 
 set_option linter.style.longLine false
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 variable (G : DrawnMultigraph)
 
@@ -131,4 +131,4 @@ noncomputable def residualMap (hARR : ArcsRotationRegular G) :
 
 #check @residualMap
 
-end CrossingLemma.PDZ
+end CrossingLemma

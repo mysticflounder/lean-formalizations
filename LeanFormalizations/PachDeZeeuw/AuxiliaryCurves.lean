@@ -19,7 +19,7 @@ used by the later Pach--de Zeeuw incidence packet.
 
 set_option linter.style.longLine false
 
-namespace PachDeZeeuw.PDZ
+namespace PachDeZeeuw
 
 open EuclideanGeometry
 
@@ -227,4 +227,4 @@ theorem auxIncidenceBridge : AuxIncidenceBridgeStatement := by
       rw [Finset.card_image_of_injective _ hf]
     _ ≤ (auxIncidences X).card := Finset.card_le_card hsubset
 
-end PachDeZeeuw.PDZ
+end PachDeZeeuw

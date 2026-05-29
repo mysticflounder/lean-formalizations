@@ -31,7 +31,7 @@ Everything is sorry-free and axiom-clean.
 
 set_option linter.style.longLine false
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 open CombinatorialMap
 
@@ -562,4 +562,4 @@ theorem residualMap_connected (hARR : ArcsRotationRegular G)
           exact (step1.trans step2).trans step3
   exact lift pa pb (hconn pa pb) d rfl d' rfl
 
-end CrossingLemma.PDZ
+end CrossingLemma

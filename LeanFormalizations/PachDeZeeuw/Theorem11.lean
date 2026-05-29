@@ -26,8 +26,8 @@ open EuclideanGeometry
 def PachDeZeeuwIrreducibleCurveDistinctDistancesStatement : Prop :=
   ∀ d : ℕ, ∃ C : ℕ, 0 < C ∧
     ∀ E : Finset ℝ², ∀ curve : Set ℝ²,
-      External.IsIrreducibleCurve d curve →
-      ¬ External.IsControlledDegenerate curve →
+      PlaneCurve.IsIrreducibleCurve d curve →
+      ¬ PlaneCurve.IsLineOrCircle curve →
       (E : Set ℝ²) ⊆ curve →
       2 ≤ E.card →
         E.card ^ 4 ≤ C * (distinctDistances E) ^ 3
@@ -48,7 +48,7 @@ lemma distinctDistances_le_of_subset {E₁ E₂ : Finset ℝ²}
 
 end PachDeZeeuw
 
-namespace PachDeZeeuw.PDZ
+namespace PachDeZeeuw
 
 open EuclideanGeometry
 
@@ -104,8 +104,8 @@ lemma split_finset_into_two_comparable_parts
 /-- If a finite point set on a non-line/non-circle irreducible curve has at
 least two points, then splitting it into two comparable parts and applying
 Theorem 1.2 gives the guarded Pach--de Zeeuw Theorem 1.1 form. -/
-theorem theorem11_irreducibleCurve_distinctDistances
-    (h12 : PachDeZeeuw.Theorem12_BipartiteDistinctDistancesStatement) :
+theorem irreducibleCurve_distinctDistances
+    (h12 : PachDeZeeuw.BipartiteDistinctDistancesStatement) :
     PachDeZeeuw.PachDeZeeuwIrreducibleCurveDistinctDistancesStatement := by
   intro d
   rcases h12 d with ⟨C, hCpos, h12C⟩
@@ -191,4 +191,4 @@ theorem theorem11_irreducibleCurve_distinctDistances
     _ = (81 * C) * (distinctDistances E) ^ 3 := by
       simp [Nat.mul_assoc]
 
-end PachDeZeeuw.PDZ
+end PachDeZeeuw

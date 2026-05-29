@@ -14,7 +14,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 card BR-3b of the Pach–de Zeeuw route-(B) bridge. No geometry, no Jordan curve
 theorem: it is pure `Equiv.Perm` / `finRotate` / `Equiv.swap` combinatorics on
 `Fin (n+1)` vs `Fin n`, transported along the order isomorphisms supplied by
-`CrossingLemma.PDZ.isoFin`.
+`CrossingLemma.isoFin`.
 
 ## What it proves and why it is the right bridge
 
@@ -74,7 +74,7 @@ The hypotheses are minimal and exactly pin `L'`:
 
 set_option linter.style.longLine false
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 open Fin
 
@@ -386,4 +386,4 @@ theorem rotationOfOrder_splice (c : β)
 
 end Augmented
 
-end CrossingLemma.PDZ
+end CrossingLemma

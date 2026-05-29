@@ -10,7 +10,7 @@ import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 /-- Forgetful map: discard the drawing data of a `DrawnMultigraph`, retaining
 only the finite multigraph carrier (vertex subtype, edge index type, unordered
@@ -80,4 +80,4 @@ theorem abstractize_pairMultiplicityBound (G : DrawnMultigraph) (M : ℕ)
     rw [DrawnMultigraph.multiplicity]
   exact (hcard.trans hmulteq).le.trans (hmult a.val b.val)
 
-end CrossingLemma.PDZ
+end CrossingLemma

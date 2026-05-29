@@ -17,7 +17,7 @@ files can build on a stable namespace.
 
 set_option linter.style.longLine false
 
-namespace PachDeZeeuw.PDZ
+namespace PachDeZeeuw
 
 open EuclideanGeometry
 
@@ -67,44 +67,44 @@ lemma exceptionalCurvePair_of_concentricCircles {C₁ C₂ : Set Point2}
   Or.inr (Or.inr h)
 
 lemma ParallelLinePair.left_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ParallelLinePair C₁ C₂) : External.IsControlledDegenerate C₁ := by
+    (h : ParallelLinePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₁ := by
   rcases h with ⟨a, b, c₁, c₂, hab, rfl, rfl⟩
   exact Or.inl ⟨a, b, c₁, hab, rfl⟩
 
 lemma ParallelLinePair.right_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ParallelLinePair C₁ C₂) : External.IsControlledDegenerate C₂ := by
+    (h : ParallelLinePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₂ := by
   rcases h with ⟨a, b, c₁, c₂, hab, rfl, rfl⟩
   exact Or.inl ⟨a, b, c₂, hab, rfl⟩
 
 lemma OrthogonalLinePair.left_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : OrthogonalLinePair C₁ C₂) : External.IsControlledDegenerate C₁ := by
+    (h : OrthogonalLinePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₁ := by
   rcases h with ⟨a₁, b₁, c₁, a₂, b₂, c₂, hab₁, hab₂, _horth, rfl, rfl⟩
   exact Or.inl ⟨a₁, b₁, c₁, hab₁, rfl⟩
 
 lemma OrthogonalLinePair.right_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : OrthogonalLinePair C₁ C₂) : External.IsControlledDegenerate C₂ := by
+    (h : OrthogonalLinePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₂ := by
   rcases h with ⟨a₁, b₁, c₁, a₂, b₂, c₂, hab₁, hab₂, _horth, rfl, rfl⟩
   exact Or.inl ⟨a₂, b₂, c₂, hab₂, rfl⟩
 
 lemma ConcentricCirclePair.left_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ConcentricCirclePair C₁ C₂) : External.IsControlledDegenerate C₁ := by
+    (h : ConcentricCirclePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₁ := by
   rcases h with ⟨center, r₁, r₂, rfl, rfl⟩
   exact Or.inr ⟨center, r₁, rfl⟩
 
 lemma ConcentricCirclePair.right_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ConcentricCirclePair C₁ C₂) : External.IsControlledDegenerate C₂ := by
+    (h : ConcentricCirclePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₂ := by
   rcases h with ⟨center, r₁, r₂, rfl, rfl⟩
   exact Or.inr ⟨center, r₂, rfl⟩
 
 lemma ExceptionalCurvePair.left_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ExceptionalCurvePair C₁ C₂) : External.IsControlledDegenerate C₁ := by
+    (h : ExceptionalCurvePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₁ := by
   rcases h with h | h | h
   · exact ParallelLinePair.left_controlledDegenerate h
   · exact OrthogonalLinePair.left_controlledDegenerate h
   · exact ConcentricCirclePair.left_controlledDegenerate h
 
 lemma ExceptionalCurvePair.right_controlledDegenerate {C₁ C₂ : Set Point2}
-    (h : ExceptionalCurvePair C₁ C₂) : External.IsControlledDegenerate C₂ := by
+    (h : ExceptionalCurvePair C₁ C₂) : PlaneCurve.IsLineOrCircle C₂ := by
   rcases h with h | h | h
   · exact ParallelLinePair.right_controlledDegenerate h
   · exact OrthogonalLinePair.right_controlledDegenerate h
@@ -179,8 +179,8 @@ This is the situation in the proof of Theorem 1.1, where the curve is excluded
 from being a line or circle. -/
 lemma assumption31Data_of_not_controlledDegenerate {C₁ C₂ : Set Point2}
     {P₁ P₂ : Finset Point2}
-    (h₁ : ¬ External.IsControlledDegenerate C₁)
-    (h₂ : ¬ External.IsControlledDegenerate C₂)
+    (h₁ : ¬ PlaneCurve.IsLineOrCircle C₁)
+    (h₂ : ¬ PlaneCurve.IsLineOrCircle C₂)
     (hdisj : Disjoint (P₁ : Set Point2) (P₂ : Set Point2))
     (hexc : ¬ ExceptionalCurvePair C₁ C₂) :
     Assumption31Data C₁ C₂ P₁ P₂ where
@@ -215,8 +215,8 @@ structure PreparedBipartiteInput (d : ℕ) where
   C₂ : Set Point2
   P₁ : Finset Point2
   P₂ : Finset Point2
-  hC₁ : External.IsIrreducibleCurve d C₁
-  hC₂ : External.IsIrreducibleCurve d C₂
+  hC₁ : PlaneCurve.IsIrreducibleCurve d C₁
+  hC₂ : PlaneCurve.IsIrreducibleCurve d C₂
   hP₁ : (P₁ : Set Point2) ⊆ C₁
   hP₂ : (P₂ : Set Point2) ⊆ C₂
   notExceptional : ¬ ExceptionalCurvePair C₁ C₂
@@ -327,4 +327,4 @@ lemma lemma37_equalDistanceQuadruple_lower {d : ℕ}
     simpa [S, f, bipartiteDistances, equalDistanceQuadruples] using hmain
   simpa [Nat.mul_pow] using hmain'
 
-end PachDeZeeuw.PDZ
+end PachDeZeeuw

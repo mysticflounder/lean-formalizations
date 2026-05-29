@@ -17,7 +17,7 @@ paper-faithful modules:
   (`PachSharir.Corollary24Statement`).
 * `pdz` supplies the verbatim Theorem 1.1 reduction chain, conditional on the open
   incidence-card hypothesis
-  (`PachDeZeeuw.PDZ.PositiveAuxiliaryIncidenceCardBoundStatement`).
+  (`PachDeZeeuw.PositiveAuxiliaryIncidenceCardBoundStatement`).
 
 The bridge `positiveAuxiliaryIncidenceCardBound_of_corollary24` is the paper's §3
 incidence assembly (Lemmas 3.2–3.7): instantiate Corollary 2.4 at `D = 4`, present
@@ -41,7 +41,7 @@ set_option linter.unusedVariables false
 
 namespace IncidenceAssembly
 
-open PachDeZeeuw PachDeZeeuw.PDZ
+open PachDeZeeuw
 
 /--
 **Gap B — the §3 incidence assembly.**
@@ -67,8 +67,8 @@ established theorem.
 -/
 theorem pachDeZeeuwTheorem11_sorryBacked :
     PachDeZeeuwIrreducibleCurveDistinctDistancesStatement :=
-  theorem11_irreducibleCurve_distinctDistances
-    (theorem12_bipartiteDistinctDistances_of_positiveCardBound
+  irreducibleCurve_distinctDistances
+    (bipartiteDistinctDistances_of_positiveCardBound
       (positiveAuxiliaryIncidenceCardBound_of_corollary24 PachSharir.corollary24))
 
 end IncidenceAssembly

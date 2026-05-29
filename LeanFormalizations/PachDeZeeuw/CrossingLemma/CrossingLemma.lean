@@ -32,7 +32,7 @@ load-bearing and verified against arXiv 1308.0177.
 
 set_option linter.style.longLine false
 
-namespace CrossingLemma.PDZ
+namespace CrossingLemma
 
 /-- A simple continuous plane arc: the image of an injective continuous map from
 the unit interval `[0,1]` into `ℝ²`. "Simple" means no self-intersection
@@ -371,4 +371,4 @@ theorem rotationOfOrder_eq_one_of_card_le_one {β : Type*} [Fintype β]
 #check @vertexRotation
 #check @rotation_wellDefined
 
-end CrossingLemma.PDZ
+end CrossingLemma

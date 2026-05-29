@@ -24,15 +24,13 @@ Balanced Theorem 1.2 corollary needed for Theorem 1.1. The paper's Theorem
 only needs the comparable-size integer form below after splitting one finite
 set on a curve into two halves.
 -/
-def Theorem12_BipartiteDistinctDistancesStatement : Prop :=
+def BipartiteDistinctDistancesStatement : Prop :=
   ∀ d : ℕ, ∃ C : ℕ, 0 < C ∧
-    ∀ X : PDZ.PreparedBipartiteInput d,
+    ∀ X : PachDeZeeuw.PreparedBipartiteInput d,
       X.P₁.card ≤ 2 * X.P₂.card →
       X.P₂.card ≤ 2 * X.P₁.card →
       X.P₁.card ^ 2 * X.P₂.card ^ 2 ≤
-        C * (PDZ.bipartiteDistances X.P₁ X.P₂).card ^ 3
-
-namespace PDZ
+        C * (PachDeZeeuw.bipartiteDistances X.P₁ X.P₂).card ^ 3
 
 /--
 The incidence upper bound needed after the auxiliary-curve reduction.
@@ -53,9 +51,9 @@ def AuxiliaryIncidenceUpperBoundStatement : Prop :=
 Assemble the balanced Pach--de Zeeuw Theorem 1.2 statement from the local
 auxiliary-incidence upper bound.
 -/
-theorem theorem12_bipartiteDistinctDistances
+theorem bipartiteDistinctDistances
     (hUpper : AuxiliaryIncidenceUpperBoundStatement) :
-    PachDeZeeuw.Theorem12_BipartiteDistinctDistancesStatement := by
+    PachDeZeeuw.BipartiteDistinctDistancesStatement := by
   intro d
   rcases hUpper d with ⟨C, hCpos, hUpperC⟩
   refine ⟨C, hCpos, ?_⟩
@@ -95,7 +93,5 @@ theorem theorem12_bipartiteDistinctDistances
         _ = (C * D ^ 3) * S ^ 4 := by ring
     exact Nat.le_of_mul_le_mul_right hmul hS4pos
   simpa [S, D, Nat.mul_pow] using hCancel
-
-end PDZ
 
 end PachDeZeeuw

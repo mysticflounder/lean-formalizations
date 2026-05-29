@@ -10,17 +10,17 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma
 # Szemerédi–Trotter from the multigraph crossing lemma
 
 Classical point–line incidence bound in `ℝ²`, proved *conditionally* on the
-multigraph crossing lemma `CrossingLemma.PDZ.CrossingLemmaMultigraphStatement`,
+multigraph crossing lemma `CrossingLemma.CrossingLemmaMultigraphStatement`,
 which enters as the single hypothesis `hCL`. This is internal infrastructure
 toward Pach–de Zeeuw Theorem 2.3, not a verbatim paper statement.
 -/
 
 set_option linter.style.longLine false
 
-namespace PachSharir.ST
+namespace PachSharir.SzemerediTrotter
 
 open scoped Classical
-open CrossingLemma.PDZ
+open CrossingLemma
 
 /-- A line in `ℝ²`: the zero set of a nonzero affine form `a·x + b·y - c`. -/
 def IsAffineLine (ℓ : Set (ℝ × ℝ)) : Prop :=
@@ -1236,4 +1236,4 @@ theorem szemerediTrotter_of_crossingLemma
     (incidences_le_numEdges_add P L hL)
     (stMultigraph_crossings_le P L)
 
-end PachSharir.ST
+end PachSharir.SzemerediTrotter

@@ -14,12 +14,12 @@ This file freezes the final incidence decomposition surface for the
 Pach--de Zeeuw Theorem 1.2 lane. The geometric work remains upstream: prove a
 degree-only decomposition into nonexceptional and discarded contributions.
 The theorem here is the arithmetic bridge from that decomposition to the cubed
-integer incidence estimate consumed by `theorem12_bipartiteDistinctDistances`.
+integer incidence estimate consumed by `bipartiteDistinctDistances`.
 -/
 
 set_option linter.style.longLine false
 
-namespace PachDeZeeuw.PDZ
+namespace PachDeZeeuw
 
 /-- The auxiliary point set is an image of `P₂ × P₂`. -/
 lemma auxPointSet_card_le {d : ℕ} (X : PreparedBipartiteInput d) :
@@ -154,26 +154,26 @@ theorem auxiliaryIncidenceUpperBound_of_decomposition
 /--
 Theorem 1.2 reduced directly to the final incidence-decomposition target.
 -/
-theorem theorem12_bipartiteDistinctDistances_of_decomposition
+theorem bipartiteDistinctDistances_of_decomposition
     (hdecomp : AuxiliaryIncidenceDecompositionBoundStatement) :
-    PachDeZeeuw.Theorem12_BipartiteDistinctDistancesStatement :=
-  theorem12_bipartiteDistinctDistances
+    PachDeZeeuw.BipartiteDistinctDistancesStatement :=
+  bipartiteDistinctDistances
     (auxiliaryIncidenceUpperBound_of_decomposition hdecomp)
 
 /--
 Theorem 1.2 reduced to the positive-product incidence-decomposition target.
 -/
-theorem theorem12_bipartiteDistinctDistances_of_positiveDecomposition
+theorem bipartiteDistinctDistances_of_positiveDecomposition
     (hpos : PositiveAuxiliaryIncidenceDecompositionBoundStatement) :
-    PachDeZeeuw.Theorem12_BipartiteDistinctDistancesStatement :=
-  theorem12_bipartiteDistinctDistances_of_decomposition
+    PachDeZeeuw.BipartiteDistinctDistancesStatement :=
+  bipartiteDistinctDistances_of_decomposition
     (auxiliaryIncidenceDecomposition_of_positive hpos)
 
 /-- Theorem 1.2 reduced to the direct positive-product cubed incidence bound. -/
-theorem theorem12_bipartiteDistinctDistances_of_positiveCardBound
+theorem bipartiteDistinctDistances_of_positiveCardBound
     (hcard : PositiveAuxiliaryIncidenceCardBoundStatement) :
-    PachDeZeeuw.Theorem12_BipartiteDistinctDistancesStatement :=
-  theorem12_bipartiteDistinctDistances_of_positiveDecomposition
+    PachDeZeeuw.BipartiteDistinctDistancesStatement :=
+  bipartiteDistinctDistances_of_positiveDecomposition
     (positiveAuxiliaryIncidenceDecomposition_of_cardBound hcard)
 
-end PachDeZeeuw.PDZ
+end PachDeZeeuw
