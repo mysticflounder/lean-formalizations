@@ -33,6 +33,17 @@ modules — and advertising them.
   = 2)` instance, rename namespace `Erdos98Proof` → `EuclideanGeometry`, and
   wire into the build.
 
+## Erdős-96 salvage
+
+- [x] **Salvage the general convex-geometry + counting content from #96** —
+  extracted, de-jargoned (dropped `Problem96.Track1`), ported v4.28 → v4.30, and
+  verified axiom-clean: `Geometry/Convex/LineSlice.lean` (line-slices of convex
+  sets + strict-convex-no-3-collinear), `Geometry/Convex/SimpleConvexPolygon.lean`
+  (concrete polygon model + collinear-vertices-cyclic-interval), and
+  `Combinatorics/UnitDistance/Counting.lean` (elimination-order counting). The
+  #96 counterexample-path encoding (`ConvexPolygonUnitDistanceCounterexample*`,
+  `FullCycle*`) was abandoned attack scaffolding and was **not** carried over.
+
 ## Correctness audit
 
 - [ ] **Pull down / copy in the source papers** backing each proof so we can do

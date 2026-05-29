@@ -11,8 +11,16 @@ import LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph
 -- Combinatorics / combinatorial maps + planar edge bound (complete, axiom-clean)
 import LeanFormalizations.Combinatorics.CombinatorialMap
 
+-- Combinatorics / unit-distance elimination-order counting (complete, axiom-clean)
+import LeanFormalizations.Combinatorics.UnitDistance.Counting
+
 -- Euclidean geometry
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
+
+-- Convex geometry: line-slices of convex sets + a simple convex polygon model
+-- (complete, axiom-clean)
+import LeanFormalizations.Geometry.Convex.LineSlice
+import LeanFormalizations.Geometry.Convex.SimpleConvexPolygon
 
 -- Pach–de Zeeuw program: distinct distances on algebraic curves, and the
 -- paper-faithful inputs it reduces to. Mostly statement-surfaces / work in

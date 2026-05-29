@@ -9,10 +9,12 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Provenance
 
-Much of this code was salvaged from a now-dormant Erdős-Problem-98 formalization
-project and re-extracted as standalone, mathlib-only modules. The source
-project's own headline theorem was circular and is **not** included here. What is
-kept is the *general* mathematics that stands on its own.
+Much of this code was salvaged from now-dormant Erdős-Problem-98 and
+Erdős-Problem-96 formalization projects and re-extracted as standalone,
+mathlib-only modules. The source projects' own headline theorems (a circular
+reduction for #98; an abandoned counterexample-path encoding for #96) are
+**not** included here. What is kept is the *general* mathematics that stands on
+its own.
 
 ## Status legend
 
@@ -79,6 +81,32 @@ it was confirmed complete). All headlines axiom-clean:
 - **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
   (`CombinatorialMap.EdgeInsertion.*`).
 
+### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
+
+Classical convex-geometry facts not currently in mathlib (salvaged from a
+now-dormant Erdős-Problem-96 formalization). All headlines axiom-clean.
+
+- **`LineSlice.lean`** — a line meets a convex set in a preconnected, hence
+  interval-shaped, set (`convex_line_intersection_isPreconnected`); a line is
+  homeomorphic to `ℝ` (`lineHomeomorph`); transported there, the slice is
+  `OrdConnected` (`convex_line_slice_ordConnected` / `_uIcc_subset` /
+  `_between_mem`); and a strictly convex set has no three collinear frontier
+  points (`strictlyConvex_boundary_no_three_collinear`).
+- **`SimpleConvexPolygon.lean`** — a concrete simple-convex-polygon model and
+  its headline `SimpleConvexPolygon.collinear_vertices_cyclicInterval`: three
+  collinear boundary vertices (under an explicit maximal-flat-side hypothesis)
+  occur cyclically consecutively, via the planar chord lemma
+  `chord_in_frontier_of_collinear_boundary_triple`.
+
+### `LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting
+
+- **`Counting.lean`** — the classical degeneracy argument for unit distances: a
+  forward-neighbor bound `k` in some index order forces at most `n · k`
+  unordered unit-distance pairs
+  (`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`,
+  `UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`), with a
+  `SimpleConvexPolygon`-indexed restatement. Axiom-clean.
+
 ### Reproduce the verification
 
 ```bash
@@ -95,6 +123,10 @@ import LeanFormalizations
 #print axioms PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry
 #print axioms CombinatorialMap.card_edge_le_three_card_vertex_sub_six
 #print axioms CombinatorialMap.eulerCharacteristic_le_two
+#print axioms convex_line_intersection_isPreconnected
+#print axioms strictlyConvex_boundary_no_three_collinear
+#print axioms SimpleConvexPolygon.collinear_vertices_cyclicInterval
+#print axioms unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
 EOF
 ```
 
@@ -153,6 +185,8 @@ LeanFormalizations.lean                    -- root aggregator (imports everythin
 LeanFormalizations/
   Combinatorics/Additive/                  -- BSG ✅
   Combinatorics/CombinatorialMap/           -- combinatorial maps + planar edge bound ✅
+  Combinatorics/UnitDistance/               -- elimination-order counting ✅
+  Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
