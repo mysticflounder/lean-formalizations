@@ -5,24 +5,21 @@ Authors: Adam McKenna
 -/
 
 import Mathlib
-import LeanFormalizations.Geometry.Euclidean.Foundation
 
 /-!
-# 2D two-point isometry classification.
+# 2D two-point isometry classification
 
-For points `a b c d : ℝ²` with `a ≠ b` and `dist a b = dist c d`, the set of
-isometric self-equivalences `g : ℝ² ≃ᵢ ℝ²` with `g a = c` and `g b = d` has
-at most two elements: a direct (orientation-preserving) isometry and the
-reflection of it through the line `c d`.
+For points `a b c d` in the Euclidean plane `ℝ² := EuclideanSpace ℝ (Fin 2)`
+with `a ≠ b` and `dist a b = dist c d`, the set of isometric self-equivalences
+`g : ℝ² ≃ᵢ ℝ²` with `g a = c` and `g b = d` has at most two elements: a direct
+(orientation-preserving) isometry and the reflection of it through the line `c d`.
 
 This file proves the upper bound `≤ 2` and the corresponding finiteness
-statement; the existence half is not provided here (downstream consumers
-— the ES-GK ledger and Branch 1 finite-union arguments — need only the
-upper bound).
+statement; the existence half is not provided here.
 
 The proof works in three layers:
 
-1. **Linear-part reduction** (Mazur-Ulam): every `g : ℝ² ≃ᵢ ℝ²` factors
+1. **Linear-part reduction** (Mazur–Ulam): every `g : ℝ² ≃ᵢ ℝ²` factors
    as `g x = g.linearPart (x - a) + g a`, so `(g a, g.linearPart)` is
    injectively recovered from `g`.
 2. **Linear set bound**: for `u v : ℝ²` with `u ≠ 0`, the set
@@ -37,20 +34,27 @@ orthogonal complement `(span ℝ {v})ᗮ` is multi-dimensional and there are
 infinitely many isometries fixing two distinct points.
 
 References:
-* Math-prover report: `/tmp/erdos98-math-prover-out/2d-isometry-classification.md`.
-* Mathlib: `Mathlib.Analysis.Normed.Affine.MazurUlam`,
-  `Mathlib.Analysis.InnerProductSpace.TwoDim`,
-  `Mathlib.Analysis.Normed.Operator.LinearIsometry`.
+* Mazur–Ulam theorem: `Mathlib.Analysis.Normed.Affine.MazurUlam`.
+* Right-angle rotation and oriented two-dimensional geometry:
+  `Mathlib.Analysis.InnerProductSpace.TwoDim`.
+* Linear isometries: `Mathlib.Analysis.Normed.Operator.LinearIsometry`.
 -/
 
-namespace Erdos98Proof
-
 open EuclideanGeometry
-open scoped Real InnerProductSpace
+open scoped Real InnerProductSpace EuclideanSpace
 
-/-- Standard orientation on `ℝ²` (the unique class-level positive orientation
-provided by the `Module.Oriented ℝ ℝ² (Fin 2)` instance in
-`FormalConjecturesForMathlib.Geometry.2d`). -/
+namespace EuclideanGeometry
+
+/-- The Euclidean plane. -/
+local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
+
+/-- The standard orientation on the plane, induced by the canonical
+orthonormal basis `EuclideanSpace.basisFun`. This makes `positiveOrientation`
+available on `ℝ²`. -/
+noncomputable instance : Module.Oriented ℝ ℝ² (Fin 2) :=
+  ⟨(EuclideanSpace.basisFun (Fin 2) ℝ).toBasis.orientation⟩
+
+/-- Standard (positive) orientation on `ℝ²`. -/
 local notation "o" => (positiveOrientation : Orientation ℝ ℝ² (Fin 2))
 
 /-- Right-angle rotation `J : ℝ² ≃ₗᵢ[ℝ] ℝ²` from the standard orientation. -/
@@ -203,7 +207,7 @@ theorem linearIsometryEquiv_send_finite {u v : ℝ²} (hu : u ≠ 0) :
 
 /- ## Layer 3: Two-point isometry set is finite with cardinality `≤ 2`.
 
-We reduce via Mazur-Ulam (`IsometryEquiv.toRealAffineIsometryEquiv`) to
+We reduce via Mazur–Ulam (`IsometryEquiv.toRealAffineIsometryEquiv`) to
 Layer 2 by mapping `g : ℝ² ≃ᵢ ℝ²` to its linear part
 `g.toRealAffineIsometryEquiv.linearIsometryEquiv`. The map
 `g x = T (x -ᵥ a) +ᵥ g a` (via `map_vsub`) shows the linear part
@@ -217,8 +221,7 @@ at most 2.
 
 This is the 2D two-point isometry classification. The bound is achieved by
 the direct isometry and its composition with the reflection through the line
-through `c` and `d`; see `/tmp/erdos98-math-prover-out/2d-isometry-classification.md`
-for the math-level argument. -/
+through `c` and `d`. -/
 theorem twoPoint_isometry_ncard_le_two
     {a b c d : ℝ²} (hab : a ≠ b) (_hdist : dist a b = dist c d) :
     ({g : ℝ² ≃ᵢ ℝ² | g a = c ∧ g b = d}.ncard) ≤ 2 := by
@@ -252,10 +255,9 @@ theorem twoPoint_isometry_ncard_le_two
 /-- For `a b c d : ℝ²` with `a ≠ b` and `dist a b = dist c d`, the set of
 isometric self-equivalences sending `a ↦ c` and `b ↦ d` is finite.
 
-Downstream-friendly form for finite-union arguments such as the ES-GK
-ledger (Tier B `EsGkDecompositionStatement`): finiteness of
-`{g | 2 ≤ Richness p g}` follows by `Set.Finite.biUnion` over the
-`n²` index-pair witnesses, each summand here being finite. -/
+This is the form convenient for finite-union arguments: finiteness of a set of
+isometries constrained on two distinct points reduces, via this lemma, to the
+finiteness of each two-point fibre. -/
 theorem twoPoint_isometry_set_finite
     {a b c d : ℝ²} (hab : a ≠ b) (_hdist : dist a b = dist c d) :
     ({g : ℝ² ≃ᵢ ℝ² | g a = c ∧ g b = d}).Finite := by
@@ -286,4 +288,4 @@ theorem twoPoint_isometry_set_finite
     have h12 := h1.symm.trans h2
     rwa [vsub_left_cancel_iff] at h12
 
-end Erdos98Proof
+end EuclideanGeometry

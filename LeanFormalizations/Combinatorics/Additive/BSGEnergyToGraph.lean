@@ -7,12 +7,12 @@ Authors: Adam McKenna
 import LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers
 
 /-!
-# Energy → popular bipartite graph (BSG step C entry point).
+# Energy → popular bipartite graph
 
 Packages the popular-pair count bound (`popular_pairs_card_lower_bound`)
 together with the popular-set cardinality bound derived from
 `sum_addConvolution_eq_card_product` into a single statement of the
-shape demanded by the graph-Balog-Szemerédi-Gowers step C
+shape consumed by the graph form of the Balog–Szemerédi–Gowers argument
 (`graph_bsg_restricted_sumset`).
 
 Given an energy bound `E[X,Y] ≥ η · |X|³` with `|X| = |Y| = n` and `n`
@@ -31,11 +31,10 @@ The bound `K = 4/η` rather than the heuristic `2/η` reflects the loss
 of taking `θ = ⌊(η/2)·n⌋ ≥ (η/4)·n` (integer threshold rounding); the
 constants compose downstream without further loss.
 
-This is pure repackaging — no new mathematical content — corresponding
-to the blueprint obligation `bsg-energy-to-popular-graph`.
+This is pure repackaging — no new mathematical content.
 -/
 
-namespace Erdos98Proof.External
+namespace Finset
 
 open scoped Pointwise
 
@@ -151,4 +150,4 @@ theorem energy_to_popular_graph {G : Type*} [AddCommGroup G] [DecidableEq G]
     exact this
 
 
-end Erdos98Proof.External
+end Finset

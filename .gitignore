@@ -2,3 +2,7 @@
 *.olean
 *.ilean
 *.trace
+/.lake-build.lock
+# local agent / memory caches
+/.fastembed_cache
+/.nthdegree

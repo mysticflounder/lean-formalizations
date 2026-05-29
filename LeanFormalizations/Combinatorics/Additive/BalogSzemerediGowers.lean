@@ -7,38 +7,31 @@ Authors: Adam McKenna
 import Mathlib
 
 /-!
-# Balog-Szemerédi-Gowers theorem (qualitative, local-from-Mathlib).
+# Balog–Szemerédi–Gowers theorem
 
-Local proof target for ledger item 1. Provenance:
-`docs/formalization/problem-98-item-1-bsg-strategy.md` (Path A).
+The Balog–Szemerédi–Gowers theorem over `Finset.addEnergy` for an arbitrary
+additive commutative group, proved via Gowers' graph-theoretic argument.
 
-## Statements
+## Main statements
 
-* `balog_szemeredi_gowers_symmetric` — equal-sets form
+* `Finset.balog_szemeredi_gowers_symmetric` — equal-sets form
   `E[X,X] ≥ η|X|³ ⇒ ∃ X' ⊆ X, c|X| ≤ |X'| ∧ |X'-X'| ≤ C|X|`.
-* `balog_szemeredi_gowers_asymmetric` — equal-cardinality two-sets form
-  `E[X,Y] ≥ η|X|³ ⇒ ∃ X' ⊆ X, Y' ⊆ Y, c·n ≤ |X'|, |Y'| ∧ |X'-Y'| ≤ C·n`,
-  required by the use-site `Branch1.PopularLambdaToDoublingStatement` where
-  `Y = λX` for some scalar `λ`.
+* `Finset.balog_szemeredi_gowers_asymmetric` — equal-cardinality two-sets form
+  `E[X,Y] ≥ η|X|³ ⇒ ∃ X' ⊆ X, Y' ⊆ Y, c·n ≤ |X'|,|Y'| ∧ |X'-Y'| ≤ C·n`.
+* `Finset.balog_szemeredi_gowers_asymmetric_explicit` — the asymmetric form with
+  the existential constants exposed as explicit polynomials in `η`
+  (`c = η/16` and an explicit `C(η)`).
 
-Both statements are qualitative — the existential constants `c, C : ℝ` are
-not given polynomial bounds in `η`. The use-site only needs existence (see
-strategy doc §"Failure modes" risk 3).
+The first two statements are qualitative: the constants `c, C : ℝ` are
+existential, with no polynomial dependence on `η` exposed.
 
-## Proof status
+## References
 
-Currently `sorry`. Proof is scheduled across ~4-5 sessions:
-1. statement file (this commit);
-2. popular-difference lemma + convolution rewrites;
-3. random-restriction step (paths-of-length-3 / Cauchy-Schwarz);
-4. Ruzsa-triangle adapter to single-set doubling;
-5. wire into `Branch1.PopularLambdaToDoubling`.
-
-References: Tao-Vu, *Additive Combinatorics* §6.4 (Gowers' graph-theoretic
-proof); Schoen-Sisask (popular sums refinement).
+* Tao–Vu, *Additive Combinatorics* §6.4 (Gowers' graph-theoretic proof).
+* Schoen–Sisask (popular sums refinement).
 -/
 
-namespace Erdos98Proof.External
+namespace Finset
 
 open scoped Pointwise
 
@@ -1006,10 +999,9 @@ Pipeline:
    to the linear conclusion.
 
 The `c · |A| ≤ |B|` assumption is unavoidable in this generality (Ruzsa
-triangle has `|B|` on the LHS). It's automatically satisfied at the
-`graph_bsg_restricted_sumset` use-site because the output `A'`, `B'` are
-both bounded below by a common `c · n` factor.  {{NEEDS_PROOF}}: Mathlib
-glue.
+triangle has `|B|` on the LHS). It is automatically satisfied where this is
+applied below, because the subsets `A'`, `B'` produced by
+`graph_bsg_restricted_sumset` are both bounded below by a common `c · n` factor.
 -/
 lemma ruzsa_sumset_to_difference {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ K c : ℝ, 0 < K → 0 < c → ∀ A B : Finset G, A.Nonempty → B.Nonempty →
@@ -1073,7 +1065,7 @@ lemma ruzsa_sumset_to_difference {G : Type*} [AddCommGroup G] [DecidableEq G] :
   linarith [hdiff_mul_cA]
 
 
-/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let `P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths `a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich `S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Self-contained; no use-site coupling. Reference: Tao-Vu, Additive Combinatorics, §6.4 / Schoen-Sisask 2007. -/
+/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let `P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths `a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich `S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Reference: Tao–Vu, *Additive Combinatorics*, §6.4 / Schoen–Sisask 2007. -/
 lemma length_three_path_count_lower_bound {G : Type*} [AddCommGroup G] [DecidableEq G]
     (A B : Finset G) (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B) :
     (E.card : ℝ) ^ 4 ≤ ((A.card : ℝ) * B.card) ^ 2 *
@@ -2367,10 +2359,9 @@ terms in `S`. Each pair `(a, b)` admits `Ω(δ^O(1) · n²)` such paths by
 Cauchy-Schwarz on `E`. The cubic support count `|S − S + S| ≤ |S|³ ≤ K³ n³`
 divided by the path-multiplicity lower bound yields the linear bound.
 
-This is the previously-missing ingredient — Routes A/B/D in
-`docs/formalization/problem-98-item-1-bsg-step-c-question.md` fail because
-they count only support and not multiplicity. Tao-Vu §6.4 / Schoen-Sisask
-2007 / Petridis 2012.  {{NEEDS_PROOF}}: length-3 path multiplicity argument.
+The key ingredient is to count length-3 paths *with multiplicity*: counting
+only the support of the representation set (rather than multiplicity) is
+insufficient. Tao–Vu §6.4 / Schoen–Sisask 2007 / Petridis 2012.
 -/
 lemma graph_bsg_restricted_sumset {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ δ K : ℝ, 0 < δ → 0 < K → ∃ c C : ℝ, 0 < c ∧ 0 < C ∧
@@ -2818,12 +2809,9 @@ lemma graph_bsg_restricted_sumset_explicit {G : Type*} [AddCommGroup G] [Decidab
 form).** For every `η > 0` there exist positive `c, C` such that whenever
 `X`, `Y` are finite subsets of an additive commutative group with
 `|X| = |Y| =: n` and mixed additive energy `E[X,Y] ≥ η · n³`, there are
-subsets `X' ⊆ X` and `Y' ⊆ Y` of size `≥ c · n` each whose sumset is
-bounded: `|X' - Y'| ≤ C · n`. This is the form consumed by the popular-λ
-use-site (with `Y = λ · X` and `|X| = |Y|` via injectivity of scalar
-multiplication). The general asymmetric form with `|X| ≠ |Y|` is not
-needed here. {{NEEDS_PROOF}}: proof landing across sessions 2-3 of
-Path A.
+subsets `X' ⊆ X` and `Y' ⊆ Y` of size `≥ c · n` each whose difference set is
+bounded: `|X' - Y'| ≤ C · n`. This is the two-set form with `|X| = |Y|`; the
+general asymmetric form with `|X| ≠ |Y|` is not treated here.
 -/
 theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ η : ℝ, 0 < η → ∃ c C : ℝ, 0 < c ∧ 0 < C ∧
@@ -3043,9 +3031,8 @@ theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [Decidabl
 subset of an additive commutative group with additive energy
 `E[X,X] ≥ η · |X|³`, there is a subset `X' ⊆ X` of size `≥ c · |X|`
 whose difference set is bounded: `|X' - X'| ≤ C · |X|`. Qualitative
-existentials only — see strategy doc for why polynomial dependence is
-not needed at the use-site. {{NEEDS_PROOF}}: proof landing across
-sessions 2-3 of Path A.
+existentials only; for explicit polynomial-in-`η` constants see
+`balog_szemeredi_gowers_asymmetric_explicit`.
 -/
 theorem balog_szemeredi_gowers_symmetric {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ η : ℝ, 0 < η → ∃ c C : ℝ, 0 < c ∧ 0 < C ∧
@@ -3101,12 +3088,11 @@ type exposes the polynomial-in-`η` witnesses `c = η/16` and
 `C₀ = 2^13·(4/η)^3 / (η/2)^5 + 2^12 / (η/2)^5`) rather than hiding them
 under an existential.
 
-This is the form required by `popular_lambda_to_polylog_doubling`
-(see `docs/formalization/problem-98-popular-lambda-plumbing.md`),
-which needs to substitute `η ↦ (log n)^{-2 C_in}` and read off the
-output exponent `C_out` as a polynomial in `C_in`. The qualitative
-form (`balog_szemeredi_gowers_asymmetric`) returns arbitrary witnesses
-via `Classical.choose`, blocking that downstream substitution.
+This form is needed whenever one must track how the output doubling constant
+depends polynomially on `η` — for instance to substitute a varying
+`η = η(n)` and read off the resulting exponent. The qualitative form
+(`balog_szemeredi_gowers_asymmetric`) returns arbitrary witnesses via
+`Classical.choose`, which hides that dependence.
 
 The hypothesis `η ≤ 1` is added so that `min c₀ (η/4) = c₀ = η/16`
 (else the `c` value would be `min (η/16) (η/4)`, which equals `η/16`
@@ -3331,4 +3317,4 @@ theorem balog_szemeredi_gowers_asymmetric_explicit {G : Type*} [AddCommGroup G] 
         _ ≤ ((C₀ / c₀) ^ 3 / c₀ + 1) * X.card :=
             mul_le_mul hbracket_ge_one hX_ge_one (by norm_num) (by linarith)
 
-end Erdos98Proof.External
+end Finset
