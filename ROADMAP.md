@@ -5,16 +5,23 @@ modules — and advertising them.
 
 ## In progress
 
-- [ ] **Strip project entanglement from BSG cluster** — rename namespace
-  `Erdos98Proof.External` → `Finset`, scrub dead-project doc references
-  (ledger / Path A / Branch1 / strategy-doc paths), remove false
-  `{{NEEDS_PROOF}}` markers (proofs are complete). *(BSG files done; verifying
-  build.)*
-- [ ] **Replace project-local terminology with standard math terms** —
-  eliminate jargon inherited from the source project ("use-site", "popular-λ",
-  "Branch1", "ledger", "ES-GK", "blueprint obligation", "step C entry point")
-  in favor of standard additive-combinatorics / geometry vocabulary. Sweep
-  every docstring and comment. *(BSG done; geometry pending.)*
+- [x] **Strip project entanglement from BSG cluster** — namespace
+  `Erdos98Proof.External` → `Finset`, dead-project doc references scrubbed,
+  false `{{NEEDS_PROOF}}` markers removed.
+- [x] **De-jargon namespaces and identifiers** — `.PDZ` dropped
+  (`PachDeZeeuw` / `CrossingLemma`); `.ST` → `PachSharir.SzemerediTrotter`;
+  `External` → `PlaneCurve`; `IsControlledDegenerate` → `IsLineOrCircle`;
+  `Theorem12_*Statement` paper-number prefixes stripped; BSG/DRC acronyms
+  spelled out in exported names (`graph_balogSzemerediGowers_*`,
+  `graph_*dependentRandomChoice*`).
+- [x] **Rewrite internal step-tags to paper terminology** — the EU-N
+  (Euler / planar edge bound) and BR-N ("route-(B)" drawing→map bridge)
+  docstring tags replaced with standard combinatorial-topology language;
+  cross-references now name the actual Lean lemmas.
+- [ ] **Remaining source-project terminology sweep** — any residual
+  ("use-site", "popular-λ", "ES-GK", "blueprint obligation", "step C entry
+  point") in docstrings/comments outside the namespaces/identifiers/EU-BR
+  scope already done.
 
 ## Geometry port
 

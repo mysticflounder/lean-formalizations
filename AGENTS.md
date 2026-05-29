@@ -60,10 +60,12 @@ EOF
 - Theorems/lemmas: `snake_case`; types/structures/classes: `UpperCamelCase`;
   defs: `lowerCamelCase`. Follow mathlib's `foo_of_bar`/`foo_eq_bar` naming.
 - Put results in the most fitting existing namespace (additive-combinatorics →
-  `Finset`; Euclidean → `EuclideanGeometry`). Avoid project-ism namespaces
-  (`.PDZ`, `.ST`, `External`, `Erdos98Proof`) — these are being renamed out.
-- Avoid baking paper numbers / source-project jargon ("Branch2", "ledger",
-  "endpoint", "honest", "Card BR-3a") into public identifiers or docstrings.
+  `Finset`; Euclidean → `EuclideanGeometry`). Do not reintroduce project-ism
+  namespaces (`.PDZ`, `.ST`, `External`, `Erdos98Proof`) — these were renamed
+  out (now `PachDeZeeuw` / `PachSharir.SzemerediTrotter` / `PlaneCurve`).
+- Do not bake paper numbers / source-project jargon ("Branch2", "ledger",
+  "endpoint", "honest", "Card BR-3a", "EU-N", "route-(B)") into public
+  identifiers or docstrings — the existing tree was scrubbed of these.
 - Public declarations get docstrings; module files get a `/-! # … -/` header.
 - Copyright header on each file: `Apache 2.0`, author `Adam McKenna`.
 

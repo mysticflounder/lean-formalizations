@@ -111,13 +111,21 @@ These define a `Prop` but do **not** prove it — accepted classical inputs:
 - **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
   (symmetries of plane algebraic curves).
 
-## Known idiomaticity gaps (pre-PR)
+## Idiomaticity status (pre-PR)
 
-An audit flagged work needed before any mathlib PR (see `ROADMAP.md`): project
-namespaces (`.PDZ`, `.ST`, `External`) and identifier jargon to rename, ~25 `def
-… : Prop` statement-surfaces, dead source-project references in docstrings, and a
-large commented-out WIP block in `AlgebraicPrelim.lean` to delete. The verified
-core (BSG, geometry) is closest to PR-ready.
+A mathlib-idiomaticity audit drove a de-jargon pass (see `ROADMAP.md`): the
+project namespaces were renamed to semantic ones (`.PDZ` dropped → `PachDeZeeuw`
+/ `CrossingLemma`; `.ST` → `PachSharir.SzemerediTrotter`; `External` →
+`PlaneCurve`); paper-number and acronym identifiers were spelled out
+(`IsControlledDegenerate` → `IsLineOrCircle`; `Theorem12_*Statement` →
+`*Statement`; `graph_bsg_*` / `graph_*drc*` →
+`graph_balogSzemerediGowers_*` / `graph_*dependentRandomChoice*`); the internal
+EU-N / BR-N step tags in docstrings were rewritten to standard
+combinatorial-topology terms; and the dead source-project references and the
+large commented-out WIP block in `AlgebraicPrelim.lean` were removed. The
+verified core (BSG, geometry, AlgebraicPrelim) is closest to PR-ready; the
+remaining `def … : Prop` statement-surfaces (Bézout / Milnor–Thom / curve
+symmetries) are unproven classical inputs by design.
 
 ## Layout
 
