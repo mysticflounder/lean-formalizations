@@ -1,0 +1,25 @@
+name = "LeanFormalizations"
+version = "0.1.0"
+keywords = ["math", "additive-combinatorics", "discrete-geometry", "lean4", "mathlib"]
+defaultTargets = ["LeanFormalizations"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+
+# NOTE: the formal_conjectures dependency is carried over from the source project
+# only for `FormalConjectures.Util.ProblemImports` (which re-exports `Mathlib`).
+# TODO: strip it — replace those imports with `import Mathlib` and remove this
+# require — so the library is mathlib-only. See README "Status / TODO".
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.27.0"
+
+[[require]]
+name = "formal_conjectures"
+git = "https://github.com/flound1129/formal-conjectures.git"
+rev = "erdos98-formalization"
+
+[[lean_lib]]
+name = "LeanFormalizations"
