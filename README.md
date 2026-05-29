@@ -64,6 +64,21 @@ are inside commented-out WIP blocks). Headline theorems confirmed axiom-clean:
 > only *states*. It still contains large commented-out WIP blocks (slated for
 > deletion) and uses project-flavored names pending the idiomaticity cleanup.
 
+### `LeanFormalizations/Combinatorics/CombinatorialMap/` — combinatorial maps + planar edge bound
+
+A standalone, mathlib-only library (promoted out of the Pach–de Zeeuw tree once
+it was confirmed complete). All headlines axiom-clean:
+
+- **`Basic.lean`** — the combinatorial-map carrier (vertex/edge/face
+  permutations, Euler characteristic, planarity).
+- **`PlanarEdgeBound.lean`** — the simple-graph edge bound `e ≤ 3v − 6` from
+  Euler's formula (`card_edge_le_three_card_vertex_sub_six`) and its
+  multiplicity lift `e ≤ M·(3v − 6)` (`planar_multigraph_edge_bound`).
+- **`EulerBound.lean`** — a connected combinatorial map has Euler characteristic
+  `≤ 2` (`CombinatorialMap.eulerCharacteristic_le_two`).
+- **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
+  (`CombinatorialMap.EdgeInsertion.*`).
+
 ### Reproduce the verification
 
 ```bash
@@ -78,6 +93,8 @@ import LeanFormalizations
 #print axioms EuclideanGeometry.twoPoint_isometry_set_finite
 #print axioms PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound
 #print axioms PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry
+#print axioms CombinatorialMap.card_edge_le_three_card_vertex_sub_six
+#print axioms CombinatorialMap.eulerCharacteristic_le_two
 EOF
 ```
 
@@ -90,11 +107,13 @@ curves" program. It **compiles** but is **not finished**: most modules carry
 `sorry` or consume unproven statement-surfaces. The reduction theorems are
 honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …`).
 
-- **`CrossingLemma/`** — the multigraph crossing lemma via combinatorial maps.
-  The combinatorial-map / Euler-bound / edge-insertion machinery is largely
-  `sorry`-free; the full crossing lemma bottoms out in a labelled conjectured
-  geometric residual (`exists_twoSidedPartition_of_arc`, `sorry`). A separate
-  `subsetAveraging_master` (`sorry`) is a documented dead-end, not used downstream.
+- **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
+  combinatorial-map / Euler-bound / edge-insertion substrate has been promoted to
+  the standalone `Combinatorics/CombinatorialMap/` library above; what remains
+  here is the still-unfinished drawing→map bridge — the full crossing lemma
+  bottoms out in a labelled conjectured geometric residual
+  (`exists_twoSidedPartition_of_arc`, `sorry`). A separate `subsetAveraging_master`
+  (`sorry`) is a documented dead-end, not used downstream.
 - **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`
   contain `sorry`).
 - **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
@@ -133,6 +152,7 @@ symmetries) are unproven classical inputs by design.
 LeanFormalizations.lean                    -- root aggregator (imports everything)
 LeanFormalizations/
   Combinatorics/Additive/                  -- BSG ✅
+  Combinatorics/CombinatorialMap/           -- combinatorial maps + planar edge bound ✅
   Geometry/Euclidean/                       -- isometry classification ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅

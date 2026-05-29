@@ -8,7 +8,7 @@ NO-AXIOM lane: this file is sorry-free and axiom-clean
 -/
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 namespace CrossingLemma
 

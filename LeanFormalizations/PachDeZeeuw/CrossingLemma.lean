@@ -8,11 +8,11 @@ Authors: Adam McKenna
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 -- Combinatorial-map / Euler machinery:
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMapEdgeInsertion
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMapEulerBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
+import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
+import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 -- Drawing -> abstract bridge + residual map:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.Abstractize
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap

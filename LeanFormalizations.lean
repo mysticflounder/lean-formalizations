@@ -8,6 +8,9 @@ Authors: Adam McKenna
 import LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers
 import LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph
 
+-- Combinatorics / combinatorial maps + planar edge bound (complete, axiom-clean)
+import LeanFormalizations.Combinatorics.CombinatorialMap
+
 -- Euclidean geometry
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
 

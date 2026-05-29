@@ -6,7 +6,7 @@ Authors: Adam McKenna
 
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 /-!
 # Euler witness properties of the residual combinatorial map

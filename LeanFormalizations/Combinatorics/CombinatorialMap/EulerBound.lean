@@ -31,12 +31,8 @@ Assembly (pure linear algebra):
   `rank δ₀ + rank δ₁ ≤ E`        (from (A): `im δ₀ ⊆ ker δ₁`, rank-nullity),
   `rank δ₁ = rank η = F − finrank(ker η) ≥ F − 1`,
   hence `(V−1) + (F−1) ≤ E`, i.e. `V − E + F ≤ 2`. ∎
-
-NOT imported by the closure aggregator `CrossingLemma.lean` (work in progress).
-Build in isolation:
-  lake build CrossingLemma.Combinatorics.CombinatorialMapEulerBound
 -/
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlanarEdgeBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.Algebra.CharP.Two

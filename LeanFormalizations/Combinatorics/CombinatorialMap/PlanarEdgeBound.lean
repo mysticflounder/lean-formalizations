@@ -18,7 +18,7 @@ The connectivity and simplicity predicates (`Connected`, `IsSimple`) enter the
 counting theorems only as hypotheses, so the development is robust to a different
 encoding of them.
 -/
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
+import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import Mathlib.Data.Sym.Sym2
 
 open scoped BigOperators

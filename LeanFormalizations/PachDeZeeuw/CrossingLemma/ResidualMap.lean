@@ -6,7 +6,7 @@ Authors: Adam McKenna
 
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
+import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 
 /-!
 # The residual combinatorial map of a plane drawing

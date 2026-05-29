@@ -65,18 +65,15 @@ Deltas (all reduced to the D1-B `orbitCount_swap_mul` engine):
 
 Reusable orbit-engine additions: `orbitCount_sumCongr` (additivity over `sumCongr`)
 and `sameCycle_swap_mul_iff_of_not_sameCycle` (the merge same-cycle dichotomy).
-
-NOT imported by the closure aggregator `CrossingLemma.lean`. Build in isolation:
-  lake build CrossingLemma.Combinatorics.CombinatorialMapEdgeInsertion
 -/
 import Mathlib.GroupTheory.Perm.Cycle.Type
 import Mathlib.GroupTheory.Perm.Cycle.Factors
 import Mathlib.GroupTheory.Perm.Sign
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CombinatorialMap
+import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 
 open Equiv Equiv.Perm
 
-namespace CrossingLemma.EdgeInsertion
+namespace CombinatorialMap.EdgeInsertion
 
 open scoped BigOperators
 
@@ -1615,4 +1612,4 @@ theorem eulerCharacteristic_insertedEdgeMap_le (hc : c₁ ≠ c₂) :
 
 end Construction
 
-end CrossingLemma.EdgeInsertion
+end CombinatorialMap.EdgeInsertion
