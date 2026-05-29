@@ -8,6 +8,4 @@ Authors: Adam McKenna
 import LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers
 import LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph
 
--- Euclidean geometry
-import LeanFormalizations.Geometry.Euclidean.Foundation
-import LeanFormalizations.Geometry.Euclidean.IsometryClassification
+-- Euclidean geometry: see unported/Geometry (project-entangled, not yet mathlib-only).

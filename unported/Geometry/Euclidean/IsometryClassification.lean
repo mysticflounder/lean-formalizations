@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 -/
 
-import FormalConjectures.Util.ProblemImports
+import Mathlib
 import LeanFormalizations.Geometry.Euclidean.Foundation
 
 /-!
