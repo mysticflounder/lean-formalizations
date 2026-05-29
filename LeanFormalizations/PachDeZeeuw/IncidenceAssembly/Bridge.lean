@@ -28,7 +28,7 @@ including the real→ℕ-cubed conversion and the `D = 4` instantiation — is w
 that deliberately lives here, never inside a paper module. It currently carries a
 single `sorry` (**Gap B**).
 
-`pachDeZeeuwTheorem11_unconditional` then closes Theorem 1.1 by feeding the bridge
+`pachDeZeeuwTheorem11_sorryBacked` then assembles Theorem 1.1 by feeding the bridge
 the paper-faithful (but still `sorry`-backed, **Gap A**) `PachSharir.corollary24`.
 The two holes are thus named and separated: Gap A in `pach-sharir`, Gap B here;
 `pdz` itself is `sorry`-free.
@@ -56,13 +56,16 @@ theorem positiveAuxiliaryIncidenceCardBound_of_corollary24
   sorry
 
 /--
-Pach–de Zeeuw Theorem 1.1 as a **closed** (hypothesis-free) statement, assembled
-from the paper modules. The reduction chain is fully proven in `pdz`; the only
-gaps are Gap A (`PachSharir.corollary24`) and Gap B
-(`positiveAuxiliaryIncidenceCardBound_of_corollary24`), so `#print axioms`
-pinpoints exactly the two holes rather than blanking the theorem.
+**NOT PROVEN — `sorry`-backed.** Pach–de Zeeuw Theorem 1.1 with a hypothesis-free
+*type*, assembled from the paper modules. Although the statement takes no
+hypothesis, its proof is **not** complete: it is backed by `sorry` through Gap A
+(`PachSharir.corollary24`) and Gap B
+(`positiveAuxiliaryIncidenceCardBound_of_corollary24`). The reduction chain in
+`pdz` is itself `sorry`-free, so `#print axioms` on this term pinpoints exactly
+those two holes (it will report `sorryAx`). Do **not** treat this as an
+established theorem.
 -/
-theorem pachDeZeeuwTheorem11_unconditional :
+theorem pachDeZeeuwTheorem11_sorryBacked :
     PachDeZeeuwIrreducibleCurveDistinctDistancesStatement :=
   theorem11_irreducibleCurve_distinctDistances
     (theorem12_bipartiteDistinctDistances_of_positiveCardBound
