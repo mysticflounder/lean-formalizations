@@ -17,6 +17,7 @@ import LeanFormalizations.Geometry.Euclidean.IsometryClassification
 import LeanFormalizations.PachDeZeeuw.Bezout
 import LeanFormalizations.PachDeZeeuw.MilnorThom
 import LeanFormalizations.PachDeZeeuw.CurveSymmetries
+import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
 import LeanFormalizations.PachDeZeeuw.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.PachSharir
 import LeanFormalizations.PachDeZeeuw
