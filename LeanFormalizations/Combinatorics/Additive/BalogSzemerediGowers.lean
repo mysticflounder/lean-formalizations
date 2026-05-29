@@ -848,7 +848,7 @@ to `a + b` under `s₁ - s₂ + s₃`. It is injective: `b₁` is recovered from
 `(a + b₁) - a` (or equivalently from the first coordinate minus the constant `a`),
 and `a₁` is recovered from the third coordinate as `(a₁ + b) - b`.
 
-Used by `graph_bsg_restricted_sumset` to bridge the length-3 path count
+Used by `graph_balogSzemerediGowers_restricted_sumset` to bridge the length-3 path count
 (`length_three_path_count_lower_bound`, lower bound via Cauchy-Schwarz) to the
 triple-rep multiplicity hypothesis of `restricted_sumset_via_multiplicity`.
 Tao-Vu, *Additive Combinatorics*, §6.4 (Cor. 6.20).
@@ -1001,7 +1001,7 @@ Pipeline:
 The `c · |A| ≤ |B|` assumption is unavoidable in this generality (Ruzsa
 triangle has `|B|` on the LHS). It is automatically satisfied where this is
 applied below, because the subsets `A'`, `B'` produced by
-`graph_bsg_restricted_sumset` are both bounded below by a common `c · n` factor.
+`graph_balogSzemerediGowers_restricted_sumset` are both bounded below by a common `c · n` factor.
 -/
 lemma ruzsa_sumset_to_difference {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ K c : ℝ, 0 < K → 0 < c → ∀ A B : Finset G, A.Nonempty → B.Nonempty →
@@ -1294,7 +1294,7 @@ Hence `E[|U|² − Z/ε] ≥ (c² / 2) |X|²`, and there is a choice of `v` real
 `|U|² ≥ (c² / 2) |X|²` (so `|U| ≥ (c / √2) |X| ≥ (c/2)|X|`) and
 `Z ≤ ε |U|²`. Reference: Fox-Sudakov 2011, Lemma 5.1.
 -/
-lemma graph_pair_drc {G : Type*} [DecidableEq G]
+lemma graph_pair_dependentRandomChoice {G : Type*} [DecidableEq G]
     (X Y : Finset G) (hX : X.Nonempty) (hY : Y.Nonempty)
     (F : Finset (G × G)) (hF_sub : F ⊆ X ×ˢ Y)
     (c : ℝ) (hc_pos : 0 < c) (hc_le : c ≤ 1)
@@ -1660,10 +1660,10 @@ lemma graph_high_degree_subset_lb {G : Type*} [DecidableEq G]
 `#{(a, a') ∈ U×U : codeg_E(a, a') < τ} ≤ κ · |U|²`, produce
 `A' ⊆ U` with `|A'| ≥ |U|/2` (when `κ ≤ 1/4`) such that for every
 `a ∈ A'` the bad-partner count `#{a' ∈ U : codeg_E(a, a') < τ}` is
-`≤ 2κ · |U|`.  Used inside `graph_drc_payoff_pointwise_witness` with
+`≤ 2κ · |U|`.  Used inside `graph_dependentRandomChoice_payoff_pointwise_witness` with
 `κ := δ/16`, giving `2κ = δ/8`.
 -/
-private lemma graph_drc_markov_refinement {G : Type*} [DecidableEq G]
+private lemma graph_dependentRandomChoice_markov_refinement {G : Type*} [DecidableEq G]
     (B U : Finset G) (E : Finset (G × G)) (τ : ℝ) (κ : ℝ)
     (hκ_pos : 0 < κ) (hUpos : (0 : ℝ) < (U.card : ℝ))
     (hbadCount : (((U ×ˢ U).filter fun p : G × G ↦
@@ -1747,7 +1747,7 @@ private lemma graph_drc_markov_refinement {G : Type*} [DecidableEq G]
 split on columns produces `B' ⊆ B` of cardinality `≥ (ρ/2) · |B|` such that
 every `b ∈ B'` has `|{a ∈ U : (a, b) ∈ E}| ≥ (ρ/2) · |U|`.
 -/
-private lemma graph_drc_popular_columns {G : Type*} [DecidableEq G]
+private lemma graph_dependentRandomChoice_popular_columns {G : Type*} [DecidableEq G]
     (A B : Finset G) (hAB : A.card = B.card)
     (E : Finset (G × G)) (_hE_sub : E ⊆ A ×ˢ B)
     (U : Finset G) (hU_sub : U ⊆ A)
@@ -1851,7 +1851,7 @@ private lemma graph_drc_popular_columns {G : Type*} [DecidableEq G]
 /--
 **Witness for the DRC pointwise payoff (steps 1-4).** Internal helper.
 Composes `graph_high_degree_subset_lb` (rare/popular row split) with
-`graph_pair_drc` (Fox-Sudakov 5.1 pair-DRC) and a Markov + rare/popular
+`graph_pair_dependentRandomChoice` (Fox-Sudakov 5.1 pair-DRC) and a Markov + rare/popular
 column split.  Returns the four pieces needed by the pointwise count
 step: a "core" set `U ⊆ A`, the "non-bad" refinement `A' ⊆ U`, the
 "popular column" refinement `B' ⊆ B`, and the codegree threshold
@@ -1862,7 +1862,7 @@ The arithmetic identity `(δ⁵/2¹²)|A|² ≤ (δ/8)|U| · τ` is established
 here (using `m := |Apop|`-relative density and `|U| · τ`-style
 cancellation) so the count helper need not redo it.
 -/
-private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
+private lemma graph_dependentRandomChoice_payoff_pointwise_witness {G : Type*} [DecidableEq G]
     (δ : ℝ) (hδ_pos : 0 < δ) (hδ_le : δ ≤ 1)
     (A B : Finset G) (hA : A.Nonempty) (hAB : A.card = B.card)
     (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B)
@@ -1937,7 +1937,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
       · rintro ⟨hpE, _, hpop⟩
         exact ⟨hpE, hpop⟩
     rw [← hfilter_eq]; exact hEpop_lb
-  -- Step 2: invoke graph_pair_drc on (A₁, B, E₁) with density c₀ = (δ/2)|A|/|A₁|.
+  -- Step 2: invoke graph_pair_dependentRandomChoice on (A₁, B, E₁) with density c₀ = (δ/2)|A|/|A₁|.
   set m : ℝ := (A₁.card : ℝ) with hm_def
   have hm_pos : 0 < m := hA₁_card_pos
   have hm_le_A : m ≤ (A.card : ℝ) := by
@@ -1956,7 +1956,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
   -- c₀ * |A₁| = (δ/2) * |A|.
   have hc₀_mul_m : c₀ * m = (δ / 2) * (A.card : ℝ) := by
     rw [hc₀_def]; field_simp
-  -- Density hypothesis for graph_pair_drc.
+  -- Density hypothesis for graph_pair_dependentRandomChoice.
   have hF_dense_drc : c₀ * (A₁.card : ℝ) * (B.card : ℝ) ≤ (E₁.card : ℝ) := by
     have : c₀ * (A₁.card : ℝ) * (B.card : ℝ) = (δ / 2) * (A.card : ℝ) * (B.card : ℝ) := by
       rw [show (A₁.card : ℝ) = m from rfl]; rw [hc₀_mul_m]
@@ -1966,9 +1966,9 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
   have hε_pos : 0 < ε := by rw [hε_def]; positivity
   have hε_le_one : ε ≤ 1 := by
     rw [hε_def]; linarith
-  -- Invoke graph_pair_drc.
+  -- Invoke graph_pair_dependentRandomChoice.
   obtain ⟨U, hU_sub_A₁, hU_card_lb_drc, hbad_card_le⟩ :=
-    graph_pair_drc A₁ B hA₁_ne hB E₁ hE₁_sub c₀ hc₀_pos hc₀_le_one hF_dense_drc
+    graph_pair_dependentRandomChoice A₁ B hA₁_ne hB E₁ hE₁_sub c₀ hc₀_pos hc₀_le_one hF_dense_drc
       ε hε_pos hε_le_one
   have hU_sub : U ⊆ A := hU_sub_A₁.trans hA₁_sub
   -- (c₀/2) * |A₁| = (δ/4) * |A|.
@@ -2046,7 +2046,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
         (δ ^ 5 / 2 ^ 12) * (A.card : ℝ) ^ 2 := by ring
     linarith
   -- Bad-pair count in U using the E-codegree.  It is bounded by the E₁-bad count from
-  -- graph_pair_drc, since codeg_E ≥ codeg_{E₁}.
+  -- graph_pair_dependentRandomChoice, since codeg_E ≥ codeg_{E₁}.
   have hbadCountE : (((U ×ˢ U).filter fun p : G × G ↦
       ((B.filter (fun b₁ ↦ (p.1, b₁) ∈ E ∧ (p.2, b₁) ∈ E)).card : ℝ) < τ).card : ℝ)
     ≤ ε * (U.card : ℝ) ^ 2 := by
@@ -2091,7 +2091,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
     linarith
   -- Apply Markov refinement helper.
   obtain ⟨A', hA'_sub_U, hA'_half, hA'_prop⟩ :=
-    graph_drc_markov_refinement (G := G) B U E τ ε hε_pos hU_card_pos hbadCountE
+    graph_dependentRandomChoice_markov_refinement (G := G) B U E τ ε hε_pos hU_card_pos hbadCountE
   -- `hA'_half`: (1 - 1/2) * |U| ≤ |A'|, i.e. |U|/2 ≤ |A'|.
   -- `hA'_prop`: ∀ a ∈ A', ((badPartner a).card : ℝ) ≤ 2ε|U| = (δ/8)|U|.
   -- So we get the (δ/8)|U| bound directly: 2 * (δ/16) = δ/8.
@@ -2110,7 +2110,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
     have h1 : (δ / 8) * (A.card : ℝ) ≤ (U.card : ℝ) / 2 := by linarith [hU_card_lb]
     have : (1 - 1 / 2) * (U.card : ℝ) = (U.card : ℝ) / 2 := by ring
     linarith [hA'_half, this]
-  -- Step 4: popular columns via `graph_drc_popular_columns`.
+  -- Step 4: popular columns via `graph_dependentRandomChoice_popular_columns`.
   -- Row-degree lower bound for a ∈ U (which is ⊆ A₁): rowDeg_E(a) ≥ (δ/2)|B|.
   have hrowDeg_lb : ∀ a ∈ U, (δ / 2) * (B.card : ℝ) ≤
       ((B.filter (fun b ↦ (a, b) ∈ E)).card : ℝ) := by
@@ -2122,7 +2122,7 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
   have hρ_pos : (0 : ℝ) < δ / 2 := by positivity
   have hρ_le : δ / 2 ≤ 1 := by linarith
   obtain ⟨B', hB'_sub, hB'_lb_drc, hpopCol⟩ :=
-    graph_drc_popular_columns (G := G) A B hAB E hE_sub U hU_sub hU_card_pos
+    graph_dependentRandomChoice_popular_columns (G := G) A B hAB E hE_sub U hU_sub hU_card_pos
       (δ / 2) hρ_pos hρ_le hrowDeg_lb
   -- (δ/2)/2 = δ/4. So |B'| ≥ (δ/4)|B| = (δ/4)|A| ≥ (δ/8)|A|.
   have hB'_card_lb : (δ / 8) * (A.card : ℝ) ≤ (B'.card : ℝ) := by
@@ -2143,14 +2143,14 @@ private lemma graph_drc_payoff_pointwise_witness {G : Type*} [DecidableEq G]
 
 /--
 **Pointwise count helper (step 5).** Given the witness from
-`graph_drc_payoff_pointwise_witness`, partition the path-3 Finset
+`graph_dependentRandomChoice_payoff_pointwise_witness`, partition the path-3 Finset
 `(B ×ˢ A).filter ((a, q.1) ∈ E ∧ (q.2, q.1) ∈ E ∧ (q.2, b) ∈ E)` by the
 second coordinate `q.2 = a₁ ∈ U`. For `a₁` that is a popular neighbour of
 `b` and a non-bad partner of `a`, the corresponding fiber has cardinality
 `≥ τ`. There are at least `(δ/8)|U|` such `a₁`, giving the final bound
 `(δ/8)|U| · τ ≥ (δ⁵/2¹²)|A|²`.
 -/
-private lemma graph_drc_payoff_pointwise_count {G : Type*} [DecidableEq G]
+private lemma graph_dependentRandomChoice_payoff_pointwise_count {G : Type*} [DecidableEq G]
     (δ : ℝ) (A B : Finset G) (E : Finset (G × G)) (U A' B' : Finset G) (τ : ℝ)
     (hU_sub : U ⊆ A) (_hA'_sub_U : A' ⊆ U) (_hB'_sub : B' ⊆ B)
     (hτ_nn : 0 ≤ τ)
@@ -2280,7 +2280,7 @@ private lemma graph_drc_payoff_pointwise_count {G : Type*} [DecidableEq G]
 
 /--
 **DRC payoff: pointwise path-3 count.** Given the pair-DRC witness `U ⊆ A`
-(from `graph_pair_drc`), define the "non-bad" set
+(from `graph_pair_dependentRandomChoice`), define the "non-bad" set
 `A' := { a ∈ U : few a' ∈ U with codegree < (δ³/32) n }` and the "popular"
 set `B' := { b ∈ B : (δ/4) |U| ≤ |N_U(b)| }`. For `a ∈ A'`, `b ∈ B'`, the
 length-3 path count `P(a, b) ≥ (δ⁵ / 2¹⁰) n² ≥ (δ⁵ / 2¹²) n²`.
@@ -2290,7 +2290,7 @@ partners of `a`, leaving `≥ (δ/8)|U|` non-bad partners `a₁`. Each non-bad
 partner has `|N(a) ∩ N(a₁)| ≥ (δ³/32) n` choices of `b₁`. Total:
 `P(a, b) ≥ (δ/8)|U| · (δ³/32) n ≥ (δ/8)(δ/4)n · (δ³/32) n = (δ⁵/2¹⁰) n²`.
 -/
-lemma graph_drc_payoff_pointwise {G : Type*} [DecidableEq G]
+lemma graph_dependentRandomChoice_payoff_pointwise {G : Type*} [DecidableEq G]
     (δ : ℝ) (hδ_pos : 0 < δ) (hδ_le : δ ≤ 1)
     (A B : Finset G) (hA : A.Nonempty) (hAB : A.card = B.card)
     (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B)
@@ -2305,10 +2305,10 @@ lemma graph_drc_payoff_pointwise {G : Type*} [DecidableEq G]
   classical
   obtain ⟨U, A', B', τ, hU_sub, hA'_sub_U, hB'_sub, hτ_nn, _hU_card, hA'_card,
     hB'_card, hUτ_bound, hbadPartner, hpopCol⟩ :=
-    graph_drc_payoff_pointwise_witness δ hδ_pos hδ_le A B hA hAB E hE_sub hE_dense
+    graph_dependentRandomChoice_payoff_pointwise_witness δ hδ_pos hδ_le A B hA hAB E hE_sub hE_dense
   refine ⟨A', B', hA'_sub_U.trans hU_sub, hB'_sub, hA'_card, hB'_card, ?_⟩
   intro a ha b hb
-  exact graph_drc_payoff_pointwise_count δ A B E U A' B' τ hU_sub hA'_sub_U hB'_sub
+  exact graph_dependentRandomChoice_payoff_pointwise_count δ A B E U A' B' τ hU_sub hA'_sub_U hB'_sub
     hτ_nn hUτ_bound hbadPartner hpopCol a ha b hb
 
 /--
@@ -2339,10 +2339,10 @@ lemma dense_bipartite_has_path3_rectangle {G : Type*} [AddCommGroup G] [Decidabl
           (((B ×ˢ A).filter fun q : G × G ↦
             (a, q.1) ∈ E ∧ (q.2, q.1) ∈ E ∧ (q.2, b) ∈ E).card : ℝ) := by
   classical
-  -- The Fox-Sudakov DRC payload is packaged in `graph_drc_payoff_pointwise`,
-  -- which assembles `graph_pair_drc`, `graph_high_degree_subset_lb`, and the
+  -- The Fox-Sudakov DRC payload is packaged in `graph_dependentRandomChoice_payoff_pointwise`,
+  -- which assembles `graph_pair_dependentRandomChoice`, `graph_high_degree_subset_lb`, and the
   -- final pointwise path-3 count step (see those lemmas for the breakdown).
-  exact graph_drc_payoff_pointwise δ hδ_pos hδ_le A B hA hAB E hE_sub hE_dense
+  exact graph_dependentRandomChoice_payoff_pointwise δ hδ_pos hδ_le A B hA hAB E hE_sub hE_dense
 
 /--
 **Graph-BSG step C (length-3 path multiplicity).** Substantive content of the
@@ -2363,7 +2363,7 @@ The key ingredient is to count length-3 paths *with multiplicity*: counting
 only the support of the representation set (rather than multiplicity) is
 insufficient. Tao–Vu §6.4 / Schoen–Sisask 2007 / Petridis 2012.
 -/
-lemma graph_bsg_restricted_sumset {G : Type*} [AddCommGroup G] [DecidableEq G] :
+lemma graph_balogSzemerediGowers_restricted_sumset {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ δ K : ℝ, 0 < δ → 0 < K → ∃ c C : ℝ, 0 < c ∧ 0 < C ∧
       ∀ A B : Finset G, A.Nonempty → B.Nonempty → A.card = B.card →
         ∀ E : Finset (G × G), E ⊆ A ×ˢ B →
@@ -2604,7 +2604,7 @@ lemma graph_bsg_restricted_sumset {G : Type*} [AddCommGroup G] [DecidableEq G] :
 
 /--
 **Graph-BSG step C (length-3 path multiplicity), explicit-constant
-form.** Sibling of `graph_bsg_restricted_sumset` that exposes the
+form.** Sibling of `graph_balogSzemerediGowers_restricted_sumset` that exposes the
 witnesses `c = δ/8` and `C = 2^13 K^3/δ^5 + 2^12/δ^5` in the theorem
 type rather than under an existential. Required by downstream
 consumers (e.g. `popular_lambda_to_polylog_doubling`) that need to
@@ -2612,7 +2612,7 @@ read off the polynomial-in-`δ`-and-`K` scaling. Same proof body as the
 qualitative form; the only change is moving the witnesses from the
 `refine ⟨…⟩` line into the signature.
 -/
-lemma graph_bsg_restricted_sumset_explicit {G : Type*} [AddCommGroup G] [DecidableEq G]
+lemma graph_balogSzemerediGowers_restricted_sumset_explicit {G : Type*} [AddCommGroup G] [DecidableEq G]
     (δ K : ℝ) (hδ : 0 < δ) (hK : 0 < K)
     (A B : Finset G) (hA : A.Nonempty) (hB : B.Nonempty) (hAB : A.card = B.card)
     (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B)
@@ -2822,9 +2822,9 @@ theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [Decidabl
           c * (Y.card : ℝ) ≤ (Y'.card : ℝ) ∧
           ((X' - Y').card : ℝ) ≤ C * (X.card : ℝ) := by
   intro η hη
-  -- Outer constants: graph_bsg with (δ := η/2, K := 4/η), then Ruzsa adapter.
+  -- Outer constants: graph_balogSzemerediGowers_restricted_sumset with (δ := η/2, K := 4/η), then Ruzsa adapter.
   obtain ⟨c₀, C₀, hc₀, hC₀, hGraphBSG⟩ :=
-    graph_bsg_restricted_sumset (G := G) (η / 2) (4 / η) (by linarith) (by positivity)
+    graph_balogSzemerediGowers_restricted_sumset (G := G) (η / 2) (4 / η) (by linarith) (by positivity)
   -- Final constants
   refine ⟨min c₀ (η / 4), (C₀ / c₀) ^ 3 / c₀ + 1, ?_, ?_, ?_⟩
   · exact lt_min hc₀ (by linarith)
@@ -2923,7 +2923,7 @@ theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [Decidabl
             (by positivity)
         linarith
       linarith
-    -- Apply graph_bsg_restricted_sumset
+    -- Apply graph_balogSzemerediGowers_restricted_sumset
     have hδ : (η / 2) * (X.card : ℝ) ^ 2 ≤ (E.card : ℝ) := by
       rw [← hn_def]; exact hE_lb
     have hK : ((E.image (fun p ↦ p.1 + p.2)).card : ℝ) ≤ (4 / η) * (X.card : ℝ) := by
@@ -3108,15 +3108,15 @@ theorem balog_szemeredi_gowers_asymmetric_explicit {G : Type*} [AddCommGroup G] 
       ((X' - Y').card : ℝ) ≤
         (((2 ^ 13 * (4 / η) ^ 3 / (η / 2) ^ 5 + 2 ^ 12 / (η / 2) ^ 5) / (η / 16)) ^ 3
             / (η / 16) + 1) * (X.card : ℝ) := by
-  -- Mirror the qualitative proof but with `graph_bsg_restricted_sumset_explicit`
-  -- in place of `graph_bsg_restricted_sumset`, so the inner constants `c₀, C₀`
+  -- Mirror the qualitative proof but with `graph_balogSzemerediGowers_restricted_sumset_explicit`
+  -- in place of `graph_balogSzemerediGowers_restricted_sumset`, so the inner constants `c₀, C₀`
   -- are definitionally `η/16` and `2^13·(4/η)^3/(η/2)^5 + 2^12/(η/2)^5`.
   -- Introduce local names matching the qualitative proof.
   set c₀ : ℝ := η / 16 with hc₀_def
   set C₀ : ℝ := 2 ^ 13 * (4 / η) ^ 3 / (η / 2) ^ 5 + 2 ^ 12 / (η / 2) ^ 5 with hC₀_def
   have hδ_pos : (0 : ℝ) < η / 2 := by linarith
   have hK_pos : (0 : ℝ) < 4 / η := by positivity
-  -- c₀ = η/16 = (η/2)/8 — this is the c from graph_bsg_restricted_sumset_explicit.
+  -- c₀ = η/16 = (η/2)/8 — this is the c from graph_balogSzemerediGowers_restricted_sumset_explicit.
   have hc₀_eq : c₀ = (η / 2) / 8 := by rw [hc₀_def]; ring
   have hc₀ : (0 : ℝ) < c₀ := by rw [hc₀_def]; linarith
   have hC₀ : (0 : ℝ) < C₀ := by rw [hC₀_def]; positivity
@@ -3209,7 +3209,7 @@ theorem balog_szemeredi_gowers_asymmetric_explicit {G : Type*} [AddCommGroup G] 
     -- Use the explicit graph-BSG. The c₀ = (η/2)/8 from the explicit version
     -- equals η/16 = c₀ by `ring`.
     obtain ⟨A', B', hA'sub, hB'sub, hA'lb_raw, hB'lb_raw, hAB'sumset_raw⟩ :=
-      graph_bsg_restricted_sumset_explicit (η / 2) (4 / η) hδ_pos hK_pos
+      graph_balogSzemerediGowers_restricted_sumset_explicit (η / 2) (4 / η) hδ_pos hK_pos
         X Y hX hY hXY E hE_sub hδ hK
     -- Rewrite (η/2)/8 to η/16 and the explicit C₀ form.
     have hA'lb : c₀ * (X.card : ℝ) ≤ (A'.card : ℝ) := by

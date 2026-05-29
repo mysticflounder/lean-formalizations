@@ -13,7 +13,7 @@ Packages the popular-pair count bound (`popular_pairs_card_lower_bound`)
 together with the popular-set cardinality bound derived from
 `sum_addConvolution_eq_card_product` into a single statement of the
 shape consumed by the graph form of the Balog–Szemerédi–Gowers argument
-(`graph_bsg_restricted_sumset`).
+(`graph_balogSzemerediGowers_restricted_sumset`).
 
 Given an energy bound `E[X,Y] ≥ η · |X|³` with `|X| = |Y| = n` and `n`
 not too small (`2 ≤ (η/2) · n`, the regime where the popular threshold
@@ -51,7 +51,7 @@ threshold `θ : ℕ` and a popular sum-set `S : Finset G` with
 * `S = (X + Y).filter (fun s ↦ θ ≤ X.addConvolution Y s)` —
   membership in `S` is the popular-θ predicate.
 
-The δ := η/2, K := 4/η constants feed `graph_bsg_restricted_sumset`
+The δ := η/2, K := 4/η constants feed `graph_balogSzemerediGowers_restricted_sumset`
 directly. Pure repackaging of `popular_pairs_card_lower_bound` and
 `sum_addConvolution_eq_card_product`.
 -/
