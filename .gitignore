@@ -6,3 +6,4 @@
 # local agent / memory caches
 /.fastembed_cache
 /.nthdegree
+/.claude
