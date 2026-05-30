@@ -62,9 +62,9 @@ are inside commented-out WIP blocks). Headline theorems confirmed axiom-clean:
   `zeroCurry_nonvertical_pair_intersection_bound`
 - `fiber_ncard_le_max_totalDegree`, `ncard_coeff_roots_le_totalDegree`
 
-> Note: this is the real proof content that the `Bezout` statement-surface below
-> only *states*. It still contains large commented-out WIP blocks (slated for
-> deletion) and uses project-flavored names pending the idiomaticity cleanup.
+> Note: this is the proof machinery that `Bezout.lean` (above) assembles into
+> the headline `theorem bezout`. It uses project-flavored names pending the
+> idiomaticity cleanup.
 
 ### `LeanFormalizations/Combinatorics/CombinatorialMap/` — combinatorial maps + planar edge bound
 
@@ -121,6 +121,7 @@ import LeanFormalizations
 #print axioms EuclideanGeometry.twoPoint_isometry_set_finite
 #print axioms PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound
 #print axioms PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry
+#print axioms PachDeZeeuw.Algebraic.bezout
 #print axioms CombinatorialMap.card_edge_le_three_card_vertex_sub_six
 #print axioms CombinatorialMap.eulerCharacteristic_le_two
 #print axioms convex_line_intersection_isPreconnected
@@ -152,11 +153,22 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `IncidenceAssembly`, `Basic`, `CurveInterface`** — the reduction chain to
   Theorem 1.1; conditional on the statement-surfaces, some `sorry`.
 
+### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
+
+- **`Bezout.lean`** — `theorem bezout : Theorem22_BezoutStatement`. Two
+  bounded-degree real plane curves with no common infinite irreducible
+  component meet in a **finite** set whose size is bounded by an explicit
+  constant in the degrees (`(d₁ + d₂ + 1) ^ 8`). This is the resultant-based
+  assembly built on `AlgebraicPrelim` (`degreeOf_resultant_le` →
+  `primitive`/`irreducible_pair_intersection_bound` → `factorized_bezout_bound`
+  → `bezout`). **Axiom-clean, 0 `sorry`.** Note: this is the *existential*
+  (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound (`Bezout21Statement`) is not
+  proven — see `ROADMAP.md`.
+
 ## Statement-surfaces ⚪ — `LeanFormalizations/PachDeZeeuw/`
 
 These define a `Prop` but do **not** prove it — accepted classical inputs:
 
-- **`Bezout.lean`** — `Bezout21Statement` (Bézout's inequality in `ℝ²`).
 - **`MilnorThom.lean`** — `MilnorThom22Statement` (Oleĭnik–Petrovskiĭ / Milnor /
   Thom connected-components bound).
 - **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
@@ -174,8 +186,8 @@ project namespaces were renamed to semantic ones (`.PDZ` dropped → `PachDeZeeu
 EU-N / BR-N step tags in docstrings were rewritten to standard
 combinatorial-topology terms; and the dead source-project references and the
 large commented-out WIP block in `AlgebraicPrelim.lean` were removed. The
-verified core (BSG, geometry, AlgebraicPrelim) is closest to PR-ready; the
-remaining `def … : Prop` statement-surfaces (Bézout / Milnor–Thom / curve
+verified core (BSG, geometry, AlgebraicPrelim, Bézout) is closest to PR-ready;
+the remaining `def … : Prop` statement-surfaces (Milnor–Thom / curve
 symmetries) are unproven classical inputs by design.
 
 ## Layout
@@ -190,7 +202,8 @@ LeanFormalizations/
   Geometry/Euclidean/                       -- isometry classification ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
-    Bezout.lean MilnorThom.lean CurveSymmetries.lean   -- statement-surfaces ⚪
+    Bezout.lean                             -- Bézout finite-intersection bound ✅
+    MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
     CrossingLemma/ PachSharir/              -- 🟡
     Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- 🟡
 ```
