@@ -44,7 +44,8 @@ modules — and advertising them.
   `Theorem22_BezoutStatement` (the **existential** form: `∃ C, finite ∧ ncard ≤
   C`, with `C = (d₁+d₂+1)^8`). Verified **axiom-clean** (`[propext,
   Classical.choice, Quot.sound]`), 0 `sorry`.
-- [ ] **Sharp `d₁·d₂` bound (`Bezout21Statement`)** — still **open**. The
+- [ ] **Sharp `d₁·d₂` bound** — still **open** (no statement-surface yet; would
+  be a `def … : Prop` like the existing `Theorem22_BezoutStatement`). The
   existential assembly loses sharpness at the factor-pair product step; the
   trimmed `AlgebraicPrelim` already proves the sharp `≤ d₁·d₂` for the special
   cases (`coeffline_…`, `zeroCurry_nonvertical_pair_intersection_bound`), so a
