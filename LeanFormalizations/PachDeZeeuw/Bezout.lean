@@ -18,8 +18,8 @@ existential constant proven here is `(d₁ + d₂ + 1) ^ 8`, obtained by a resul
 / Sylvester-matrix elimination argument summed over the normalized irreducible
 factor pairs.
 
-This is the crude existential form. The sharp `d₁ · d₂` bound
-(`Bezout.Bezout21Statement`) is **not** proven here.
+This is the crude existential form. The sharp `d₁ · d₂` bound is **not**
+proven here (it is not stated anywhere — see `ROADMAP.md`).
 
 All supporting lemmas live in `namespace PachDeZeeuw.Algebraic` so they can see
 the elimination / resultant machinery already established in `AlgebraicPrelim`.
