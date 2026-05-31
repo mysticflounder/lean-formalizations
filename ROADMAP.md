@@ -18,10 +18,16 @@ modules — and advertising them.
   (Euler / planar edge bound) and BR-N ("route-(B)" drawing→map bridge)
   docstring tags replaced with standard combinatorial-topology language;
   cross-references now name the actual Lean lemmas.
-- [ ] **Remaining source-project terminology sweep** — any residual
-  ("use-site", "popular-λ", "ES-GK", "blueprint obligation", "step C entry
-  point") in docstrings/comments outside the namespaces/identifiers/EU-BR
-  scope already done.
+- [x] **Remaining source-project terminology sweep** — done. Audited all 35
+  `.lean` files: the verified core was already clean (0 Erdős/problem-number
+  references in source; `External` is not a live namespace). Scrubbed residual
+  development-structure jargon from the WIP PachDeZeeuw docstrings ("lane",
+  "packet", "Branch 2"), removed a dead doc-filename citation, and corrected
+  stale "`External` namespace retained" comments to describe the current state
+  (predicates live in `PlaneCurve`). Renamed two live jargon identifiers
+  (`pachDeZeeuwTheorem11_sorryBacked` → `irreducibleCurve_distinctDistances_sorryBacked`,
+  `subsetAveraging_master` → `vertexSubsetAveraging_bound`). Full library builds
+  green (8511 jobs).
 
 ## Geometry port
 
