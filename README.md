@@ -163,7 +163,7 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   assembly built on `AlgebraicPrelim` (`degreeOf_resultant_le` →
   `primitive`/`irreducible_pair_intersection_bound` → `factorized_bezout_bound`
   → `bezout`). **Axiom-clean, 0 `sorry`.** Note: this is the *existential*
-  (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound (`Bezout21Statement`) is not
+  (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound is not yet stated or
   proven — see `ROADMAP.md`.
 
 ## Statement-surfaces ⚪ — `LeanFormalizations/PachDeZeeuw/`
