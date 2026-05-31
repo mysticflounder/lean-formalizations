@@ -9,7 +9,7 @@ import LeanFormalizations.PachDeZeeuw.CurveInterface
 /-!
 # Pach--de Zeeuw low-level interface
 
-This file starts the no-external-dependency Pach--de Zeeuw lane. The first
+This file starts the no-external-dependency Pach–de Zeeuw development. The first
 goal is the finite counting core used by the Elekes lower bound; the curve
 predicates and normalized input wrappers live alongside it so the later PDZ
 files can build on a stable namespace.

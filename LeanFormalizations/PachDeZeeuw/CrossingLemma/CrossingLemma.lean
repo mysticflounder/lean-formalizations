@@ -11,7 +11,7 @@ import Mathlib
 
 This file freezes the carrier types and the frozen `Prop` statement of the
 finite multigraph crossing inequality (Székely / Ajtai–Chvátal–Newborn–
-Szemerédi, multigraph form) used by the Pach--de Zeeuw incidence lane.
+Szemerédi, multigraph form) used by the Pach–de Zeeuw incidence development.
 
 It is **mathlib-only**: it imports no `CrossingLemma.*` module. The crossing
 lemma is purely combinatorial — it mentions no algebraic curves,
@@ -114,7 +114,7 @@ The deliverable is `vertexRotation`: under the **pinned** regularity hypothesis
 `ArcsRotationRegular` (predicate ARR, §6), the incident arc-ends at each vertex
 carry a well-defined circular order — a genuine `Equiv.Perm` — read off from the
 first-crossing angles on a small circle. `ArcsRotationRegular` is a *threaded
-hypothesis*; its discharge for the PdZ algebraic arcs is a separate lane and is
+hypothesis*; its discharge for the Pach–de Zeeuw algebraic arcs is a separate concern and is
 **not** attempted here (and the arcs are never assumed semialgebraic).
 
 ### Layer 1 — generic order theory (no geometry)
@@ -224,7 +224,7 @@ def IsFirstCrossing (G : DrawnMultigraph) (p : ℝ × ℝ) (e : Fin G.numEdges �
         dist ((G.arc e.1).param s) p < r
 
 /-- **The pinned regularity predicate ARR** (germ-stable local order), verbatim
-from §6 of the bridge packet. For every vertex `p` there exist a radius `r_p > 0`
+from §6 of the accompanying drawing→map development. For every vertex `p` there exist a radius `r_p > 0`
 and an angular-position function `α` on incident-ends × radii such that:
 
 * **(a)** for each incident end and each `0 < r ≤ r_p`, the value `α e r` is the
@@ -237,7 +237,7 @@ and an angular-position function `α` on incident-ends × radii such that:
 The predicate talks only about the arcs and small circles; it mentions no
 permutation, combinatorial map, or planarity, and it does **not** assume the arcs
 are semialgebraic. It is a threaded hypothesis: its discharge for the PdZ
-algebraic arcs lives in the algebraic lane, not here. -/
+algebraic arcs lives in the algebraic development, not here. -/
 def ArcsRotationRegular (G : DrawnMultigraph) : Prop :=
   ∀ p ∈ G.V, ∃ (rp : ℝ) (α : (Fin G.numEdges × Bool) → ℝ → ℝ),
     0 < rp ∧

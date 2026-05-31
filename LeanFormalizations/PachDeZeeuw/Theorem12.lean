@@ -10,8 +10,8 @@ import LeanFormalizations.PachDeZeeuw.AuxiliaryCurves
 # Pach--de Zeeuw Theorem 1.2 surface
 
 This file freezes the balanced bipartite distinct-distance statement used by
-Theorem 1.1. The actual proof is downstream in the PDZ algebraic / incidence
-packet.
+Theorem 1.1. The actual proof is downstream in the Pach–de Zeeuw algebraic /
+incidence development.
 -/
 
 set_option linter.style.longLine false
@@ -20,8 +20,8 @@ namespace PachDeZeeuw
 
 /--
 Balanced Theorem 1.2 corollary needed for Theorem 1.1. The paper's Theorem
-1.2 gives the stronger `min(m^(2/3)n^(2/3),m^2,n^2)` lower bound; Branch 2
-only needs the comparable-size integer form below after splitting one finite
+1.2 gives the stronger `min(m^(2/3)n^(2/3),m^2,n^2)` lower bound; only the
+comparable-size integer form below is needed here after splitting one finite
 set on a curve into two halves.
 -/
 def BipartiteDistinctDistancesStatement : Prop :=

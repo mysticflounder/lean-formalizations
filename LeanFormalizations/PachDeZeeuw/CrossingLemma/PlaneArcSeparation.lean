@@ -4,10 +4,9 @@ Local arc-separation (MS): the geometric residual of the drawing→map bridge.
 # What this file is
 
 A **standalone, pure plane-topology** development of the (MS) lemma — the one
-research-grade geometric input of the drawing→combinatorial-map bridge
-(`docs/formalization/problem-98-pdz-ps-drawing-to-genus0-map-bridge-packet-2026-05-25.md`,
-§7).  It is deliberately divorced from the combinatorial-map machinery: it does
-**not** import `CrossingLemma`, `CombinatorialMap`, or any `Branch2/` file, and it
+research-grade geometric input of the drawing→combinatorial-map bridge.
+It is deliberately divorced from the combinatorial-map machinery: it does
+**not** import `CrossingLemma`, `CombinatorialMap`, or any sibling drawing→map file, and it
 does not mention `DrawnMultigraph`/`CrossingFree` (sibling agents own those).
 Everything here is stated over an abstract topological space and specialised to
 `ℝ × ℝ` only where the geometry bites.

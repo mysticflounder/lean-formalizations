@@ -14,7 +14,7 @@ import Mathlib.Tactic
 # Pach--de Zeeuw auxiliary curves
 
 This file freezes the auxiliary-curve definitions and the incidence bridge
-used by the later Pach--de Zeeuw incidence packet.
+used by the later Pach–de Zeeuw incidence development.
 -/
 
 set_option linter.style.longLine false

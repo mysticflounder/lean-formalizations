@@ -22,8 +22,8 @@ the paper (Pach–de Zeeuw, Subsection 2.1):
 * `PlaneCurve.IsLineOrCircle C` — `C` is a line or a circle: the
   configuration excluded by Theorem 1.1.
 
-The `External` namespace is retained from the original development; these
-predicates are now local, Mathlib-only definitions.
+These predicates live in the `PlaneCurve` namespace; they are local,
+Mathlib-only definitions.
 -/
 
 set_option linter.style.longLine false

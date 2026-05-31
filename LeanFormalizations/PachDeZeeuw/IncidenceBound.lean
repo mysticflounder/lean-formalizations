@@ -11,7 +11,7 @@ import Mathlib.Tactic
 # Pach--de Zeeuw incidence-bound assembly
 
 This file freezes the final incidence decomposition surface for the
-Pach--de Zeeuw Theorem 1.2 lane. The geometric work remains upstream: prove a
+Pach--de Zeeuw Theorem 1.2. The geometric work remains upstream: prove a
 degree-only decomposition into nonexceptional and discarded contributions.
 The theorem here is the arithmetic bridge from that decomposition to the cubed
 integer incidence estimate consumed by `bipartiteDistinctDistances`.

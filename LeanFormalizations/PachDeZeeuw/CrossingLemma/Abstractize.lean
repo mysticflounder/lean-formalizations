@@ -3,7 +3,7 @@ The forgetful map from a plane drawing
 (`DrawnMultigraph`) to the abstract finite multigraph (`AbstractPlanarizedMultigraph`)
 consumed by the EU planar edge bound, with its cardinality identities.
 
-NO-AXIOM lane: this file is sorry-free and axiom-clean
+NO-AXIOM: this file is sorry-free and axiom-clean
 (`[propext, Classical.choice, Quot.sound]`).
 -/
 import Mathlib

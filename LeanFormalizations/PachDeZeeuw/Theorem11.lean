@@ -22,7 +22,7 @@ namespace PachDeZeeuw
 
 open EuclideanGeometry
 
-/-- Theorem 1.1, one-curve distinct-distance theorem, in Branch 2 integer form. -/
+/-- Theorem 1.1, one-curve distinct-distance theorem, in integer form. -/
 def PachDeZeeuwIrreducibleCurveDistinctDistancesStatement : Prop :=
   ∀ d : ℕ, ∃ C : ℕ, 0 < C ∧
     ∀ E : Finset ℝ², ∀ curve : Set ℝ²,

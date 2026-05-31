@@ -26,9 +26,8 @@ abbrev Point4 := EuclideanSpace ℝ (Fin 4)
 
 /-! ### Curve vocabulary
 
-The plane-curve predicates these lemmas range over. (In the source project these
-lived in a shared `External` namespace; inlined here so the file is
-self-contained and mathlib-only.) -/
+The plane-curve predicates these lemmas range over. (Inlined here in the
+`PlaneCurve` namespace so the file is self-contained and mathlib-only.) -/
 
 namespace PlaneCurve
 
@@ -166,7 +165,7 @@ lemma noCommonCurveComponent_of_no_common_infinite_factor
 /-- Curry a bivariate real polynomial into a univariate polynomial over the coefficient ring. -/
 abbrev XCoeff := MvPolynomial (Fin 1) ℝ
 
-/-- Fraction field of the coefficient ring used in the Bezout proof packet. -/
+/-- Fraction field of the coefficient ring used in the Bézout proof. -/
 abbrev XFrac := FractionRing XCoeff
 
 /-- View a bivariate polynomial as a univariate polynomial in the first variable. -/

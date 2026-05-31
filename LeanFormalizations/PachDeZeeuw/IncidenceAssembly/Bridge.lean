@@ -28,7 +28,7 @@ including the real→ℕ-cubed conversion and the `D = 4` instantiation — is w
 that deliberately lives here, never inside a paper module. It currently carries a
 single `sorry` (**Gap B**).
 
-`pachDeZeeuwTheorem11_sorryBacked` then assembles Theorem 1.1 by feeding the bridge
+`irreducibleCurve_distinctDistances_sorryBacked` then assembles Theorem 1.1 by feeding the bridge
 the paper-faithful (but still `sorry`-backed, **Gap A**) `PachSharir.corollary24`.
 The two holes are thus named and separated: Gap A in `pach-sharir`, Gap B here;
 `pdz` itself is `sorry`-free.
@@ -65,7 +65,7 @@ hypothesis, its proof is **not** complete: it is backed by `sorry` through Gap A
 those two holes (it will report `sorryAx`). Do **not** treat this as an
 established theorem.
 -/
-theorem pachDeZeeuwTheorem11_sorryBacked :
+theorem irreducibleCurve_distinctDistances_sorryBacked :
     PachDeZeeuwIrreducibleCurveDistinctDistancesStatement :=
   irreducibleCurve_distinctDistances
     (bipartiteDistinctDistances_of_positiveCardBound

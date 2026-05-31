@@ -19,7 +19,7 @@ constant). It derives the cubed target
 
 (defined in `CrossingLemma.lean`) **from an assumed weak bound** `hweak`. The weak
 bound is the content the drawing→genus-0-map / Euler bridge supplies; discharging it
-is a *separate* lane and is **not** attempted here.
+is a *separate* concern and is **not** attempted here.
 
 It imports only `Mathlib` and the standalone `CrossingLemma` surface, mentions no
 algebraic curves, and is **not** on the closure aggregator `CrossingLemma.lean`.
@@ -81,7 +81,7 @@ vertex subsets, sharpened to single `M` by the multigraph bundle structure).
 * **Scaffolding, sorry-free:** the surviving-count definitions
   (`edgesOn`, `crossingPairs`, `crossingsOn`) and the elementary count lemmas that do
   not need the (research-grade) double-count identities.
-* **Labelled OBSTRUCTION (`sorry`):** `subsetAveraging_master` — the integer
+* **Labelled OBSTRUCTION (`sorry`):** `vertexSubsetAveraging_bound` — the integer
   double-count master inequality, which (a) needs the `C(v−2,s−2)` / `C(v−4,s−4)` /
   `C(v,s)` `Finset.powersetCard` double counts AND (b) per fact 2 above *cannot* close
   the exact constant by itself. It is present only as documentation of the integer
@@ -255,7 +255,7 @@ theorem crossingsOn_mono {S T : Finset (ℝ × ℝ)} (h : S ⊆ T) :
   rw [Finset.mem_filter] at hij ⊢
   exact ⟨hij.1, h hij.2.1, h hij.2.2.1, h hij.2.2.2.1, h hij.2.2.2.2⟩
 
-/-- **OBSTRUCTION — `subsetAveraging_master` [BLOCKED, `sorry`; NOT used by the main theorem].**
+/-- **OBSTRUCTION — `vertexSubsetAveraging_bound` [BLOCKED, `sorry`; NOT used by the main theorem].**
 
 The integer double-count master inequality. Summing an assumed per-subset weak bound
 `edgesOn G S ≤ 3·M·S.card + crossingsOn G S` over all `S ∈ G.V.powersetCard s` and
@@ -283,7 +283,7 @@ Honest classification: part (a) CONJECTURED-feasible / mechanical-laborious (the
 constant — the integer route reaches only a *looser* constant, so this lemma is a dead
 end for the target and is retained only as documentation. Feasibility of an exact-constant
 proof via this route: NOT feasible (proven). -/
-theorem subsetAveraging_master (M s : ℕ) (hs4 : 4 ≤ s) (hsv : s ≤ G.V.card)
+theorem vertexSubsetAveraging_bound (M s : ℕ) (hs4 : 4 ≤ s) (hsv : s ≤ G.V.card)
     (hweakSub : ∀ S : Finset (ℝ × ℝ), S ⊆ G.V →
       edgesOn G S ≤ 3 * M * S.card + crossingsOn G S) :
     G.numEdges * Nat.choose (G.V.card - 2) (s - 2) ≤
