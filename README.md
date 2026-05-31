@@ -50,11 +50,12 @@ reusing mathlib's `Finset.addEnergy`. **All three theorems are axiom-clean.**
 
 ### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core
 
-A ~7000-line plane-algebraic-geometry development (namespace
+A ~1600-line plane-algebraic-geometry development (namespace
 `PachDeZeeuw.Algebraic`): resultants over `ℝ[x,y]`, common-component theory,
 fiber-finiteness, and **explicit point-pair intersection bounds** — the genuine
-Bézout-type content. Its **live content is `sorry`-free** (the remaining `sorry`s
-are inside commented-out WIP blocks). Headline theorems confirmed axiom-clean:
+Bézout-type content. It is **fully `sorry`-free** (the commented-out WIP blocks
+that once held the only `sorry`s were removed in the de-jargon pass). Headline
+theorems confirmed axiom-clean:
 
 - `resultant_ne_zero_of_fraction_coprime`,
   `resultant_ne_zero_of_isRelPrime_primitive_curry`

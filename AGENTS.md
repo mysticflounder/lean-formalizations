@@ -75,8 +75,8 @@ EOF
   already fixed: `Sym2.mk (a,b)` → `s(a, b)`; `Equiv.Perm.apply_inv_self` /
   `inv_apply_self` → `simp only [Equiv.Perm.coe_inv, Equiv.apply_symm_apply]` /
   `Equiv.symm_apply_apply`; some defs need `noncomputable`.
-- `AlgebraicPrelim.lean` contains large **commented-out** `/- … -/` WIP blocks;
-  its `sorry`s live there. Don't be fooled — its *live* content is `sorry`-free.
+- `AlgebraicPrelim.lean` is fully `sorry`-free — the commented-out `/- … -/`
+  WIP blocks that once held its only `sorry`s were removed in the de-jargon pass.
 - When adding a module, also add its import to `LeanFormalizations.lean` so the
   default target builds it.
 

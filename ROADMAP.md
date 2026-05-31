@@ -25,13 +25,13 @@ modules — and advertising them.
 
 ## Geometry port
 
-- [ ] **Port `unported/Geometry/Euclidean/` to standalone** — delete
-  `Foundation.lean` (only defines Erdős-98 predicates `InGeneralPosition`,
+- [x] **Port `unported/Geometry/Euclidean/` to standalone** — done. Deleted
+  `Foundation.lean` (only defined Erdős-98 predicates `InGeneralPosition`,
   `distinctDistances`, `hIndexed`, `Config`, unused by the classification);
-  in `IsometryClassification.lean` replace the fork's `ℝ²` with
-  `EuclideanSpace ℝ (Fin 2)`, supply the standard orientation + `Fact (finrank
-  = 2)` instance, rename namespace `Erdos98Proof` → `EuclideanGeometry`, and
-  wire into the build.
+  in `IsometryClassification.lean` replaced the fork's `ℝ²` with
+  `EuclideanSpace ℝ (Fin 2)`, supplied the standard orientation + `Fact (finrank
+  = 2)` instance, renamed namespace `Erdos98Proof` → `EuclideanGeometry`, and
+  wired it into the build. Verified axiom-clean.
 
 ## Bézout (Pach–de Zeeuw Theorem 2.2)
 
@@ -102,5 +102,3 @@ modules — and advertising them.
   `BalogSzemerediGowers.lean` (lines ~2993, ~3281) — mathlib v4.30.0 prefers
   `push Not`. (These are the only build warnings; everything else is clean.)
 - [ ] Open mathlib PR(s) once audit + namespacing are settled.
-</content>
-</invoke>
