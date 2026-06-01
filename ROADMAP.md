@@ -39,7 +39,7 @@ modules — and advertising them.
   = 2)` instance, renamed namespace `Erdos98Proof` → `EuclideanGeometry`, and
   wired it into the build. Verified axiom-clean.
 
-## Bézout (Pach–de Zeeuw Theorem 2.2)
+## Bézout (Pach–de Zeeuw Theorem 2.1)
 
 - [x] **Restore the proven Bézout finite-intersection assembly** — ported the
   ~1300-line resultant-based chain (`degreeOf_resultant_le` →
@@ -47,11 +47,11 @@ modules — and advertising them.
   → capstone `bezout`) from the `erdos-98` source into
   `PachDeZeeuw/Bezout.lean` (imports `AlgebraicPrelim`, namespace
   `PachDeZeeuw.Algebraic`), ported v4.27 → v4.30. Discharges
-  `Theorem22_BezoutStatement` (the **existential** form: `∃ C, finite ∧ ncard ≤
+  `BezoutFiniteIntersectionStatement` (the **existential** form: `∃ C, finite ∧ ncard ≤
   C`, with `C = (d₁+d₂+1)^8`). Verified **axiom-clean** (`[propext,
   Classical.choice, Quot.sound]`), 0 `sorry`.
 - [ ] **Sharp `d₁·d₂` bound** — still **open** (no statement-surface yet; would
-  be a `def … : Prop` like the existing `Theorem22_BezoutStatement`). The
+  be a `def … : Prop` like the existing `BezoutFiniteIntersectionStatement`). The
   existential assembly loses sharpness at the factor-pair product step; the
   trimmed `AlgebraicPrelim` already proves the sharp `≤ d₁·d₂` for the special
   cases (`coeffline_…`, `zeroCurry_nonvertical_pair_intersection_bound`), so a

@@ -10,8 +10,8 @@ import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
 /-!
 # Bézout finite-intersection bound for real plane curves
 
-This module discharges `PachDeZeeuw.Algebraic.Theorem22_BezoutStatement`
-(Pach--de Zeeuw, Theorem 2.2): two bounded-degree real plane curves with no
+This module discharges `PachDeZeeuw.Algebraic.BezoutFiniteIntersectionStatement`
+(Pach--de Zeeuw, Theorem 2.1): two bounded-degree real plane curves with no
 shared infinite irreducible component meet in a finite set whose cardinality is
 bounded by a constant depending only on the two degrees. The achievable
 existential constant proven here is `(d₁ + d₂ + 1) ^ 8`, obtained by a resultant
@@ -1299,7 +1299,7 @@ theorem factorized_bezout_bound
   exact ⟨hfinite, hcard⟩
 
 /-- The public Bezout statement from the theorem plan. -/
-theorem bezout : Theorem22_BezoutStatement := by
+theorem bezout : BezoutFiniteIntersectionStatement := by
   intro d₁ d₂
   refine ⟨(d₁ + d₂ + 1) ^ 8 + 1, Nat.succ_pos _, ?_⟩
   intro C₁ C₂ hC₁ hC₂ hno

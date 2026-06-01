@@ -67,8 +67,11 @@ def NoCommonCurveComponent (C₁ C₂ : Set Point2) : Prop :=
   ¬ ∃ e : ℕ, ∃ C : Set Point2,
     PlaneCurve.IsIrreducibleCurve e C ∧ C.Infinite ∧ C ⊆ C₁ ∧ C ⊆ C₂
 
-/-- Theorem 2.2, Bezout finite-intersection bound for plane curves. -/
-def Theorem22_BezoutStatement : Prop :=
+/-- Theorem 2.1, Bezout finite-intersection bound for plane curves. This is the
+existential / finite-intersection consequence of Bézout's inequality (Theorem 2.1):
+it asserts only that some degree-dependent bound `C` exists, a weaker statement than
+the sharp `≤ d₁·d₂` count that is Theorem 2.1's full form. -/
+def BezoutFiniteIntersectionStatement : Prop :=
   ∀ d₁ d₂ : ℕ, ∃ C : ℕ, 0 < C ∧
     ∀ C₁ C₂ : Set Point2,
       PlaneCurve.IsBoundedDegreeCurve d₁ C₁ →

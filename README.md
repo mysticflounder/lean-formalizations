@@ -156,7 +156,7 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
 
 ### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
 
-- **`Bezout.lean`** — `theorem bezout : Theorem22_BezoutStatement`. Two
+- **`Bezout.lean`** — `theorem bezout : BezoutFiniteIntersectionStatement`. Two
   bounded-degree real plane curves with no common infinite irreducible
   component meet in a **finite** set whose size is bounded by an explicit
   constant in the degrees (`(d₁ + d₂ + 1) ^ 8`). This is the resultant-based
