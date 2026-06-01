@@ -1068,7 +1068,7 @@ lemma ruzsa_sumset_to_difference {G : Type*} [AddCommGroup G] [DecidableEq G] :
   linarith [hdiff_mul_cA]
 
 
-/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let `P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths `a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich `S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Reference: Tao–Vu, *Additive Combinatorics*, §6.4 / Schoen–Sisask 2007. -/
+/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let `P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths `a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich `S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Reference: Tao–Vu, *Additive Combinatorics*, §6.4 (quantitative form of Corollary 6.20, "Paths of length three"). -/
 lemma length_three_path_count_lower_bound {G : Type*} [AddCommGroup G] [DecidableEq G]
     (A B : Finset G) (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B) :
     (E.card : ℝ) ^ 4 ≤ ((A.card : ℝ) * B.card) ^ 2 *
@@ -2364,7 +2364,7 @@ divided by the path-multiplicity lower bound yields the linear bound.
 
 The key ingredient is to count length-3 paths *with multiplicity*: counting
 only the support of the representation set (rather than multiplicity) is
-insufficient. Tao–Vu §6.4 / Schoen–Sisask 2007 / Petridis 2012.
+insufficient. Tao–Vu §6.4 (proof of Theorem 2.29) / Petridis 2012.
 -/
 lemma graph_balogSzemerediGowers_restricted_sumset {G : Type*} [AddCommGroup G] [DecidableEq G] :
     ∀ δ K : ℝ, 0 < δ → 0 < K → ∃ c C : ℝ, 0 < c ∧ 0 < C ∧
@@ -2381,8 +2381,8 @@ lemma graph_balogSzemerediGowers_restricted_sumset {G : Type*} [AddCommGroup G] 
   -- Constants:
   -- * c := δ / 8 (from `dense_bipartite_has_path3_rectangle`, Fox-Sudakov DRC).
   -- * C := 2^13 K³ / δ^5 + 2^12 / δ^5, the path-multiplicity bound,
-  --   absorbing both the M ≥ 1 and M = 0 sub-cases (Tao-Vu Lemma 6.17 /
-  --   Schoen-Sisask 2007 explicit form).
+  --   absorbing both the M ≥ 1 and M = 0 sub-cases (triple-counting step in
+  --   the proof of Tao-Vu Theorem 2.29, §6.4).
   intro δ K hδ hK
   refine ⟨δ / 8, 2 ^ 13 * K ^ 3 / δ ^ 5 + 2 ^ 12 / δ ^ 5,
     by positivity, by positivity, ?_⟩

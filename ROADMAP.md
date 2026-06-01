@@ -70,21 +70,24 @@ modules — and advertising them.
 
 ## Correctness audit
 
-- [ ] **Pull down / copy in the source papers** backing each proof so we can do
-  a line-by-line correctness audit against the published arguments. Needed:
-  - **BSG**: Tao & Vu, *Additive Combinatorics* (CUP 2006), §6.4 — Gowers'
-    graph-theoretic proof. Schoen & Sisask (popular sums / length-3 path
-    refinement, ~2007). Petridis (2012, "New proofs of Plünnecke-type
-    estimates" / the multiplicity refinement cited in the step-C lemma).
-    {{NEEDS_RESEARCH}}: exact Schoen–Sisask and Petridis citations + retrievable
-    PDFs/arXiv links.
-  - **Geometry**: Mazur–Ulam theorem (mathlib already has it; cite the standard
-    statement). 2D two-point isometry classification — find a canonical
-    reference for "the isometry group fixing two points of the plane has ≤ 2
-    elements" rather than the now-deleted `/tmp/erdos98-math-prover-out/`
-    report.
-  - Decide where the PDFs live (e.g. `docs/references/` — likely gitignored if
-    not redistributable; track links + local-only copies).
+Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
+(citation status + math-correctness status, kept up to date).
+
+- [~] **Citation audit** — done for the vendored sources. PdZ: Bézout was
+  mislabelled "Theorem 2.2" → corrected to **2.1**. BSG: "Lemma 6.17" (actually
+  van der Waerden) → corrected to the triple-count step of Tao–Vu Thm 2.29;
+  the non-existent "Schoen–Sisask" reference (4 occurrences) → **Reiher–Schoen**,
+  *Combinatorica* (2024), arXiv:2308.10245. Petridis confirmed (arXiv:1101.3507).
+  Crossing-lemma cites (Székely 1997, ACNS 1982+Leighton, Pach–Tóth 2018/2020)
+  all confirmed. Still open: **Fox–Sudakov** DRC ref; **geometry** two-point
+  isometry text; **Newman/Pommerenke** crosscut cites (deferred with the
+  CrossingLemma WIP).
+- [~] **Line-by-line math audit** — in progress (see matrix). BSG energy +
+  popular-pairs / Ruzsa cluster ✅ verified against Tao–Vu §6.4; DRC track and
+  final-assembly theorems pending. Bézout / Geometry not yet started.
+- **Sources**: Pach–de Zeeuw `.tex` and Tao–Vu *Additive Combinatorics* are
+  vendored under `docs/references/`; copyrighted PDFs are gitignored (local-only),
+  arXiv `.tex` sources stay tracked.
 
 ## Advertising
 
