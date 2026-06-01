@@ -7,3 +7,6 @@
 /.fastembed_cache
 /.nthdegree
 /.claude
+# copyrighted reference books — local-only, not redistributable
+# (arXiv .tex sources under docs/references/ stay tracked)
+/docs/references/*.pdf
