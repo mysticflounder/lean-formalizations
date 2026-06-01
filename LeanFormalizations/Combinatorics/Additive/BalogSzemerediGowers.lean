@@ -28,7 +28,8 @@ existential, with no polynomial dependence on `η` exposed.
 ## References
 
 * Tao–Vu, *Additive Combinatorics* §6.4 (Gowers' graph-theoretic proof).
-* Schoen–Sisask (popular sums refinement).
+* Reiher–Schoen, "Note on the Theorem of Balog, Szemerédi, and Gowers",
+  *Combinatorica* (2024), arXiv:2308.10245 (the `K⁴` difference-set refinement).
 -/
 
 namespace Finset
@@ -908,7 +909,9 @@ indexed by `v ∈ A + B` each contain ≥ M triples and embed into `S × S × S`
 so `M · |A + B| ≤ ∑_{v ∈ A + B} |T_v| ≤ |S|³`.
 
 This is the standard sumset bound used in the Tao-Vu / Petridis path-counting
-proof of Balog-Szemerédi-Gowers (Tao-Vu, *Additive Combinatorics*, Lemma 6.17).
+proof of Balog-Szemerédi-Gowers: the triple-counting step inside the proof of
+Tao-Vu, *Additive Combinatorics*, Theorem 2.29 (§6.4) — `#triples ≤ |A+B|³` —
+not a separately numbered lemma.
 -/
 lemma restricted_sumset_via_multiplicity {G : Type*} [AddCommGroup G] [DecidableEq G]
     (A B S : Finset G) (M : ℕ) :
