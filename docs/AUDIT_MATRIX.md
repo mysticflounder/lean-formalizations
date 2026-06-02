@@ -27,6 +27,7 @@ These are distinct from **kernel verification** (compiles, `#print axioms` clean
 **Vendored sources** (ground truth):
 - `docs/references/PachDeZeeuw_DistancesOnCurves_arxiv_20151031.tex` — Pach–de Zeeuw (arXiv source).
 - `docs/references/TaoVu.AddComb.pdf` — Tao & Vu, *Additive Combinatorics* (CUP 2006). **Local-only, gitignored (copyrighted).**
+- `docs/references/FoxSudakov_DependentRandomChoice_arxiv_0909.3271v2.pdf` — Fox & Sudakov, *Dependent Random Choice*, *RS&A* 38 (2011) 68–99, arXiv:0909.3271. Gitignored PDF (arXiv source is redistributable; track the link).
 
 Last updated: 2026-06-01.
 
@@ -61,25 +62,32 @@ track (Fox–Sudakov DRC), assembled into the public theorems.
 | `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib |
 | `length_three_path_count_lower_bound` | 🔧 | ✅ | double Cauchy–Schwarz; was "/ Schoen–Sisask 2007" → corrected to TV §6.4 quantitative Cor 6.20 |
 
-### Dependent-random-choice track (Fox–Sudakov)
+### Dependent-random-choice track (Fox–Sudakov §5)
 
-| Lemma | Citation | Math | Note |
-|-------|----------|------|------|
-| `graph_pair_dependentRandomChoice` | ☐ | ☐ | Fox–Sudakov DRC — citation not yet verified vs source |
-| `graph_high_degree_subset_lb` | — | ☐ | |
-| `graph_dependentRandomChoice_markov_refinement` | — | ☐ | |
-| `graph_dependentRandomChoice_popular_columns` | — | ☐ | |
-| `graph_dependentRandomChoice_payoff_pointwise_witness` | — | ☐ | |
-| `graph_dependentRandomChoice_payoff_pointwise_count` | — | ☐ | |
-| `graph_dependentRandomChoice_payoff_pointwise` | — | ☐ | |
-| `dense_bipartite_has_path3_rectangle` | ☐ | ☐ | Fox–Sudakov DRC |
+Verified against **Fox–Sudakov, *Dependent Random Choice*, arXiv:0909.3271v2**:
+the track architecture and all constants match the paper's §5. Lemma 5.1 (DRC
+core), Lemma 5.2 (`A′,B′` of size ≥ cn/8 with ≥ 2⁻¹²c⁵n² length-3 paths), and the
+§5.1 BSG application (`|A′+B′| ≤ 2¹²C³c⁻⁵n`) correspond exactly; our `c=δ/8` and
+`C=2¹³K³/δ⁵+2¹²/δ⁵` are the paper's `c′=cn/8`, `C′=2¹²C³c⁻⁵` (+ edge-case terms).
+◐ = correspondence + constants confirmed; individual proof bodies not line-read.
+
+| Lemma | Citation | Math | Maps to | Note |
+|-------|----------|------|---------|------|
+| `graph_pair_dependentRandomChoice` | ✅ | ◐ | FS Lemma 5.1 | DRC core: random `v∈B`, `U=N(v)` |
+| `graph_high_degree_subset_lb` | ✅ | ◐ | FS Lemma 5.2 proof (`A₁`) | high-degree subset, density `c₁≥c` |
+| `graph_dependentRandomChoice_markov_refinement` | ✅ | ◐ | FS 5.2 (lines 618–620) | `A′` from low-bad-pair vertices |
+| `graph_dependentRandomChoice_popular_columns` | ✅ | ◐ | FS 5.2 (lines 621–628) | `B′` from high-`U`-degree vertices |
+| `graph_dependentRandomChoice_payoff_pointwise_witness` | ✅ | ◐ | FS 5.2 (lines 629–634) | length-3 path count per `(a,b)` |
+| `graph_dependentRandomChoice_payoff_pointwise_count` | ✅ | ◐ | FS 5.2 (lines 629–634) | |
+| `graph_dependentRandomChoice_payoff_pointwise` | ✅ | ◐ | FS 5.2 (lines 629–634) | |
+| `dense_bipartite_has_path3_rectangle` | ✅ | ◐ | **FS Lemma 5.2** (capstone) | `c=δ/8`, `2⁻¹²c⁵n²` paths — constants match |
 
 ### Assembly + public theorems
 
 | Decl | Citation | Math | Note |
 |------|----------|------|------|
-| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ☐ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected; Petridis 2012 kept. **Interface consumed correctly by the public theorems; interior (DRC track) not yet line-audited.** |
-| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ☐ | ☐ | explicit constants; same interior gap |
+| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ◐ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected. Matches **Fox–Sudakov §5.1** triple-count (`|A′+B′|≤2¹²C³c⁻⁵n`); closing pieces (`path3_count_le_triple_rep_count`, `restricted_sumset_via_multiplicity`) already ✅. |
+| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ✅ | ◐ | explicit constants; same FS §5.1 correspondence |
 | `balog_szemeredi_gowers_asymmetric` | ✅ | ✅ | **assembly verified**: popular graph (`popular_pairs_card_lower_bound` ✅) + `|S|≤(4/η)n` counting + graph-BSG interface + `ruzsa_sumset_to_difference` ✅; large (n≥4/η) and singleton cases both sound. Rests on DRC interior (☐). |
 | `balog_szemeredi_gowers_symmetric` | ✅ | ✅ | **verified**: asymmetric with Y:=X + Ruzsa-triangle symmetrization (`|X'−X'|·|Y'|≤|X'−Y'|²`), cost C→C²/c |
 | `balog_szemeredi_gowers_asymmetric_explicit` | ◐ | ◐ | mirrors asymmetric; `c=η/16=min(η/16,η/4)` ✓; explicit `C` definitionally consistent. Tail of proof not fully re-read; rests on DRC interior (☐). |
@@ -138,9 +146,10 @@ conditional. Audit deferred until proofs land.
 
 ---
 
-## Outstanding citation work
+## Outstanding work
 
-- Verify **Fox–Sudakov** dependent-random-choice reference for the DRC track.
-- Acquire Tao–Vu only confirmed §/Thm/Cor numbers used; remaining internal refs OK.
-- Geometry: pin a canonical text for the two-point isometry fact.
+- BSG DRC track: line-read the 8 lemma proof *bodies* (◐ → ✅); architecture +
+  constants already confirmed vs Fox–Sudakov §5.
+- Bézout: start math audit vs the Pach–de Zeeuw `.tex` (resultant chain).
+- Geometry: pin a canonical text for the two-point isometry fact; audit.
 - Newman / Pommerenke crosscut citations (deferred with CrossingLemma WIP).

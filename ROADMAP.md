@@ -85,10 +85,11 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
 - [~] **Line-by-line math audit** — in progress (see matrix). BSG energy +
   popular-pairs / Ruzsa cluster ✅ and the public `balog_szemeredi_gowers_`
   `asymmetric`/`symmetric` theorems ✅ verified against Tao–Vu §6.4 (assembly
-  sound). Remaining BSG gap: the **dependent-random-choice track interior**
-  (8 lemmas behind `graph_balogSzemerediGowers_restricted_sumset`), whose
-  interface is consumed correctly but interior is not yet read. Bézout /
-  Geometry not yet started.
+  sound). The **dependent-random-choice track** (8 lemmas behind
+  `graph_balogSzemerediGowers_restricted_sumset`) is verified at the
+  architecture + constants level against Fox–Sudakov §5 (Lemmas 5.1/5.2,
+  `c=δ/8`, `C=2¹²C³c⁻⁵`); only the individual proof *bodies* remain to line-read.
+  Bézout / Geometry math audits not yet started.
 - **Sources**: Pach–de Zeeuw `.tex` and Tao–Vu *Additive Combinatorics* are
   vendored under `docs/references/`; copyrighted PDFs are gitignored (local-only),
   arXiv `.tex` sources stay tracked.
