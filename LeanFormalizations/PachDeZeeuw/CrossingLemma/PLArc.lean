@@ -22,8 +22,9 @@ This is the bottom of the route-(c) node DAG:
   proven open, disjoint, and **connected** — the convex sector as an intersection
   of two half-planes, the reflex sector as a *union* of two half-planes meeting at
   the reflected point `3v − a − b`.  Fully algebraic, no `arg`/`Complex`/disk.
-  The remaining L2 piece (corner-locus complement = the two rays) is deferred to
-  the L3 tube localisation; see the §L2 header below.                 [PROVEN]
+  The corner-locus complement `(convexSector ∪ reflexSector)ᶜ = cornerLocus` (the
+  two rays, algebraic form) is also proven; only its disk-localisation to `β` is
+  deferred to L3.                                                     [PROVEN]
 * **Action 0** — the `PolyArc` carrier (finite vertex list + simplicity).
   The coercion `PolyArc → SimpleArc` and the collar (L3) are built on top in
   later work.                                                         [definitions]
@@ -300,6 +301,49 @@ theorem segment_vb_subset_compl_sectors (a v b : Plane) :
   · rw [hg1, cornerTurn] at h
     nlinarith [mul_nonneg ht (mul_self_nonneg (sideForm a v b))]
   · rw [hg2, mul_zero] at h; exact lt_irrefl 0 h
+
+/-! ### The corner locus: complement of the two sectors
+
+The complement of `convexSector ∪ reflexSector` is the **corner locus** — the two
+rays `v→a`, `v→b` (here in their algebraic form: the `a`-side of the line `a,v`
+together with the `b`-side of the line `v,b`).  L3 will intersect this with a thin
+disk around `v` to recover exactly `β ∩ disk` (the two incident segments), which
+turns `T ∖ β = T⁺ ⊔ T⁻` into the two sectors locally. -/
+
+/-- The **corner locus** at `a → v → b`: the union of the `a`-ward ray of the line
+through `a, v` and the `b`-ward ray of the line through `v, b`.  Algebraically, the
+set where one side-functional vanishes and the corner-oriented other is `≥ 0`. -/
+def cornerLocus (a v b : Plane) : Set Plane :=
+  {z | sideForm a v z = 0 ∧ 0 ≤ cornerTurn a v b * sideForm v b z} ∪
+  {z | sideForm v b z = 0 ∧ 0 ≤ cornerTurn a v b * sideForm a v z}
+
+/-- **The two sectors and the corner locus partition the plane.**  Their union is
+everything (`convexSector ⊔ reflexSector ⊔ cornerLocus = univ`), and since the
+sectors are disjoint from each other (`disjoint_convexSector_reflexSector`) and
+from the locus (`segment_*_subset_compl_sectors` localised), this exhibits the
+complement of the two open sectors as exactly the corner locus. -/
+theorem compl_sectors_eq_cornerLocus (a v b : Plane) (h : IsCorner a v b) :
+    (convexSector a v b ∪ reflexSector a v b)ᶜ = cornerLocus a v b := by
+  simp only [IsCorner, cornerTurn] at h
+  ext z
+  simp only [convexSector, reflexSector, cornerLocus, cornerTurn, Set.mem_compl_iff,
+    Set.mem_union, Set.mem_setOf_eq, not_or, not_and, not_lt]
+  constructor
+  · rintro ⟨hc, hr1, hr2⟩
+    -- hr1 : 0 ≤ τ·g₁, hr2 : 0 ≤ τ·g₂ ; hc : 0 < τ·g₁ → τ·g₂ ≤ 0
+    rcases le_or_gt (sideForm a v b * sideForm a v z) 0 with h1 | h1
+    · -- τ·g₁ = 0 ⇒ g₁ = 0 (τ ≠ 0)
+      have hz1 : sideForm a v z = 0 :=
+        (mul_eq_zero.mp (le_antisymm h1 hr1)).resolve_left h
+      exact Or.inl ⟨hz1, hr2⟩
+    · -- 0 < τ·g₁, so hc gives τ·g₂ ≤ 0, with hr2 ⇒ τ·g₂ = 0 ⇒ g₂ = 0
+      have hz2 : sideForm v b z = 0 :=
+        (mul_eq_zero.mp (le_antisymm (hc h1) hr2)).resolve_left h
+      exact Or.inr ⟨hz2, hr1⟩
+  · rintro (⟨hz1, hr2⟩ | ⟨hz2, hr1⟩)
+    · refine ⟨fun hpos => ?_, by simp [hz1], hr2⟩
+      rw [hz1, mul_zero] at hpos; exact absurd hpos (lt_irrefl 0)
+    · exact ⟨fun _ => by simp [hz2], hr1, by simp [hz2]⟩
 
 /-! ## §Action 0  The polygonal-arc carrier
 

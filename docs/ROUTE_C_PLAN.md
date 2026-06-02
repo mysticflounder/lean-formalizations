@@ -356,9 +356,11 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    over a segment slab use L1 `leftSide/rightSide`; over a vertex disk use L2
    `convexSector/reflexSector`; consistency on overlaps via the sign of the shared
    segment's `sideForm` (L2's `cornerTurn` orientation). Sectors avoid the incident
-   segments — **DONE** (`segment_av/vb_subset_compl_sectors`). The *remaining*
-   L2/L3 algebra: corner-locus complement `(convexSector ∪ reflexSector)ᶜ ∩ disk
-   = (β ∩ disk)` (ray parametrisation), so `disk \ β` is exactly the two sectors.
+   segments — **DONE** (`segment_av/vb_subset_compl_sectors`). Corner-locus
+   complement `(convexSector ∪ reflexSector)ᶜ = cornerLocus` (the two rays,
+   algebraic form) — **DONE** (`compl_sectors_eq_cornerLocus`). The *remaining*
+   L3 algebra: disk-localise it, `cornerLocus ∩ disk = (β ∩ disk)` (ray
+   parametrisation + `r < ‖a−v‖, ‖b−v‖`), so `disk \ β` is exactly the two sectors.
    Non-emptiness of `T⁺,T⁻`: the sector points (e.g. `a+b−v`, `3v−a−b`) lie in `T`
    for a thin enough disk. *(deps: §L1/§L2 of `PLArc.lean`, all PROVEN.)*
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
@@ -366,10 +368,14 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
    `exists_twoSidedPartition_of_polyArc` (the PL form of the residual).
 
-**Status (2026-06-02):** L1, L2 core, and sub-node-3's "sectors avoid incident
-segments" are PROVEN sorry-free in `PLArc.lean`. Next concrete step: sub-node 1
-(coercion) or sub-node 2 (collar) — both feed sub-node 3 (the crux). Sub-node 3 is
-where the genuine separation content lives; design it before coding the tube.
+**Status (2026-06-02):** L1, L2 (incl. corner-locus complement
+`compl_sectors_eq_cornerLocus`), and sub-node-3's "sectors avoid incident
+segments" are PROVEN sorry-free in `PLArc.lean`. The local algebraic skeleton of
+sub-node 3 is thus complete; what remains for sub-node 3 is the *metric*
+localisation (`cornerLocus ∩ disk = β ∩ disk` for a thin disk) which depends on
+the collar radii — so it folds into sub-node 2. Next concrete step: sub-node 1
+(coercion) or sub-node 2 (collar). The genuine separation content lives in
+sub-nodes 2–3; design the tube radii before coding.
 
 ---
 
