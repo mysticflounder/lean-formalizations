@@ -537,6 +537,15 @@ structure PolyArc where
     ∀ i j : Fin numSegs, (i : ℕ) + 1 < (j : ℕ) →
       Disjoint (segment ℝ (verts (Fin.castSucc i)) (verts (Fin.succ i)))
         (segment ℝ (verts (Fin.castSucc j)) (verts (Fin.succ j)))
+  /-- **Consecutive segments meet only at the shared vertex.**  The `i`-th segment
+  `[verts i, verts (i+1)]` and the `(i+1)`-th `[verts (i+1), verts (i+2)]` intersect
+  in exactly `{verts (i+1)}`.  Together with `nonadjacent_disjoint` this makes the
+  PL parametrisation injective (the arc is simple). -/
+  consecutive_meet :
+    ∀ i : Fin numSegs, (h : (i : ℕ) + 1 < numSegs) →
+      segment ℝ (verts (Fin.castSucc i)) (verts (Fin.succ i))
+        ∩ segment ℝ (verts (Fin.succ i)) (verts (Fin.succ ⟨(i : ℕ) + 1, h⟩))
+        ⊆ {verts (Fin.succ i)}
 
 namespace PolyArc
 
