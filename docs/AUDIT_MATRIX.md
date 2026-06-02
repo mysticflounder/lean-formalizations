@@ -112,7 +112,7 @@ terms). ✅ = body read in full and matches the source argument.
 | `graph_dependentRandomChoice_payoff_pointwise_witness` | ✅ | ✅ | FS 5.2 assembly | chains all 4 above; ε-bad transfer codeg_E≥codeg_{E₁} handled; identity (δ⁵/2¹²)\|A\|²≤(δ/8)\|U\|·τ ✓. **Deviation 1 here.** |
 | `graph_dependentRandomChoice_payoff_pointwise_count` | ✅ | ✅ | FS 5.2 path count | Good=Nb\Bad, \|Good\|≥(δ/8)\|U\|; injective disjoint fibers ⇒ #paths≥\|Good\|·τ≥(δ⁵/2¹²)\|A\|². **Deviation 2 here.** |
 | `graph_dependentRandomChoice_payoff_pointwise` | ✅ | ✅ | FS 5.2 | packaging: witness ⊕ count, ∀(a,b) |
-| `dense_bipartite_has_path3_rectangle` | ✅ | ✅ | **FS Lemma 5.2** (capstone) | thin delegation to `_payoff_pointwise`. ⚠️ doc nit: its "Proof:" docstring sketches a *different* DRC variant (`a*∈A, B′=N(a*)`) than the construction actually used — cosmetic. |
+| `dense_bipartite_has_path3_rectangle` | ✅ | ✅ | **FS Lemma 5.2** (capstone) | thin delegation to `_payoff_pointwise`. Doc nit fixed 2026-06-01: "Proof:" docstring now describes the actual DRC variant (random column `v∈B` → `U=N(v)⊆A`, split into `A′⊆U` + popular columns `B′`). |
 
 ### Assembly + public theorems
 
@@ -185,8 +185,13 @@ conditional. Audit deferred until proofs land.
 - ~~Dead code (9 lemmas)~~ — **DONE 2026-06-01**: 7 bespoke codegree-route lemmas
   deleted; 2 general lemmas (`double_markov_refinement`,
   `length_three_path_count_lower_bound`) kept as flagged mathlib candidates.
-- **Cosmetic doc fixes** (optional): `dense_bipartite_has_path3_rectangle` docstring
-  "Proof:" describes the wrong DRC variant; two `push_neg` deprecation warnings.
+- ~~Cosmetic doc fixes~~ — **DONE 2026-06-01**: rewrote the
+  `dense_bipartite_has_path3_rectangle` "Proof:" docstring to describe the
+  *actual* DRC variant (random column `v∈B` → core `U=N(v)⊆A`, split into `A′⊆U`
+  + popular columns `B′⊆B`); replaced all **11** deprecated `push_neg at` sites
+  (not two — earlier count was stale) with `push Not at`. Build green, 0
+  deprecation warnings, 3 public theorems re-confirmed axiom-clean. (Four
+  pre-existing `unused variable` warnings remain, unrelated.)
 - Bézout: start math audit vs the Pach–de Zeeuw `.tex` (resultant chain).
 - Geometry: pin a canonical text for the two-point isometry fact; audit.
 - Newman / Pommerenke crosscut citations (deferred with CrossingLemma WIP).

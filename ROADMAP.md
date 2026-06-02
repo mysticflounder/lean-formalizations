@@ -92,8 +92,8 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   `graph_balogSzemerediGowers_restricted_sumset` + explicit form); and all three
   public theorems incl. `asymmetric_explicit`. Two honest deviations from
   Fox–Sudakov (lower-bound density `c₀≤c₁`; path count without distinctness
-  terms) and one cosmetic doc nit recorded in the matrix; both deviations are
-  sound. Build empirically re-verified green (8475 jobs) and all 3 public
+  terms) are documented in the matrix; both deviations are sound (the one
+  cosmetic doc nit + `push_neg` deprecations have since been fixed, 2026-06-01). Build empirically re-verified green (8475 jobs) and all 3 public
   theorems `#print axioms`-clean. **9 dead lemmas** (codegree route +
   `length_three_path_count_lower_bound`) are off-path/unreachable — fate TBD.
   Bézout / Geometry math audits not yet started.
@@ -120,7 +120,13 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
 - [x] mathlib-master novelty check for BSG — confirmed novel in v4.30.0 (no
   `balog`/`szemeredi_gowers`/`bsg` anywhere; `Finset.addConvolution` already
   upstream and consumed by these proofs).
-- [ ] Clean up the two `push_neg` deprecation warnings in
-  `BalogSzemerediGowers.lean` (lines ~2993, ~3281) — mathlib v4.30.0 prefers
-  `push Not`. (These are the only build warnings; everything else is clean.)
+- [x] Clean up the `push_neg` deprecation warnings in
+  `BalogSzemerediGowers.lean` — done (2026-06-01). mathlib v4.30.0 deprecated the
+  whole `push_neg` tactic in favor of `push Not`; there were **11** call sites
+  (not two — the earlier count was stale), all `push_neg at <hyp>`, now
+  `push Not at <hyp>`. Build green, 0 deprecation warnings, all 3 public theorems
+  re-confirmed `#print axioms`-clean. (Four pre-existing `unused variable`
+  warnings remain — `hc_le`/`hε_le` in `graph_pair_dependentRandomChoice`,
+  `hδ_le` in `graph_high_degree_subset_lb`, `hB` near line 2226 — left as-is,
+  unrelated to the deprecation.)
 - [ ] Open mathlib PR(s) once audit + namespacing are settled.

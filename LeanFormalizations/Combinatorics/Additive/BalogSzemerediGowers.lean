@@ -270,7 +270,7 @@ lemma double_markov_refinement {α β : Type*}
     refine Finset.sum_le_sum fun x hx ↦ ?_
     rw [Finset.mem_sdiff, hX'_def, Finset.mem_filter] at hx
     by_contra hgt
-    push_neg at hgt
+    push Not at hgt
     exact hx.2 ⟨hx.1, le_of_lt hgt⟩
   -- Popular part of X: each x has rowSum x ≤ M·|Y|.
   have hPop_X_le : ∑ x ∈ X', rowSum x ≤ (X'.card : ℝ) * (M * (Y.card : ℝ)) := by
@@ -376,7 +376,7 @@ lemma double_markov_refinement {α β : Type*}
       refine Finset.sum_le_sum fun y hy ↦ ?_
       rw [Finset.mem_sdiff, hY'_def, Finset.mem_filter] at hy
       by_contra hgt
-      push_neg at hgt
+      push Not at hgt
       exact hy.2 ⟨hy.1, le_of_lt hgt⟩
     -- Popular-Y bound.
     have hPop_Y_le : ∑ y ∈ Y', colSum y ≤ (Y'.card : ℝ) * (M * (X.card : ℝ)) := by
@@ -686,7 +686,7 @@ lemma length_three_path_count_lower_bound {G : Type*} [AddCommGroup G] [Decidabl
         intro p hp; have := hE_sub hp; simp at this
     subst hE0
     simp
-  push_neg at hAB
+  push Not at hAB
   obtain ⟨hA_ne, hB_ne⟩ := hAB
   have hA_pos : 0 < A.card := Finset.card_pos.mpr hA_ne
   have hB_pos : 0 < B.card := Finset.card_pos.mpr hB_ne
@@ -1203,7 +1203,7 @@ lemma graph_high_degree_subset_lb {G : Type*} [DecidableEq G]
     rw [Finset.mem_sdiff, hApop_def, Finset.mem_filter] at ha
     have hnot := ha.2
     by_contra hgt
-    push_neg at hgt
+    push Not at hgt
     exact hnot ⟨ha.1, le_of_lt hgt⟩
   have hAdiff_le_A : ((A \ Apop).card : ℝ) ≤ (A.card : ℝ) := by
     exact_mod_cast Finset.card_le_card (Finset.sdiff_subset (s := A) (t := Apop))
@@ -1315,7 +1315,7 @@ private lemma graph_dependentRandomChoice_markov_refinement {G : Type*} [Decidab
     rw [Finset.mem_sdiff, hA'_def, Finset.mem_filter] at ha
     have hnot := ha.2
     by_contra hge
-    push_neg at hge
+    push Not at hge
     exact hnot ⟨ha.1, le_of_lt hge⟩
   have hpartner_nn : ∀ a, 0 ≤ ((badPartner a).card : ℝ) := fun a ↦ Nat.cast_nonneg _
   have hsum_A'_nn : 0 ≤ ∑ a ∈ A', ((badPartner a).card : ℝ) :=
@@ -1409,7 +1409,7 @@ private lemma graph_dependentRandomChoice_popular_columns {G : Type*} [Decidable
     rw [Finset.mem_sdiff, hB'_def, Finset.mem_filter] at hb
     have hnot := hb.2
     by_contra hgt
-    push_neg at hgt
+    push Not at hgt
     exact hnot ⟨hb.1, le_of_lt hgt⟩
   have hrare_col' : ∑ b ∈ B \ B', (colCount b : ℝ) ≤
       (B.card : ℝ) * ((ρ / 2) * (U.card : ℝ)) := by
@@ -1805,7 +1805,7 @@ private lemma graph_dependentRandomChoice_payoff_pointwise_count {G : Type*} [De
     obtain ⟨⟨ha₁U, ha₁bE⟩, hnotBad⟩ := ha₁
     refine ⟨?_, ha₁bE⟩
     by_contra hlt
-    push_neg at hlt
+    push Not at hlt
     exact hnotBad ⟨ha₁U, hlt⟩
   -- Path Finset of interest.
   set paths : Finset (G × G) := (B ×ˢ A).filter fun q : G × G ↦
@@ -1922,11 +1922,18 @@ Lemma 5.2 / Tao-Vu Cor. 6.20).** Given a bipartite graph `E ⊆ A ×ˢ B` of den
 multiplicity is **pointwise**, not averaged — this is what makes the bound
 linear when fed into the triple-rep count.
 
-Proof: dependent random choice. The standard argument is to pick `a* ∈ A`
-uniformly, let `B' := N_E(a*) ⊆ B`, then refine `A' ⊆ A` to vertices with at
-least `(δ²/2)|B'|`-many neighbors in `B'`; by Cauchy-Schwarz a positive
-fraction of choices of `a*` work. References: Fox-Sudakov, *Dependent Random
-Choice* (2011), Lemma 5.2; Tao-Vu, *Additive Combinatorics*, §6.4, Cor. 6.20.
+Proof: dependent random choice (as implemented). (1) Restrict to the popular
+rows `A₁ := {a : deg_E(a) ≥ (δ/2)|B|}` and edges `E₁` out of them; `E₁` still
+has density `≥ δ/2`. (2) Pair-DRC (Fox-Sudakov 5.1): pick a *column* vertex
+`v ∈ B` uniformly and set the core `U := N_{E₁}(v) ⊆ A₁ ⊆ A`; by Cauchy-Schwarz
+a positive fraction of `v` give both `|U| ≥ (δ/4)|A|` and few "bad" ordered
+pairs `(a, a') ∈ U × U` of low codegree `|N(a) ∩ N(a')| < τ`. (3) `A' ⊆ U` is
+the Markov refinement to vertices with `≤ (δ/8)|U|` bad partners in `U`; (4)
+`B' ⊆ B` is the popular columns, those with `≥ (δ/4)|U|` neighbors inside `U`.
+The high pointwise codegree on `A'` combined with `B'`'s density in `U` forces
+`≥ (δ⁵/2¹²)|A|²` length-3 paths through every `(a, b) ∈ A' × B'`. References:
+Fox-Sudakov, *Dependent Random Choice* (2011), Lemma 5.2; Tao-Vu, *Additive
+Combinatorics*, §6.4, Cor. 6.20.
 -/
 lemma dense_bipartite_has_path3_rectangle {G : Type*} [AddCommGroup G] [DecidableEq G]
     (δ : ℝ) (hδ_pos : 0 < δ) (hδ_le : δ ≤ 1)
@@ -2183,7 +2190,7 @@ lemma graph_balogSzemerediGowers_restricted_sumset {G : Type*} [AddCommGroup G] 
         linarith
   · -- ### Vacuous case: δ > 1. Then |E| ≤ n² but δ·n² ≤ |E|, contradiction.
     exfalso
-    push_neg at hδ_le  -- 1 < δ
+    push Not at hδ_le  -- 1 < δ
     have hE_le_AB : E.card ≤ (A ×ˢ B).card := Finset.card_le_card hE_sub
     have hAB_card : (A ×ˢ B).card = n * n := by
       rw [Finset.card_product, ← hn_def, hBcard_nat]
@@ -2387,7 +2394,7 @@ lemma graph_balogSzemerediGowers_restricted_sumset_explicit {G : Type*} [AddComm
         linarith
   · -- ### Vacuous case: δ > 1. Then |E| ≤ n² but δ·n² ≤ |E|, contradiction.
     exfalso
-    push_neg at hδ_le
+    push Not at hδ_le
     have hE_le_AB : E.card ≤ (A ×ˢ B).card := Finset.card_le_card hE_sub
     have hAB_card : (A ×ˢ B).card = n * n := by
       rw [Finset.card_product, ← hn_def, hBcard_nat]
@@ -2592,7 +2599,7 @@ theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [Decidabl
       rw [hexp]
       linarith
   · -- Small case: (η/2) * n < 2. Use singletons.
-    push_neg at hLarge
+    push Not at hLarge
     obtain ⟨x, hxX⟩ := hX
     obtain ⟨y, hyY⟩ := hY
     refine ⟨{x}, {y}, Finset.singleton_subset_iff.mpr hxX,
@@ -2880,7 +2887,7 @@ theorem balog_szemeredi_gowers_asymmetric_explicit {G : Type*} [AddCommGroup G] 
       rw [← hunfold]
       exact hAmB'_total
   · -- Small case: (η/2) * n < 2. Use singletons.
-    push_neg at hLarge
+    push Not at hLarge
     obtain ⟨x, hxX⟩ := hX
     obtain ⟨y, hyY⟩ := hY
     refine ⟨{x}, {y}, Finset.singleton_subset_iff.mpr hxX,
