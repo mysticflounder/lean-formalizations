@@ -132,35 +132,50 @@ and `Plane` is locally connected (`IsOpen.locPathConnectedSpace`, PRESENT). So t
 
 ### Global nodes — the invariant
 
-- **G1 — define `σ : R∖β → ℤ/2`.** Recommended engine: the **side double cover**.
-  Build a 2-sheeted space realizing the L3 side-flip across `β` and trivial sheets
-  away from `β`; `σ` is the sheet-choice. *Construction from scratch* (mathlib has
-  the `IsCoveringMap` *definition and lifting API* — ledger D3/D4 — but not this
-  construction). The covering engine is what discharges the crux node G3 cleanly;
-  see the route note below.
+> **R2 resolved (2026-06-02) — the covering construction, corrected.** The prior
+> framing (covering "lives on `R∖β`", crux = "odd-crossing loop not
+> null-homotopic", risk of needing PL transversality) was **wrong on the engine**.
+> The corrected, mathlib-supported construction below makes the side cover a genuine
+> covering map of **all of `R`** and obtains homotopy-invariance for free. See §4 R2
+> and the memory `nthdegree recall "R2 covering construction"`.
 
-- **G2 — `σ` is locally constant** (continuous into discrete `ℤ/2`). Away from `β`:
-  `σ` is constant on the trivial sheets. Across `β`: continuity is exactly the L3
-  continuous side map. *From scratch, follows from L3 + G1.*
+- **G1 — the side double cover of `R` (corrected).** Cover `R` by two open charts:
+  `U₁ :=` the collar `T` (an open neighborhood **containing all of `β`**, connected,
+  from L3) and `U₀ := R∖β`. Then `U₀ ∪ U₁ = R` (β's endpoints are on `∂R`, outside
+  `R`) and `U₀ ∩ U₁ = T∖β = T⁺ ⊔ T⁻`. Build `E → R` by gluing the trivial double
+  covers `U₀×ℤ/2` and `U₁×ℤ/2` along the overlap with transition `0` on `T⁺` and the
+  flip on `T⁻` (locally constant; trivial cocycle — only two charts). **Crucially `E`
+  is a covering map over *all* of `R`, including over `β`, because over the collar
+  chart `U₁ ⊇ β` the cover is trivial** — the nontriviality is entirely in the
+  overlap transition. No branching; mathlib's covering API applies to `R` directly.
+  *Construction from scratch (give the two `Trivialization`s ⇒ `IsCoveringMap`,
+  D3a), elementary given L3.*
 
-- **G3 — `σ` is well-defined / takes both values (the crux).** Equivalently: **a
-  loop in `R` crossing the crosscut `β` an odd number of times is not
-  null-homotopic in `R`.** This is the single irreducible hard fact; it is where
-  `IsSimplyConnected R` is consumed. *Engine:* `monodromy_theorem` +
-  `IsCoveringMapOn.existsUnique_continuousMap_lifts` — a null-homotopic loop has
-  trivial monodromy in the side cover, but an odd-crossing loop flips the sheet
-  (L3), contradiction. **mathlib supplies the monodromy/lifting machinery (D3–D5);
-  the application to *this* cover is from scratch.** This node replaces the
-  mod-2-intersection-number argument, which would otherwise require PL
-  transversality / general position — **ABSENT** from mathlib (ledger D9). Choosing
-  the covering engine is precisely what lets route (c) avoid building intersection
-  theory.
+- **G3 — `σ` is well-defined and takes both values (was "the crux"; now plumbing).**
+  `R` is `SimplyConnectedSpace` (`IsSimplyConnected.simplyConnectedSpace`, D1) and
+  `LocPathConnectedSpace` (`IsOpen.locPathConnectedSpace`, D7). Apply
+  `IsCoveringMap.existsUnique_continuousMap_lifts` (D5) to the **identity**
+  `id : R → R` to get a global continuous section `F : R → E` with `p∘F = id` — i.e.
+  the cover is trivial. Define `τ : E → ℤ/2` by `τ(e) = 0 ↔ e = F(p e)`; it is
+  continuous because two continuous lifts agree on a **clopen** set
+  (`IsCoveringMap.eqOn_of_comp_eq` / `isSeparatedMap` + `isLocalHomeomorph`, D5a).
+  Set `σ := τ ∘ s₀` where `s₀` is the construction sheet-`0` section over `U₀=R∖β`.
+  The overlap transition forces `σ|T⁺ = c` and `σ|T⁻ = c+1` (both values attained).
+  **`IsSimplyConnected R` is consumed exactly once, at the lift of `id`; homotopy
+  invariance is automatic — no monodromy bookkeeping, no intersection number, no
+  transversality.**
 
-- **G4 — each side is connected** ("at most two components", Node D). Every
-  `z ∈ R∖β` is joined inside `R∖β` to `T⁺` or `T⁻`: take a path in `R`
-  (`IsOpen.isConnected_iff_isPathConnected`, D6) from `z` to a collar point and
-  push it off `β` into the collar (L3). Hence `σ⁻¹{i}` is path-connected.
-  *From scratch; supported by the path API (D6, D8). Hardest after G3.*
+- **G2 — `σ` is locally constant** (continuous into discrete `ℤ/2`). Immediate: `τ`
+  is continuous (G3) and `s₀` is continuous, so `σ` is continuous. *Follows from G3.*
+
+- **G4 — each side is connected / at most two components** (Node D). Every
+  `z ∈ R∖β` is joined inside `R∖β` to `T⁺` or `T⁻`: `R` is open & connected (a
+  component of `Aᶜ`), hence path-connected (`IsOpen.isConnected_iff_isPathConnected`,
+  D6); take a path in `R` from `z` to a collar point and cut it at first entry to the
+  closed collar — the initial segment avoids `β` (β meets `R` only inside `T`), landing
+  in `T⁺` or `T⁻`. With `σ` locally constant (G2), `σ⁻¹{c}` and `σ⁻¹{c+1}` are then
+  exactly the two path-components. *From scratch; supported by the path API (D6, D8) +
+  L3. Hardest remaining after L3.*
 
 ### Assembly
 
@@ -169,11 +184,11 @@ and `Plane` is locally connected (`IsOpen.locPathConnectedSpace`, PRESENT). So t
 
 ```
 L1 ┐
-L2 ┼─► L3 ─► G2 ┐
-   │       │    ├─► Z1 ─► exists_twoSidedPartition_of_arc
-   └─► G1 ─┴─► G3┤
-            └─► G4┘
-(G3, G4 consume IsSimplyConnected R via the monodromy engine / path-pushing)
+L2 ┼─► L3 ─► G1 ─► G3 ─► G2 ┐
+   │         (cover)  (lift id)  ├─► Z1 ─► exists_twoSidedPartition_of_arc
+   └─► L3 ───────────► G4 ───────┘
+(G3 consumes IsSimplyConnected R once — the lift of id:R→R; G4 consumes R path-connected.
+ L3 = the collar = the only node needing PL; everything right of it is mathlib-supported.)
 ```
 
 ---
@@ -190,9 +205,12 @@ real external dependency to formalize.
 |---|---|---|---|
 | D1 | `IsSimplyConnected`, `IsSimplyConnected.simplyConnectedSpace` | `AlgebraicTopology/FundamentalGroupoid/SimplyConnected.lean:132,134` | hypothesis plumbing |
 | D2 | `simply_connected_iff_paths_homotopic'` | `…/SimplyConnected.lean:94` | G3 |
-| D3 | `IsCoveringMap`; `Circle.isCoveringMap_exp` | `Topology/Covering*`; `Analysis/SpecialFunctions/Complex/Circle.lean:401` | G1, G3 |
-| D4 | `monodromy_theorem`, `liftPath`, `monodromy_bijective`, `monodromy_map` | `Topology/Homotopy/Lifting.lean:152,257,400,376` | G3 |
-| D5 | `IsCoveringMapOn.existsUnique_continuousMap_lifts`, `existsUnique_continuousMap_lifts` | `Topology/Homotopy/Lifting.lean:480,421` | G3 |
+| D3 | `IsCoveringMap := ∀ x, IsEvenlyCovered f x …` (construct via two `Trivialization`s) | `Topology/Covering/Basic.lean:287,40` | G1 |
+| D3a | `Trivialization`, `IsEvenlyCovered`, `Trivialization.mk` (the chart data for G1) | `Topology/Covering/Basic.lean:40`; `Topology/FiberBundle/…` | G1 |
+| D4 | `existsUnique_continuousMap_lifts [SimplyConnectedSpace A] [LocPathConnectedSpace A]` | `Topology/Homotopy/Lifting.lean:421` | G3 (lift `id : R→R`) |
+| D5 | `IsCoveringMap.existsUnique_continuousMap_lifts` (covering-map form of D4) | `Topology/Homotopy/Lifting.lean:421` (via `IsLocalHomeomorph`) | G3 |
+| D5a | section/lift agreement is clopen: `IsCoveringMap.eq_of_comp_eq`, `eqOn_of_comp_eq`, `const_of_comp`, `isSeparatedMap`, `isLocalHomeomorph` | `Topology/Covering/Basic.lean:369,377,373,348,339` | G3 (`τ` continuity) |
+| D5b | *(unused now)* `monodromy_theorem`, `monodromy_bijective` | `Topology/Homotopy/Lifting.lean:152,400` | not needed by the corrected G3 |
 | D6 | `IsOpen.isConnected_iff_isPathConnected` | `Topology/Connected/LocPathConnected.lean:163` | G4 |
 | D7 | `IsOpen.locPathConnectedSpace` (⇒ `LocPathConnectedSpace` on open subsets of `Plane`) | `…/LocPathConnected.lean:160` | G1, G4, lifting hyps |
 | D8 | `isPathConnected_iff_pathConnectedSpace`, `pathComponentIn`, path API | `Topology/Connected/PathConnected.lean:576,…` | G4 |
@@ -205,10 +223,10 @@ real external dependency to formalize.
 |---|---|---|---|
 | E1 | **PL two-sided collar / tubular nbhd of an arc** (L3) | No tubular-neighborhood API for plane sets; nothing comparable | L3 — bulk |
 | E2 | **Corner local model** (L2) | None | L2 |
-| E3 | **Construction of the side double cover** + proof it `IsCoveringMap` (G1) | `IsCoveringMap` *def/API* present (D3); *this construction* absent | G1 |
-| E4 | **"odd-crossing loop ⇏ null-homotopic"** wired through the side cover (G3) | monodromy engine present (D4–D5); *this application* absent | G3 |
-| E5 | **Each side connected via path-pushing off `β`** (G4) | path API present (D6,D8); *the push-off lemma* absent | G4 |
-| E6 | *(avoided)* PL **general position / transversality** + **mod-2 intersection number** of a path with a PL arc and its homotopy invariance | **ABSENT** (only smooth `Bordism.lean` exists; no transversality, no intersection number) | would be needed only by the *intersection-parity* variant of G3 — the covering engine (E3/E4) is chosen specifically to **avoid** this |
+| E3 | **Construction of the side double cover** (two charts) + proof it `IsCoveringMap` (G1) | `IsCoveringMap`/`Trivialization` def/API present (D3/D3a); *this two-chart construction* absent | G1 |
+| E4 | **`σ` definition + both-values** from the trivializing section `F` and the transition flip (G3) | lifting + clopen-agreement present (D4/D5/D5a); *this assembly* absent | G3 |
+| E5 | **Each side connected via path-cut at first collar entry** (G4) | path API present (D6,D8); *the cut/push-off lemma* absent | G4 |
+| ~~E6~~ | ~~PL general position / transversality / mod-2 intersection number~~ | **ABSENT** in mathlib — but **NO LONGER NEEDED**: R2's corrected covering construction gets homotopy-invariance from `existsUnique_continuousMap_lifts` (D4), so route (c) never builds intersection theory **or** needs simplicial approximation | *eliminated 2026-06-02* |
 
 ### Confirmed-absent flagships (out of scope, never attempted)
 
@@ -228,24 +246,26 @@ stale for v4.30 and should be corrected when L-nodes land. (Tracked, not yet don
 
 ## 4. Risks / unverified preconditions
 
-- **R1 — PL preservation downstream {{NEEDS_PROOF}}.** The PL restriction is free
-  for ST (verified, §0) but not yet traced through the amplification + bridge. If
-  some intermediate construction needs non-PL arcs, the lever weakens. *Verify
-  before committing to L-nodes.* Low risk (drawings stay straight-line) but must be
-  checked.
-- **R2 — the cover lives on `R∖β`, simple connectivity is of `R` {{NEEDS_PROOF}}.**
-  G3 must bridge `π₁(R∖β)` data to `IsSimplyConnected R`. The intended bridge:
-  loops in `R∖β` are loops in `R`; null-homotopy *in `R`* lifts via the cover
-  extended appropriately. The exact formulation that mathlib's `monodromy_theorem`
-  accepts (it is stated for a covering of the *base* the loop lives in) is **not yet
-  pinned down** — this is the highest-uncertainty design point. Resolve on paper
-  before coding G1/G3.
+- **R1 — PL preservation downstream — RESOLVED ✅ (2026-06-02).** Verified by
+  source trace: the *only* arc constructor is `segmentArc` (straight,
+  `SzemerediTrotter.lean:373`); the *only* `hCL` application site is `stMultigraph`
+  (`SzemerediTrotter.lean:173`/`1231`); `crossingLemma_of_weakBound` and the bridge
+  files (`Abstractize`/`ResidualMap`/`RotationCoherence`) construct **no** arcs (only
+  numeric/abstract data). Restricting the crossing lemma to PL/straight drawings is
+  **free end-to-end**.
+- **R2 — cover vs simple connectivity — RESOLVED ✅ (2026-06-02), engine corrected.**
+  The earlier worry (cover only on `R∖β`; need PL transversality / simplicial
+  approximation) is **dissolved** by the two-chart construction: the collar chart
+  `U₁ ⊇ β` is trivially covered, so `E → R` is a covering of **all of `R`**. Then
+  `IsSimplyConnected R` ⇒ lift `id : R→R` (D4) ⇒ trivial cover ⇒ continuous `τ`
+  (clopen agreement, D5a) ⇒ side function `σ`. Homotopy-invariance is free; **E6
+  eliminated**. Residual mathematical risk now concentrated in **L3 (the collar)**.
 - **R3 — `Plane = ℝ × ℝ` has no inner product (verified, D7 note).** Use the
   determinant form (L1), or transport to `EuclideanSpace ℝ (Fin 2)`. Decided: stay
   in `ℝ × ℝ` with the determinant form; no transport.
-- **R4 — architectural gap (B)/(C) of §1.** Even full success leaves
+- **R4 — architectural gap (B)/(C) of §1 {{NEEDS_PROOF}}.** Even full success leaves
   `WeakAveragedBound` unproduced and the faces→genus-0→Euler span unbuilt. Route
-  (c) is necessary, not sufficient, for an unconditional crossing lemma.
+  (c) is necessary, not sufficient, for an unconditional crossing lemma. *Unchanged.*
 
 ---
 
@@ -253,23 +273,23 @@ stale for v4.30 and should be corrected when L-nodes land. (Tracked, not yet don
 
 Estimate (sessions = ~150–200k context → one `/compact`):
 
-0. **R1 + R2 paper resolution** (½–1 session). **Go/no-go gate.** If R2 has no
-   clean mathlib-acceptable formulation, route (c) stalls at G3 and we reassess.
-1. **L1 + Action 0** (PL types, segment functional) — ~1 session.
-2. **L2 + L3** (corner model, global collar) — ~2 sessions. The local bulk.
-3. **G1** (side double cover + `IsCoveringMap`) — ~1–2 sessions.
-4. **G3** (crux: monodromy ⇒ well-defined/both-valued) — ~2 sessions. Highest risk.
+0. **R1 + R2 gate — DONE ✅ (2026-06-02).** Both resolved; route (c) is GO. R2's
+   resolution removed E6 and reduced the residual to L3 + plumbing.
+1. **Action 0 + L1** (PL types, segment determinant functional) — ~1 session.
+2. **L2 + L3** (corner model, global collar) — ~2–3 sessions. **The bulk and the
+   genuine hardest node now.** L3 is the only node needing PL.
+3. **G1** (two-chart side double cover ⇒ `IsCoveringMap`) — ~1 session.
+4. **G3** (lift `id`, build `τ`, `σ`, both-values) — ~1 session. Now plumbing.
 5. **G2 + G4 + Z1** (locally constant, each side connected, assembly) — ~1–2
    sessions.
 
-**Total ~6–12 sessions** for `exists_twoSidedPartition_of_arc` on PL arcs,
-hardest node G3, dominant variance R2. Discharging it does **not** finish the
-crossing lemma (§1, R4).
+**Total ~6–10 sessions** for `exists_twoSidedPartition_of_arc` on PL arcs;
+**hardest node L3 (the collar); dominant variance now L3, not G3.** Discharging
+the residual does **not** finish the crossing lemma (§1, R4).
 
-**Work order (per project rules — hardest first):** the honest hardest node is G3
-(crux) resting on L3 (collar). Do the R2 paper resolution and L3 design *first*
-(they gate G3), then build bottom-up L→G→Z. Do **not** start L1 coding before the
-R1/R2 gate clears.
+**Work order (per project rules — hardest first):** with the gate cleared, the
+honest hardest node is **L3 (the collar)**; G1/G3 reduce to it. Design L3 carefully,
+then build bottom-up L→G→Z. Action 0 + L1 are the immediate first coding step.
 
 ---
 
