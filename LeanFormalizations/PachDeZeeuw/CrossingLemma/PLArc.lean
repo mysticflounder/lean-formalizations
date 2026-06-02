@@ -23,8 +23,15 @@ This is the bottom of the route-(c) node DAG:
   of two half-planes, the reflex sector as a *union* of two half-planes meeting at
   the reflected point `3v − a − b`.  Fully algebraic, no `arg`/`Complex`/disk.
   The corner-locus complement `(convexSector ∪ reflexSector)ᶜ = cornerLocus` (the
-  two rays, algebraic form) is also proven; only its disk-localisation to `β` is
-  deferred to L3.                                                     [PROVEN]
+  two rays, algebraic form) is also proven.                           [PROVEN]
+* **L3.1** — the **metric disk-localisation** `ball_inter_cornerLocus`: inside a
+  disk around the vertex `v` of radius at most the distance to either neighbour, the
+  (infinite) corner locus coincides with the two incident closed segments `[v,a]`,
+  `[v,b]` — i.e. with the arc near `v`.  With `compl_sectors_eq_cornerLocus` this
+  gives the local separation `disk ∖ β = (disk ∩ convexSector) ⊔ (disk ∩
+  reflexSector)`.  The one piece of genuine 2-D linear algebra is
+  `exists_param_of_sideForm_eq_zero` (a point on a line is an affine combination of
+  its endpoints).                                                     [PROVEN]
 * **Action 0** — the `PolyArc` carrier (finite vertex list + simplicity).
   The coercion `PolyArc → SimpleArc` and the collar (L3) are built on top in
   later work.                                                         [definitions]
@@ -344,6 +351,136 @@ theorem compl_sectors_eq_cornerLocus (a v b : Plane) (h : IsCorner a v b) :
     · refine ⟨fun hpos => ?_, by simp [hz1], hr2⟩
       rw [hz1, mul_zero] at hpos; exact absurd hpos (lt_irrefl 0)
     · exact ⟨fun _ => by simp [hz2], hr1, by simp [hz2]⟩
+
+/-! ## §L3.1  Metric localisation of the corner locus
+
+The corner locus (§L2) is the union of the two *infinite* rays `v→a`, `v→b`.  The
+global collar (L3) only ever sees a **thin disk** around each vertex `v`, and inside
+a disk of radius at most the distance to either neighbour the corner locus
+coincides with the two **incident closed segments** `[v,a]`, `[v,b]` — i.e. with the
+arc itself near `v`.  Combined with `compl_sectors_eq_cornerLocus` this gives the
+key local-separation fact: on a thin disk,
+`disk ∖ β = disk ∩ (convexSector ∪ reflexSector)`, so the two sectors are exactly
+the two sides of the arc.  This is the algebra → metric bridge of L3 sub-node 3.
+
+The single piece of genuine 2-D linear algebra is `exists_param_of_sideForm_eq_zero`:
+a point on the line through `a ≠ v` is an affine combination of `v` and `a`. -/
+
+/-- A point where the side-functional of the directed segment `a → v` vanishes lies
+on the line through `a` and `v` (here `a ≠ v`): it is `(1-t)•v + t•a` for some `t`. -/
+theorem exists_param_of_sideForm_eq_zero (a v z : Plane) (hav : a ≠ v)
+    (hz : sideForm a v z = 0) : ∃ t : ℝ, z = (1 - t) • v + t • a := by
+  have hd : a.1 - v.1 ≠ 0 ∨ a.2 - v.2 ≠ 0 := by
+    by_contra hcon
+    push Not at hcon
+    obtain ⟨h1, h2⟩ := hcon
+    exact hav (Prod.ext (by linarith) (by linarith))
+  have hz' : (a.2 - v.2) * (z.1 - v.1) - (a.1 - v.1) * (z.2 - v.2) = 0 := by
+    have e : sideForm a v z
+        = (a.2 - v.2) * (z.1 - v.1) - (a.1 - v.1) * (z.2 - v.2) := by
+      simp only [sideForm]; ring
+    rw [e] at hz; exact hz
+  -- it suffices to find `t` with `z - v = t • (a - v)`
+  suffices h : ∃ t : ℝ, z - v = t • (a - v) by
+    obtain ⟨t, ht⟩ := h
+    refine ⟨t, ?_⟩
+    have e : (1 - t) • v + t • a = v + t • (a - v) := by
+      simp only [sub_smul, smul_sub, one_smul]; abel
+    rw [e, ← ht]; abel
+  rcases hd with h1 | h2
+  · refine ⟨(z.1 - v.1) / (a.1 - v.1), ?_⟩
+    refine Prod.ext ?_ ?_ <;>
+      simp only [Prod.fst_sub, Prod.snd_sub, Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+    · rw [div_mul_cancel₀ _ h1]
+    · rw [div_mul_eq_mul_div, eq_div_iff h1]; linear_combination -hz'
+  · refine ⟨(z.2 - v.2) / (a.2 - v.2), ?_⟩
+    refine Prod.ext ?_ ?_ <;>
+      simp only [Prod.fst_sub, Prod.snd_sub, Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+    · rw [div_mul_eq_mul_div, eq_div_iff h2]; linear_combination hz'
+    · rw [div_mul_cancel₀ _ h2]
+
+/-- **Metric localisation of the corner locus.**  Inside a disk around the vertex
+`v` of radius at most the distance to either neighbour `a`, `b`, the corner locus
+coincides with the two incident closed segments `[v,a]`, `[v,b]`.  (`IsCorner`
+guarantees `a, v, b` are distinct and non-collinear.) -/
+theorem ball_inter_cornerLocus (a v b : Plane) (h : IsCorner a v b)
+    {r : ℝ} (hra : r ≤ dist v a) (hrb : r ≤ dist v b) :
+    Metric.ball v r ∩ cornerLocus a v b
+      = Metric.ball v r ∩ (segment ℝ v a ∪ segment ℝ v b) := by
+  have hτ : sideForm a v b ≠ 0 := h
+  have hav : a ≠ v := by rintro rfl; exact hτ (by simp only [sideForm]; ring)
+  have hbv : b ≠ v := by rintro rfl; exact hτ (by simp only [sideForm]; ring)
+  -- the two neighbour distances as positive norms
+  have hda : dist v a = ‖a - v‖ := by rw [dist_eq_norm, norm_sub_rev]
+  have hdb : dist v b = ‖b - v‖ := by rw [dist_eq_norm, norm_sub_rev]
+  have hanv : (0 : ℝ) < ‖a - v‖ := by rw [norm_pos_iff, sub_ne_zero]; exact hav
+  have hbnv : (0 : ℝ) < ‖b - v‖ := by rw [norm_pos_iff, sub_ne_zero]; exact hbv
+  rw [hda] at hra; rw [hdb] at hrb
+  -- side-functional along the two parametrised rays
+  have hsfA : ∀ t : ℝ, sideForm v b ((1 - t) • v + t • a) = t * sideForm a v b := by
+    intro t
+    rw [sideForm_affineComb v b v a (by ring : (1 - t) + t = 1),
+      sideForm_left_endpoint, ← sideForm_cyclic a v b]; ring
+  have hsfB : ∀ t : ℝ, sideForm a v ((1 - t) • v + t • b) = t * sideForm a v b := by
+    intro t
+    rw [sideForm_affineComb a v v b (by ring : (1 - t) + t = 1),
+      sideForm_right_endpoint]; ring
+  have hdistA : ∀ t : ℝ, dist ((1 - t) • v + t • a) v = |t| * ‖a - v‖ := by
+    intro t
+    rw [dist_eq_norm]
+    have e : (1 - t) • v + t • a - v = t • (a - v) := by
+      simp only [sub_smul, one_smul, smul_sub]; abel
+    rw [e, norm_smul, Real.norm_eq_abs]
+  have hdistB : ∀ t : ℝ, dist ((1 - t) • v + t • b) v = |t| * ‖b - v‖ := by
+    intro t
+    rw [dist_eq_norm]
+    have e : (1 - t) • v + t • b - v = t • (b - v) := by
+      simp only [sub_smul, one_smul, smul_sub]; abel
+    rw [e, norm_smul, Real.norm_eq_abs]
+  ext z
+  simp only [Set.mem_inter_iff, Metric.mem_ball, cornerLocus, Set.mem_union,
+    Set.mem_setOf_eq, cornerTurn]
+  constructor
+  · rintro ⟨hball, hloc⟩
+    refine ⟨hball, ?_⟩
+    rcases hloc with ⟨hz1, hr1⟩ | ⟨hz2, hr2⟩
+    · -- z on the `a`-ward ray ⇒ z ∈ segment [v,a]
+      left
+      obtain ⟨t, rfl⟩ := exists_param_of_sideForm_eq_zero a v z hav hz1
+      rw [hsfA] at hr1
+      have ht0 : 0 ≤ t := by nlinarith [mul_self_pos.mpr hτ, hr1]
+      rw [hdistA, abs_of_nonneg ht0] at hball
+      have ht1 : t < 1 := by nlinarith [hanv, hra, hball]
+      exact ⟨1 - t, t, by linarith, ht0, by ring, rfl⟩
+    · -- z on the `b`-ward ray ⇒ z ∈ segment [v,b]
+      right
+      have hz2' : sideForm b v z = 0 := by rw [sideForm_swap v b z, hz2, neg_zero]
+      obtain ⟨t, rfl⟩ := exists_param_of_sideForm_eq_zero b v z hbv hz2'
+      rw [hsfB] at hr2
+      have ht0 : 0 ≤ t := by nlinarith [mul_self_pos.mpr hτ, hr2]
+      rw [hdistB, abs_of_nonneg ht0] at hball
+      have ht1 : t < 1 := by nlinarith [hbnv, hrb, hball]
+      exact ⟨1 - t, t, by linarith, ht0, by ring, rfl⟩
+  · rintro ⟨hball, hseg⟩
+    refine ⟨hball, ?_⟩
+    rcases hseg with hsa | hsb
+    · -- z ∈ segment [v,a] ⇒ z on the `a`-ward ray
+      left
+      obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hsa
+      refine ⟨?_, ?_⟩
+      · rw [sideForm_affineComb a v v a hpq, sideForm_left_endpoint,
+          sideForm_right_endpoint]; ring
+      · rw [sideForm_affineComb v b v a hpq, sideForm_left_endpoint,
+          ← sideForm_cyclic a v b]
+        nlinarith [mul_nonneg hq (mul_self_nonneg (sideForm a v b))]
+    · -- z ∈ segment [v,b] ⇒ z on the `b`-ward ray
+      right
+      obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hsb
+      refine ⟨?_, ?_⟩
+      · rw [sideForm_affineComb v b v b hpq, sideForm_left_endpoint,
+          sideForm_right_endpoint]; ring
+      · rw [sideForm_affineComb a v v b hpq, sideForm_right_endpoint]
+        nlinarith [mul_nonneg hq (mul_self_nonneg (sideForm a v b))]
 
 /-! ## §Action 0  The polygonal-arc carrier
 

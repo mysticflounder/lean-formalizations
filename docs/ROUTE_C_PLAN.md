@@ -358,24 +358,64 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    segment's `sideForm` (L2's `cornerTurn` orientation). Sectors avoid the incident
    segments — **DONE** (`segment_av/vb_subset_compl_sectors`). Corner-locus
    complement `(convexSector ∪ reflexSector)ᶜ = cornerLocus` (the two rays,
-   algebraic form) — **DONE** (`compl_sectors_eq_cornerLocus`). The *remaining*
-   L3 algebra: disk-localise it, `cornerLocus ∩ disk = (β ∩ disk)` (ray
-   parametrisation + `r < ‖a−v‖, ‖b−v‖`), so `disk \ β` is exactly the two sectors.
-   Non-emptiness of `T⁺,T⁻`: the sector points (e.g. `a+b−v`, `3v−a−b`) lie in `T`
-   for a thin enough disk. *(deps: §L1/§L2 of `PLArc.lean`, all PROVEN.)*
+   algebraic form) — **DONE** (`compl_sectors_eq_cornerLocus`). Disk-localisation
+   `ball v r ∩ cornerLocus a v b = ball v r ∩ (segment[v,a] ∪ segment[v,b])` for
+   `r ≤ dist v a, dist v b` — **DONE** (`ball_inter_cornerLocus`, §L3.1, axiom-clean;
+   the one piece of genuine 2-D linear algebra is `exists_param_of_sideForm_eq_zero`:
+   a point on the line through `a ≠ v` is the affine combination `(1-t)•v + t•a`).
+   So **sub-node 3 is algebraically complete**: on a thin disk around `v`,
+   `disk \ β = (disk ∩ convexSector) ⊔ (disk ∩ reflexSector)` — the two sectors are
+   exactly the two sides. Non-emptiness of `T⁺,T⁻`: the sector points (e.g.
+   `a+b−v`, `3v−a−b`) lie in `T` for a thin enough disk. *(deps: §L1/§L2 of
+   `PLArc.lean`, all PROVEN.)*
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
    `exists_twoSidedPartition_of_polyArc` (the PL form of the residual).
 
 **Status (2026-06-02):** L1, L2 (incl. corner-locus complement
-`compl_sectors_eq_cornerLocus`), and sub-node-3's "sectors avoid incident
-segments" are PROVEN sorry-free in `PLArc.lean`. The local algebraic skeleton of
-sub-node 3 is thus complete; what remains for sub-node 3 is the *metric*
-localisation (`cornerLocus ∩ disk = β ∩ disk` for a thin disk) which depends on
-the collar radii — so it folds into sub-node 2. Next concrete step: sub-node 1
-(coercion) or sub-node 2 (collar). The genuine separation content lives in
-sub-nodes 2–3; design the tube radii before coding.
+`compl_sectors_eq_cornerLocus`), sub-node-3's "sectors avoid incident segments",
+**and the metric disk-localisation `ball_inter_cornerLocus`** are PROVEN sorry-free
+and axiom-clean in `PLArc.lean`. **Sub-node 3 (local separation) is now
+algebraically complete.** What remains in L3 is sub-node 2 (the tube as a metric
+object) and sub-node 1 (the `PolyArc → SimpleArc` coercion), then the global g and
+the G-nodes.
+
+### Tube + global side-function design (decided 2026-06-02, before coding sub-node 2)
+
+The global side map `g : ↥(T \ β) → ZMod 2` is built **piecewise by the
+sector/slab decomposition with a propagated orientation — NOT by nearest-point
+projection** (the nearest point to a polyline is genuinely non-unique on the angle
+bisectors, so a projection-based `g` is not even well-defined there; the
+sector/slab `g` is, because both candidate nearest points give the same side).
+
+- **Per-segment orientation `εᵢ ∈ {±1}`** propagated along the arc: fix `ε₀ := +1`;
+  at each interior vertex `vᵢ` the turn `cornerTurn` fixes `εᵢ` from `εᵢ₋₁` so that
+  "inside the turn" (`convexSector`) carries a single `g`-value across the corner.
+  Because the arc is a **tree (no cycle)**, propagation has **no consistency
+  obstruction** — this is why an arc, unlike a loop, needs no monodromy here.
+- `g(z) := ⟦sign(εᵢ · sideForm(segᵢ, z))⟧` where `i` indexes the local link
+  (slab or disk) containing `z`. Local constancy is a local property; overlaps
+  (`disk ∩ slab`) agree by the §L2 algebra (`convexSector ⊆ τ-positive side of each
+  incident segment`). Non-constancy: exhibit one point each side (sector witnesses
+  `a+b−v`, `3v−a−b`). **Connectedness of `T⁺,T⁻` is NOT needed** (minimal-need
+  analysis above) — only that `g` is locally constant and non-constant.
+- **Tube radius is tapered, not uniform.** A uniform tube pokes outside `R` near the
+  endpoints (which lie on `∂R`, so `dist(·, Rᶜ) → 0` there). Use a point-dependent
+  radius `ρ(p) = min(δ₀, ½·dist(p, Rᶜ))` over `p ∈ arcInterior β`:
+  `T := ⋃_{p ∈ arcInterior β} ball p (ρ p)`. Then `ρ p > 0` (as `p ∈ R` open),
+  `ball p (ρ p) ⊆ R` (gives `T ⊆ R`), `arcInterior β ⊆ T`, `T` open, and `T`
+  **connected** (each ball meets the connected `arcInterior β`). The cap `δ₀` is
+  `< ½·` (min non-adjacent segment distance) and `< ½·` (min incident edge length),
+  so each disk/slab sees only its own incident segment(s) — this is where the
+  disk-localisation `ball_inter_cornerLocus` and the *no-self-crossing simplicity
+  field* of `PolyArc` (sub-node 1, still TODO) are spent. {{NEEDS_PROOF}} the
+  positivity of "min non-adjacent segment distance" needs that simplicity field
+  (closed non-adjacent segments disjoint ⇒ positive distance by compactness).
+
+Next concrete step: sub-node 1 (the `PolyArc → SimpleArc` coercion + the
+no-self-crossing simplicity field that makes `d_sep > 0`), then sub-node 2 (the
+tapered tube `T` with the four properties above).
 
 ---
 
