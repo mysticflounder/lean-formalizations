@@ -1236,4 +1236,195 @@ theorem szemerediTrotter_of_crossingLemma
     (incidences_le_numEdges_add P L hL)
     (stMultigraph_crossings_le P L)
 
+/-! ## Rich-line interface for the grid `A × A`
+
+The exact consequence of Szemerédi–Trotter the downstream needs (for **general**
+`A ⊆ ℝ`): for the grid `P = A ×ˢ A`, the number of `k`-rich affine lines inside
+any finite family `L` is `≲ |A|⁴ / k³`.  We state it rpow-free as
+`k³ · #{rich} ≤ C · (|A|⁴ + k²·|A|²)`, which for `2 ≤ k ≤ |A|` is exactly
+`#{rich} ≤ 2C · |A|⁴ / k³`.  Everything here is conditional on the crossing lemma,
+inherited verbatim from `szemerediTrotter_of_crossingLemma`. -/
+
+/-- The `k`-rich lines of the family `L` for the grid `A ×ˢ A`: those meeting the
+grid in at least `k` points. -/
+noncomputable def gridRichLines (A : Finset ℝ) (L : Finset (Set (ℝ × ℝ))) (k : ℕ) :
+    Finset (Set (ℝ × ℝ)) :=
+  L.filter fun ℓ => k ≤ ((A ×ˢ A).filter (fun p => p ∈ ℓ)).card
+
+lemma gridRichLines_subset (A : Finset ℝ) (L : Finset (Set (ℝ × ℝ))) (k : ℕ) :
+    gridRichLines A L k ⊆ L := Finset.filter_subset _ _
+
+/-- **Grid rich-line bound** (rpow-free interface form), conditional on the
+crossing lemma: for `P = A ×ˢ A` and any finite family `L` of affine lines,
+`k³ · #{k-rich lines} ≤ C · (|A|⁴ + k²·|A|²)` for all `k ≥ 2`. -/
+def GridRichLineStatement : Prop :=
+  ∃ C : ℝ, 0 < C ∧
+    ∀ (A : Finset ℝ) (L : Finset (Set (ℝ × ℝ))),
+      (∀ ℓ ∈ L, IsAffineLine ℓ) → ∀ k : ℕ, 2 ≤ k →
+        (k : ℝ) ^ 3 * ((gridRichLines A L k).card : ℝ)
+          ≤ C * ((A.card : ℝ) ^ 4 + (k : ℝ) ^ 2 * (A.card : ℝ) ^ 2)
+
+/-- **The arithmetic core.** From the Szemerédi–Trotter inequality
+`k·X ≤ C·(s + N + X)` (where `s = N^{2/3}·X^{2/3}`, encoded via `s³ = N²·X²`) plus
+the geometric cap `X ≤ N²`, derive `k³·X ≤ (64C³+4C)·(N² + k²N)`.  Pure real
+arithmetic; the only nonlinear input is the cube `s³ = N²X²`. -/
+lemma richline_arith {N X k C s : ℝ} (hN : 0 ≤ N) (hX : 0 ≤ X) (hk2 : 2 ≤ k)
+    (hC1 : 1 ≤ C) (hs0 : 0 ≤ s) (hs3 : s ^ 3 = N ^ 2 * X ^ 2) (hXN : X ≤ N ^ 2)
+    (hST : k * X ≤ C * (s + N + X)) :
+    k ^ 3 * X ≤ (64 * C ^ 3 + 4 * C) * (N ^ 2 + k ^ 2 * N) := by
+  have hCpos : 0 < C := lt_of_lt_of_le zero_lt_one hC1
+  have hkpos : 0 < k := lt_of_lt_of_le two_pos hk2
+  by_cases hX0 : X ≤ 0
+  · have hXeq : X = 0 := le_antisymm hX0 hX
+    rw [hXeq, mul_zero]
+    have h1 : (0:ℝ) ≤ 64 * C ^ 3 + 4 * C := by nlinarith [hCpos, pow_pos hCpos 3]
+    have h2 : (0:ℝ) ≤ N ^ 2 + k ^ 2 * N := by
+      nlinarith [sq_nonneg N, mul_nonneg (sq_nonneg k) hN]
+    exact mul_nonneg h1 h2
+  · have hXpos : 0 < X := not_le.mp hX0
+    by_cases hkb : 2 * C ≤ k
+    · have hCX : C * X ≤ k / 2 * X :=
+        mul_le_mul_of_nonneg_right (by linarith) (le_of_lt hXpos)
+      have hhalf : k / 2 * X ≤ C * s + C * N := by nlinarith [hST, hCX]
+      by_cases hsN : N ≤ s
+      · -- main regime: `s ≥ N`
+        have h4 : k * X ≤ 4 * C * s := by
+          nlinarith [hhalf, mul_le_mul_of_nonneg_left hsN (le_of_lt hCpos)]
+        have hcube : (k * X) ^ 3 ≤ (4 * C * s) ^ 3 :=
+          pow_le_pow_left₀ (mul_nonneg (le_of_lt hkpos) hX) h4 3
+        have hexp : (k * X) ^ 3 = k ^ 3 * X * X ^ 2 := by ring
+        have hrhs : (4 * C * s) ^ 3 = 64 * C ^ 3 * N ^ 2 * X ^ 2 := by
+          have hexp2 : (4 * C * s) ^ 3 = 64 * C ^ 3 * s ^ 3 := by ring
+          rw [hexp2, hs3]; ring
+        rw [hexp, hrhs] at hcube
+        have hx2 : (0:ℝ) < X ^ 2 := by positivity
+        have hmain : k ^ 3 * X ≤ 64 * C ^ 3 * N ^ 2 := by
+          have h := hcube
+          rw [show (64:ℝ) * C ^ 3 * N ^ 2 * X ^ 2 = (64 * C ^ 3 * N ^ 2) * X ^ 2 by ring,
+            show k ^ 3 * X * X ^ 2 = (k ^ 3 * X) * X ^ 2 by ring] at h
+          exact le_of_mul_le_mul_right h hx2
+        nlinarith [hmain, mul_nonneg (mul_nonneg (le_of_lt hCpos) (sq_nonneg k)) hN,
+          mul_nonneg (mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg k)) hN,
+          mul_nonneg (le_of_lt hCpos) (sq_nonneg N)]
+      · -- low regime: `s < N`
+        have hsN' : s < N := not_le.mp hsN
+        have hkX : k * X ≤ 4 * C * N := by
+          nlinarith [hhalf, mul_le_mul_of_nonneg_left (le_of_lt hsN') (le_of_lt hCpos)]
+        nlinarith [mul_le_mul_of_nonneg_left hkX (sq_nonneg k),
+          mul_nonneg (mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg k)) hN,
+          mul_nonneg (le_of_lt hCpos) (sq_nonneg N),
+          mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg N)]
+    · -- small `k`: `k < 2C`, fall back to the geometric cap `X ≤ N²`
+      push_neg at hkb
+      have hk3 : k ^ 3 ≤ 8 * C ^ 3 := by
+        have h := mul_nonneg (by linarith : (0:ℝ) ≤ 2 * C - k)
+          (by positivity : (0:ℝ) ≤ 4 * C ^ 2 + 2 * C * k + k ^ 2)
+        nlinarith [h]
+      have e1 : k ^ 3 * X ≤ k ^ 3 * N ^ 2 :=
+        mul_le_mul_of_nonneg_left hXN (by positivity)
+      have e2 : k ^ 3 * N ^ 2 ≤ 8 * C ^ 3 * N ^ 2 :=
+        mul_le_mul_of_nonneg_right hk3 (sq_nonneg N)
+      nlinarith [e1, e2, mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg N),
+        mul_nonneg (le_of_lt hCpos) (sq_nonneg N),
+        mul_nonneg (mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg k)) hN,
+        mul_nonneg (mul_nonneg (le_of_lt hCpos) (sq_nonneg k)) hN]
+
+/-- **Geometric cap.** Distinct affine lines, each meeting the grid `A ×ˢ A` in
+`≥ k ≥ 2` points, inject into ordered pairs of grid points (two points determine
+a line), so there are at most `|A ×ˢ A|² = |A|⁴` of them. -/
+lemma gridRichLines_card_le (A : Finset ℝ) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ) {k : ℕ} (hk : 2 ≤ k) :
+    (gridRichLines A L k).card ≤ A.card ^ 4 := by
+  classical
+  have hpair : ∀ ℓ : Set (ℝ × ℝ), ∃ pq : (ℝ × ℝ) × (ℝ × ℝ),
+      ℓ ∈ gridRichLines A L k →
+        pq.1 ∈ A ×ˢ A ∧ pq.2 ∈ A ×ˢ A ∧ pq.1 ∈ ℓ ∧ pq.2 ∈ ℓ ∧ pq.1 ≠ pq.2 := by
+    intro ℓ
+    by_cases hℓ : ℓ ∈ gridRichLines A L k
+    · have h1 : 1 < ((A ×ˢ A).filter (fun p => p ∈ ℓ)).card := by
+        have := (Finset.mem_filter.mp hℓ).2; omega
+      obtain ⟨a, ha, b, hb, hab⟩ := Finset.one_lt_card.mp h1
+      exact ⟨(a, b), fun _ => ⟨(Finset.mem_filter.mp ha).1, (Finset.mem_filter.mp hb).1,
+        (Finset.mem_filter.mp ha).2, (Finset.mem_filter.mp hb).2, hab⟩⟩
+    · exact ⟨default, fun h => absurd h hℓ⟩
+  choose f hf using hpair
+  have hcardt : A.card ^ 4 = ((A ×ˢ A) ×ˢ (A ×ˢ A)).card := by
+    rw [Finset.card_product, Finset.card_product]; ring
+  rw [hcardt]
+  apply Finset.card_le_card_of_injOn f
+  · intro ℓ hℓ
+    obtain ⟨h1, h2, _, _, _⟩ := hf ℓ hℓ
+    exact Finset.mem_product.mpr ⟨h1, h2⟩
+  · intro ℓ₁ h₁ ℓ₂ h₂ hfeq
+    rw [Finset.mem_coe] at h₁ h₂
+    by_contra hne
+    obtain ⟨_, _, hp₁, hq₁, hpq₁⟩ := hf ℓ₁ h₁
+    obtain ⟨_, _, hp₂, hq₂, _⟩ := hf ℓ₂ h₂
+    have ha₁ : IsAffineLine ℓ₁ := hL ℓ₁ (gridRichLines_subset A L k h₁)
+    have ha₂ : IsAffineLine ℓ₂ := hL ℓ₂ (gridRichLines_subset A L k h₂)
+    have hsub := encard_inter_le_one_of_lines ha₁ ha₂ hne
+    have hpI : (f ℓ₁).1 ∈ ℓ₁ ∩ ℓ₂ := ⟨hp₁, by rw [hfeq]; exact hp₂⟩
+    have hqI : (f ℓ₁).2 ∈ ℓ₁ ∩ ℓ₂ := ⟨hq₁, by rw [hfeq]; exact hq₂⟩
+    exact hpq₁ (hsub hpI hqI)
+
+/-- **The grid rich-line bound, conditional on the crossing lemma.** Combines the
+incidence form of Szemerédi–Trotter (`szemerediTrotter_of_crossingLemma`) with
+the geometric cap to expose the exact interface `k³·#{rich} ≤ C·(|A|⁴ + k²|A|²)`. -/
+theorem gridRichLine_of_crossingLemma (hCL : CrossingLemmaMultigraphStatement) :
+    GridRichLineStatement := by
+  obtain ⟨C, hCpos, hST⟩ := szemerediTrotter_of_crossingLemma hCL
+  refine ⟨64 * (C + 1) ^ 3 + 4 * (C + 1), by positivity, ?_⟩
+  intro A L hL k hk
+  set D := C + 1 with hD
+  have hC1 : (1:ℝ) ≤ D := by rw [hD]; linarith
+  have hge : (k : ℝ) * ((gridRichLines A L k).card : ℝ)
+      ≤ (incidences (A ×ˢ A) (gridRichLines A L k) : ℝ) := by
+    rw [incidences_eq_sum, Nat.cast_sum,
+      show (k : ℝ) * ((gridRichLines A L k).card : ℝ)
+          = ∑ _ℓ ∈ gridRichLines A L k, (k : ℝ) by
+        rw [Finset.sum_const, nsmul_eq_mul]; ring]
+    apply Finset.sum_le_sum
+    intro ℓ hℓ
+    have hk' : k ≤ ((A ×ˢ A).filter (fun p => p ∈ ℓ)).card := (Finset.mem_filter.mp hℓ).2
+    exact_mod_cast hk'
+  have hP : ((A ×ˢ A).card : ℝ) = (A.card : ℝ) ^ 2 := by
+    rw [Finset.card_product]; push_cast; ring
+  have hST_D : (incidences (A ×ˢ A) (gridRichLines A L k) : ℝ) ≤
+      D * (((A ×ˢ A).card : ℝ) ^ ((2:ℝ)/3)
+            * ((gridRichLines A L k).card : ℝ) ^ ((2:ℝ)/3)
+          + ((A ×ˢ A).card : ℝ) + ((gridRichLines A L k).card : ℝ)) := by
+    have hsub : ∀ ℓ ∈ gridRichLines A L k, IsAffineLine ℓ :=
+      fun ℓ hℓ => hL ℓ (gridRichLines_subset A L k hℓ)
+    have h := hST (A ×ˢ A) (gridRichLines A L k) hsub
+    have hnn : (0:ℝ) ≤ ((A ×ˢ A).card : ℝ) ^ ((2:ℝ)/3)
+            * ((gridRichLines A L k).card : ℝ) ^ ((2:ℝ)/3)
+          + ((A ×ˢ A).card : ℝ) + ((gridRichLines A L k).card : ℝ) := by positivity
+    exact le_trans h (mul_le_mul_of_nonneg_right (by rw [hD]; linarith) hnn)
+  rw [hP] at hST_D
+  set s := ((A.card : ℝ) ^ 2) ^ ((2:ℝ)/3)
+            * ((gridRichLines A L k).card : ℝ) ^ ((2:ℝ)/3) with hs_def
+  have hcomb : (k : ℝ) * ((gridRichLines A L k).card : ℝ)
+      ≤ D * (s + (A.card : ℝ) ^ 2 + ((gridRichLines A L k).card : ℝ)) :=
+    le_trans hge hST_D
+  have hs0 : 0 ≤ s := by rw [hs_def]; positivity
+  have hs3 : s ^ 3 = ((A.card : ℝ) ^ 2) ^ 2 * ((gridRichLines A L k).card : ℝ) ^ 2 := by
+    rw [hs_def, mul_pow]
+    congr 1
+    · rw [← Real.rpow_natCast (((A.card : ℝ) ^ 2) ^ ((2:ℝ)/3)) 3,
+        ← Real.rpow_mul (by positivity)]; norm_num
+    · rw [← Real.rpow_natCast (((gridRichLines A L k).card : ℝ) ^ ((2:ℝ)/3)) 3,
+        ← Real.rpow_mul (Nat.cast_nonneg _)]; norm_num
+  have hk2R : (2:ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+  have hXN : ((gridRichLines A L k).card : ℝ) ≤ ((A.card : ℝ) ^ 2) ^ 2 := by
+    have hnat := gridRichLines_card_le A L hL hk
+    calc ((gridRichLines A L k).card : ℝ) ≤ ((A.card ^ 4 : ℕ) : ℝ) := by exact_mod_cast hnat
+      _ = ((A.card : ℝ) ^ 2) ^ 2 := by push_cast; ring
+  have harith := richline_arith (N := (A.card : ℝ) ^ 2)
+    (X := ((gridRichLines A L k).card : ℝ)) (k := (k : ℝ)) (C := D) (s := s)
+    (by positivity) (Nat.cast_nonneg _) hk2R hC1 hs0 hs3 hXN hcomb
+  calc (k : ℝ) ^ 3 * ((gridRichLines A L k).card : ℝ)
+      ≤ (64 * D ^ 3 + 4 * D) * (((A.card : ℝ) ^ 2) ^ 2 + (k : ℝ) ^ 2 * (A.card : ℝ) ^ 2) :=
+        harith
+    _ = (64 * D ^ 3 + 4 * D) * ((A.card : ℝ) ^ 4 + (k : ℝ) ^ 2 * (A.card : ℝ) ^ 2) := by ring
+
 end PachSharir.SzemerediTrotter
