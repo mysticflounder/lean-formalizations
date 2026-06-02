@@ -12,6 +12,7 @@ import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 -- Drawing -> abstract bridge + residual map:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.Abstractize
