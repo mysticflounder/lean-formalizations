@@ -257,6 +257,50 @@ theorem isConnected_reflexSector (a v b : Plane) (h : IsCorner a v b) :
       smul_eq_mul]; ring
   rw [cornerTurn, e]; nlinarith [mul_self_pos.mpr h]
 
+/-! ### The two sectors avoid the corner's own segments
+
+The side-functional vanishes along its own segment, so each open sector is
+disjoint from both incident segments `[a,v]`, `[v,b]`.  This is the local seed of
+`T ∖ β = T⁺ ⊔ T⁻` in L3: the two sectors are candidate sides, and they never
+touch the arc.  (The *non-adjacent* segments are excluded by thinness of the tube
+in L3, not here.) -/
+
+/-- The side-functional vanishes on its own segment. -/
+theorem sideForm_eq_zero_of_mem_segment (a b : Plane) {z : Plane}
+    (hz : z ∈ segment ℝ a b) : sideForm a b z = 0 := by
+  obtain ⟨s, t, _, _, hst, rfl⟩ := hz
+  rw [sideForm_affineComb a b a b hst]; simp
+
+/-- The previous segment `[a,v]` is disjoint from both sectors. -/
+theorem segment_av_subset_compl_sectors (a v b : Plane) :
+    segment ℝ a v ⊆ (convexSector a v b ∪ reflexSector a v b)ᶜ := by
+  rintro z ⟨s, t, hs, _, hst, rfl⟩
+  have hg1 : sideForm a v (s • a + t • v) = 0 := by
+    rw [sideForm_affineComb a v a v hst]; simp
+  have hg2 : sideForm v b (s • a + t • v) = s * sideForm a v b := by
+    rw [sideForm_affineComb v b a v hst, sideForm_cyclic a v b]; simp
+  rw [Set.mem_compl_iff]
+  rintro (⟨h1, _⟩ | (h | h))
+  · rw [hg1, mul_zero] at h1; exact lt_irrefl 0 h1
+  · rw [hg1, mul_zero] at h; exact lt_irrefl 0 h
+  · rw [hg2, cornerTurn] at h
+    nlinarith [mul_nonneg hs (mul_self_nonneg (sideForm a v b))]
+
+/-- The next segment `[v,b]` is disjoint from both sectors. -/
+theorem segment_vb_subset_compl_sectors (a v b : Plane) :
+    segment ℝ v b ⊆ (convexSector a v b ∪ reflexSector a v b)ᶜ := by
+  rintro z ⟨s, t, _, ht, hst, rfl⟩
+  have hg2 : sideForm v b (s • v + t • b) = 0 := by
+    rw [sideForm_affineComb v b v b hst]; simp
+  have hg1 : sideForm a v (s • v + t • b) = t * sideForm a v b := by
+    rw [sideForm_affineComb a v v b hst]; simp
+  rw [Set.mem_compl_iff]
+  rintro (⟨_, h2⟩ | (h | h))
+  · rw [hg2, mul_zero] at h2; exact lt_irrefl 0 h2
+  · rw [hg1, cornerTurn] at h
+    nlinarith [mul_nonneg ht (mul_self_nonneg (sideForm a v b))]
+  · rw [hg2, mul_zero] at h; exact lt_irrefl 0 h
+
 /-! ## §Action 0  The polygonal-arc carrier
 
 A `PolyArc` is a finite list of `n+1` vertices spanning `n ≥ 1` segments.  The

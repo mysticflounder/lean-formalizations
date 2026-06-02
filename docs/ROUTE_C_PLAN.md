@@ -307,6 +307,72 @@ then build bottom-up L→G→Z. Action 0 + L1 are the immediate first coding ste
 
 ---
 
+## 6. L3 — detailed design (the hardest node, in progress)
+
+Verified target shapes (read from `PlaneArcSeparation.lean` on 2026-06-02):
+
+- `IsTwoSidedPartition W U V` requires: `IsOpen U`, `IsOpen V` (**ambient**, in
+  the plane), `Disjoint U V`, `U ∪ V = W`, `U.Nonempty`, `V.Nonempty`,
+  `IsPreconnected U`, `IsPreconnected V`. (Structure, 8 fields.)
+- `ArcInRegion A R β` gives: `IsOpen R`, `R` a component of `Aᶜ`,
+  `IsSimplyConnected R`, `arcInterior β ⊆ R`, `Disjoint (arcInterior β) A`,
+  both endpoints `∈ frontier R` (crosscut).
+- `regionMinusArc R β = R \ β.carrier`; `regionMinusArc_isOpen` PROVEN.
+
+So the **end deliverable** is: a continuous `σ : ↥(regionMinusArc R β) → ZMod 2`
+that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**; then
+`U := σ⁻¹{0}`, `V := σ⁻¹{1}` (pushed to ambient-open subsets of the plane via
+`regionMinusArc_isOpen` + `σ` continuous into discrete `ZMod 2`).
+
+### Minimal-need analysis (what each downstream node truly consumes)
+
+- **G1 (cover) needs only**: `T` open with `arcInterior β ⊆ T ⊆ R`, `T` *connected*,
+  and a *locally constant, non-constant* `g : ↥(T \ β.carrier) → ZMod 2` (i.e.
+  `T \ β = T⁺ ⊔ T⁻`, both **open** and **nonempty** — **NOT** required connected).
+  Then the two-chart double cover `E → R` (charts `R∖β`, `T`; transition `g`).
+- **G3 (both values)**: `R` simply connected ⇒ cover trivial ⇒ coboundary
+  `g = h₀|_overlap + h₁|_overlap`. `T` connected ⇒ `h₁` constant ⇒ `h₀ = σ` is
+  non-constant on `R∖β` (because `g` is). *This is exactly where `T` connected and
+  `g` non-constant are spent; `T⁺/T⁻` connectedness is never used here.*
+- **G4 (each side preconnected)**: every `z ∈ R∖β` joins **within `R∖β`** by a path
+  to `T⁺` or `T⁻` (path in `R` by `IsOpen.isConnected_iff_isPathConnected`, cut at
+  first entry to the closed collar; the initial segment avoids `β`). `σ` constant on
+  each path ⇒ `σ⁻¹{c}` path-connected ⇒ preconnected. **This** is the node that
+  needs the side-reaching/path-cut lemma (E5).
+
+### L3 sub-nodes (build order; hardest = the collar + local separation)
+
+1. **`PolyArc → SimpleArc Plane` coercion** (PL parametrisation): continuous,
+   injective piecewise-affine `Icc 0 1 → Plane`; relate `carrier`/`arcInterior` to
+   `PolyArc.carrier` and the endpoint set. Plumbing, real. *(deps: none external)*
+2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`. Construction =
+   thin tube — per segment an open slab around the *open* segment, per interior
+   vertex a small disk, radius = `min` over (dist to non-adjacent segments, dist to
+   `Aᶜ`-complement i.e. to keep `⊆ R`, dist to the two endpoints). Connected because
+   it is a union of connected slabs/disks overlapping consecutively along the
+   connected `arcInterior β`. *(deps: `Metric.ball`, `IsOpen`, `dist`; `IsConnected`
+   union API.)*
+3. **Local separation `T \ β = T⁺ ⊔ T⁻`, both open & nonempty** (the crux). Glue:
+   over a segment slab use L1 `leftSide/rightSide`; over a vertex disk use L2
+   `convexSector/reflexSector`; consistency on overlaps via the sign of the shared
+   segment's `sideForm` (L2's `cornerTurn` orientation). Sectors avoid the incident
+   segments — **DONE** (`segment_av/vb_subset_compl_sectors`). The *remaining*
+   L2/L3 algebra: corner-locus complement `(convexSector ∪ reflexSector)ᶜ ∩ disk
+   = (β ∩ disk)` (ray parametrisation), so `disk \ β` is exactly the two sectors.
+   Non-emptiness of `T⁺,T⁻`: the sector points (e.g. `a+b−v`, `3v−a−b`) lie in `T`
+   for a thin enough disk. *(deps: §L1/§L2 of `PLArc.lean`, all PROVEN.)*
+4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
+   `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
+   E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
+   `exists_twoSidedPartition_of_polyArc` (the PL form of the residual).
+
+**Status (2026-06-02):** L1, L2 core, and sub-node-3's "sectors avoid incident
+segments" are PROVEN sorry-free in `PLArc.lean`. Next concrete step: sub-node 1
+(coercion) or sub-node 2 (collar) — both feed sub-node 3 (the crux). Sub-node 3 is
+where the genuine separation content lives; design it before coding the tube.
+
+---
+
 *Verification basis:* all PRESENT/ABSENT rows checked against
 `.lake/packages/mathlib/Mathlib` at `v4.30.0` on 2026-06-02 (`grep` over the source
 tree; declaration line numbers cited inline). Full route-(c) evaluation:
