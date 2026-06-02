@@ -73,15 +73,6 @@ modules — and advertising them.
 Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
 (citation status + math-correctness status, kept up to date).
 
-> **Repo structure (2026-06-02):** `main` is now `sorry`-free. The `sorry`-backed
-> Pach–de Zeeuw **distinct-distances program** (CrossingLemma, PachSharir,
-> IncidenceAssembly, the reduction chain, MilnorThom, CurveSymmetries) was moved
-> to the **`wip-pachdezeeuw`** branch — it may never be completed, so it no longer
-> rides on `main`. Kept on `main`: BSG, geometry, the CombinatorialMap library,
-> unit-distance counting, and the complete axiom-clean **Bézout** work
-> (`Bezout.lean` + `AlgebraicPrelim.lean`). Resume WIP via `git checkout
-> wip-pachdezeeuw`.
-
 - [~] **Citation audit** — done for the vendored sources. PdZ: Bézout was
   mislabelled "Theorem 2.2" → corrected to **2.1**. BSG: "Lemma 6.17" (actually
   van der Waerden) → corrected to the triple-count step of Tao–Vu Thm 2.29;

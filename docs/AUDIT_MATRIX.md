@@ -155,11 +155,10 @@ Kernel status: axiom-clean. No source vendored (standard results).
 
 ---
 
-## Crossing lemma — `PachDeZeeuw/CrossingLemma/*` *(moved to `wip-pachdezeeuw` branch)*
+## Crossing lemma — `PachDeZeeuw/CrossingLemma/*`
 
-Kernel status: **WIP, live `sorry`s** (PlaneArcSeparation, CrossingLemmaAmplification).
-Moved off `main` 2026-06-02 to keep `main` sorry-free; lives on the
-`wip-pachdezeeuw` branch. Math-correctness audit deferred until proofs land.
+Kernel status: **WIP, live `sorry`s** (PlaneArcSeparation 15, CrossingLemmaAmplification 6,
+ResidualMap* 2, Abstractize 1). Math-correctness audit deferred until proofs land.
 
 | Reference | Status | Note |
 |-----------|--------|------|
@@ -171,13 +170,11 @@ Moved off `main` 2026-06-02 to keep `main` sorry-free; lives on the
 
 ---
 
-## Pach–Sharir incidences — `PachDeZeeuw/PachSharir/*`, `IncidenceAssembly/*` *(moved to `wip-pachdezeeuw` branch)*
+## Pach–Sharir incidences — `PachDeZeeuw/PachSharir/*`, `IncidenceAssembly/*`
 
-Kernel status: **WIP, live `sorry`s** (Bridge/Gap B, Theorem23/Gap A). Top-level
-Theorem 1.1 / 1.2 are sorry-backed / conditional. Moved off `main` 2026-06-02
-with the rest of the distinct-distances program; lives on the `wip-pachdezeeuw`
-branch. Audit deferred until proofs land. (Note: `CombinatorialMap/` itself —
-sorry-free, axiom-clean — stayed on `main` as a standalone library.)
+Kernel status: **WIP, live `sorry`s** (Bridge 9, Theorem23 4, SzemerediTrotter 2,
+CombinatorialMap/EdgeInsertion 3). Top-level Theorem 1.1 / 1.2 are sorry-backed /
+conditional. Audit deferred until proofs land.
 
 ---
 

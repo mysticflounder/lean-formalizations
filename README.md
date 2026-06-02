@@ -134,31 +134,27 @@ EOF
 
 (Or use `./lake-build.sh` — a memory-capped, single-flight wrapper.)
 
-## Work-in-progress — moved off `main` to the `wip-pachdezeeuw` branch
+## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/`
 
-The unfinished Pach–de Zeeuw **"distinct distances on algebraic curves"**
-program is no longer on `main`. It is `sorry`-backed WIP (it may never be
-completed), so to keep `main` sorry-free and publish-clean it now lives on the
-**`wip-pachdezeeuw`** branch (a full snapshot — it still builds there):
+A vendored, ported copy of the Pach–de Zeeuw "distinct distances on algebraic
+curves" program. It **compiles** but is **not finished**: most modules carry
+`sorry` or consume unproven statement-surfaces. The reduction theorems are
+honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …`).
 
-- **`CrossingLemma/`** — multigraph crossing lemma; bottoms out in a labelled
-  conjectured geometric residual (`exists_twoSidedPartition_of_arc`, `sorry`).
-  (Its complete combinatorial-map / Euler-bound substrate stayed on `main` as the
-  standalone `Combinatorics/CombinatorialMap/` library — see above.)
-- **`PachSharir/`** — Pach–Sharir incidence bound (`theorem23`/`corollary24`,
-  `sorry`).
-- **`IncidenceAssembly/`, `AuxiliaryCurves`, `IncidenceBound`, `Theorem11`,
-  `Theorem12`, `Basic`, `CurveInterface`** — the (conditional, `sorry`-backed)
-  reduction chain to Theorem 1.1.
-- **`MilnorThom.lean`, `CurveSymmetries.lean`** — unproven classical
-  statement-surfaces (`MilnorThom22Statement`; `Lemma25/26Statement`) that the
-  program consumes.
-
-To resume that work: `git checkout wip-pachdezeeuw`.
+- **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
+  combinatorial-map / Euler-bound / edge-insertion substrate has been promoted to
+  the standalone `Combinatorics/CombinatorialMap/` library above; what remains
+  here is the still-unfinished drawing→map bridge — the full crossing lemma
+  bottoms out in a labelled conjectured geometric residual
+  (`exists_twoSidedPartition_of_arc`, `sorry`). A separate `subsetAveraging_master`
+  (`sorry`) is a documented dead-end, not used downstream.
+- **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`
+  contain `sorry`).
+- **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
+  `IncidenceAssembly`, `Basic`, `CurveInterface`** — the reduction chain to
+  Theorem 1.1; conditional on the statement-surfaces, some `sorry`.
 
 ### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
-
-(Kept on `main`: this and `AlgebraicPrelim.lean` are complete and axiom-clean.)
 
 - **`Bezout.lean`** — `theorem bezout : BezoutFiniteIntersectionStatement`. Two
   bounded-degree real plane curves with no common infinite irreducible
@@ -169,6 +165,15 @@ To resume that work: `git checkout wip-pachdezeeuw`.
   → `bezout`). **Axiom-clean, 0 `sorry`.** Note: this is the *existential*
   (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound is not yet stated or
   proven — see `ROADMAP.md`.
+
+## Statement-surfaces ⚪ — `LeanFormalizations/PachDeZeeuw/`
+
+These define a `Prop` but do **not** prove it — accepted classical inputs:
+
+- **`MilnorThom.lean`** — `MilnorThom22Statement` (Oleĭnik–Petrovskiĭ / Milnor /
+  Thom connected-components bound).
+- **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
+  (symmetries of plane algebraic curves).
 
 ## Idiomaticity status (pre-PR)
 
@@ -182,28 +187,26 @@ project namespaces were renamed to semantic ones (`.PDZ` dropped → `PachDeZeeu
 EU-N / BR-N step tags in docstrings were rewritten to standard
 combinatorial-topology terms; and the dead source-project references and the
 large commented-out WIP block in `AlgebraicPrelim.lean` were removed. The
-verified core (BSG, geometry, AlgebraicPrelim, Bézout) — everything now on
-`main` — is closest to PR-ready. The unproven statement-surfaces (Milnor–Thom /
-curve symmetries) moved to the `wip-pachdezeeuw` branch with the rest of the
-distinct-distances program.
+verified core (BSG, geometry, AlgebraicPrelim, Bézout) is closest to PR-ready;
+the remaining `def … : Prop` statement-surfaces (Milnor–Thom / curve
+symmetries) are unproven classical inputs by design.
 
 ## Layout
 
 ```
-LeanFormalizations.lean                    -- root aggregator
+LeanFormalizations.lean                    -- root aggregator (imports everything)
 LeanFormalizations/
   Combinatorics/Additive/                  -- BSG ✅
   Combinatorics/CombinatorialMap/           -- combinatorial maps + planar edge bound ✅
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification ✅
-  PachDeZeeuw/                              -- (on main) only the complete Bézout work
+  PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
     Bezout.lean                             -- Bézout finite-intersection bound ✅
-
-Everything else under PachDeZeeuw/ (the sorry-backed distinct-distances program:
-CrossingLemma/, PachSharir/, IncidenceAssembly/, the reduction chain, MilnorThom,
-CurveSymmetries) lives on the `wip-pachdezeeuw` branch, not on `main`.
+    MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
+    CrossingLemma/ PachSharir/              -- 🟡
+    Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- 🟡
 ```
 
 ## License

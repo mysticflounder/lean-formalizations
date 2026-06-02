@@ -22,10 +22,14 @@ import LeanFormalizations.Geometry.Euclidean.IsometryClassification
 import LeanFormalizations.Geometry.Convex.LineSlice
 import LeanFormalizations.Geometry.Convex.SimpleConvexPolygon
 
--- Pach–de Zeeuw: Bézout finite-intersection (Theorem 2.1, existential form) and
--- its algebraic prelims. Complete, axiom-clean. The rest of the Pach–de Zeeuw
--- distinct-distances program (crossing lemma, Pach–Sharir, incidence assembly,
--- the reduction chain) is `sorry`-backed WIP and lives on the `wip-pachdezeeuw`
--- branch, not on `main`.
-import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
+-- Pach–de Zeeuw program: distinct distances on algebraic curves, and the
+-- paper-faithful inputs it reduces to. Mostly statement-surfaces / work in
+-- progress with `sorry`; see README for the per-module VERIFIED/PARTIAL triage.
 import LeanFormalizations.PachDeZeeuw.Bezout
+import LeanFormalizations.PachDeZeeuw.MilnorThom
+import LeanFormalizations.PachDeZeeuw.CurveSymmetries
+import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
+import LeanFormalizations.PachDeZeeuw.CrossingLemma
+import LeanFormalizations.PachDeZeeuw.PachSharir
+import LeanFormalizations.PachDeZeeuw
+import LeanFormalizations.PachDeZeeuw.IncidenceAssembly
