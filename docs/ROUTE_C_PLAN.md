@@ -116,9 +116,20 @@ and `Plane` is locally connected (`IsOpen.locPathConnectedSpace`, PRESENT). So t
   product lives on `WithLp 2 (ℝ×ℝ)` / `EuclideanSpace`, see ledger D7); the
   determinant form sidesteps that entirely. *From scratch, trivial.*
 
-- **L2 — corner local model.** At a PL vertex where two segments meet at angle, the
-  punctured neighborhood splits into the "inside-the-angle" and "outside-the-angle"
-  open sectors. *From scratch, elementary 2-D geometry; fiddlier than L1.*
+- **L2 — corner local model. CORE PROVEN ✅ (2026-06-02, `PLArc.lean` §L2).** At a PL
+  vertex `a → v → b` with genuine turn `τ := sideForm a v b ≠ 0` (`IsCorner`), the
+  complement of the two rays splits *globally* into `convexSector` (inside the turn,
+  `{0 < τ·sideForm a v z ∧ 0 < τ·sideForm v b z}`) and `reflexSector` (outside,
+  `{τ·sideForm a v z < 0 ∨ τ·sideForm v b z < 0}`). Both proven **open, disjoint,
+  nonempty, and connected** (`isOpen_/disjoint_/isConnected_convexSector` &
+  `_reflexSector`) — the convex sector via half-plane intersection convexity, the
+  reflex sector via `IsPreconnected.union` of two half-planes meeting at the
+  reflected point `3v − a − b`. **Fully algebraic, no `arg`/`Complex`/disk** — much
+  cleaner than the originally-anticipated angular/sector analysis (the reflex side
+  was the feared part; it reduces to "union of two convex sets sharing a point").
+  Axiom-clean `[propext, Classical.choice, Quot.sound]`. *Remaining L2 piece:* the
+  corner-locus identity `(convexSector ∪ reflexSector)ᶜ = ray(v→a) ∪ ray(v→b)`
+  (mechanical ray parametrisation), deferred to the L3 tube localisation.
 
 - **L3 — global collar of `arcInterior β`.** Glue L1 over each open segment and L2
   over each interior vertex into a single open neighborhood `T ⊇ arcInterior β` with
@@ -275,9 +286,12 @@ Estimate (sessions = ~150–200k context → one `/compact`):
 
 0. **R1 + R2 gate — DONE ✅ (2026-06-02).** Both resolved; route (c) is GO. R2's
    resolution removed E6 and reduced the residual to L3 + plumbing.
-1. **Action 0 + L1** (PL types, segment determinant functional) — ~1 session.
-2. **L2 + L3** (corner model, global collar) — ~2–3 sessions. **The bulk and the
-   genuine hardest node now.** L3 is the only node needing PL.
+1. **Action 0 + L1** (PL types, segment determinant functional) — DONE ✅
+   (`PLArc.lean` §L1 + §Action 0, 2026-06-02).
+2. **L2 core** (corner model: two sectors open/disjoint/connected) — DONE ✅
+   (`PLArc.lean` §L2, 2026-06-02). Remaining: corner-locus complement identity,
+   folded into L3. **L3** (global collar) — ~2 sessions, **the genuine hardest
+   node**; the only node needing PL.
 3. **G1** (two-chart side double cover ⇒ `IsCoveringMap`) — ~1 session.
 4. **G3** (lift `id`, build `τ`, `σ`, both-values) — ~1 session. Now plumbing.
 5. **G2 + G4 + Z1** (locally constant, each side connected, assembly) — ~1–2
