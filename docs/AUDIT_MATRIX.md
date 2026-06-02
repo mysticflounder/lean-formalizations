@@ -42,9 +42,10 @@ Kernel status: axiom-clean (`propext, Classical.choice, Quot.sound`), 0 `sorry`
 on all 3 public theorems). The energy→popular-graph bridge (Tao–Vu §6.4) supplies
 the dense graph; the **dependent-random-choice** track (Fox–Sudakov §5) takes it
 from there to the restricted sumset. The abandoned popular-pairs-via-codegree
-route (9 dead lemmas, see below) is the superseded alternative and is unreachable.
+route has been resolved (2026-06-01): 7 bespoke lemmas deleted, 2 general lemmas
+kept as flagged mathlib candidates (see below).
 
-### Energy + popular-pairs track (Tao–Vu §6.4)
+### Energy → popular-graph bridge + sumset closers (live, Tao–Vu §6.4)
 
 | Lemma | Citation | Math | Note |
 |-------|----------|------|------|
@@ -57,7 +58,7 @@ route (9 dead lemmas, see below) is the superseded alternative and is unreachabl
 | `restricted_sumset_via_multiplicity` | 🔧 | ✅ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4 = FS §5.1. **Body line-read**: disjoint fibers T_v over A+B, M·\|A+B\| ≤ Σ\|T_v\| = \|⋃T_v\| ≤ \|S\|³. Sound. |
 | `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib (full body read) |
 
-### Dead code — abandoned popular-pairs-via-codegree route (resolved 2026-06-01)
+### Abandoned popular-pairs-via-codegree route (resolved 2026-06-01)
 
 The codegree route was superseded by the DRC track and was unreachable from any
 public theorem. **Resolved:** 7 bespoke lemmas deleted; 2 general-purpose lemmas
