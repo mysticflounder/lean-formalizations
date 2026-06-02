@@ -83,8 +83,12 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   isometry text; **Newman/Pommerenke** crosscut cites (deferred with the
   CrossingLemma WIP).
 - [~] **Line-by-line math audit** — in progress (see matrix). BSG energy +
-  popular-pairs / Ruzsa cluster ✅ verified against Tao–Vu §6.4; DRC track and
-  final-assembly theorems pending. Bézout / Geometry not yet started.
+  popular-pairs / Ruzsa cluster ✅ and the public `balog_szemeredi_gowers_`
+  `asymmetric`/`symmetric` theorems ✅ verified against Tao–Vu §6.4 (assembly
+  sound). Remaining BSG gap: the **dependent-random-choice track interior**
+  (8 lemmas behind `graph_balogSzemerediGowers_restricted_sumset`), whose
+  interface is consumed correctly but interior is not yet read. Bézout /
+  Geometry not yet started.
 - **Sources**: Pach–de Zeeuw `.tex` and Tao–Vu *Additive Combinatorics* are
   vendored under `docs/references/`; copyrighted PDFs are gitignored (local-only),
   arXiv `.tex` sources stay tracked.

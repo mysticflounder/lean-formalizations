@@ -78,11 +78,11 @@ track (Fox–Sudakov DRC), assembled into the public theorems.
 
 | Decl | Citation | Math | Note |
 |------|----------|------|------|
-| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ☐ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected; Petridis 2012 kept |
-| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ☐ | ☐ | explicit constants |
-| `balog_szemeredi_gowers_asymmetric` | ◐ | ☐ | stmt ↔ TV Thm 2.29 |
-| `balog_szemeredi_gowers_symmetric` | ◐ | ☐ | stmt ↔ TV Thm 2.29 (equal-sets) |
-| `balog_szemeredi_gowers_asymmetric_explicit` | ◐ | ☐ | `c=η/16`, explicit `C(η)`; TV Thm 2.29 is the explicit-polynomial form |
+| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ☐ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected; Petridis 2012 kept. **Interface consumed correctly by the public theorems; interior (DRC track) not yet line-audited.** |
+| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ☐ | ☐ | explicit constants; same interior gap |
+| `balog_szemeredi_gowers_asymmetric` | ✅ | ✅ | **assembly verified**: popular graph (`popular_pairs_card_lower_bound` ✅) + `|S|≤(4/η)n` counting + graph-BSG interface + `ruzsa_sumset_to_difference` ✅; large (n≥4/η) and singleton cases both sound. Rests on DRC interior (☐). |
+| `balog_szemeredi_gowers_symmetric` | ✅ | ✅ | **verified**: asymmetric with Y:=X + Ruzsa-triangle symmetrization (`|X'−X'|·|Y'|≤|X'−Y'|²`), cost C→C²/c |
+| `balog_szemeredi_gowers_asymmetric_explicit` | ◐ | ◐ | mirrors asymmetric; `c=η/16=min(η/16,η/4)` ✓; explicit `C` definitionally consistent. Tail of proof not fully re-read; rests on DRC interior (☐). |
 
 ### Module-level reference list (header)
 
