@@ -45,6 +45,8 @@ namespace CrossingLemma.PlaneArcSeparation
 
 open Set Topology
 
+open scoped ENNReal NNReal
+
 /-! ## §L1  The segment side-functional (signed area / left-of test) -/
 
 /-- **Side-functional of the directed segment `a → b`.**  The signed area of the
@@ -482,14 +484,34 @@ theorem ball_inter_cornerLocus (a v b : Plane) (h : IsCorner a v b)
       · rw [sideForm_affineComb a v v b hpq, sideForm_right_endpoint]
         nlinarith [mul_nonneg hq (mul_self_nonneg (sideForm a v b))]
 
+/-! ## §L3.2  Positive separation of disjoint compacts
+
+A disjoint compact / closed pair in the plane is separated by a uniform positive
+distance.  This is the metric-space fact (`Metric.exists_pos_forall_lt_edist`,
+phrased here in `dist` rather than `edist`) behind the non-adjacent segment
+separation `d_sep` of the L3 collar. -/
+
+/-- **Uniform positive separation of a disjoint compact/closed pair.**  If `s` is
+compact, `t` is closed, and they are disjoint, some `δ > 0` lies strictly below
+every cross distance `dist x y`, `x ∈ s`, `y ∈ t`. -/
+theorem exists_pos_forall_lt_dist {s t : Set Plane} (hs : IsCompact s)
+    (ht : IsClosed t) (hst : Disjoint s t) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ x ∈ s, ∀ y ∈ t, δ < dist x y := by
+  obtain ⟨r, hr, hlt⟩ := Metric.exists_pos_forall_lt_edist hs ht hst
+  refine ⟨(r : ℝ), by exact_mod_cast hr, fun x hx y hy => ?_⟩
+  have h := hlt x hx y hy
+  have h2 : ((r : ℝ≥0∞)).toReal < (edist x y).toReal :=
+    (ENNReal.toReal_lt_toReal ENNReal.coe_ne_top (edist_ne_top x y)).mpr h
+  rwa [ENNReal.coe_toReal, ← dist_edist] at h2
+
 /-! ## §Action 0  The polygonal-arc carrier
 
 A `PolyArc` is a finite list of `n+1` vertices spanning `n ≥ 1` segments.  The
-simplicity conditions (consecutive segments share only their common vertex;
-non-adjacent segments are disjoint) are recorded so the carrier is a genuine
-simple arc; the coercion `PolyArc → SimpleArc Plane` (piecewise-linear
-parametrisation) and the collar construction are built on top in later work
-(nodes L2/L3 of `docs/ROUTE_C_PLAN.md`). -/
+simplicity conditions are recorded so the carrier is a genuine simple arc:
+`distinct` (vertices pairwise distinct) and `nonadjacent_disjoint` (non-consecutive
+closed segments disjoint).  The coercion `PolyArc → SimpleArc Plane`
+(piecewise-linear parametrisation) and the collar construction are built on top in
+later work (node L3 of `docs/ROUTE_C_PLAN.md`). -/
 
 /-- A **polygonal (PL) simple arc** in the plane: `n + 1` vertices `verts 0, …,
 verts n` (`n ≥ 1`) joined by the `n` consecutive segments `[verts i, verts (i+1)]`.
@@ -505,6 +527,16 @@ structure PolyArc where
   verts : Fin (numSegs + 1) → Plane
   /-- Vertices are pairwise distinct. -/
   distinct : Function.Injective verts
+  /-- **No self-crossing.**  Non-consecutive closed segments are disjoint: the
+  `i`-th segment `[verts i, verts (i+1)]` and the `j`-th `[verts j, verts (j+1)]`
+  with a gap (`i + 1 < j`) do not meet.  (Consecutive segments share exactly their
+  common vertex; that is handled separately where injectivity of the parametrisation
+  is built.)  This is the simplicity condition that makes the non-adjacent
+  separation `d_sep` positive — the thinness budget of the L3 collar. -/
+  nonadjacent_disjoint :
+    ∀ i j : Fin numSegs, (i : ℕ) + 1 < (j : ℕ) →
+      Disjoint (segment ℝ (verts (Fin.castSucc i)) (verts (Fin.succ i)))
+        (segment ℝ (verts (Fin.castSucc j)) (verts (Fin.succ j)))
 
 namespace PolyArc
 
@@ -529,6 +561,41 @@ def carrier : Set Plane :=
 /-- The two endpoints of the polygonal arc. -/
 def src : Plane := β.verts 0
 def tgt : Plane := β.verts (Fin.last β.numSegs)
+
+/-- Each closed segment of the arc is compact (continuous image of `[0,1]`). -/
+theorem segCarrier_isCompact (i : Fin β.numSegs) : IsCompact (β.segCarrier i) := by
+  rw [segCarrier, segment_eq_image ℝ (β.segSrc i) (β.segTgt i)]
+  exact isCompact_Icc.image (by fun_prop)
+
+/-- **Non-adjacent separation `d_sep > 0`.**  There is a single `δ > 0` strictly
+below every distance between a point of a segment and a point of a non-consecutive
+segment.  This is the thinness budget of the L3 collar: a tube of radius `< δ`
+around any one segment cannot reach a non-adjacent segment.  (Proof: each
+non-adjacent pair is a disjoint compact pair, separated by `exists_pos_forall_lt_dist`;
+take the minimum over the finitely many pairs.) -/
+theorem exists_pos_nonadjacent_sep :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ i j : Fin β.numSegs, (i : ℕ) + 1 < (j : ℕ) →
+      ∀ x ∈ β.segCarrier i, ∀ y ∈ β.segCarrier j, δ < dist x y := by
+  classical
+  have hpair : ∀ p : Fin β.numSegs × Fin β.numSegs, ∃ δ : ℝ, 0 < δ ∧
+      ((p.1 : ℕ) + 1 < (p.2 : ℕ) →
+        ∀ x ∈ β.segCarrier p.1, ∀ y ∈ β.segCarrier p.2, δ < dist x y) := by
+    intro p
+    by_cases hp : (p.1 : ℕ) + 1 < (p.2 : ℕ)
+    · obtain ⟨δ, hδ, hsep⟩ := exists_pos_forall_lt_dist (β.segCarrier_isCompact p.1)
+        (β.segCarrier_isCompact p.2).isClosed (β.nonadjacent_disjoint p.1 p.2 hp)
+      exact ⟨δ, hδ, fun _ => hsep⟩
+    · exact ⟨1, one_pos, fun h => absurd h hp⟩
+  choose g hg0 hg using hpair
+  have hne : (Finset.univ : Finset (Fin β.numSegs × Fin β.numSegs)).Nonempty :=
+    ⟨(⟨0, β.numSegs_pos⟩, ⟨0, β.numSegs_pos⟩), Finset.mem_univ _⟩
+  refine ⟨Finset.univ.inf' hne g, ?_, ?_⟩
+  · rw [Finset.lt_inf'_iff]
+    exact fun p _ => hg0 p
+  · intro i j hij x hx y hy
+    calc Finset.univ.inf' hne g
+        ≤ g (i, j) := Finset.inf'_le g (Finset.mem_univ _)
+      _ < dist x y := hg (i, j) hij x hx y hy
 
 end PolyArc
 

@@ -345,6 +345,15 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
 1. **`PolyArc → SimpleArc Plane` coercion** (PL parametrisation): continuous,
    injective piecewise-affine `Icc 0 1 → Plane`; relate `carrier`/`arcInterior` to
    `PolyArc.carrier` and the endpoint set. Plumbing, real. *(deps: none external)*
+   **Started 2026-06-02:** `PolyArc` now carries the no-self-crossing field
+   `nonadjacent_disjoint` (non-consecutive closed segments disjoint), and the metric
+   backbone is PROVEN: `segCarrier_isCompact`, and `exists_pos_nonadjacent_sep` —
+   the **uniform `d_sep > 0`** separating every non-adjacent segment pair (via
+   `exists_pos_forall_lt_dist` = `Metric.exists_pos_forall_lt_edist` in `dist` form,
+   minimised over the finitely many pairs). All sorry-free, axiom-clean. *Still TODO
+   for sub-node 1:* the `consecutive_meet` field (adjacent segments meet only at the
+   shared vertex) and the parametrisation map + its continuity/injectivity, then the
+   `carrier`/`arcInterior` relations.
 2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`. Construction =
    thin tube — per segment an open slab around the *open* segment, per interior
    vertex a small disk, radius = `min` over (dist to non-adjacent segments, dist to
