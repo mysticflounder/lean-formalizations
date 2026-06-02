@@ -33,3 +33,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.PachSharir
 import LeanFormalizations.PachDeZeeuw
 import LeanFormalizations.PachDeZeeuw.IncidenceAssembly
+
+-- Vendored, frozen Erdős problem statements (verbatim from formal-conjectures,
+-- Apache 2.0) hosted for cross-version reference; see LeanFormalizations.FormalConjectures.
+import LeanFormalizations.FormalConjectures

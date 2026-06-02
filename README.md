@@ -175,6 +175,23 @@ These define a `Prop` but do **not** prove it — accepted classical inputs:
 - **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
   (symmetries of plane algebraic curves).
 
+## Vendored statements ⚪ — `LeanFormalizations/FormalConjectures/`
+
+Frozen, **verbatim** Erdős problem statements copied from
+[`formal-conjectures`](https://github.com/google-deepmind/formal-conjectures) (Apache 2.0),
+hosted here so downstream projects can reference them without importing that project
+(which is pinned to mathlib v4.27.0; this project is on v4.30.0).
+
+- **`ErdosProblems/96.lean`, `97.lean`, `98.lean`** — problems 96 (unit distances in a
+  convex polygon), 97 (equidistant vertices), 98 (distinct distances in general position).
+  Each carries a `!!! DO NOT CHANGE !!!` notice; the **only** adaptation is the import line.
+  The statements use `sorry`/`answer(sorry)` exactly as upstream (open-problem surfaces).
+- **`Util.lean`** — a thin mathlib-v4.30 compatibility shim (no-op `answer(…)` macro and
+  `category`/`AMS` attributes; `ℝ²`, `ConvexIndep`, `distinctDistances`,
+  `unitDistancePairsCount`, `InGeneralPosition`, `NonTrilinear`, `Set.Triplewise` copied
+  verbatim from `FormalConjecturesForMathlib`). It is *not* a faithful port of the upstream
+  attribute/linter machinery — only enough to compile the frozen statements.
+
 ## Idiomaticity status (pre-PR)
 
 A mathlib-idiomaticity audit drove a de-jargon pass (see `ROADMAP.md`): the
@@ -207,6 +224,9 @@ LeanFormalizations/
     MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
     CrossingLemma/ PachSharir/              -- 🟡
     Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- 🟡
+  FormalConjectures/                       -- vendored verbatim Erdős statements ⚪
+    Util.lean                              -- v4.30 compat shim (DO NOT depend on for proofs)
+    ErdosProblems/96 97 98                 -- frozen statements-of-record (DO NOT CHANGE)
 ```
 
 ## License
