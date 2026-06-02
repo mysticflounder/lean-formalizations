@@ -29,16 +29,20 @@ These are distinct from **kernel verification** (compiles, `#print axioms` clean
 - `docs/references/TaoVu.AddComb.pdf` — Tao & Vu, *Additive Combinatorics* (CUP 2006). **Local-only, gitignored (copyrighted).**
 - `docs/references/FoxSudakov_DependentRandomChoice_arxiv_0909.3271v2.pdf` — Fox & Sudakov, *Dependent Random Choice*, *RS&A* 38 (2011) 68–99, arXiv:0909.3271. Gitignored PDF (arXiv source is redistributable; track the link).
 
-Last updated: 2026-06-01.
+Last updated: 2026-06-01. **BSG live path: 100% line-verified** against Tao–Vu §6.4
++ Fox–Sudakov §5; build green (8475 jobs); all 3 public theorems empirically
+axiom-clean (`[propext, Classical.choice, Quot.sound]`, verified — not inferred).
 
 ---
 
 ## Balog–Szemerédi–Gowers — `Combinatorics/Additive/BalogSzemerediGowers.lean`
 
-Kernel status: axiom-clean (`propext, Classical.choice, Quot.sound`), 0 `sorry`.
-Two proof tracks: the **popular-pairs / paths-of-length-2-and-3** track (Tao–Vu
-§6.4 + the energy→graph bridge, TV Lemma 2.30) and a **dependent-random-choice**
-track (Fox–Sudakov DRC), assembled into the public theorems.
+Kernel status: axiom-clean (`propext, Classical.choice, Quot.sound`), 0 `sorry`
+— **empirically re-verified 2026-06-01** (build green, 8475 jobs; `#print axioms`
+on all 3 public theorems). The energy→popular-graph bridge (Tao–Vu §6.4) supplies
+the dense graph; the **dependent-random-choice** track (Fox–Sudakov §5) takes it
+from there to the restricted sumset. The abandoned popular-pairs-via-codegree
+route (9 dead lemmas, see below) is the superseded alternative and is unreachable.
 
 ### Energy + popular-pairs track (Tao–Vu §6.4)
 
@@ -50,9 +54,8 @@ track (Fox–Sudakov DRC), assembled into the public theorems.
 | `addEnergy_le_popular_part` | — | ✅ | rare part `≤ θ|X||Y|` via `r²≤θr` |
 | `popular_pairs_card_lower_bound` | — | ✅ | `|G(θ)|≥(η/2)|X||Y|` for `2θ≤η|X|` |
 | `path3_count_le_triple_rep_count` | 🔧 | ✅ | cited "Cor. 6.20" ✓; injection = identity step in proof of TV Thm 2.29 (full body read) |
-| `restricted_sumset_via_multiplicity` | 🔧 | ◐ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4. Statement ✓; body not line-read |
+| `restricted_sumset_via_multiplicity` | 🔧 | ✅ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4 = FS §5.1. **Body line-read**: disjoint fibers T_v over A+B, M·\|A+B\| ≤ Σ\|T_v\| = \|⋃T_v\| ≤ \|S\|³. Sound. |
 | `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib (full body read) |
-| `length_three_path_count_lower_bound` | 🔧 | ◐ | citation fixed (was "/ Schoen–Sisask 2007"). Statement + docstring structure checked; ~230-line double-CS body **not** line-read |
 
 ### ⚠️ Dead code — abandoned popular-pairs-via-codegree route
 
@@ -61,6 +64,7 @@ any public theorem; unaudited; candidates for deletion. Compile + axiom-clean.
 
 | Lemma | Status | Note |
 |-------|--------|------|
+| `length_three_path_count_lower_bound` | dead | **reclassified 2026-06-01** — was listed as a live ◐; reachability check shows 0 real uses (the only other mention is a docstring in another lemma). The ~230-line double-CS body was the popular-pairs route to path-3 counts; the live path uses `dense_bipartite_has_path3_rectangle` (DRC) instead. Body never line-read; n/a (off-path). |
 | `popular_paths_length_two_lower_bound` | dead | feeds only the dead chain below |
 | `exists_popular_column` | dead | 0 downstream uses |
 | `codegree_sum_lower_bound` | dead | → `codegree_sq_sum_lower_bound` only |
@@ -72,33 +76,41 @@ any public theorem; unaudited; candidates for deletion. Compile + axiom-clean.
 
 ### Dependent-random-choice track (Fox–Sudakov §5)
 
-Verified against **Fox–Sudakov, *Dependent Random Choice*, arXiv:0909.3271v2**:
-the track architecture and all constants match the paper's §5. Lemma 5.1 (DRC
-core), Lemma 5.2 (`A′,B′` of size ≥ cn/8 with ≥ 2⁻¹²c⁵n² length-3 paths), and the
-§5.1 BSG application (`|A′+B′| ≤ 2¹²C³c⁻⁵n`) correspond exactly; our `c=δ/8` and
-`C=2¹³K³/δ⁵+2¹²/δ⁵` are the paper's `c′=cn/8`, `C′=2¹²C³c⁻⁵` (+ edge-case terms).
-◐ = correspondence + constants confirmed; individual proof bodies not line-read.
+**Line-verified 2026-06-01** against **Fox–Sudakov, *Dependent Random Choice*,
+arXiv:0909.3271v2** (§5 extracted from the vendored PDF). All 8 proof *bodies*
+read step-by-step; architecture and constants match the paper's §5. Our `c=δ/8`
+and `C=2¹³K³/δ⁵+2¹²/δ⁵` are the paper's `c′=cn/8`, `C′=2¹²C³c⁻⁵` (+ edge-case
+terms). ✅ = body read in full and matches the source argument.
+
+**Two honest deviations from the paper, both sound:**
+1. The witness uses the *guaranteed lower-bound* density `c₀=(δ/2)|A|/m` for the
+   pair-DRC call, not the paper's exact edge density `c₁≥c`. Since DRC is valid for
+   any true lower-bound density and `c₀≤c₁`, this only loosens constants; the final
+   `δ⁵/2¹²` still lands.
+2. The pointwise path count omits the paper's `a′≠a, b′≠b` distinctness ("−1")
+   terms. Valid: the BSG representation `y=x−x′+x″` does not require distinct path
+   vertices, so degenerate paths are legitimate; the count is honest.
 
 | Lemma | Citation | Math | Maps to | Note |
 |-------|----------|------|---------|------|
-| `graph_pair_dependentRandomChoice` | ✅ | ◐ | FS Lemma 5.1 | DRC core: random `v∈B`, `U=N(v)` |
-| `graph_high_degree_subset_lb` | ✅ | ◐ | FS Lemma 5.2 proof (`A₁`) | high-degree subset, density `c₁≥c` |
-| `graph_dependentRandomChoice_markov_refinement` | ✅ | ◐ | FS 5.2 (lines 618–620) | `A′` from low-bad-pair vertices |
-| `graph_dependentRandomChoice_popular_columns` | ✅ | ◐ | FS 5.2 (lines 621–628) | `B′` from high-`U`-degree vertices |
-| `graph_dependentRandomChoice_payoff_pointwise_witness` | ✅ | ◐ | FS 5.2 (lines 629–634) | length-3 path count per `(a,b)` |
-| `graph_dependentRandomChoice_payoff_pointwise_count` | ✅ | ◐ | FS 5.2 (lines 629–634) | |
-| `graph_dependentRandomChoice_payoff_pointwise` | ✅ | ◐ | FS 5.2 (lines 629–634) | |
-| `dense_bipartite_has_path3_rectangle` | ✅ | ◐ | **FS Lemma 5.2** (capstone) | `c=δ/8`, `2⁻¹²c⁵n²` paths — constants match |
+| `graph_pair_dependentRandomChoice` | ✅ | ✅ | FS Lemma 5.1 | DRC core. 9-step body: Σ\|U(v)\|=\|F\|, Σ\|U(v)\|²=Σ codeg, CS, Φ(v)=\|U\|²−(1/ε)\|Bad\|, averaging. |U\|≥(c/2)\|X\|, bad-pairs ≤ε\|U\|² ✓ |
+| `graph_high_degree_subset_lb` | ✅ | ✅ | FS Lemma 5.2 proof (`A₁`) | handshake + rare/popular split: \|Apop\|≥(δ/2)\|A\|, \|Epop\|≥(δ/2)\|A\|\|B\| ✓ |
+| `graph_dependentRandomChoice_markov_refinement` | ✅ | ✅ | FS 5.2 (`A′`) | Markov: \|U\A′\|·2κ\|U\| ≤ \|badPairs\| ≤ κ\|U\|² ⇒ \|A′\|≥\|U\|/2. κ=δ/16, 2κ=δ/8 ✓ |
+| `graph_dependentRandomChoice_popular_columns` | ✅ | ✅ | FS 5.2 (`B′`) | double-count U×B: \|B′\|≥(ρ/2)\|B\|, col-deg ≥(ρ/2)\|U\|. ρ=δ/2 ⇒ c\|U\|/4, cn/4 ✓ |
+| `graph_dependentRandomChoice_payoff_pointwise_witness` | ✅ | ✅ | FS 5.2 assembly | chains all 4 above; ε-bad transfer codeg_E≥codeg_{E₁} handled; identity (δ⁵/2¹²)\|A\|²≤(δ/8)\|U\|·τ ✓. **Deviation 1 here.** |
+| `graph_dependentRandomChoice_payoff_pointwise_count` | ✅ | ✅ | FS 5.2 path count | Good=Nb\Bad, \|Good\|≥(δ/8)\|U\|; injective disjoint fibers ⇒ #paths≥\|Good\|·τ≥(δ⁵/2¹²)\|A\|². **Deviation 2 here.** |
+| `graph_dependentRandomChoice_payoff_pointwise` | ✅ | ✅ | FS 5.2 | packaging: witness ⊕ count, ∀(a,b) |
+| `dense_bipartite_has_path3_rectangle` | ✅ | ✅ | **FS Lemma 5.2** (capstone) | thin delegation to `_payoff_pointwise`. ⚠️ doc nit: its "Proof:" docstring sketches a *different* DRC variant (`a*∈A, B′=N(a*)`) than the construction actually used — cosmetic. |
 
 ### Assembly + public theorems
 
 | Decl | Citation | Math | Note |
 |------|----------|------|------|
-| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ◐ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected. Matches **Fox–Sudakov §5.1** triple-count (`|A′+B′|≤2¹²C³c⁻⁵n`); closing pieces (`path3_count_le_triple_rep_count`, `restricted_sumset_via_multiplicity`) already ✅. |
-| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ✅ | ◐ | explicit constants; same FS §5.1 correspondence |
-| `balog_szemeredi_gowers_asymmetric` | ✅ | ✅ | **assembly verified**: popular graph (`popular_pairs_card_lower_bound` ✅) + `|S|≤(4/η)n` counting + graph-BSG interface + `ruzsa_sumset_to_difference` ✅; large (n≥4/η) and singleton cases both sound. Rests on DRC interior (☐). |
+| `graph_balogSzemerediGowers_restricted_sumset` | 🔧 | ✅ | was "Lemma 6.17 / Schoen–Sisask 2007" → corrected. **Body line-read** = **Fox–Sudakov §5.1** triple-count: DRC rectangle ⊕ `path3_count_le_triple_rep_count` ⊕ `restricted_sumset_via_multiplicity`; M=0/M≥1 case-split sound (the +2¹²/δ⁵ term + factor-2 honestly absorb the small-n/M=0 edge case the paper glosses). |
+| `graph_balogSzemerediGowers_restricted_sumset_explicit` | ✅ | ✅ | explicit constants. **Body diff-confirmed identical** to the qualitative version (only dropped comments + 4 redundant positivity `have`s). |
+| `balog_szemeredi_gowers_asymmetric` | ✅ | ✅ | **assembly verified**: popular graph (`popular_pairs_card_lower_bound` ✅) + `|S|≤(4/η)n` counting + graph-BSG interface + `ruzsa_sumset_to_difference` ✅; large (n≥4/η) and singleton cases both sound. DRC interior now ✅. |
 | `balog_szemeredi_gowers_symmetric` | ✅ | ✅ | **verified**: asymmetric with Y:=X + Ruzsa-triangle symmetrization (`|X'−X'|·|Y'|≤|X'−Y'|²`), cost C→C²/c |
-| `balog_szemeredi_gowers_asymmetric_explicit` | ◐ | ◐ | mirrors asymmetric; `c=η/16=min(η/16,η/4)` ✓; explicit `C` definitionally consistent. Tail of proof not fully re-read; rests on DRC interior (☐). |
+| `balog_szemeredi_gowers_asymmetric_explicit` | ✅ | ✅ | **body line-read** (was ◐): exact mirror of the qualitative asymmetric proof with explicit constants `c₀=η/16`, `C₀=2¹³(4/η)³/(η/2)⁵+2¹²/(η/2)⁵`; popular graph → explicit graph-BSG → balance → Ruzsa `((C₀/c₀)³/c₀+1)n`; singleton small-case sound. |
 
 ### Module-level reference list (header)
 
@@ -156,8 +168,13 @@ conditional. Audit deferred until proofs land.
 
 ## Outstanding work
 
-- BSG DRC track: line-read the 8 lemma proof *bodies* (◐ → ✅); architecture +
-  constants already confirmed vs Fox–Sudakov §5.
+- ~~BSG DRC track: line-read the 8 lemma proof bodies~~ — **DONE 2026-06-01.**
+  BSG live path is now 100% line-verified (Tao–Vu §6.4 + Fox–Sudakov §5).
+- **Dead code (9 lemmas): delete or keep-as-documented-alternative.** The codegree
+  route + `length_three_path_count_lower_bound` are unreachable; deciding their
+  fate is a judgment call (delete for cleanliness vs keep as a second proof track).
+- **Cosmetic doc fixes** (optional): `dense_bipartite_has_path3_rectangle` docstring
+  "Proof:" describes the wrong DRC variant; two `push_neg` deprecation warnings.
 - Bézout: start math audit vs the Pach–de Zeeuw `.tex` (resultant chain).
 - Geometry: pin a canonical text for the two-point isometry fact; audit.
 - Newman / Pommerenke crosscut citations (deferred with CrossingLemma WIP).

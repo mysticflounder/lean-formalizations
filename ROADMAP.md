@@ -82,13 +82,20 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   all confirmed. Still open: **Fox–Sudakov** DRC ref; **geometry** two-point
   isometry text; **Newman/Pommerenke** crosscut cites (deferred with the
   CrossingLemma WIP).
-- [~] **Line-by-line math audit** — in progress (see matrix). BSG energy +
-  popular-pairs / Ruzsa cluster ✅ and the public `balog_szemeredi_gowers_`
-  `asymmetric`/`symmetric` theorems ✅ verified against Tao–Vu §6.4 (assembly
-  sound). The **dependent-random-choice track** (8 lemmas behind
-  `graph_balogSzemerediGowers_restricted_sumset`) is verified at the
-  architecture + constants level against Fox–Sudakov §5 (Lemmas 5.1/5.2,
-  `c=δ/8`, `C=2¹²C³c⁻⁵`); only the individual proof *bodies* remain to line-read.
+- [x] **Line-by-line math audit — BSG live path is 100% line-verified**
+  (2026-06-01; see matrix). Every declaration reachable from the three public
+  theorems has had its proof *body* read against the vendored sources: the
+  energy→popular-graph bridge + Ruzsa cluster vs Tao–Vu §6.4; the full
+  **dependent-random-choice track** (all 8 lemmas) vs Fox–Sudakov §5 (Lemmas
+  5.1/5.2 + §5.1 BSG application, `c=δ/8`, `C=2¹³K³/δ⁵+2¹²/δ⁵`); the §5.1
+  triple-count assembly (`restricted_sumset_via_multiplicity`,
+  `graph_balogSzemerediGowers_restricted_sumset` + explicit form); and all three
+  public theorems incl. `asymmetric_explicit`. Two honest deviations from
+  Fox–Sudakov (lower-bound density `c₀≤c₁`; path count without distinctness
+  terms) and one cosmetic doc nit recorded in the matrix; both deviations are
+  sound. Build empirically re-verified green (8475 jobs) and all 3 public
+  theorems `#print axioms`-clean. **9 dead lemmas** (codegree route +
+  `length_three_path_count_lower_bound`) are off-path/unreachable — fate TBD.
   Bézout / Geometry math audits not yet started.
 - **Sources**: Pach–de Zeeuw `.tex` and Tao–Vu *Additive Combinatorics* are
   vendored under `docs/references/`; copyrighted PDFs are gitignored (local-only),
