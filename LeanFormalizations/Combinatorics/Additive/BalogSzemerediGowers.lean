@@ -899,9 +899,9 @@ Hence `E[|U|² − Z/ε] ≥ (c² / 2) |X|²`, and there is a choice of `v` real
 lemma graph_pair_dependentRandomChoice {G : Type*} [DecidableEq G]
     (X Y : Finset G) (hX : X.Nonempty) (hY : Y.Nonempty)
     (F : Finset (G × G)) (hF_sub : F ⊆ X ×ˢ Y)
-    (c : ℝ) (hc_pos : 0 < c) (hc_le : c ≤ 1)
+    (c : ℝ) (hc_pos : 0 < c) (_hc_le : c ≤ 1)
     (hF_dense : c * (X.card : ℝ) * (Y.card : ℝ) ≤ (F.card : ℝ))
-    (ε : ℝ) (hε_pos : 0 < ε) (hε_le : ε ≤ 1) :
+    (ε : ℝ) (hε_pos : 0 < ε) (_hε_le : ε ≤ 1) :
     ∃ U : Finset G, U ⊆ X ∧
       (c / 2) * (X.card : ℝ) ≤ (U.card : ℝ) ∧
       (((U ×ˢ U).filter fun p : G × G ↦
@@ -1144,7 +1144,7 @@ Combined with the pointwise bound `|Nb(a)| ≤ n` on `A₁`, this gives
 `|A₁| · n ≥ (δ/2) n²`, i.e. `|A₁| ≥ (δ/2) n`.
 -/
 lemma graph_high_degree_subset_lb {G : Type*} [DecidableEq G]
-    (δ : ℝ) (hδ_pos : 0 < δ) (hδ_le : δ ≤ 1)
+    (δ : ℝ) (hδ_pos : 0 < δ) (_hδ_le : δ ≤ 1)
     (A B : Finset G) (hA : A.Nonempty) (hAB : A.card = B.card)
     (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B)
     (hE_dense : δ * (A.card : ℝ) * (B.card : ℝ) ≤ (E.card : ℝ)) :
@@ -2223,7 +2223,7 @@ qualitative form; the only change is moving the witnesses from the
 -/
 lemma graph_balogSzemerediGowers_restricted_sumset_explicit {G : Type*} [AddCommGroup G] [DecidableEq G]
     (δ K : ℝ) (hδ : 0 < δ) (hK : 0 < K)
-    (A B : Finset G) (hA : A.Nonempty) (hB : B.Nonempty) (hAB : A.card = B.card)
+    (A B : Finset G) (hA : A.Nonempty) (_hB : B.Nonempty) (hAB : A.card = B.card)
     (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B)
     (hE_lb : δ * (A.card : ℝ) ^ 2 ≤ (E.card : ℝ))
     (hS_ub : ((E.image (fun p ↦ p.1 + p.2)).card : ℝ) ≤ K * (A.card : ℝ)) :

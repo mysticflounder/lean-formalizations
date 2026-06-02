@@ -35,9 +35,6 @@ The two holes are thus named and separated: Gap A in `pach-sharir`, Gap B here;
 -/
 
 set_option linter.style.longLine false
--- The bridge consumes `h` (Corollary 2.4) once Gap B is filled; until then its
--- body is `sorry`, so `h` reads as unused.
-set_option linter.unusedVariables false
 
 namespace IncidenceAssembly
 
@@ -47,11 +44,12 @@ open PachDeZeeuw
 **Gap B — the §3 incidence assembly.**
 
 Reduce `pdz`'s open positive-product incidence-card statement to the paper-exact
-Pach–Sharir Corollary 2.4. The hypothesis `h` is the result the assembly consumes
-once Lemmas 3.2–3.7 are formalized; the body is `sorry` pending that work.
+Pach–Sharir Corollary 2.4. The hypothesis `_h` is the result the assembly consumes
+once Lemmas 3.2–3.7 are formalized; the body is `sorry` pending that work, so the
+hypothesis is underscored to mark it intentionally-unused until Gap B is filled.
 -/
 theorem positiveAuxiliaryIncidenceCardBound_of_corollary24
-    (h : PachSharir.Corollary24Statement) :
+    (_h : PachSharir.Corollary24Statement) :
     PositiveAuxiliaryIncidenceCardBoundStatement :=
   sorry
 
