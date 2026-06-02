@@ -49,18 +49,26 @@ track (Fox–Sudakov DRC), assembled into the public theorems.
 | `addEnergy_split_by_threshold` | — | ✅ | partition at `θ`; trivial |
 | `addEnergy_le_popular_part` | — | ✅ | rare part `≤ θ|X||Y|` via `r²≤θr` |
 | `popular_pairs_card_lower_bound` | — | ✅ | `|G(θ)|≥(η/2)|X||Y|` for `2θ≤η|X|` |
-| `popular_paths_length_two_lower_bound` | — | ◐ | corresponds to TV Lemma 6.19 (paths len 2) |
-| `exists_popular_column` | — | ☐ | Markov extraction |
-| `codegree_sum_lower_bound` | — | ☐ | |
-| `codegree_sq_sum_lower_bound` | — | ☐ | |
-| `exists_popular_pivot` | — | ☐ | Markov on codegree² |
-| `exists_pivot_with_neighbors` | — | ☐ | |
-| `codegree_to_difference_representations` | — | ☐ | |
-| `double_markov_refinement` | — | ☐ | generic double-Markov |
-| `path3_count_le_triple_rep_count` | 🔧 | ✅ | cited "Cor. 6.20" ✓; injection = identity step in proof of TV Thm 2.29 |
-| `restricted_sumset_via_multiplicity` | 🔧 | ✅ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4 |
-| `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib |
-| `length_three_path_count_lower_bound` | 🔧 | ✅ | double Cauchy–Schwarz; was "/ Schoen–Sisask 2007" → corrected to TV §6.4 quantitative Cor 6.20 |
+| `path3_count_le_triple_rep_count` | 🔧 | ✅ | cited "Cor. 6.20" ✓; injection = identity step in proof of TV Thm 2.29 (full body read) |
+| `restricted_sumset_via_multiplicity` | 🔧 | ◐ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4. Statement ✓; body not line-read |
+| `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib (full body read) |
+| `length_three_path_count_lower_bound` | 🔧 | ◐ | citation fixed (was "/ Schoen–Sisask 2007"). Statement + docstring structure checked; ~230-line double-CS body **not** line-read |
+
+### ⚠️ Dead code — abandoned popular-pairs-via-codegree route
+
+**0 uses repo-wide** (superseded by the DRC track). Not on the critical path to
+any public theorem; unaudited; candidates for deletion. Compile + axiom-clean.
+
+| Lemma | Status | Note |
+|-------|--------|------|
+| `popular_paths_length_two_lower_bound` | dead | feeds only the dead chain below |
+| `exists_popular_column` | dead | 0 downstream uses |
+| `codegree_sum_lower_bound` | dead | → `codegree_sq_sum_lower_bound` only |
+| `codegree_sq_sum_lower_bound` | dead | → `exists_popular_pivot` only |
+| `exists_popular_pivot` | dead | → `exists_pivot_with_neighbors` only |
+| `exists_pivot_with_neighbors` | dead | 0 downstream uses (terminal) |
+| `codegree_to_difference_representations` | dead | 0 uses |
+| `double_markov_refinement` | dead | 0 uses |
 
 ### Dependent-random-choice track (Fox–Sudakov §5)
 
