@@ -57,22 +57,33 @@ route (9 dead lemmas, see below) is the superseded alternative and is unreachabl
 | `restricted_sumset_via_multiplicity` | 🔧 | ✅ | was "Lemma 6.17" (=van der Waerden!) → corrected to triple-count step of TV Thm 2.29 §6.4 = FS §5.1. **Body line-read**: disjoint fibers T_v over A+B, M·\|A+B\| ≤ Σ\|T_v\| = \|⋃T_v\| ≤ \|S\|³. Sound. |
 | `ruzsa_sumset_to_difference` | — | ✅ | Plünnecke–Ruzsa (`|B+B|≤K²|A|`) + Ruzsa triangle; both mathlib (full body read) |
 
-### ⚠️ Dead code — abandoned popular-pairs-via-codegree route
+### Dead code — abandoned popular-pairs-via-codegree route (resolved 2026-06-01)
 
-**0 uses repo-wide** (superseded by the DRC track). Not on the critical path to
-any public theorem; unaudited; candidates for deletion. Compile + axiom-clean.
+The codegree route was superseded by the DRC track and was unreachable from any
+public theorem. **Resolved:** 7 bespoke lemmas deleted; 2 general-purpose lemmas
+kept as potential mathlib contributions. Build stays green (8475 jobs); public
+theorems still `#print axioms`-clean.
 
-| Lemma | Status | Note |
-|-------|--------|------|
-| `length_three_path_count_lower_bound` | dead | **reclassified 2026-06-01** — was listed as a live ◐; reachability check shows 0 real uses (the only other mention is a docstring in another lemma). The ~230-line double-CS body was the popular-pairs route to path-3 counts; the live path uses `dense_bipartite_has_path3_rectangle` (DRC) instead. Body never line-read; n/a (off-path). |
-| `popular_paths_length_two_lower_bound` | dead | feeds only the dead chain below |
-| `exists_popular_column` | dead | 0 downstream uses |
-| `codegree_sum_lower_bound` | dead | → `codegree_sq_sum_lower_bound` only |
-| `codegree_sq_sum_lower_bound` | dead | → `exists_popular_pivot` only |
-| `exists_popular_pivot` | dead | → `exists_pivot_with_neighbors` only |
-| `exists_pivot_with_neighbors` | dead | 0 downstream uses (terminal) |
-| `codegree_to_difference_representations` | dead | 0 uses |
-| `double_markov_refinement` | dead | 0 uses |
+**Deleted** (all stated over `addEnergy`/`addConvolution` with the route's internal
+θ/η constants — not general; 0 references outside their own block):
+
+| Lemma | Disposition |
+|-------|-------------|
+| `popular_paths_length_two_lower_bound` | 🗑️ deleted |
+| `exists_popular_column` | 🗑️ deleted |
+| `codegree_sum_lower_bound` | 🗑️ deleted |
+| `codegree_sq_sum_lower_bound` | 🗑️ deleted |
+| `exists_popular_pivot` | 🗑️ deleted |
+| `exists_pivot_with_neighbors` | 🗑️ deleted |
+| `codegree_to_difference_representations` | 🗑️ deleted |
+
+**Kept** (general, self-contained, currently unused — flagged in-source as potential
+mathlib contributions, safe to delete later):
+
+| Lemma | Why kept |
+|-------|----------|
+| `double_markov_refinement` | rectangle mass-concentration over arbitrary types `α, β`; fully general |
+| `length_three_path_count_lower_bound` | `Σ P₃(a,b) ≥ |E|⁴/(|A||B|)²` bipartite path-count inequality; general (the live path uses the *pointwise* DRC bound `dense_bipartite_has_path3_rectangle` instead) |
 
 ### Dependent-random-choice track (Fox–Sudakov §5)
 
@@ -170,9 +181,9 @@ conditional. Audit deferred until proofs land.
 
 - ~~BSG DRC track: line-read the 8 lemma proof bodies~~ — **DONE 2026-06-01.**
   BSG live path is now 100% line-verified (Tao–Vu §6.4 + Fox–Sudakov §5).
-- **Dead code (9 lemmas): delete or keep-as-documented-alternative.** The codegree
-  route + `length_three_path_count_lower_bound` are unreachable; deciding their
-  fate is a judgment call (delete for cleanliness vs keep as a second proof track).
+- ~~Dead code (9 lemmas)~~ — **DONE 2026-06-01**: 7 bespoke codegree-route lemmas
+  deleted; 2 general lemmas (`double_markov_refinement`,
+  `length_three_path_count_lower_bound`) kept as flagged mathlib candidates.
 - **Cosmetic doc fixes** (optional): `dense_bipartite_has_path3_rectangle` docstring
   "Proof:" describes the wrong DRC variant; two `push_neg` deprecation warnings.
 - Bézout: start math audit vs the Pach–de Zeeuw `.tex` (resultant chain).
