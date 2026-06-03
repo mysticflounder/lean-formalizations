@@ -755,4 +755,121 @@ theorem paramRaw_collapse_of (x : ℝ) (i : Fin β.numSegs) (s : ℝ)
 
 end PolyArc
 
+/-! #### Affine injectivity on a single segment -/
+
+/-- On a nondegenerate segment, the affine parameter is determined by the point:
+`(1−s)•A + s•B = (1−s')•A + s'•B` with `A ≠ B` forces `s = s'`. -/
+theorem affine_inj {A B : Plane} (hAB : A ≠ B) {s s' : ℝ}
+    (h : (1 - s) • A + s • B = (1 - s') • A + s' • B) : s = s' := by
+  have hz : (s - s') • (B - A) = 0 := by
+    have hh : (1 - s) • A + s • B - ((1 - s') • A + s' • B) = 0 := by rw [h]; abel
+    rw [← hh]; module
+  rcases smul_eq_zero.mp hz with h1 | h2
+  · linarith [sub_eq_zero.mp h1]
+  · exact absurd (sub_eq_zero.mp h2).symm hAB
+
+/-- If an affine point on `[A,B]` equals the left endpoint `A` (with `A ≠ B`) then
+the parameter is `0`. -/
+theorem affine_eq_left {A B : Plane} (hAB : A ≠ B) {s : ℝ}
+    (h : (1 - s) • A + s • B = A) : s = 0 := by
+  refine affine_inj hAB (s := s) (s' := 0) ?_
+  rw [h]; simp
+
+/-- If an affine point on `[A,B]` equals the right endpoint `B` (with `A ≠ B`) then
+the parameter is `1`. -/
+theorem affine_eq_right {A B : Plane} (hAB : A ≠ B) {s : ℝ}
+    (h : (1 - s) • A + s • B = B) : s = 1 := by
+  refine affine_inj hAB (s := s) (s' := 1) ?_
+  rw [h]; simp
+
+namespace PolyArc
+
+variable (β : PolyArc)
+
+/-! #### Segment-index assignment and the per-point local coordinate
+
+For `t ∈ [0,1]`, the clamped floor `idx t := min ⌊n·t⌋ (n−1)` selects a segment with
+`(t:ℝ) ∈ [idx/n, (idx+1)/n]`, i.e. local coordinate `s := n·t − idx ∈ [0,1]`, so that
+`param t` lands on `segCarrier (idx t)` (per-interval collapse). -/
+
+/-- The segment index of a parameter `t`: the clamped floor of `n·t`. -/
+noncomputable def idx (t : Set.Icc (0 : ℝ) 1) : Fin β.numSegs :=
+  ⟨min (⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat (β.numSegs - 1), by
+    have : β.numSegs - 1 < β.numSegs := by have := β.numSegs_pos; omega
+    omega⟩
+
+/-- The local coordinate of `t` within its segment. -/
+noncomputable def locCoord (t : Set.Icc (0 : ℝ) 1) : ℝ :=
+  (β.numSegs : ℝ) * (t : ℝ) - ((β.idx t : ℕ) : ℝ)
+
+theorem nx_eq_idx_add_locCoord (t : Set.Icc (0 : ℝ) 1) :
+    (β.numSegs : ℝ) * (t : ℝ) = ((β.idx t : ℕ) : ℝ) + β.locCoord t := by
+  unfold locCoord; ring
+
+/-- The local coordinate lies in `[0,1]`. -/
+theorem locCoord_mem (t : Set.Icc (0 : ℝ) 1) :
+    0 ≤ β.locCoord t ∧ β.locCoord t ≤ 1 := by
+  have ht0 : (0 : ℝ) ≤ (t : ℝ) := t.2.1
+  have ht1 : (t : ℝ) ≤ 1 := t.2.2
+  have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+    have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+  have hnxnn : (0 : ℝ) ≤ (β.numSegs : ℝ) * (t : ℝ) := mul_nonneg (le_of_lt hnpos) ht0
+  have hfloor_nonneg : 0 ≤ ⌊(β.numSegs : ℝ) * (t : ℝ)⌋ := Int.floor_nonneg.mpr hnxnn
+  -- the index as a real
+  set m : ℕ := (β.idx t : ℕ) with hm
+  have hlc : β.locCoord t = (β.numSegs : ℝ) * (t : ℝ) - (m : ℝ) := by
+    rw [hm]; unfold locCoord; ring
+  rw [hlc]
+  have hmle : (m : ℝ) ≤ (β.numSegs : ℝ) * (t : ℝ) := by
+    -- m = min (⌊nx⌋.toNat) (n-1) ≤ ⌊nx⌋.toNat ≤ ⌊nx⌋ ≤ nx
+    have h1 : m ≤ (⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat := by
+      rw [hm]; unfold idx; exact min_le_left _ _
+    have htoN : ((⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat : ℝ)
+        = (⌊(β.numSegs : ℝ) * (t : ℝ)⌋ : ℝ) := by
+      have := Int.toNat_of_nonneg hfloor_nonneg
+      exact_mod_cast congrArg (fun z : ℤ => (z : ℝ)) this
+    have h2 : ((⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat : ℝ) ≤ (β.numSegs : ℝ) * (t : ℝ) := by
+      rw [htoN]; exact Int.floor_le _
+    calc (m : ℝ) ≤ ((⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat : ℝ) := by exact_mod_cast h1
+      _ ≤ (β.numSegs : ℝ) * (t : ℝ) := h2
+  refine ⟨by linarith, ?_⟩
+  -- upper bound: nx - m ≤ 1.  Two cases on whether the min hit n-1.
+  rcases le_or_gt (⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat (β.numSegs - 1) with hcase | hcase
+  · -- m = ⌊nx⌋.toNat, so nx - m < 1 by lt_floor_add_one
+    have hmeq : (m : ℝ) = (⌊(β.numSegs : ℝ) * (t : ℝ)⌋ : ℝ) := by
+      have : m = (⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat := by
+        rw [hm]; unfold idx; simp only [Fin.val_mk]; exact min_eq_left hcase
+      rw [this]
+      have := Int.toNat_of_nonneg hfloor_nonneg
+      exact_mod_cast congrArg (fun z : ℤ => (z : ℝ)) this
+    have hlt : (β.numSegs : ℝ) * (t : ℝ) < (⌊(β.numSegs : ℝ) * (t : ℝ)⌋ : ℝ) + 1 :=
+      Int.lt_floor_add_one _
+    rw [hmeq]; linarith
+  · -- m = n-1; then nx ≤ n and m = n-1 ⇒ nx - m ≤ n - (n-1) = 1
+    have hmeqn : m = β.numSegs - 1 := by
+      rw [hm]; unfold idx; simp only [Fin.val_mk]; exact min_eq_right (le_of_lt hcase)
+    have hnxle : (β.numSegs : ℝ) * (t : ℝ) ≤ (β.numSegs : ℝ) := by
+      calc (β.numSegs : ℝ) * (t : ℝ) ≤ (β.numSegs : ℝ) * 1 := by
+            apply mul_le_mul_of_nonneg_left ht1 (le_of_lt hnpos)
+        _ = (β.numSegs : ℝ) := by ring
+    have hmr : (m : ℝ) = (β.numSegs : ℝ) - 1 := by
+      rw [hmeqn]; have := β.numSegs_pos
+      push_cast [Nat.cast_sub (by omega : 1 ≤ β.numSegs)]; ring
+    rw [hmr]; linarith
+
+/-- `param t` lies on the carrier of its segment `idx t`. -/
+theorem param_mem_segCarrier (t : Set.Icc (0 : ℝ) 1) :
+    β.param t ∈ β.segCarrier (β.idx t) := by
+  obtain ⟨h0, h1⟩ := β.locCoord_mem t
+  have hcollapse : β.param t
+      = (1 - β.locCoord t) • β.verts (Fin.castSucc (β.idx t))
+        + β.locCoord t • β.verts (Fin.succ (β.idx t)) := by
+    unfold param
+    exact β.paramRaw_collapse_of (t : ℝ) (β.idx t) (β.locCoord t)
+      (β.nx_eq_idx_add_locCoord t) h0 h1
+  rw [segCarrier, segSrc, segTgt, hcollapse]
+  exact ⟨1 - β.locCoord t, β.locCoord t, by linarith, h0, by ring, rfl⟩
+
+end PolyArc
+
 end CrossingLemma.PlaneArcSeparation
