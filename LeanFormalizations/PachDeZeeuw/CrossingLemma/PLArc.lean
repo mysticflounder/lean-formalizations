@@ -2680,4 +2680,50 @@ theorem disjoint_stripSupport_nonadjacent (β : PolyArc) {δ : ℝ}
   intro z hzi hzj
   exact hsep i j hij z hzi hzj
 
+/-! #### P3 disjointness — the adjacent corner cases.
+
+These are where the angle-free estimate pays off.  Two adjacent edges `i, i+1` share the
+vertex `v = verts (i+1) = segTgt i = segSrc (i+1)`.  The corner-confinement keystone
+(`exists_delta_corner_confine`) says a point near *both* edge lines is within any chosen
+`r` of `v`; the foot parameter is Lipschitz (`abs_footParam_sub_le`), so a point that close
+to `v` has `footParam` on edge `i` close to `1` (the value at the shared vertex `= segTgt
+i`) — contradicting membership in the narrowed mid-band `footParam < 1 − α`.  Hence no
+point lies in edge `i`'s mid-band while also being within `δ₀` of edge `i+1`. -/
+
+/-- **Adjacent band ↔ strip impossibility.**  A point in edge `i`'s narrowed mid-band that
+is also within `δ₀` of both edge `i` and edge `i+1` is impossible, provided the corner
+confinement at radius `r` holds at width `δ₀` and the Lipschitz budget `L_i · r ≤ α` is
+met (`L_i = ‖edge_i‖₁ / ‖edge_i‖₂²` the foot-parameter Lipschitz constant). -/
+theorem not_mem_adjacent_band_strip (β : PolyArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
+    (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hconf : ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ i)) < r)
+    (hLr : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+            / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * r ≤ α)
+    {z : Plane} (hmid : z ∈ edgeBandMid (β.segSrc i) (β.segTgt i) α)
+    (hzi : Metric.infDist z (β.segCarrier i) < δ₀)
+    (hzi1 : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀) : False := by
+  have hne : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
+  have hv : β.segTgt i = β.verts (Fin.succ i) := rfl
+  have hfp_lt : footParam (β.segSrc i) (β.segTgt i) z < 1 - α := hmid.2
+  have hconf' : dist z (β.verts (Fin.succ i)) < r := hconf z hzi hzi1
+  have hft : footParam (β.segSrc i) (β.segTgt i) (β.segTgt i) = 1 := footParam_tgt hne
+  have hlip := abs_footParam_sub_le hne (β.segTgt i) z
+  rw [hft] at hlip
+  set L := (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+            / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) with hL
+  have hLpos : 0 < L := by
+    rw [hL]; exact div_pos (segDir_l1_pos β i) (dotp_self_pos hne)
+  have hdist : dist (β.segTgt i) z = dist z (β.verts (Fin.succ i)) := by
+    rw [hv, dist_comm]
+  rw [hdist] at hlip
+  have hbound : |footParam (β.segSrc i) (β.segTgt i) z - 1| < α :=
+    calc |footParam (β.segSrc i) (β.segTgt i) z - 1|
+        ≤ L * dist z (β.verts (Fin.succ i)) := hlip
+      _ < L * r := mul_lt_mul_of_pos_left hconf' hLpos
+      _ ≤ α := hLr
+  have := (abs_lt.mp hbound).1
+  linarith
+
 end CrossingLemma.PlaneArcSeparation
