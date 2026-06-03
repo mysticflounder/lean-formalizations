@@ -397,11 +397,42 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `r ≤ dist v a, dist v b` — **DONE** (`ball_inter_cornerLocus`, §L3.1, axiom-clean;
    the one piece of genuine 2-D linear algebra is `exists_param_of_sideForm_eq_zero`:
    a point on the line through `a ≠ v` is the affine combination `(1-t)•v + t•a`).
-   So **sub-node 3 is algebraically complete**: on a thin disk around `v`,
+   So the *per-vertex disk* algebra is complete: on a thin disk around `v`,
    `disk \ β = (disk ∩ convexSector) ⊔ (disk ∩ reflexSector)` — the two sectors are
    exactly the two sides. Non-emptiness of `T⁺,T⁻`: the sector points (e.g.
    `a+b−v`, `3v−a−b`) lie in `T` for a thin enough disk. *(deps: §L1/§L2 of
    `PLArc.lean`, all PROVEN.)*
+
+   **CORRECTED GLOBAL DESIGN (2026-06-02) — the slabs must dodge the vertices.**
+   A coordinate check refutes the naive "slab side = `sign(εᵢ·sideForm_i)` over the
+   whole open edge" plan: with `v=0, b=(3,0), a=(2,1)` (convex left turn), the point
+   `z=(0.1,0.2)` is on the `sideForm_(v,b)`-positive side of edge `(v,b)` yet lies in
+   the **reflex** sector — near `v` the *other* edge `(v,a)` cuts across, so the slab
+   label would contradict the disk's sector label. **Fix:** each segment slab covers
+   only the *middle* of its edge, `slabᵢ := {z | αᵢ < footParam sᵢ tᵢ z < βᵢ}` with
+   `0 < αᵢ`, `βᵢ < 1` chosen past the two vertex disks; the per-vertex **disk** owns
+   the vertex neighbourhood; overlaps `slabᵢ ∩ diskᵥ` then sit where the foot is
+   bounded away from `v`, where the two labels provably agree. Also: `Plane = ℝ×ℝ`
+   has the **sup** norm and **no `InnerProductSpace`**, so do NOT use metric
+   nearest-point (its foot is not the perpendicular); use the algebraic `sideForm`
+   for the transverse side and an explicit-coordinate `dotp`/`footParam` for the
+   tangential slab cut. There is **no** single global continuous side function (a PL
+   arc has no continuous normal field — the normal jumps by the exterior angle at
+   each corner), so `g` is *necessarily* glued from slab + disk pieces. The
+   union-of-balls tube `T` (sub-node 2) is kept for topology; `T⁺/T⁻` are defined as
+   a *separate* partition of `T\β` over the slab/disk pieces.
+
+   **Foundation DONE (2026-06-02, sorry-free, axiom-clean):** `dotp`,
+   `dotp_smul_left`, `dotp_self_pos`, `footParam`, `continuous_footParam`,
+   `footParam_src = 0`, `footParam_tgt = 1`, and the key
+   `footParam_affineComb : footParam s t ((1−c)•s + c•t) = c` (reads off the affine
+   coefficient, so `footParam ∈ (α,β)` selects the middle of an edge). Foot
+   decomposition recorded: with `d=t−s`, `sideForm s t z = μ·dotp d d` for
+   `z−s = λd + μ·rot90 d`, so `sign(sideForm) = sign μ` is the perpendicular side.
+   **Remaining in sub-node 3:** define `slabᵢ`/`diskᵥ` and the per-piece side label;
+   prove the slab/disk **overlap-consistency** lemmas (the genuine crux — the
+   vertex-dodging makes them true); show the pieces **cover** `T\β`; assemble
+   `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

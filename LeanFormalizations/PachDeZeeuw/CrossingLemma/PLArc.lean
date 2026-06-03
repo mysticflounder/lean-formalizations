@@ -1172,4 +1172,69 @@ theorem isConnected_taperedTube {R S : Set Plane} (hR : IsOpen R)
   ⟨hSne.mono (subset_taperedTube hR hRc hδ hSR),
     isPreconnected_taperedTube hR hRc hδ hSR hScon hSne⟩
 
+/-! ## §L3 sub-node 3 — the side function `g` (slab/disk glue): foundations
+
+The collar's two sides `T⁺, T⁻` are cut out by an algebraic side rule, glued from
+**segment slabs** and **vertex disks**.  A coordinate check (recorded in the plan)
+shows the slabs *must be bounded away from the vertices*: a point just off the open
+edge `(v,b)` on its `sideForm`-positive side, but near `v`, can actually sit in the
+*reflex* sector (the other incident edge cuts through), so a naive
+`sign(εᵢ·sideForm_i)` slab label would conflict with the disk's sector label there.
+Hence each slab covers only the *middle* of its edge (`footParam ∈ (αᵢ,βᵢ) ⊂ (0,1)`)
+and the per-vertex disk owns the vertex neighbourhood; overlaps then sit where the
+foot is bounded away from the vertex and the two labels agree.
+
+`footParam s t z` is the tangential (orthogonal-projection) coordinate `λ` with foot
+`s + λ·(t−s)`.  Plane `ℝ × ℝ` carries the **sup** norm and has *no*
+`InnerProductSpace` instance, so we use the explicit coordinate bilinear form
+`dotp` rather than `inner`.  (The *transverse* side is already handled by `sideForm`:
+with `d = t−s`, `sideForm s t z = μ·dotp d d` where `z−s = λ·d + μ·rot90 d`, so
+`sign (sideForm s t z) = sign μ` is the perpendicular side.) -/
+
+/-- Coordinate dot product on the plane (the explicit bilinear form; `ℝ × ℝ` has the
+sup norm and carries no `InnerProductSpace` instance). -/
+def dotp (u w : Plane) : ℝ := u.1 * w.1 + u.2 * w.2
+
+theorem dotp_smul_left (c : ℝ) (u w : Plane) : dotp (c • u) w = c * dotp u w := by
+  simp only [dotp, Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+
+/-- `dotp u u` is the squared length; positive for a nonzero displacement. -/
+theorem dotp_self_pos {s t : Plane} (h : t ≠ s) : 0 < dotp (t - s) (t - s) := by
+  have hcoord : (t - s).1 ≠ 0 ∨ (t - s).2 ≠ 0 := by
+    by_contra hc
+    push Not at hc
+    exact h (sub_eq_zero.mp (Prod.ext hc.1 hc.2))
+  simp only [dotp]
+  rcases hcoord with h1 | h1
+  · nlinarith [mul_self_pos.mpr h1, mul_self_nonneg (t - s).2]
+  · nlinarith [mul_self_pos.mpr h1, mul_self_nonneg (t - s).1]
+
+/-- **The tangential (foot) parameter** of `z` along the directed segment `s → t`:
+the scalar `λ` such that the orthogonal foot of `z` on the line is `s + λ·(t−s)`.
+Collar slabs are cut out by `λ ∈ (α,β) ⊂ (0,1)` (bounded away from the vertices). -/
+noncomputable def footParam (s t z : Plane) : ℝ :=
+  dotp (z - s) (t - s) / dotp (t - s) (t - s)
+
+/-- The foot parameter is continuous in the evaluation point (the denominator is a
+nonzero constant). -/
+theorem continuous_footParam (s t : Plane) : Continuous (footParam s t) := by
+  unfold footParam dotp
+  fun_prop
+
+@[simp] theorem footParam_src (s t : Plane) : footParam s t s = 0 := by
+  simp [footParam, dotp]
+
+theorem footParam_tgt {s t : Plane} (h : t ≠ s) : footParam s t t = 1 := by
+  rw [footParam, div_self (ne_of_gt (dotp_self_pos h))]
+
+/-- **Key:** the foot parameter reads off the affine coefficient.  For the point
+`(1−c)·s + c·t` on the line through `s,t` (`t ≠ s`), `footParam` returns `c`.  This
+is what lets `footParam ∈ (α,β)` pick out the *middle* of an edge and exclude the
+vertex neighbourhoods. -/
+theorem footParam_affineComb {s t : Plane} (h : t ≠ s) (c : ℝ) :
+    footParam s t ((1 - c) • s + c • t) = c := by
+  have hpos := dotp_self_pos h
+  have hz : ((1 - c) • s + c • t) - s = c • (t - s) := by module
+  rw [footParam, hz, dotp_smul_left, mul_div_assoc, div_self (ne_of_gt hpos), mul_one]
+
 end CrossingLemma.PlaneArcSeparation
