@@ -523,8 +523,19 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `footParam_pos_of_close_to_seg` (`p ∈ segment ℝ s t` and `dist z p < dist p s / 2`
    ⇒ `0 < footParam s t z`) — at a call site the half-distance budget comes from the
    tube taper `dist z p < infDist p Rᶜ/2 ≤ dist p s/2` once the endpoint `s ∈ Rᶜ`; all
-   sorry-free, axiom-clean.  STILL TODO: C2 narrowed-band defs + `vertexPlus/Minus`
-   (τ-selected) + band↔sector glue consistency; C3 `exists_collarData` budget (global
+   sorry-free, axiom-clean.  **C2 DONE (narrowed bands + τ-selected sectors + glue):**
+   `edgeBandMid s t α = {footParam ∈ (α,1−α)}` with `edgePlusMid`/`edgeMinusMid`
+   (`isOpen_*`); `vertexPlus a v b = if 0<cornerTurn a v b then convexSector else
+   reflexSector` and `vertexMinus` the other (`isOpen_*`,
+   `disjoint_vertexPlus_vertexMinus`); the two algebraic bridges `dotp_sub_src`
+   (`dotp(z−s,t−s) = ‖t−s‖²·footParam`) and `dotp_sub_tgt` (`dotp(z−t,s−t) =
+   ‖t−s‖²·(1−footParam)`) that turn band foot bounds into the overlap-gate
+   `0 < dotp(z−v,·−v)`; and the **four consistency lemmas**
+   `mem_vertexPlus/Minus_of_outgoing/incoming` — on the band/disk overlap (gate + thin
+   hyp) a `sideForm`-signed band point lands in the matching τ-selected sector (proof:
+   `overlap_mem_*Sector_iff[_incoming]` + sign of `cornerTurn·sideForm` via
+   `mul_pos`/`mul_neg_of_*`); all sorry-free, axiom-clean.  STILL TODO: C3
+   `exists_collarData` budget (global
    `α`, double cutoff, narrowed cover variant); C4 separation plumbing (off-carrier,
    disjoint-supports via `exists_pos_nonadjacent_sep`); C5 `collarPlus/Minus` defs +
    OPEN + NONEMPTY; C6 UNION `= T\carrier`; C7 DISJOINT.

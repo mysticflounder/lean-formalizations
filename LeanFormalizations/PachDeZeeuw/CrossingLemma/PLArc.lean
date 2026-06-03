@@ -1962,4 +1962,130 @@ theorem footParam_pos_of_close_to_seg {s t : Plane} (h : t ≠ s) {p z : Plane}
     have := (abs_le.mp hlip).1; linarith
   linarith
 
+/-! ### Task (iv), C2: narrowed bands, τ-selected vertex sectors, and the glue
+
+The naive `sign(εᵢ·sideForm_i)` slab label conflicts with the disk's sector label *near
+the vertices* (the slab cutoff note, §sub-node 3).  So the global pieces are: per-edge
+**narrowed** bands `edgeBandMid s t α = {footParam ∈ (α, 1−α)}` (bounded away from both
+vertices), split into `edgePlusMid`/`edgeMinusMid`; and per-vertex **τ-selected sectors**
+`vertexPlus a v b = convexSector` if the turn `cornerTurn a v b > 0` else `reflexSector`
+(`vertexMinus` the other).  The selection is forced by the corner glue: on the band/disk
+overlap, `z ∈ convexSector ↔ 0 < τ·sideForm_edge z`, so the convex sector is the `+` side
+exactly when `τ > 0`.  The four consistency lemmas below pin the band's side to the
+vertex's side on the overlap (one per incoming/outgoing edge × ±). -/
+
+/-- The two algebraic bridges converting band foot bounds into the overlap-gate
+`0 < dotp (z−v) (·−v)` of the glue lemmas. -/
+theorem dotp_sub_src {s t z : Plane} (h : t ≠ s) :
+    dotp (z - s) (t - s) = dotp (t - s) (t - s) * footParam s t z := by
+  have hP : dotp (t - s) (t - s) ≠ 0 := (dotp_self_pos h).ne'
+  rw [footParam]; field_simp
+
+theorem dotp_sub_tgt {s t z : Plane} (h : t ≠ s) :
+    dotp (z - t) (s - t) = dotp (t - s) (t - s) * (1 - footParam s t z) := by
+  have h1 : dotp (z - t) (s - t) = dotp (t - s) (t - s) - dotp (z - s) (t - s) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  rw [h1, dotp_sub_src (z := z) h]; ring
+
+/-- The **narrowed** edge band (foot strictly inside `(α, 1−α)`): kept away from both
+vertices so the slab and disk labels agree on the overlap. -/
+def edgeBandMid (s t : Plane) (α : ℝ) : Set Plane :=
+  {z | footParam s t z ∈ Set.Ioo α (1 - α)}
+
+/-- The positive side of the narrowed band. -/
+def edgePlusMid (s t : Plane) (α : ℝ) : Set Plane :=
+  edgeBandMid s t α ∩ {z | 0 < sideForm s t z}
+
+/-- The negative side of the narrowed band. -/
+def edgeMinusMid (s t : Plane) (α : ℝ) : Set Plane :=
+  edgeBandMid s t α ∩ {z | sideForm s t z < 0}
+
+theorem isOpen_edgeBandMid (s t : Plane) (α : ℝ) : IsOpen (edgeBandMid s t α) :=
+  isOpen_Ioo.preimage (continuous_footParam s t)
+
+theorem isOpen_edgePlusMid (s t : Plane) (α : ℝ) : IsOpen (edgePlusMid s t α) :=
+  (isOpen_edgeBandMid s t α).inter (isOpen_lt continuous_const (continuous_sideForm s t))
+
+theorem isOpen_edgeMinusMid (s t : Plane) (α : ℝ) : IsOpen (edgeMinusMid s t α) :=
+  (isOpen_edgeBandMid s t α).inter (isOpen_lt (continuous_sideForm s t) continuous_const)
+
+/-- The **τ-selected positive sector** at corner `a → v → b`: the convex sector if the
+turn is positive, else the reflex sector. -/
+noncomputable def vertexPlus (a v b : Plane) : Set Plane :=
+  if 0 < cornerTurn a v b then convexSector a v b else reflexSector a v b
+
+/-- The τ-selected negative sector (the other one). -/
+noncomputable def vertexMinus (a v b : Plane) : Set Plane :=
+  if 0 < cornerTurn a v b then reflexSector a v b else convexSector a v b
+
+theorem isOpen_vertexPlus (a v b : Plane) : IsOpen (vertexPlus a v b) := by
+  rw [vertexPlus]; split_ifs
+  · exact isOpen_convexSector a v b
+  · exact isOpen_reflexSector a v b
+
+theorem isOpen_vertexMinus (a v b : Plane) : IsOpen (vertexMinus a v b) := by
+  rw [vertexMinus]; split_ifs
+  · exact isOpen_reflexSector a v b
+  · exact isOpen_convexSector a v b
+
+theorem disjoint_vertexPlus_vertexMinus (a v b : Plane) :
+    Disjoint (vertexPlus a v b) (vertexMinus a v b) := by
+  rw [vertexPlus, vertexMinus]; split_ifs
+  · exact disjoint_convexSector_reflexSector a v b
+  · exact (disjoint_convexSector_reflexSector a v b).symm
+
+/-- **Glue, outgoing-`+`.**  On the overlap with the outgoing edge `v→b`'s band
+(`0 < dotp (z−v)(b−v)`, thin), a `sideForm v b z > 0` point lands in the `+` sector. -/
+theorem mem_vertexPlus_of_outgoing {a v b z : Plane} (hτ : cornerTurn a v b ≠ 0)
+    (hG : 0 < dotp (z - v) (b - v))
+    (hthin : |dotp (v - a) (b - v)| * |sideForm v b z|
+              < |sideForm a v b| * dotp (z - v) (b - v))
+    (hsf : 0 < sideForm v b z) : z ∈ vertexPlus a v b := by
+  rw [vertexPlus]
+  rcases lt_or_gt_of_ne hτ with hneg | hpos
+  · rw [if_neg (not_lt.mpr hneg.le), overlap_mem_reflexSector_iff hG hthin]
+    exact mul_neg_of_neg_of_pos hneg hsf
+  · rw [if_pos hpos, overlap_mem_convexSector_iff hG hthin]
+    exact mul_pos hpos hsf
+
+/-- **Glue, outgoing-`−`.** -/
+theorem mem_vertexMinus_of_outgoing {a v b z : Plane} (hτ : cornerTurn a v b ≠ 0)
+    (hG : 0 < dotp (z - v) (b - v))
+    (hthin : |dotp (v - a) (b - v)| * |sideForm v b z|
+              < |sideForm a v b| * dotp (z - v) (b - v))
+    (hsf : sideForm v b z < 0) : z ∈ vertexMinus a v b := by
+  rw [vertexMinus]
+  rcases lt_or_gt_of_ne hτ with hneg | hpos
+  · rw [if_neg (not_lt.mpr hneg.le), overlap_mem_convexSector_iff hG hthin]
+    exact mul_pos_of_neg_of_neg hneg hsf
+  · rw [if_pos hpos, overlap_mem_reflexSector_iff hG hthin]
+    exact mul_neg_of_pos_of_neg hpos hsf
+
+/-- **Glue, incoming-`+`.**  On the overlap with the incoming edge `a→v`'s band
+(`0 < dotp (z−v)(a−v)`, thin), a `sideForm a v z > 0` point lands in the `+` sector. -/
+theorem mem_vertexPlus_of_incoming {a v b z : Plane} (hτ : cornerTurn a v b ≠ 0)
+    (hG : 0 < dotp (z - v) (a - v))
+    (hthin : |dotp (v - b) (a - v)| * |sideForm v a z|
+              < |sideForm b v a| * dotp (z - v) (a - v))
+    (hsf : 0 < sideForm a v z) : z ∈ vertexPlus a v b := by
+  rw [vertexPlus]
+  rcases lt_or_gt_of_ne hτ with hneg | hpos
+  · rw [if_neg (not_lt.mpr hneg.le), overlap_mem_reflexSector_iff_incoming hG hthin]
+    exact mul_neg_of_neg_of_pos hneg hsf
+  · rw [if_pos hpos, overlap_mem_convexSector_iff_incoming hG hthin]
+    exact mul_pos hpos hsf
+
+/-- **Glue, incoming-`−`.** -/
+theorem mem_vertexMinus_of_incoming {a v b z : Plane} (hτ : cornerTurn a v b ≠ 0)
+    (hG : 0 < dotp (z - v) (a - v))
+    (hthin : |dotp (v - b) (a - v)| * |sideForm v a z|
+              < |sideForm b v a| * dotp (z - v) (a - v))
+    (hsf : sideForm a v z < 0) : z ∈ vertexMinus a v b := by
+  rw [vertexMinus]
+  rcases lt_or_gt_of_ne hτ with hneg | hpos
+  · rw [if_neg (not_lt.mpr hneg.le), overlap_mem_convexSector_iff_incoming hG hthin]
+    exact mul_pos_of_neg_of_neg hneg hsf
+  · rw [if_pos hpos, overlap_mem_reflexSector_iff_incoming hG hthin]
+    exact mul_neg_of_pos_of_neg hpos hsf
+
 end CrossingLemma.PlaneArcSeparation
