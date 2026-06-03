@@ -363,13 +363,29 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
      β.carrier` (via `segCarrier_subset_range_param`). *Still TODO for sub-node 1:*
      the `arcInterior`/endpoint-set relations (relate `arcInterior β.toSimpleArc` to
      the open segments / interior vertices and the two endpoints `src`/`tgt`).
-2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`. Construction =
-   thin tube — per segment an open slab around the *open* segment, per interior
-   vertex a small disk, radius = `min` over (dist to non-adjacent segments, dist to
-   `Aᶜ`-complement i.e. to keep `⊆ R`, dist to the two endpoints). Connected because
-   it is a union of connected slabs/disks overlapping consecutively along the
-   connected `arcInterior β`. *(deps: `Metric.ball`, `IsOpen`, `dist`; `IsConnected`
-   union API.)*
+2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`.
+   **DONE 2026-06-02, sorry-free, axiom-clean `[propext, Classical.choice,
+   Quot.sound]`.** Construction settled on the cleaner **tapered tube**
+   `taperedTube R S δ₀ := ⋃ p ∈ S, ball p (min δ₀ (½·infDist p Rᶜ))` over the spine
+   `S = arcInterior β` (NOT the per-segment slab / per-vertex disk union originally
+   sketched — the union-of-balls form makes all four properties one-liners and the
+   point-dependent radius `½·dist(p, Rᶜ)` keeps `T ⊆ R` even near the endpoints).
+   Proved (all `Set`-generic in `S`, `R`):
+   - `isOpen_taperedTube` — union of open balls.
+   - `taperedTube_subset : taperedTube R S δ₀ ⊆ R` — **unconditional** (radius
+     `≤ ½·infDist p Rᶜ` forces any `Rᶜ` ball-point to violate `infDist`).
+   - `taperedRadius_pos` / `subset_taperedTube : S ⊆ taperedTube R S δ₀` — needs
+     `S ⊆ R`, `R` open, `Rᶜ.Nonempty`, `δ₀ > 0` (positivity of `infDist p Rᶜ` via
+     `IsClosed.notMem_iff_infDist_pos`).
+   - `isPreconnected_taperedTube` / `isConnected_taperedTube` — additionally needs
+     `S` preconnected + nonempty; each ball glued to the connected spine through a
+     common base point (`isPreconnected_of_forall` + `IsPreconnected.union`).
+   Spine facts for a generic `SimpleArc` also proved: `arcInterior_nonempty`,
+   `isPreconnected_arcInterior` (continuous image of the connected `(0,1)`, via
+   `isPreconnected_setOf_mem_unitIoo`). *(deps: `Metric.ball`/`infDist`, `IsOpen`,
+   `convex_ball`, `isPreconnected_of_forall`, `IsInducing.subtypeVal`.)*
+   **Still needed at assembly:** `Rᶜ.Nonempty` (from `frontier R ≠ ∅` via the
+   crosscut endpoints) and `arcInterior β ⊆ R` (from `ArcInRegion.interior_subset`).
 3. **Local separation `T \ β = T⁺ ⊔ T⁻`, both open & nonempty** (the crux). Glue:
    over a segment slab use L1 `leftSide/rightSide`; over a vertex disk use L2
    `convexSector/reflexSector`; consistency on overlaps via the sign of the shared
@@ -401,8 +417,12 @@ ramp-sum parametrisation with continuity (`continuous_param`) and injectivity
 (`injective_param`), the coercion `toSimpleArc`, and the carrier relation
 `range_toSimpleArc = carrier`; all sorry-free, axiom-clean
 `[propext, Classical.choice, Quot.sound]`. **The only loose end in sub-node 1** is
-the `arcInterior`/endpoint relations (not yet needed downstream). What remains in L3
-is sub-node 2 (the tapered tube as a metric object), then the global g and the
+the `arcInterior`/endpoint relations (not yet needed downstream). **Sub-node 2 — the
+tapered collar tube `taperedTube` — is now PROVEN** (open, `T ⊆ R`, `S ⊆ T`,
+connected; plus generic `arcInterior_nonempty`/`isPreconnected_arcInterior`), all
+sorry-free and axiom-clean. What remains in L3 is **sub-node 3's metric assembly**
+(realise `T \ β = T⁺ ⊔ T⁻` on the actual tube — the algebra is done, the glue of the
+disk-localisation across the whole spine is not), then the global `g` and the
 G-nodes.
 
 ### Tube + global side-function design (decided 2026-06-02, before coding sub-node 2)

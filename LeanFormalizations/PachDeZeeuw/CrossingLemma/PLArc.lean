@@ -1052,4 +1052,124 @@ theorem range_toSimpleArc : Set.range β.toSimpleArc = β.carrier := by
 
 end PolyArc
 
+/-! ## §L3 sub-node 2 — the tapered collar tube
+
+The collar `T` is built as a **tapered tube** around the arc's spine `S`
+(`S = arcInterior β`):
+
+  `taperedTube R S δ₀ = ⋃ p ∈ S, ball p (min δ₀ (½·infDist p Rᶜ))`.
+
+The point-dependent radius `min δ₀ (½·dist(p, Rᶜ))` keeps the tube *inside* `R`
+even near the endpoints (which sit on `∂R`, where a uniform tube would poke out:
+`dist(·, Rᶜ) → 0` there).  The four properties the downstream cover nodes (G1/G3)
+consume are proved here, all `Set`-generic (any spine `S`, any open `R`):
+
+* `isOpen_taperedTube`   — open (a union of open balls);
+* `taperedTube_subset`   — `T ⊆ R` (unconditional);
+* `subset_taperedTube`   — `S ⊆ T` (needs `S ⊆ R`, `R` open, `Rᶜ` nonempty, `δ₀>0`);
+* `isConnected_taperedTube` — `T` connected (additionally needs `S` preconnected,
+  nonempty), via `isPreconnected_of_forall` glueing each ball to the connected spine.
+
+We first record the two spine facts for a generic `SimpleArc`: `arcInterior` is
+nonempty and preconnected (the continuous image of the connected `(0,1)`). -/
+
+/-- The open-parameter set `{p ∈ Icc 0 1 | (p:ℝ) ∈ (0,1)}` is preconnected: it is
+the subtype image of the connected interval `(0,1)`. -/
+theorem isPreconnected_setOf_mem_unitIoo :
+    IsPreconnected {p : Set.Icc (0 : ℝ) 1 | (p : ℝ) ∈ unitIoo} := by
+  rw [← Topology.IsInducing.subtypeVal.isPreconnected_image, image_param_eq_unitIoo,
+    unitIoo]
+  exact isPreconnected_Ioo
+
+/-- The interior of a simple arc is nonempty (it contains the image of the
+midpoint `½ ∈ (0,1)`). -/
+theorem arcInterior_nonempty (β : SimpleArc Plane) : β.arcInterior.Nonempty := by
+  refine ⟨β ⟨1 / 2, by norm_num [Set.mem_Icc]⟩, ?_⟩
+  rw [SimpleArc.arcInterior]
+  exact ⟨⟨1 / 2, by norm_num [Set.mem_Icc]⟩,
+    by simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo]; norm_num, rfl⟩
+
+/-- The interior of a simple arc is preconnected (continuous image of the
+connected open parameter interval). -/
+theorem isPreconnected_arcInterior (β : SimpleArc Plane) :
+    IsPreconnected β.arcInterior := by
+  rw [SimpleArc.arcInterior]
+  exact isPreconnected_setOf_mem_unitIoo.image (⇑β) β.continuous_toFun.continuousOn
+
+/-- **The tapered collar tube** around a spine `S` inside an open region `R`.
+Each spine point `p` contributes an open ball whose radius is capped at `δ₀` and
+at half the distance from `p` to the complement `Rᶜ` (so the ball stays in `R`). -/
+noncomputable def taperedTube (R S : Set Plane) (δ₀ : ℝ) : Set Plane :=
+  ⋃ p ∈ S, Metric.ball p (min δ₀ (Metric.infDist p Rᶜ / 2))
+
+/-- The tapered tube is open (a union of open balls). -/
+theorem isOpen_taperedTube (R S : Set Plane) (δ₀ : ℝ) :
+    IsOpen (taperedTube R S δ₀) :=
+  isOpen_biUnion (fun _ _ => Metric.isOpen_ball)
+
+/-- **`T ⊆ R`** — the tube never leaves the region.  Unconditional: the per-point
+radius is `≤ ½·dist(p, Rᶜ)`, so a ball point landing in `Rᶜ` would force
+`infDist p Rᶜ < ½·infDist p Rᶜ`, impossible. -/
+theorem taperedTube_subset (R S : Set Plane) (δ₀ : ℝ) :
+    taperedTube R S δ₀ ⊆ R := by
+  intro q hq
+  rw [taperedTube, Set.mem_iUnion₂] at hq
+  obtain ⟨p, _, hqp⟩ := hq
+  by_contra hqR
+  have hqRc : q ∈ Rᶜ := hqR
+  have h1 : Metric.infDist p Rᶜ ≤ dist p q := Metric.infDist_le_dist_of_mem hqRc
+  rw [Metric.mem_ball] at hqp
+  have h2 : dist q p < Metric.infDist p Rᶜ / 2 := lt_of_lt_of_le hqp (min_le_right _ _)
+  rw [dist_comm] at h2
+  have hnn : (0 : ℝ) ≤ Metric.infDist p Rᶜ := Metric.infDist_nonneg
+  linarith
+
+/-- The per-point tube radius is positive at a spine point of `R` (provided `Rᶜ`
+is nonempty, e.g. `R ≠ univ` — guaranteed by the crosscut frontier condition). -/
+theorem taperedRadius_pos {R : Set Plane} (hR : IsOpen R) (hRc : (Rᶜ).Nonempty)
+    {δ₀ : ℝ} (hδ : 0 < δ₀) {p : Plane} (hp : p ∈ R) :
+    0 < min δ₀ (Metric.infDist p Rᶜ / 2) := by
+  refine lt_min hδ ?_
+  have hpos : 0 < Metric.infDist p Rᶜ :=
+    (hR.isClosed_compl.notMem_iff_infDist_pos hRc).mp (fun h => h hp)
+  linarith
+
+/-- **`S ⊆ T`** — the spine sits inside the tube (each point is the centre of its
+own positive-radius ball). -/
+theorem subset_taperedTube {R S : Set Plane} (hR : IsOpen R) (hRc : (Rᶜ).Nonempty)
+    {δ₀ : ℝ} (hδ : 0 < δ₀) (hSR : S ⊆ R) : S ⊆ taperedTube R S δ₀ := by
+  intro p hp
+  rw [taperedTube, Set.mem_iUnion₂]
+  exact ⟨p, hp, Metric.mem_ball_self (taperedRadius_pos hR hRc hδ (hSR hp))⟩
+
+/-- **The tube is preconnected.**  Each ball is convex (preconnected) and shares its
+centre with the preconnected spine `S`; glue every ball to `S` through a common base
+point via `isPreconnected_of_forall`. -/
+theorem isPreconnected_taperedTube {R S : Set Plane} (hR : IsOpen R)
+    (hRc : (Rᶜ).Nonempty) {δ₀ : ℝ} (hδ : 0 < δ₀) (hSR : S ⊆ R)
+    (hScon : IsPreconnected S) (hSne : S.Nonempty) :
+    IsPreconnected (taperedTube R S δ₀) := by
+  obtain ⟨x, hxS⟩ := hSne
+  apply isPreconnected_of_forall x
+  intro q hq
+  rw [taperedTube, Set.mem_iUnion₂] at hq
+  obtain ⟨p, hpS, hqp⟩ := hq
+  refine ⟨S ∪ Metric.ball p (min δ₀ (Metric.infDist p Rᶜ / 2)), ?_,
+    Set.mem_union_left _ hxS, Set.mem_union_right _ hqp, ?_⟩
+  · refine Set.union_subset (subset_taperedTube hR hRc hδ hSR) ?_
+    intro y hy
+    rw [taperedTube, Set.mem_iUnion₂]
+    exact ⟨p, hpS, hy⟩
+  · exact hScon.union p hpS
+      (Metric.mem_ball_self (taperedRadius_pos hR hRc hδ (hSR hpS)))
+      ((convex_ball p (min δ₀ (Metric.infDist p Rᶜ / 2))).isPreconnected)
+
+/-- **The tube is connected** (nonempty + preconnected). -/
+theorem isConnected_taperedTube {R S : Set Plane} (hR : IsOpen R)
+    (hRc : (Rᶜ).Nonempty) {δ₀ : ℝ} (hδ : 0 < δ₀) (hSR : S ⊆ R)
+    (hScon : IsPreconnected S) (hSne : S.Nonempty) :
+    IsConnected (taperedTube R S δ₀) :=
+  ⟨hSne.mono (subset_taperedTube hR hRc hδ hSR),
+    isPreconnected_taperedTube hR hRc hδ hSR hScon hSne⟩
+
 end CrossingLemma.PlaneArcSeparation
