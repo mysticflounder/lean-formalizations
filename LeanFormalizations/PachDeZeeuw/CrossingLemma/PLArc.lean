@@ -3643,4 +3643,83 @@ theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ 
         hp hm
     · exact Set.disjoint_left.mp (disjoint_endCapTgtPlus_endCapTgtMinus β ρ) hp hm
 
+/-! #### P3 existence — the separation primitives.
+
+Three positive constants extracted from the (finite, simple) arc geometry: a common disk
+radius making all vertex/endpoint disks pairwise disjoint, and the gaps from each endpoint
+to its non-incident edges.  The master's `hballs`, `hbudsrc`, `hbudtgt` sit below these. -/
+
+/-- A single positive disk radius `ρ₀` making the `numSegs+1` vertex disks pairwise
+disjoint (one third of the minimal inter-vertex distance). -/
+theorem exists_pos_disk_radius (β : PolyArc) :
+    ∃ ρ₀ : ℝ, 0 < ρ₀ ∧ ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) ρ₀) (Metric.ball (β.verts q) ρ₀) := by
+  classical
+  have hne : (Finset.univ : Finset (Fin (β.numSegs + 1))).offDiag.Nonempty := by
+    refine ⟨(0, Fin.last β.numSegs),
+      Finset.mem_offDiag.mpr ⟨Finset.mem_univ _, Finset.mem_univ _, ?_⟩⟩
+    intro h; have h2 := congrArg Fin.val h
+    simp only [Fin.val_last, Fin.val_zero] at h2; have := β.numSegs_pos; omega
+  set d := (Finset.univ.offDiag).inf' hne (fun pq => dist (β.verts pq.1) (β.verts pq.2)) with hd
+  have hdpos : 0 < d := by
+    rw [hd, Finset.lt_inf'_iff]
+    intro pq hpq
+    rw [Finset.mem_offDiag] at hpq
+    exact dist_pos.mpr (fun h => hpq.2.2 (β.distinct h))
+  refine ⟨d / 3, by linarith, ?_⟩
+  intro p q hpq
+  apply Metric.ball_disjoint_ball
+  have hmem : (p, q) ∈ (Finset.univ : Finset (Fin (β.numSegs + 1))).offDiag :=
+    Finset.mem_offDiag.mpr ⟨Finset.mem_univ _, Finset.mem_univ _, hpq⟩
+  have hle : d ≤ dist (β.verts p) (β.verts q) := by
+    rw [hd]; exact Finset.inf'_le (fun pq => dist (β.verts pq.1) (β.verts pq.2)) hmem
+  linarith
+
+/-- A positive gap `d` from the source endpoint `verts 0` to every non-incident edge. -/
+theorem exists_pos_src_edge_sep (β : PolyArc) :
+    ∃ d : ℝ, 0 < d ∧ ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      d ≤ Metric.infDist (β.verts 0) (β.segCarrier i) := by
+  classical
+  set f : Fin β.numSegs → ℝ :=
+    fun i => if (i : ℕ) = 0 then 1 else Metric.infDist (β.verts 0) (β.segCarrier i) with hf
+  have hfpos : ∀ i, 0 < f i := by
+    intro i; simp only [hf]; split
+    · exact one_pos
+    · rename_i h
+      exact ((β.segCarrier_isCompact i).isClosed.notMem_iff_infDist_pos
+        ⟨β.segSrc i, left_mem_segment ℝ _ _⟩).mp (β.src_notMem_segCarrier i h)
+  have hne : (Finset.univ : Finset (Fin β.numSegs)).Nonempty :=
+    ⟨⟨0, β.numSegs_pos⟩, Finset.mem_univ _⟩
+  set m := Finset.univ.inf' hne f with hm
+  have hmpos : 0 < m := by rw [hm, Finset.lt_inf'_iff]; exact fun i _ => hfpos i
+  refine ⟨m, hmpos, fun i hi => ?_⟩
+  have hle : m ≤ f i := Finset.inf'_le f (Finset.mem_univ i)
+  have hfi : f i = Metric.infDist (β.verts 0) (β.segCarrier i) := by
+    simp only [hf]; rw [if_neg hi]
+  rwa [hfi] at hle
+
+/-- A positive gap `d` from the target endpoint `verts (last)` to every non-incident edge. -/
+theorem exists_pos_tgt_edge_sep (β : PolyArc) :
+    ∃ d : ℝ, 0 < d ∧ ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      d ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) := by
+  classical
+  set f : Fin β.numSegs → ℝ :=
+    fun i => if (i : ℕ) = β.numSegs - 1 then 1
+      else Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) with hf
+  have hfpos : ∀ i, 0 < f i := by
+    intro i; simp only [hf]; split
+    · exact one_pos
+    · rename_i h
+      exact ((β.segCarrier_isCompact i).isClosed.notMem_iff_infDist_pos
+        ⟨β.segSrc i, left_mem_segment ℝ _ _⟩).mp (β.tgt_notMem_segCarrier i h)
+  have hne : (Finset.univ : Finset (Fin β.numSegs)).Nonempty :=
+    ⟨⟨0, β.numSegs_pos⟩, Finset.mem_univ _⟩
+  set m := Finset.univ.inf' hne f with hm
+  have hmpos : 0 < m := by rw [hm, Finset.lt_inf'_iff]; exact fun i _ => hfpos i
+  refine ⟨m, hmpos, fun i hi => ?_⟩
+  have hle : m ≤ f i := Finset.inf'_le f (Finset.mem_univ i)
+  have hfi : f i = Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) := by
+    simp only [hf]; rw [if_neg hi]
+  rwa [hfi] at hle
+
 end CrossingLemma.PlaneArcSeparation
