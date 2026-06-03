@@ -3003,4 +3003,84 @@ theorem disjoint_stripSupport_vertexBall_nonincident (β : PolyArc)
   · exact hsep i ⟨(j : ℕ) + 1, hj1⟩ (by rw [hval]; omega) z hi hj1'
   · exact hsep j i (by omega) z hj hi
 
+/-! #### P3 disjointness — end caps.
+
+The endpoint pieces carry a single incident edge (`firstSeg`/`lastSeg`) and no corner, so
+their `±` split is the lone `sideForm` sign.  Opposite-sign caps at the same endpoint, or a
+cap against the opposite-sign band on its own edge, contradict directly; the two endpoint
+caps are separated by their balls. -/
+
+/-- Opposite-sign caps at the source endpoint are disjoint. -/
+theorem disjoint_endCapSrcPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Disjoint (endCapSrcPlus β ρ) (endCapSrcMinus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  have hp : 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z := hzp.2
+  have hm : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0 := hzm.2
+  linarith
+
+/-- Opposite-sign caps at the target endpoint are disjoint. -/
+theorem disjoint_endCapTgtPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Disjoint (endCapTgtPlus β ρ) (endCapTgtMinus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  have hp : 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z := hzp.2
+  have hm : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0 := hzm.2
+  linarith
+
+/-- The source `+` cap and the `−` band on its own edge (`firstSeg`) are disjoint
+(opposite `sideForm` sign on the same edge). -/
+theorem disjoint_endCapSrcPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (α δ₀ : ℝ) : Disjoint (endCapSrcPlus β ρ) (bandStripMinus β α δ₀ β.firstSeg) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzb
+  have hp : 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z := hzc.2
+  have hm : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0 := hzb.1.2
+  linarith
+
+/-- The source `−` cap and the `+` band on its own edge are disjoint. -/
+theorem disjoint_endCapSrcMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (α δ₀ : ℝ) : Disjoint (endCapSrcMinus β ρ) (bandStripPlus β α δ₀ β.firstSeg) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzb
+  have hm : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0 := hzc.2
+  have hp : 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z := hzb.1.2
+  linarith
+
+/-- The target `+` cap and the `−` band on its own edge (`lastSeg`) are disjoint. -/
+theorem disjoint_endCapTgtPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (α δ₀ : ℝ) : Disjoint (endCapTgtPlus β ρ) (bandStripMinus β α δ₀ β.lastSeg) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzb
+  have hp : 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z := hzc.2
+  have hm : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0 := hzb.1.2
+  linarith
+
+/-- The target `−` cap and the `+` band on its own edge are disjoint. -/
+theorem disjoint_endCapTgtMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (α δ₀ : ℝ) : Disjoint (endCapTgtMinus β ρ) (bandStripPlus β α δ₀ β.lastSeg) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzb
+  have hm : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0 := hzc.2
+  have hp : 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z := hzb.1.2
+  linarith
+
+/-- The two endpoint caps are disjoint once their balls are (a `ρ` budget). -/
+theorem disjoint_endCapSrc_endCapTgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hball : Disjoint (Metric.ball (β.verts 0) (ρ 0))
+                      (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))) :
+    Disjoint (endCapSrcPlus β ρ) (endCapTgtMinus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzs hzt
+  exact (Set.disjoint_left.mp hball) hzs.1.1 hzt.1.1
+
+/-- The other endpoint-cap cross pairing. -/
+theorem disjoint_endCapSrcMinus_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hball : Disjoint (Metric.ball (β.verts 0) (ρ 0))
+                      (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))) :
+    Disjoint (endCapSrcMinus β ρ) (endCapTgtPlus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzs hzt
+  exact (Set.disjoint_left.mp hball) hzs.1.1 hzt.1.1
+
 end CrossingLemma.PlaneArcSeparation
