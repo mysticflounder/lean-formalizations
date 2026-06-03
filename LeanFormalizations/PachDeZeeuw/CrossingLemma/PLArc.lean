@@ -1304,4 +1304,26 @@ theorem pos_turn_sideForm_of_overlap (a v b z : Plane)
     rw [e]; nlinarith [habs, hbound, hsq]
   nlinarith [key, hP]
 
+/-- **Transverse smallness from the disk radius.**  `|sideForm v b z|` is controlled
+by the (sup-metric) distance from `z` to `v`: it is at most `(|b.1−v.1|+|b.2−v.2|)`
+times `dist v z`.  This discharges the thinness hypothesis of
+`pos_turn_sideForm_of_overlap` from a small disk radius. -/
+theorem abs_sideForm_le_dist (v b z : Plane) :
+    |sideForm v b z| ≤ (|b.1 - v.1| + |b.2 - v.2|) * dist v z := by
+  have h1 : |z.1 - v.1| ≤ dist v z := by
+    rw [Prod.dist_eq]
+    calc |z.1 - v.1| = dist v.1 z.1 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist v.1 z.1) (dist v.2 z.2) := le_max_left _ _
+  have h2 : |z.2 - v.2| ≤ dist v z := by
+    rw [Prod.dist_eq]
+    calc |z.2 - v.2| = dist v.2 z.2 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist v.1 z.1) (dist v.2 z.2) := le_max_right _ _
+  calc |sideForm v b z|
+      = |(b.1 - v.1) * (z.2 - v.2) - (b.2 - v.2) * (z.1 - v.1)| := by rw [sideForm]
+    _ ≤ |(b.1 - v.1) * (z.2 - v.2)| + |(b.2 - v.2) * (z.1 - v.1)| := by
+          rw [sub_eq_add_neg]; refine (abs_add_le _ _).trans ?_; rw [abs_neg]
+    _ = |b.1 - v.1| * |z.2 - v.2| + |b.2 - v.2| * |z.1 - v.1| := by rw [abs_mul, abs_mul]
+    _ ≤ |b.1 - v.1| * dist v z + |b.2 - v.2| * dist v z := by gcongr
+    _ = (|b.1 - v.1| + |b.2 - v.2|) * dist v z := by ring
+
 end CrossingLemma.PlaneArcSeparation
