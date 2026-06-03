@@ -2116,4 +2116,131 @@ theorem mem_edgeBandMid_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} 
   rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo]
   exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
 
+/-- Reversing the edge complements the foot parameter: `footParam t s z = 1 − footParam s t z`. -/
+theorem footParam_swap_eq {s t : Plane} (h : t ≠ s) (z : Plane) :
+    footParam t s z = 1 - footParam s t z := by
+  have hP : dotp (t - s) (t - s) ≠ 0 := (dotp_self_pos h).ne'
+  have hL : footParam t s z = dotp (z - t) (s - t) / dotp (s - t) (s - t) := rfl
+  have hss : dotp (s - t) (s - t) = dotp (t - s) (t - s) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  rw [hL, hss, dotp_sub_tgt h]
+  field_simp
+
+/-- **The narrowed-band cover with endpoint pinch.**  Every tube point is in a *narrowed*
+edge band, an *interior*-vertex disk, or — at the two arc endpoints — an endpoint disk on
+the **forward** side of the incident edge (foot `> 0` at the source, `< 1` at the target).
+The endpoint forward sign is the pinch: routing to an endpoint disk happens only through
+the `b<α` / `b>1−α` branch of the endpoint-incident edge, where the spine witness is on
+that edge and the tube taper gives `dist z p < infDist p Rᶜ / 2 ≤ dist p (endpoint) / 2`. -/
+theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
+    (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
+    (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
+    {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
+    (hband : ∀ i : Fin β.numSegs,
+      (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * δ₀
+        < α / 2 * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i))
+    (hsrc : ∀ i : Fin β.numSegs,
+      δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
+    (htgt : ∀ i : Fin β.numSegs,
+      δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
+    {z : Plane} (hz : z ∈ taperedTube R S δ₀) :
+    (∃ i : Fin β.numSegs, z ∈ edgeBandMid (β.segSrc i) (β.segTgt i) (α / 2))
+    ∨ (∃ j : Fin (β.numSegs + 1), 0 < (j : ℕ) ∧ (j : ℕ) < β.numSegs
+          ∧ z ∈ Metric.ball (β.verts j) (ρ j))
+    ∨ (z ∈ Metric.ball (β.verts 0) (ρ 0)
+          ∧ 0 < footParam (β.segSrc (⟨0, β.numSegs_pos⟩ : Fin β.numSegs))
+                          (β.segTgt (⟨0, β.numSegs_pos⟩ : Fin β.numSegs)) z)
+    ∨ (z ∈ Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs))
+          ∧ footParam (β.segSrc (⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩ : Fin β.numSegs))
+                      (β.segTgt (⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩ : Fin β.numSegs)) z < 1) := by
+  rw [taperedTube, Set.mem_iUnion₂] at hz
+  obtain ⟨p, hpS, hzp⟩ := hz
+  have hball := Metric.mem_ball.mp hzp
+  have hdzp : dist z p < δ₀ := lt_of_lt_of_le hball (min_le_left _ _)
+  have hdz_inf : dist z p < Metric.infDist p Rᶜ / 2 := lt_of_lt_of_le hball (min_le_right _ _)
+  have hdpz : dist p z < δ₀ := by rwa [dist_comm] at hdzp
+  have hpc := hS hpS
+  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  obtain ⟨i, hpi⟩ := hpc
+  rw [PolyArc.segCarrier] at hpi
+  have hts : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
+  have hpseg : p ∈ segment ℝ (β.segSrc i) (β.segTgt i) := hpi
+  obtain ⟨a, b, ha, hb, hab, hp⟩ := hpi
+  have haeq : a = 1 - b := by linarith
+  have hfoot : footParam (β.segSrc i) (β.segTgt i) p = b := by
+    rw [← hp, haeq]; exact footParam_affineComb hts b
+  rcases lt_or_ge b α with hlo | hge
+  · -- near the source vertex `castSucc i`
+    have hps : dist p (β.segSrc i) = b * dist (β.segSrc i) (β.segTgt i) := by
+      rw [← hp, dist_affineComb_src hab, abs_of_nonneg hb, dist_comm (β.segTgt i)]
+    have hdps : dist p (β.segSrc i) ≤ α * dist (β.segSrc i) (β.segTgt i) := by
+      rw [hps]; exact mul_le_mul_of_nonneg_right (le_of_lt hlo) dist_nonneg
+    have htri : dist z (β.segSrc i) ≤ dist z p + dist p (β.segSrc i) := dist_triangle z p _
+    have hzs : dist z (β.segSrc i) < ρ (Fin.castSucc i) := by linarith [hsrc i]
+    rcases Nat.eq_zero_or_pos (i : ℕ) with hi0 | hipos
+    · -- i = 0: source endpoint, pinch
+      have hie : i = (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) := Fin.ext hi0
+      have hsv : β.segSrc i = β.verts 0 := by
+        rw [PolyArc.segSrc, hie]; rfl
+      have hcast : (Fin.castSucc i) = (0 : Fin (β.numSegs + 1)) := by rw [hie]; rfl
+      have hinf : Metric.infDist p Rᶜ ≤ dist p (β.segSrc i) := by
+        rw [hsv]; exact Metric.infDist_le_dist_of_mem hsrc0
+      have hpinch : 0 < footParam (β.segSrc i) (β.segTgt i) z := by
+        apply footParam_pos_of_close_to_seg hts hpseg
+        calc dist z p < Metric.infDist p Rᶜ / 2 := hdz_inf
+          _ ≤ dist p (β.segSrc i) / 2 := by linarith
+      right; right; left
+      refine ⟨?_, ?_⟩
+      · rw [Metric.mem_ball]
+        rw [hsv, hcast] at hzs; exact hzs
+      · rw [hie] at hpinch; exact hpinch
+    · -- interior source vertex
+      right; left
+      exact ⟨Fin.castSucc i, by simpa using hipos, by simpa using i.isLt,
+        Metric.mem_ball.mpr hzs⟩
+  · rcases le_or_gt b (1 - α) with hmid | hhi
+    · -- middle of the edge: narrowed band
+      left
+      refine ⟨i, mem_edgeBandMid_of_footParam_mem (p := p) hts hα ?_ ?_⟩
+      · rw [hfoot, Set.mem_Icc]; exact ⟨hge, hmid⟩
+      · have hMnn : (0 : ℝ) ≤ |(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2| :=
+          add_nonneg (abs_nonneg _) (abs_nonneg _)
+        have hle := mul_le_mul_of_nonneg_left (le_of_lt hdpz) hMnn
+        linarith [hband i]
+    · -- near the target vertex `succ i`
+      have hpt : dist p (β.segTgt i) = (1 - b) * dist (β.segSrc i) (β.segTgt i) := by
+        rw [← hp, dist_affineComb_tgt hab, abs_of_nonneg ha, haeq]
+      have ha_lt : 1 - b < α := by linarith
+      have hdpt : dist p (β.segTgt i) ≤ α * dist (β.segSrc i) (β.segTgt i) := by
+        rw [hpt]; exact mul_le_mul_of_nonneg_right (le_of_lt ha_lt) dist_nonneg
+      have htri : dist z (β.segTgt i) ≤ dist z p + dist p (β.segTgt i) := dist_triangle z p _
+      have hzt : dist z (β.segTgt i) < ρ (Fin.succ i) := by linarith [htgt i]
+      rcases Nat.lt_or_ge ((i : ℕ) + 1) β.numSegs with hlt | hge2
+      · -- interior target vertex
+        right; left
+        refine ⟨Fin.succ i, ?_, ?_, Metric.mem_ball.mpr hzt⟩
+        · simp [Fin.succ]
+        · simpa [Fin.val_succ] using hlt
+      · -- i + 1 = numSegs: target endpoint, pinch
+        have hival : (i : ℕ) = β.numSegs - 1 := by omega
+        have hie : i = (⟨β.numSegs - 1, by omega⟩ : Fin β.numSegs) := Fin.ext hival
+        have hsucc : (Fin.succ i) = (Fin.last β.numSegs) := by
+          apply Fin.ext; simp [Fin.val_succ, Fin.val_last]; omega
+        have htv : β.segTgt i = β.verts (Fin.last β.numSegs) := by
+          rw [PolyArc.segTgt, hsucc]
+        have hinf : Metric.infDist p Rᶜ ≤ dist p (β.segTgt i) := by
+          rw [htv]; exact Metric.infDist_le_dist_of_mem hsrcL
+        have hpinchrev : 0 < footParam (β.segTgt i) (β.segSrc i) z := by
+          apply footParam_pos_of_close_to_seg (Ne.symm hts)
+          · rw [segment_symm]; exact hpseg
+          · calc dist z p < Metric.infDist p Rᶜ / 2 := hdz_inf
+              _ ≤ dist p (β.segTgt i) / 2 := by linarith
+        have hpinch : footParam (β.segSrc i) (β.segTgt i) z < 1 := by
+          have := footParam_swap_eq hts z; linarith
+        right; right; right
+        refine ⟨?_, ?_⟩
+        · rw [Metric.mem_ball]
+          rw [htv, hsucc] at hzt; exact hzt
+        · rw [hie] at hpinch; exact hpinch
+
 end CrossingLemma.PlaneArcSeparation

@@ -534,8 +534,21 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `mem_vertexPlus/Minus_of_outgoing/incoming` — on the band/disk overlap (gate + thin
    hyp) a `sideForm`-signed band point lands in the matching τ-selected sector (proof:
    `overlap_mem_*Sector_iff[_incoming]` + sign of `cornerTurn·sideForm` via
-   `mul_pos`/`mul_neg_of_*`); all sorry-free, axiom-clean.  STILL TODO: C3
-   `exists_collarData` budget (global
+   `mul_pos`/`mul_neg_of_*`); all sorry-free, axiom-clean.  **C3a/C3b DONE (the
+   narrowed-band cover keystone):** `mem_edgeBandMid_of_footParam_mem` (double-cutoff
+   core: spine foot `∈ [α,1−α]` + `α/2` closeness budget ⇒ `z ∈ edgeBandMid s t (α/2)`,
+   foot in the OPEN `(α/2,1−α/2) ⊇ [α,1−α]`); `footParam_swap_eq` (`footParam t s z =
+   1−footParam s t z`); and **`taperedTube_subset_midBands_union_disks`** — every tube
+   point lands in a narrowed edge band, an *interior*-vertex disk, or (at the two arc
+   endpoints) an endpoint disk on the **forward** side of the incident edge (`footParam
+   > 0` at the source, `< 1` at the target).  The endpoint forward sign is the **fused
+   pinch**: routing to an endpoint disk happens only through the `b<α`/`b>1−α` branch of
+   the endpoint-incident edge, where the spine witness `p` is on that edge and the tube
+   taper gives `dist z p < infDist p Rᶜ/2 ≤ dist p (endpoint)/2`
+   (`footParam_pos_of_close_to_seg` from C1, with `Metric.infDist_le_dist_of_mem` and
+   `hsrc0 : verts 0 ∈ Rᶜ` / `hsrcL : verts (last) ∈ Rᶜ`); the target endpoint uses
+   `footParam_swap_eq` on the reversed edge.  All sorry-free, axiom-clean.  STILL TODO:
+   C3c `exists_collarData` budget (global
    `α`, double cutoff, narrowed cover variant); C4 separation plumbing (off-carrier,
    disjoint-supports via `exists_pos_nonadjacent_sep`); C5 `collarPlus/Minus` defs +
    OPEN + NONEMPTY; C6 UNION `= T\carrier`; C7 DISJOINT.
