@@ -2328,4 +2328,26 @@ theorem exists_delta_corner_confine (β : PolyArc) (i : Fin β.numSegs)
   have hzb : dist z b < σ / 2 := lt_of_lt_of_le hbdist hδσ
   linarith
 
+/-- **Non-adjacent tube separation.**  A single tube half-width `δ > 0` below which no
+point can be within `δ` of two *non-consecutive* edges at once: the per-edge collar
+sides of far edges have disjoint supports, so the only cross-overlaps to reconcile are
+the adjacent ones (handled by `exists_delta_corner_confine` + the corner glue).  Proof:
+take `δ = d_sep/2` from `exists_pos_nonadjacent_sep`; near-points (`infDist_lt_iff`) in
+both edges would be `< 2δ = d_sep` apart, contradicting the separation. -/
+theorem exists_delta_nonadjacent_tube_sep (β : PolyArc) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ i j : Fin β.numSegs, (i : ℕ) + 1 < (j : ℕ) →
+      ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ →
+        Metric.infDist z (β.segCarrier j) < δ → False := by
+  obtain ⟨ds, hds, hsep⟩ := β.exists_pos_nonadjacent_sep
+  refine ⟨ds / 2, by linarith, ?_⟩
+  intro i j hij z hzi hzj
+  have hine : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  have hjne : (β.segCarrier j).Nonempty := ⟨β.segSrc j, left_mem_segment ℝ _ _⟩
+  obtain ⟨x, hx, hxd⟩ := (Metric.infDist_lt_iff hine).mp hzi
+  obtain ⟨y, hy, hyd⟩ := (Metric.infDist_lt_iff hjne).mp hzj
+  have hsepxy : ds < dist x y := hsep i j hij x hx y hy
+  have htri : dist x y ≤ dist x z + dist z y := dist_triangle x z y
+  have hxz : dist x z < ds / 2 := by rw [dist_comm]; exact hxd
+  linarith
+
 end CrossingLemma.PlaneArcSeparation
