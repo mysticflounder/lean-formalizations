@@ -2243,4 +2243,89 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
           rw [htv, hsucc] at hzt; exact hzt
         · rw [hie] at hpinch; exact hpinch
 
+/-! ### Task (iv), C-keystone: corner confinement
+
+The orientation side-function reconciles two adjacent edges only on the region near
+their shared vertex, where the corner glue (`exists_radius_thin` + the four
+`mem_vertex*` lemmas) is valid.  This lemma is what makes that region controllable by
+the *free* tube half-width `δ` rather than by a vertex-disk radius (which the cover
+pins large, the source of the discarded local architecture's obstruction): a point
+within `δ` of **both** incident edges is within any prescribed `r` of the shared
+vertex, once `δ` is small.
+
+Proof by compactness, mirroring `exists_pos_nonadjacent_sep`: trim each closed edge to
+its part at distance `≥ r/2` from the vertex; the two trimmed pieces are disjoint
+compacts (the edges meet only at the vertex, `consecutive_meet`), hence separated by
+some `σ > 0`; take `δ = min (r/2) (σ/2)`.  A point within `δ` of both edges either is
+already within `r` of the vertex, or has near-points in both trimmed pieces, forcing
+those within `2δ ≤ σ` — impossible. -/
+theorem exists_delta_corner_confine (β : PolyArc) (i : Fin β.numSegs)
+    (hi1 : (i : ℕ) + 1 < β.numSegs) {r : ℝ} (hr : 0 < r) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ z : Plane,
+      Metric.infDist z (β.segCarrier i) < δ →
+      Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ →
+      dist z (β.verts (Fin.succ i)) < r := by
+  classical
+  set v : Plane := β.verts (Fin.succ i) with hv
+  set A : Set Plane := β.segCarrier i with hA
+  set B : Set Plane := β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ with hB
+  have hAne : A.Nonempty := by
+    rw [hA, PolyArc.segCarrier]; exact ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  have hBne : B.Nonempty := by
+    rw [hB, PolyArc.segCarrier]; exact ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+  have hfarclosed : IsClosed {w : Plane | r / 2 ≤ dist w v} :=
+    isClosed_le continuous_const (continuous_id.dist continuous_const)
+  set Afar : Set Plane := A ∩ {w | r / 2 ≤ dist w v} with hAfar
+  set Bfar : Set Plane := B ∩ {w | r / 2 ≤ dist w v} with hBfar
+  have hAfc : IsCompact Afar := (β.segCarrier_isCompact i).inter_right hfarclosed
+  have hBfc : IsCompact Bfar :=
+    (β.segCarrier_isCompact ⟨(i : ℕ) + 1, hi1⟩).inter_right hfarclosed
+  -- the two trimmed edges are disjoint: the edges meet only at the shared vertex `v`
+  have hmeet : A ∩ B ⊆ {v} := by
+    have hcast : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+      Fin.ext (by simp [Fin.val_succ])
+    have hAeq : A = segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
+      rw [hA, PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt]
+    have hBeq : B = segment ℝ (β.verts (Fin.succ i))
+        (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) := by
+      rw [hB, PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+    intro w hw
+    have hwmem : w ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) ∩
+        segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) := by
+      rw [← hAeq, ← hBeq]; exact hw
+    have hwv := β.consecutive_meet i hi1 hwmem
+    rw [hv]; exact hwv
+  have hdisj : Disjoint Afar Bfar := by
+    rw [Set.disjoint_left]
+    intro w hwA hwB
+    have hwAB : w ∈ A ∩ B := ⟨hwA.1, hwB.1⟩
+    have hwv : w = v := hmeet hwAB
+    have hd0 : dist w v = 0 := by rw [hwv]; simp
+    have hge : r / 2 ≤ dist w v := hwA.2
+    rw [hd0] at hge; linarith
+  obtain ⟨σ, hσ, hsep⟩ := exists_pos_forall_lt_dist hAfc hBfc.isClosed hdisj
+  refine ⟨min (r / 2) (σ / 2), lt_min (by linarith) (by linarith), ?_⟩
+  intro z hzA hzB
+  by_contra hzv
+  push Not at hzv
+  obtain ⟨a, haA, hadist⟩ := (Metric.infDist_lt_iff hAne).mp hzA
+  obtain ⟨b, hbB, hbdist⟩ := (Metric.infDist_lt_iff hBne).mp hzB
+  have hδr : min (r / 2) (σ / 2) ≤ r / 2 := min_le_left _ _
+  have hδσ : min (r / 2) (σ / 2) ≤ σ / 2 := min_le_right _ _
+  have hafar : r / 2 ≤ dist a v := by
+    have h1 : dist z v ≤ dist z a + dist a v := dist_triangle z a v
+    have h2 : dist z a < r / 2 := lt_of_lt_of_le hadist hδr
+    linarith
+  have hbfar : r / 2 ≤ dist b v := by
+    have h1 : dist z v ≤ dist z b + dist b v := dist_triangle z b v
+    have h2 : dist z b < r / 2 := lt_of_lt_of_le hbdist hδr
+    linarith
+  have haAfar : a ∈ Afar := ⟨haA, hafar⟩
+  have hbBfar : b ∈ Bfar := ⟨hbB, hbfar⟩
+  have hsepab : σ < dist a b := hsep a haAfar b hbBfar
+  have htri : dist a b ≤ dist a z + dist z b := dist_triangle a z b
+  have hza : dist a z < σ / 2 := by rw [dist_comm]; exact lt_of_lt_of_le hadist hδσ
+  have hzb : dist z b < σ / 2 := lt_of_lt_of_le hbdist hδσ
+  linarith
+
 end CrossingLemma.PlaneArcSeparation

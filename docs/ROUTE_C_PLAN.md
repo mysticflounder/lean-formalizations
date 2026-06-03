@@ -547,11 +547,37 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    taper gives `dist z p < infDist p Rᶜ/2 ≤ dist p (endpoint)/2`
    (`footParam_pos_of_close_to_seg` from C1, with `Metric.infDist_le_dist_of_mem` and
    `hsrc0 : verts 0 ∈ Rᶜ` / `hsrcL : verts (last) ∈ Rᶜ`); the target endpoint uses
-   `footParam_swap_eq` on the reversed edge.  All sorry-free, axiom-clean.  STILL TODO:
-   C3c `exists_collarData` budget (global
-   `α`, double cutoff, narrowed cover variant); C4 separation plumbing (off-carrier,
-   disjoint-supports via `exists_pos_nonadjacent_sep`); C5 `collarPlus/Minus` defs +
-   OPEN + NONEMPTY; C6 UNION `= T\carrier`; C7 DISJOINT.
+   `footParam_swap_eq` on the reversed edge.  All sorry-free, axiom-clean.
+
+   **ROUTING CHANGE (2026-06-03, Adam-approved).**  The planned "assemble `T⁺/T⁻` from
+   local band+sector pieces glued by `exists_radius_thin`" (old C3c–C7) is **abandoned —
+   it provably cannot close union(P2)+disjoint(P3) with one global `α/ρ/δ₀`.**  The
+   metric vertex *disk* `ball(v,ρ_v)` is pinned **large** by the cover (`ρ_v > α·edgelen`)
+   yet must be **small** for the glue to fire on the band/disk overlap (`ρ_v ≤ r =
+   (α/2)·|sf|·P/(K·M+1)`); these reduce to the fixed condition `edgelen < |sf|·P/(2(K·M+1))
+   ≈ (tan θ/2)·Q`, satisfiable only for `tan θ ≳ 2` and long edges — **not uniform**.  Both
+   escapes fail (full sectors ⇒ disjoint breaks via mid-edge points in the opposite reflex
+   sector; disk-confined sectors ⇒ union gap, since `L₂² ≤ L₁·L∞` always).  Verified by
+   self-derivation + adversarial Plan pass.
+
+   **NEW route — global orientation / corner-overlap sign function.**  (Literal mitered
+   normal field `n(t)` + `sign(s)` is infeasible: `Plane` has the SUP norm and no
+   `InnerProductSpace`, so no `orthogonalProjection`/`rot90`/injective-offset API.)  The
+   side label is a single global sign: per-edge `sideForm` where `z` is near one edge,
+   reconciled at corners by the existing L2 convex/reflex sector model where `z` is near a
+   vertex.  The vertex region is the **corner-tube overlap** `{infDist z (edge i) < δ₀} ∩
+   {infDist z (edge i+1) < δ₀}` — controlled by the **free** `δ₀`, not by `ρ_v`, which is
+   what escapes the wall.  **KEYSTONE DONE:** `exists_delta_corner_confine` — for any
+   target radius `r>0`, ∃ `δ>0` s.t. a point within `δ` of both incident edges is within
+   `r` of the shared vertex (compactness: trim each edge to its `≥ r/2`-from-`v` part,
+   disjoint compacts by `consecutive_meet`, separated by `σ`, take `δ = min(r/2, σ/2)`);
+   sorry-free, axiom-clean.  So choosing `δ₀ ≤ δ(r)` with `r` the glue radius from
+   `exists_radius_thin` makes the corner glue fire **by construction** on the only overlap
+   it is needed.  STILL TODO: the per-edge "near one edge ⇒ `sideForm` sign well-defined"
+   lemma; the global `collarPlus/Minus` defs (per-edge sign ∪ corner-overlap sector);
+   OPEN + NONEMPTY (P1/P4); UNION `= T\carrier` (P2, via the C3b cover); DISJOINT (P3, via
+   the keystone + the C2 glue); the `δ₀` budget choice.  Hypotheses: `IsCorner` at interior
+   vertices (gives the finite `sin θ` min) + endpoints in `Rᶜ`.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
