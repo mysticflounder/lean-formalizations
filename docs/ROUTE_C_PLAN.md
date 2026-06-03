@@ -665,9 +665,24 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    The assembly skolemizes the corner thresholds and sets `δ₀ = ρ = M5/2` (`M5` = min of
    corner-`inf'`, `δsep`, `dsrc/2`, `dtgt/2`, `ρ₀`).  All `#print axioms`-clean.
 
-   **STILL TODO in (iv):** (4) P2 union `=W` (tube∖carrier ⊆ collarPlus ∪ collarMinus,
-   via the C3b cover `taperedTube_subset_bands_union_disks` + disk→sector / endpoint→cap);
-   (5) P4 nonempty.  Then G1/G3/G4/Z1.
+   **P2 COMPLETE (2026-06-03), step (4) DONE.**  `union_collarPlus_collarMinus`:
+   `collarPlus ∪ collarMinus = taperedTube R S δ₀ ∖ carrier`.  Reverse inclusion is
+   definitional (each side `= ground ∩ pieces`).  Forward runs the narrowed-band cover
+   **at cover-`α` = `2α`** (so the cover's `α/2` narrowing lands in the collar's `α`-bands)
+   and assigns each routed point a side.  The cover (`taperedTube_subset_midBands_union_disks`)
+   was strengthened to additionally emit the band-strip metric certificate
+   `infDist z (segCarrier i) < δ₀` (the spine witness `p ∈ segCarrier i` is in scope).
+   Supporting: `vertexPlus_union_vertexMinus` (the τ-pair exhausts convex∪reflex);
+   `mem_openSegment_of_sideForm_zero_ball`/`…'` (a `sideForm=0` ball point with the forward
+   foot pinch is forced onto the segment — kills the endpoint `sideForm=0` case once
+   `ρ_end ≤ ‖incident edge‖`); `mem_sectorPlus_or_sectorMinus_of_ball` (interior-vertex
+   disk → sector via `compl_sectors_eq_cornerLocus` + `ball_inter_cornerLocus`, needs
+   `hturn` + `ρ_v ≤` both incident edge lengths).  Band points: off-carrier ⇒ `sideForm ≠ 0`
+   on the open-segment locus (`edgeBand_inter_sideForm_zero_eq_openSegment`), sign picks
+   the strip.  All `#print axioms`-clean `[propext, Classical.choice, Quot.sound]`.
+
+   **STILL TODO in (iv):** (5) P4 nonempty (scaled-edge witness off edge-0 midpoint,
+   pushed perpendicular by `< δ₀`, in `bandStrip±ᶠⁱʳˢᵗ`).  Then G1/G3/G4/Z1.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

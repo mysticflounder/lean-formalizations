@@ -2361,7 +2361,8 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
     (htgt : ∀ i : Fin β.numSegs,
       δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
     {z : Plane} (hz : z ∈ taperedTube R S δ₀) :
-    (∃ i : Fin β.numSegs, z ∈ edgeBandMid (β.segSrc i) (β.segTgt i) (α / 2))
+    (∃ i : Fin β.numSegs, z ∈ edgeBandMid (β.segSrc i) (β.segTgt i) (α / 2)
+          ∧ Metric.infDist z (β.segCarrier i) < δ₀)
     ∨ (∃ j : Fin (β.numSegs + 1), 0 < (j : ℕ) ∧ (j : ℕ) < β.numSegs
           ∧ z ∈ Metric.ball (β.verts j) (ρ j))
     ∨ (z ∈ Metric.ball (β.verts 0) (ρ 0)
@@ -2418,12 +2419,14 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
   · rcases le_or_gt b (1 - α) with hmid | hhi
     · -- middle of the edge: narrowed band
       left
-      refine ⟨i, mem_edgeBandMid_of_footParam_mem (p := p) hts hα ?_ ?_⟩
+      refine ⟨i, mem_edgeBandMid_of_footParam_mem (p := p) hts hα ?_ ?_, ?_⟩
       · rw [hfoot, Set.mem_Icc]; exact ⟨hge, hmid⟩
       · have hMnn : (0 : ℝ) ≤ |(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2| :=
           add_nonneg (abs_nonneg _) (abs_nonneg _)
         have hle := mul_le_mul_of_nonneg_left (le_of_lt hdpz) hMnn
         linarith [hband i]
+      · rw [PolyArc.segCarrier]
+        exact lt_of_le_of_lt (Metric.infDist_le_dist_of_mem hpseg) hdzp
     · -- near the target vertex `succ i`
       have hpt : dist p (β.segTgt i) = (1 - b) * dist (β.segSrc i) (β.segTgt i) := by
         rw [← hp, dist_affineComb_tgt hab, abs_of_nonneg ha, haeq]
@@ -2709,6 +2712,207 @@ theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
     (isOpen_endCapTgtMinus β ρ)
   · exact isOpen_iUnion (fun i => isOpen_bandStripMinus β α δ₀ i)
   · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorMinus β ρ i hi1))
+
+/-! ### P2 (union) — `collarPlus ∪ collarMinus = taperedTube R S δ₀ ∖ carrier`
+
+The two collar sides exhaust the tube-minus-carrier ground set.  Reverse inclusion is
+definitional (each side is the ground set intersected with its piece-union).  Forward
+inclusion runs the narrowed-band cover at **cover-`α` = `2α`** (so the cover's `α/2`
+narrowing lands exactly in the collar's `α`-bands) and assigns each routed point a
+definite side:
+
+* a **band** point is off the carrier, so its `sideForm` is nonzero on the band's open
+  segment locus — `> 0` ⇒ `bandStripPlus`, `< 0` ⇒ `bandStripMinus`;
+* an **interior-vertex disk** point is off the two incident segments, so by
+  `compl_sectors_eq_cornerLocus` + `ball_inter_cornerLocus` it lies in the convex or
+  reflex sector, i.e. in `vertexPlus` or `vertexMinus` (`sectorPlus`/`sectorMinus`);
+* an **endpoint disk** point carries the forward foot pinch; with the disk radius below
+  the incident edge length, `sideForm = 0` would force it back onto the segment, so its
+  `sideForm` sign selects the matching end cap. -/
+
+/-- The two τ-selected sectors exhaust the convex/reflex pair. -/
+theorem vertexPlus_union_vertexMinus (a v b : Plane) :
+    vertexPlus a v b ∪ vertexMinus a v b = convexSector a v b ∪ reflexSector a v b := by
+  rw [vertexPlus, vertexMinus]
+  split_ifs
+  · rfl
+  · rw [Set.union_comm]
+
+/-- A point on the edge line, inside the source-endpoint ball (radius `≤ ‖edge‖`) and on
+the forward side of the source (`foot > 0`), already lies on the open segment. -/
+theorem mem_openSegment_of_sideForm_zero_ball {s t z : Plane} (h : t ≠ s)
+    (hz : sideForm s t z = 0) (hfoot : 0 < footParam s t z)
+    (hball : dist z s < dist s t) : z ∈ openSegment ℝ s t := by
+  have hst : (0 : ℝ) < dist s t := dist_pos.mpr (Ne.symm h)
+  have hsub := sub_eq_footParam_smul_of_sideForm_zero h hz
+  have hzs : dist z s = |footParam s t z| * dist s t := by
+    rw [dist_eq_norm, hsub, norm_smul, Real.norm_eq_abs, ← dist_eq_norm, dist_comm t s]
+  rw [abs_of_pos hfoot] at hzs
+  have hlt1 : footParam s t z < 1 := by
+    have hmul : footParam s t z * dist s t < dist s t := by rw [← hzs]; exact hball
+    nlinarith [hst]
+  rw [← edgeBand_inter_sideForm_zero_eq_openSegment h]
+  exact ⟨show footParam s t z ∈ Set.Ioo (0 : ℝ) 1 from Set.mem_Ioo.mpr ⟨hfoot, hlt1⟩, hz⟩
+
+/-- Target-endpoint mirror: inside the target ball with `foot < 1` forces the open
+segment (apply the source version to the reversed edge). -/
+theorem mem_openSegment_of_sideForm_zero_ball' {s t z : Plane} (h : t ≠ s)
+    (hz : sideForm s t z = 0) (hfoot : footParam s t z < 1)
+    (hball : dist z t < dist s t) : z ∈ openSegment ℝ s t := by
+  rw [openSegment_symm]
+  refine mem_openSegment_of_sideForm_zero_ball (Ne.symm h) ?_ ?_ ?_
+  · rw [sideForm_swap, hz, neg_zero]
+  · rw [footParam_swap_eq h]; linarith
+  · rwa [dist_comm s t] at hball
+
+/-- **Interior-vertex routing.**  An off-carrier point in the disk of the shared vertex
+`segTgt i` (radius below both incident edge lengths) lands in `sectorPlus` or
+`sectorMinus`. -/
+theorem mem_sectorPlus_or_sectorMinus_of_ball (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hra : ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segSrc i))
+    (hrb : ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    {z : Plane} (hzC : z ∉ β.carrier)
+    (hzball : z ∈ Metric.ball (β.segTgt i) (ρ (Fin.succ i))) :
+    z ∈ sectorPlus β ρ i hi1 ∨ z ∈ sectorMinus β ρ i hi1 := by
+  have hmem : z ∈ convexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+      ∪ reflexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := by
+    by_contra hcon
+    rw [← Set.mem_compl_iff, compl_sectors_eq_cornerLocus _ _ _ hcorner] at hcon
+    have hloc : z ∈ Metric.ball (β.segTgt i) (ρ (Fin.succ i))
+        ∩ cornerLocus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := ⟨hzball, hcon⟩
+    rw [ball_inter_cornerLocus _ _ _ hcorner hra hrb] at hloc
+    rcases hloc.2 with hseg | hseg
+    · apply hzC; rw [PolyArc.carrier]
+      refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+      rw [PolyArc.segCarrier, segment_symm]; exact hseg
+    · apply hzC; rw [PolyArc.carrier]
+      refine Set.mem_iUnion.mpr ⟨⟨(i : ℕ) + 1, hi1⟩, ?_⟩
+      rw [PolyArc.segCarrier]
+      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
+        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+      rw [hcs]; exact hseg
+  rw [← vertexPlus_union_vertexMinus] at hmem
+  rcases hmem with h | h
+  · exact Or.inl ⟨h, hzball⟩
+  · exact Or.inr ⟨h, hzball⟩
+
+/-- **P2 (union).** -/
+theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
+    (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
+    (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
+    {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
+    (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hband : ∀ i : Fin β.numSegs,
+      (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * δ₀
+        < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i))
+    (hsrc : ∀ i : Fin β.numSegs,
+      δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
+    (htgt : ∀ i : Fin β.numSegs,
+      δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
+    (hballV : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segSrc i)
+        ∧ ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hballSrc : ρ 0 ≤ dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg))
+    (hballTgt : ρ (Fin.last β.numSegs)
+      ≤ dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)) :
+    collarPlus β R S δ₀ α ρ ∪ collarMinus β R S δ₀ α ρ
+      = taperedTube R S δ₀ \ β.carrier := by
+  apply Set.Subset.antisymm
+  · -- both sides sit inside the ground set
+    exact Set.union_subset (fun _ hz => hz.1) (fun _ hz => hz.1)
+  · intro z hzG
+    obtain ⟨hzT, hzC⟩ := hzG
+    have hcov := taperedTube_subset_midBands_union_disks β R S hS hsrc0 hsrcL ρ
+      (by linarith : (0 : ℝ) < 2 * α)
+      (fun i => by rw [show 2 * α / 2 = α from by ring]; exact hband i)
+      hsrc htgt hzT
+    rcases hcov with ⟨i, hzb, hinfd⟩ | ⟨j, hj0, hjlt, hzball⟩
+      | ⟨hzball, hpinch⟩ | ⟨hzball, hpinch⟩
+    · -- band point
+      rw [show 2 * α / 2 = α from by ring] at hzb
+      have hts := β.segTgt_ne_segSrc i
+      have hbm : α < footParam (β.segSrc i) (β.segTgt i) z
+          ∧ footParam (β.segSrc i) (β.segTgt i) z < 1 - α := by
+        have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
+      have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        rw [← edgeBand_inter_sideForm_zero_eq_openSegment hts]
+        exact ⟨show footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo (0 : ℝ) 1 from
+          Set.mem_Ioo.mpr ⟨by linarith [hbm.1], by linarith [hbm.2]⟩, h0⟩
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · refine Or.inr ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ ?_))⟩
+        exact Set.mem_iUnion.mpr ⟨i, ⟨hzb, hneg⟩, hinfd⟩
+      · refine Or.inl ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ ?_))⟩
+        exact Set.mem_iUnion.mpr ⟨i, ⟨hzb, hpos⟩, hinfd⟩
+    · -- interior-vertex disk
+      set i : Fin β.numSegs := ⟨(j : ℕ) - 1, by have := hjlt; omega⟩ with hi
+      have hi1 : (i : ℕ) + 1 < β.numSegs := by simp only [hi]; omega
+      have hsucc : (Fin.succ i : Fin (β.numSegs + 1)) = j := by
+        apply Fin.ext; simp only [Fin.val_succ, hi]; omega
+      have hzball' : z ∈ Metric.ball (β.segTgt i) (ρ (Fin.succ i)) := by
+        rw [PolyArc.segTgt, hsucc]; exact hzball
+      obtain ⟨hra, hrb⟩ := hballV i hi1
+      rcases mem_sectorPlus_or_sectorMinus_of_ball β ρ i hi1 (hturn i hi1) hra hrb hzC hzball'
+        with hsec | hsec
+      · refine Or.inl ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ?_))⟩
+        exact Set.mem_iUnion₂.mpr ⟨i, hi1, hsec⟩
+      · refine Or.inr ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ?_))⟩
+        exact Set.mem_iUnion₂.mpr ⟨i, hi1, hsec⟩
+    · -- source endpoint
+      have hfs : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) = β.firstSeg := rfl
+      rw [hfs] at hpinch
+      have hts := β.segTgt_ne_segSrc β.firstSeg
+      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+      have hsf0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        apply mem_openSegment_of_sideForm_zero_ball hts h0 hpinch
+        have hd : dist z (β.segSrc β.firstSeg) < ρ 0 := by
+          rw [hsv]; exact Metric.mem_ball.mp hzball
+        exact lt_of_lt_of_le hd hballSrc
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · exact Or.inr ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hneg⟩)⟩
+      · exact Or.inl ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hpos⟩)⟩
+    · -- target endpoint
+      have hls : (⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩ : Fin β.numSegs)
+          = β.lastSeg := rfl
+      rw [hls] at hpinch
+      have hts := β.segTgt_ne_segSrc β.lastSeg
+      have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
+        rw [PolyArc.segTgt]; congr 1
+        apply Fin.ext
+        simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+      have hsf0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨β.lastSeg, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        apply mem_openSegment_of_sideForm_zero_ball' hts h0 hpinch
+        have hd : dist z (β.segTgt β.lastSeg) < ρ (Fin.last β.numSegs) := by
+          rw [htv]; exact Metric.mem_ball.mp hzball
+        exact lt_of_lt_of_le hd hballTgt
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · exact Or.inr ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hneg⟩⟩
+      · exact Or.inl ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hpos⟩⟩
 
 /-! #### P3 disjointness — the clean (sign / same-locus) cases.
 
