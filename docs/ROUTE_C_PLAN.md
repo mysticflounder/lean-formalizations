@@ -493,7 +493,13 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    band, `b<α` ⇒ source-vertex disk, `b>1−α` ⇒ target-vertex disk; axiom-clean.  The
    budget inequalities are deliberately left as hypotheses so the assembly discharges
    them by choosing `δ₀` small.  Helper `PolyArc.segTgt_ne_segSrc` (each edge
-   non-degenerate).  STILL TODO: (iv) the per-vertex `diskᵥ` side-split (ball
+   non-degenerate).  **Budget step DONE:** `exists_delta_cover_budget` — given `α>0`
+   and radii `ρⱼ` already exceeding `α·distᵢ` for each incident edge (`hρsrc`/`hρtgt`),
+   there is a single `δ₀>0` satisfying all three budget families at once (`δ₀` = half
+   the finite `Finset.inf'` over edges of `min(α·‖Δ‖²/‖Δ‖₁, ρ−α·distᵢ, ρ−α·distᵢ)`);
+   plus `segDir_l1_pos` (each edge has positive ℓ¹ length).  So the cover now reduces
+   to choosing `α` and `ρⱼ` (with `ρⱼ > α·distᵢ`).  STILL TODO: (iv) the per-vertex
+   `diskᵥ` side-split (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; choose `δ₀`/`ρⱼ` discharging the cover budget; assemble
    `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the

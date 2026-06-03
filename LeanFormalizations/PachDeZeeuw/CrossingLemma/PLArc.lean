@@ -1757,4 +1757,77 @@ theorem taperedTube_subset_bands_union_disks (β : PolyArc) (R S : Set Plane)
       show dist z t < ρ (Fin.succ i)
       linarith
 
+/-- Each edge has positive ℓ¹ length (its direction is nonzero). -/
+theorem segDir_l1_pos (β : PolyArc) (i : Fin β.numSegs) :
+    0 < |(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2| := by
+  rcases lt_or_eq_of_le (add_nonneg (abs_nonneg ((β.segTgt i).1 - (β.segSrc i).1))
+      (abs_nonneg ((β.segTgt i).2 - (β.segSrc i).2))) with h | h
+  · exact h
+  · exfalso
+    have hn1 := abs_nonneg ((β.segTgt i).1 - (β.segSrc i).1)
+    have hn2 := abs_nonneg ((β.segTgt i).2 - (β.segSrc i).2)
+    have h1 : (β.segTgt i).1 - (β.segSrc i).1 = 0 := abs_eq_zero.mp (by linarith)
+    have h2 : (β.segTgt i).2 - (β.segSrc i).2 = 0 := abs_eq_zero.mp (by linarith)
+    exact β.segTgt_ne_segSrc i (Prod.ext (sub_eq_zero.mp h1) (sub_eq_zero.mp h2))
+
+/-- **The cover radius budget is satisfiable (task iv, budget step).**  Given a cutoff
+`α > 0` and per-vertex disk radii `ρⱼ` that already exceed `α·‖edge‖` for each incident
+edge, there is a single tube radius `δ₀ > 0` making all three budget families of
+`taperedTube_subset_bands_union_disks` hold simultaneously.  `δ₀` is half the finite
+minimum over edges of `min(α·‖Δ‖²/‖Δ‖₁, ρ(castSucc i) − α·distᵢ, ρ(succ i) − α·distᵢ)`. -/
+theorem exists_delta_cover_budget (β : PolyArc) {α : ℝ} (hα : 0 < α)
+    (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hρsrc : ∀ i, α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
+    (hρtgt : ∀ i, α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    ∃ δ₀ : ℝ, 0 < δ₀ ∧
+      (∀ i, (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * δ₀
+              < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i)) ∧
+      (∀ i, δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i)) ∧
+      (∀ i, δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) := by
+  classical
+  set g : Fin β.numSegs → ℝ := fun i =>
+    min (α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i)
+          / (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|))
+      (min (ρ (Fin.castSucc i) - α * dist (β.segSrc i) (β.segTgt i))
+        (ρ (Fin.succ i) - α * dist (β.segSrc i) (β.segTgt i))) with hg
+  have hM : ∀ i, 0 < |(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2| :=
+    segDir_l1_pos β
+  have hP : ∀ i, 0 < dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) :=
+    fun i => dotp_self_pos (β.segTgt_ne_segSrc i)
+  have hgpos : ∀ i, 0 < g i := by
+    intro i
+    rw [hg]
+    refine lt_min (div_pos (mul_pos hα (hP i)) (hM i)) (lt_min ?_ ?_)
+    · linarith [hρsrc i]
+    · linarith [hρtgt i]
+  have hne : (Finset.univ : Finset (Fin β.numSegs)).Nonempty :=
+    ⟨⟨0, β.numSegs_pos⟩, Finset.mem_univ _⟩
+  set m := Finset.univ.inf' hne g with hm
+  have hmpos : 0 < m := by rw [hm, Finset.lt_inf'_iff]; exact fun i _ => hgpos i
+  refine ⟨m / 2, by linarith, ?_, ?_, ?_⟩
+  · intro i
+    have hle : m ≤ g i := Finset.inf'_le g (Finset.mem_univ i)
+    have hlt : m / 2 < g i := by linarith
+    have hgi : g i ≤ α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i)
+        / (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) := by
+      rw [hg]; exact min_le_left _ _
+    have hbound : m / 2 < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i)
+        / (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) :=
+      lt_of_lt_of_le hlt hgi
+    rw [lt_div_iff₀ (hM i)] at hbound
+    calc (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * (m / 2)
+        = m / 2 * (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) := by
+          ring
+      _ < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) := hbound
+  · intro i
+    have hle : m ≤ g i := Finset.inf'_le g (Finset.mem_univ i)
+    have hgi : g i ≤ ρ (Fin.castSucc i) - α * dist (β.segSrc i) (β.segTgt i) := by
+      rw [hg]; exact le_trans (min_le_right _ _) (min_le_left _ _)
+    linarith
+  · intro i
+    have hle : m ≤ g i := Finset.inf'_le g (Finset.mem_univ i)
+    have hgi : g i ≤ ρ (Fin.succ i) - α * dist (β.segSrc i) (β.segTgt i) := by
+      rw [hg]; exact le_trans (min_le_right _ _) (min_le_right _ _)
+    linarith
+
 end CrossingLemma.PlaneArcSeparation
