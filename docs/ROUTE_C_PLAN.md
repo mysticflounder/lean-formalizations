@@ -629,9 +629,16 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    band's `sideForm` sign with the sector side via `thin_of_infDist_incoming/outgoing`
    + `mem_vertex*_of_incoming/outgoing` (the outgoing case bridges `segSrc(j+1)=segTgt j`),
    giving `disjoint_bandStrip±_sector∓_incoming/outgoing` — each takes the angle-free `hδ`
-   threshold as a hypothesis.  STILL TODO in P3: non-incident band↔sector and
-   sector↔sector (ball-vs-edge / ball-vs-ball separation), end caps, then the master
-   `disjoint_collarPlus_collarMinus` assembling all cases + the concrete `δ₀`.
+   threshold as a hypothesis.  Separation cases: `infDist_lt_of_mem_vertexBall`,
+   `disjoint_sectorPlus_sectorMinus_diff` (different vertices, ball budget),
+   `disjoint_stripSupport_vertexBall_nonincident` (non-incident band↔sector via
+   non-adjacent sep).  End caps (sign/ball): `disjoint_endCap*Plus_endCap*Minus`,
+   `disjoint_endCap*±_bandStrip∓_self` (same-edge sign), `disjoint_endCapSrc*_endCapTgt*`
+   (ball budget).  STILL TODO in P3: end-cap ↔ non-incident band (endpoint-to-edge
+   separation budget: `verts 0 / verts last ∉ segCarrier i` for non-incident `i`, a min
+   over edges), then the master `disjoint_collarPlus_collarMinus` assembling every case
+   under one `δ₀/α/ρ`, and the concrete `δ₀` existence (min of all angle-free thresholds
+   + non-adjacent-sep + corner-confine + ball/endpoint budgets).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
