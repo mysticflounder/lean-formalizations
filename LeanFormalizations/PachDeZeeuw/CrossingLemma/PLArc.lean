@@ -1441,6 +1441,21 @@ theorem thin_of_infDist_outgoing {a v b z : Plane} (hbv : b ≠ v) {α δ₀ : �
     _ ≤ |sideForm a v b| * dotp (z - v) (b - v) :=
         mul_le_mul_of_nonneg_left hge (abs_nonneg _)
 
+/-- **Angle-free corner thinness (incoming edge).**  The `a↔b` mirror of
+`thin_of_infDist_outgoing`, supplying the thinness hypothesis of
+`mem_vertexPlus_of_incoming` / `mem_vertexMinus_of_incoming`.  Both arms of a corner
+are treated by the same angle-free estimate; here the relevant arm is the incoming
+edge `a→v`, so closeness is to `[v,a]` and the foot lower bound is on `footParam v a z`.
+Proof: the outgoing lemma instantiated with its two arms swapped. -/
+theorem thin_of_infDist_incoming {a v b z : Plane} (hav : a ≠ v) {α δ₀ : ℝ}
+    (hfoot : α ≤ footParam v a z)
+    (hstrip : Metric.infDist z (segment ℝ v a) < δ₀)
+    (hδ : |dotp (v - b) (a - v)| * (|a.1 - v.1| + |a.2 - v.2|) * δ₀
+           < |sideForm b v a| * (α * dotp (a - v) (a - v))) :
+    |dotp (v - b) (a - v)| * |sideForm v a z|
+      < |sideForm b v a| * dotp (z - v) (a - v) :=
+  thin_of_infDist_outgoing hav hfoot hstrip hδ
+
 /-- **Quantitative tangential bound.**  The dot product of a displacement `z − p`
 with the edge direction `t − s` is controlled by the sup-distance `dist p z` and the
 ℓ¹ size of the direction.  Metric companion of `abs_sideForm_le_dist`; it is what

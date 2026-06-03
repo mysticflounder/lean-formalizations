@@ -591,7 +591,9 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `abs_sideForm_le_dist_of_mem_segment` (`|sideForm v b z| ≤ M·dist q z`, any `q ∈ [v,b]`);
    `abs_sideForm_le_M_infDist` (`≤ M·infDist z [v,b]`); `thin_of_infDist_outgoing` (produces
    the exact outgoing-glue `hthin` from `α ≤ footParam v b z ∧ infDist z [v,b] < δ₀` under an
-   **angle-free** threshold `K·M·δ₀ < |τ|·α·P`; incoming form symmetric via the `a↔b` swap).
+   **angle-free** threshold `K·M·δ₀ < |τ|·α·P`); and `thin_of_infDist_incoming` (the `a↔b`
+   mirror feeding `mem_vertexPlus/Minus_of_incoming`, proved as a direct instantiation of the
+   outgoing lemma with its two arms swapped — both PROVEN sorry-free + axiom-clean 2026-06-03).
    CONSEQUENCE: the collar no longer needs metric vertex disks pinned to `r ≈ tan θ·edgelen`;
    the band/sector reconciliation fires from the tube half-width alone, uniformly.  Mathlib
    has no Jordan/crosscut/arc-separation lemma to import (searched) — the collar must be
