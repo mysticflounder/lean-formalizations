@@ -484,10 +484,18 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `footParam_mem_Icc_of_mem_segment` (`p ∈ segment ℝ s t ⇒ footParam ∈ [0,1]`),
    `dist_affineComb_src : dist (a•s+b•t) s = |b|·dist t s`, `dist_affineComb_tgt :
    dist (a•s+b•t) t = |a|·dist s t` (convert "foot near a vertex" into "metrically near
-   that vertex" for the disk case).  STILL TODO in
-   (ii): the per-vertex `diskᵥ` (ball
+   that vertex" for the disk case).  **(iii) DONE** — the cover itself:
+   `taperedTube_subset_bands_union_disks` proves `taperedTube R S δ₀ ⊆ (⋃ᵢ edgeBand
+   (segSrc i)(segTgt i)) ∪ (⋃ⱼ ball (verts j) (ρ j))` for any spine `S ⊆ carrier`,
+   under the explicit radius budget (three families of inequalities, `hband`/`hsrc`/
+   `htgt`, parametrised by a cutoff `α>0` and per-vertex radii `ρⱼ`): trichotomy on the
+   barycentric coordinate `b = footParam` of the spine point — middle `[α,1−α]` ⇒ edge
+   band, `b<α` ⇒ source-vertex disk, `b>1−α` ⇒ target-vertex disk; axiom-clean.  The
+   budget inequalities are deliberately left as hypotheses so the assembly discharges
+   them by choosing `δ₀` small.  Helper `PolyArc.segTgt_ne_segSrc` (each edge
+   non-degenerate).  STILL TODO: (iv) the per-vertex `diskᵥ` side-split (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
-   single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
+   single global label `g`; choose `δ₀`/`ρⱼ` discharging the cover budget; assemble
    `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the
    sector witnesses `a+b−v`, `3v−a−b`).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build

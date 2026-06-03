@@ -563,6 +563,17 @@ def segTgt (i : Fin β.numSegs) : Plane :=
 def segCarrier (i : Fin β.numSegs) : Set Plane :=
   segment ℝ (β.segSrc i) (β.segTgt i)
 
+/-- Each edge is non-degenerate: its target and source vertices differ (the vertices
+are pairwise distinct and `castSucc i ≠ succ i`). -/
+theorem segTgt_ne_segSrc (i : Fin β.numSegs) : β.segTgt i ≠ β.segSrc i := by
+  rw [segTgt, segSrc]
+  intro h
+  have h2 : Fin.succ i = Fin.castSucc i := β.distinct h
+  have h3 : (i : ℕ) + 1 = (i : ℕ) := by
+    have := congrArg Fin.val h2
+    rwa [Fin.val_succ, Fin.coe_castSucc] at this
+  omega
+
 /-- The full carrier of the polygonal arc: the union of its closed segments. -/
 def carrier : Set Plane :=
   ⋃ i : Fin β.numSegs, β.segCarrier i
@@ -1655,5 +1666,95 @@ theorem mem_edgeBand_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (h�
   rw [abs_lt] at hdiff
   rw [edgeBand, Set.mem_setOf_eq, Set.mem_Ioo]
   exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
+
+/-! ### The cover (task iii): the tube is covered by edge bands and vertex disks
+
+The full covering of the collar tube.  Each spine point `p` sits on some edge with a
+barycentric coordinate `b = footParam`; trichotomy on `b` against the cutoff `α`:
+
+* `b ∈ [α, 1−α]` (middle of the edge) ⇒ a tube point `z` near `p` is in that edge's
+  band (`mem_edgeBand_of_footParam_mem`), provided `δ₀` beats `α·‖edge‖²` (`hband`);
+* `b < α` (near the source vertex) ⇒ `z` is within `δ₀ + α·‖edge‖` of `verts (castSucc
+  i)`, hence in its disk, provided that is `< ρ` (`hsrc`);
+* `b > 1−α` (near the target vertex) ⇒ symmetric, into `verts (succ i)`'s disk (`htgt`).
+
+The three side conditions form the radius budget the final assembly will discharge by
+choosing `δ₀` small.  The statement is generic in the spine `S ⊆ carrier`, so it
+applies to the assembly's `arcInterior` tube via monotonicity. -/
+theorem taperedTube_subset_bands_union_disks (β : PolyArc) (R S : Set Plane)
+    (hS : S ⊆ β.carrier) {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hα : 0 < α)
+    (hband : ∀ i : Fin β.numSegs,
+      (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * δ₀
+        < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i))
+    (hsrc : ∀ i : Fin β.numSegs,
+      δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
+    (htgt : ∀ i : Fin β.numSegs,
+      δ₀ + α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    taperedTube R S δ₀ ⊆
+      (⋃ i : Fin β.numSegs, edgeBand (β.segSrc i) (β.segTgt i))
+        ∪ (⋃ j : Fin (β.numSegs + 1), Metric.ball (β.verts j) (ρ j)) := by
+  intro z hz
+  rw [taperedTube, Set.mem_iUnion₂] at hz
+  obtain ⟨p, hpS, hzp⟩ := hz
+  have hdzp : dist z p < δ₀ := lt_of_lt_of_le (Metric.mem_ball.mp hzp) (min_le_left _ _)
+  have hdpz : dist p z < δ₀ := by rwa [dist_comm] at hdzp
+  have hpc := hS hpS
+  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  obtain ⟨i, hpi⟩ := hpc
+  rw [PolyArc.segCarrier] at hpi
+  set s := β.segSrc i with hs
+  set t := β.segTgt i with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc i
+  obtain ⟨a, b, ha, hb, hab, hp⟩ := hpi
+  have haeq : a = 1 - b := by linarith
+  have hfoot : footParam s t p = b := by
+    rw [← hp, haeq]; exact footParam_affineComb hts b
+  rcases lt_or_ge b α with hlo | hge
+  · -- near the source vertex `verts (castSucc i) = s`
+    have hps : dist p s = b * dist s t := by
+      rw [← hp, dist_affineComb_src hab, abs_of_nonneg hb, dist_comm t s]
+    have hdps : dist p s ≤ α * dist s t := by
+      rw [hps]; exact mul_le_mul_of_nonneg_right (le_of_lt hlo) dist_nonneg
+    have htri : dist z s ≤ dist z p + dist p s := dist_triangle z p s
+    have hsi := hsrc i
+    rw [← hs, ← ht] at hsi
+    right
+    rw [Set.mem_iUnion]
+    refine ⟨Fin.castSucc i, ?_⟩
+    rw [Metric.mem_ball]
+    show dist z s < ρ (Fin.castSucc i)
+    linarith
+  · rcases le_or_gt b (1 - α) with hmid | hhi
+    · -- middle of the edge
+      left
+      rw [Set.mem_iUnion]
+      refine ⟨i, ?_⟩
+      rw [← hs, ← ht]
+      refine mem_edgeBand_of_footParam_mem (p := p) hts hα ?_ ?_
+      · rw [hfoot, Set.mem_Icc]; exact ⟨hge, hmid⟩
+      · have hMnn : (0 : ℝ) ≤ |t.1 - s.1| + |t.2 - s.2| :=
+          add_nonneg (abs_nonneg _) (abs_nonneg _)
+        have hle : (|t.1 - s.1| + |t.2 - s.2|) * dist p z
+            ≤ (|t.1 - s.1| + |t.2 - s.2|) * δ₀ :=
+          mul_le_mul_of_nonneg_left (le_of_lt hdpz) hMnn
+        have hb2 := hband i
+        rw [← hs, ← ht] at hb2
+        linarith
+    · -- near the target vertex `verts (succ i) = t`
+      have hpt : dist p t = (1 - b) * dist s t := by
+        rw [← hp, dist_affineComb_tgt hab, abs_of_nonneg ha, haeq]
+      have ha_lt : 1 - b < α := by linarith
+      have hdpt : dist p t ≤ α * dist s t := by
+        rw [hpt]; exact mul_le_mul_of_nonneg_right (le_of_lt ha_lt) dist_nonneg
+      have htri : dist z t ≤ dist z p + dist p t := dist_triangle z p t
+      have hti := htgt i
+      rw [← hs, ← ht] at hti
+      right
+      rw [Set.mem_iUnion]
+      refine ⟨Fin.succ i, ?_⟩
+      rw [Metric.mem_ball]
+      show dist z t < ρ (Fin.succ i)
+      linarith
 
 end CrossingLemma.PlaneArcSeparation
