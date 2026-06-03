@@ -2936,4 +2936,71 @@ theorem disjoint_bandStripMinus_sectorPlus_outgoing (β : PolyArc)
   have hmem := bandStrip_outgoing_mem_vertexMinus β j hj1 hα hτ hδ hzb.1.1.1 hzb.2 hzb.1.2
   exact (Set.disjoint_left.mp (disjoint_vertexPlus_vertexMinus _ _ _)) hzs.1 hmem
 
+/-! #### P3 disjointness — sector ↔ sector and non-incident band ↔ sector.
+
+These are pure separation cases (no corner glue).  Two sectors at *different* vertices
+are separated once their balls are disjoint (a `ρ` budget).  A band on an edge `i` not
+incident to the sector's vertex is separated by the non-adjacent edge separation: the
+sector vertex `verts (j+1)` lies on *both* edges `j` and `j+1`, and a non-incident `i`
+is non-adjacent to at least one of them. -/
+
+/-- A point in the vertex ball at `verts (j+1)` is within that radius of **both** incident
+edges `j` and `j+1` (the vertex is their shared endpoint). -/
+theorem infDist_lt_of_mem_vertexBall (β : PolyArc) (j : Fin β.numSegs)
+    (hj1 : (j : ℕ) + 1 < β.numSegs) {ρ' : ℝ} {z : Plane}
+    (hz : z ∈ Metric.ball (β.verts (Fin.succ j)) ρ') :
+    Metric.infDist z (β.segCarrier j) < ρ' ∧
+      Metric.infDist z (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩) < ρ' := by
+  have hd : dist z (β.verts (Fin.succ j)) < ρ' := Metric.mem_ball.mp hz
+  have h1 : β.verts (Fin.succ j) = β.segTgt j := rfl
+  have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
+    Fin.ext (by simp [Fin.val_succ])
+  have h2 : β.verts (Fin.succ j) = β.segSrc ⟨(j : ℕ) + 1, hj1⟩ := by rw [PolyArc.segSrc, hidx]
+  refine ⟨?_, ?_⟩
+  · calc Metric.infDist z (β.segCarrier j)
+        ≤ dist z (β.segTgt j) := Metric.infDist_le_dist_of_mem (right_mem_segment ℝ _ _)
+      _ = dist z (β.verts (Fin.succ j)) := by rw [h1]
+      _ < ρ' := hd
+  · calc Metric.infDist z (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩)
+        ≤ dist z (β.segSrc ⟨(j : ℕ) + 1, hj1⟩) :=
+          Metric.infDist_le_dist_of_mem (left_mem_segment ℝ _ _)
+      _ = dist z (β.verts (Fin.succ j)) := by rw [h2]
+      _ < ρ' := hd
+
+/-- **Sector ↔ sector disjointness (different vertices).**  Reduces to disjointness of
+the two vertex balls (a `ρ` budget). -/
+theorem disjoint_sectorPlus_sectorMinus_diff (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs)
+    (hball : Disjoint (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j)))
+                      (Metric.ball (β.verts (Fin.succ k)) (ρ (Fin.succ k)))) :
+    Disjoint (sectorPlus β ρ j hj1) (sectorMinus β ρ k hk1) := by
+  rw [Set.disjoint_left]
+  intro z hzj hzk
+  exact (Set.disjoint_left.mp hball) hzj.2 hzk.2
+
+/-- **Non-incident band ↔ sector disjointness.**  Edge `i` is not incident to the
+sector's vertex `verts (j+1)` (`(i:ℕ) ∉ {j, j+1}`).  Reduces (via the strip support and
+the vertex ball) to the non-adjacent edge separation at width `δ`, with `δ₀ ≤ δ` and
+`ρ (j+1) ≤ δ`. -/
+theorem disjoint_stripSupport_vertexBall_nonincident (β : PolyArc)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ δ : ℝ} (i j : Fin β.numSegs)
+    (hj1 : (j : ℕ) + 1 < β.numSegs)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
+      Metric.infDist w (β.segCarrier a) < δ → Metric.infDist w (β.segCarrier b) < δ → False)
+    (hδ₀ : δ₀ ≤ δ) (hρ : ρ (Fin.succ j) ≤ δ)
+    (hij : (i : ℕ) ≠ (j : ℕ)) (hij1 : (i : ℕ) ≠ (j : ℕ) + 1) :
+    Disjoint (stripSupport β δ₀ i) (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j))) := by
+  rw [Set.disjoint_left]
+  intro z hzi hzb
+  have hi : Metric.infDist z (β.segCarrier i) < δ := lt_of_lt_of_le hzi hδ₀
+  obtain ⟨hjclose, hj1close⟩ := infDist_lt_of_mem_vertexBall β j hj1 hzb
+  have hj : Metric.infDist z (β.segCarrier j) < δ := lt_of_lt_of_le hjclose hρ
+  have hj1' : Metric.infDist z (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩) < δ :=
+    lt_of_lt_of_le hj1close hρ
+  have hval : ((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) = (j : ℕ) + 1 := rfl
+  rcases lt_trichotomy ((i : ℕ) + 1) (j : ℕ) with hlt | heq | hgt
+  · exact hsep i j hlt z hi hj
+  · exact hsep i ⟨(j : ℕ) + 1, hj1⟩ (by rw [hval]; omega) z hi hj1'
+  · exact hsep j i (by omega) z hj hi
+
 end CrossingLemma.PlaneArcSeparation
