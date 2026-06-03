@@ -578,6 +578,28 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    OPEN + NONEMPTY (P1/P4); UNION `= T\carrier` (P2, via the C3b cover); DISJOINT (P3, via
    the keystone + the C2 glue); the `δ₀` budget choice.  Hypotheses: `IsCorner` at interior
    vertices (gives the finite `sin θ` min) + endpoints in `Rᶜ`.
+
+   **THE `tan θ` WALL IS AN ARTIFACT — DISSOLVED (2026-06-03).**  Re-examining the wall:
+   it came entirely from discharging the glue's thinness `hthin` via `exists_radius_thin`,
+   whose bound `|sideForm v b z| ≤ M·dist v z` measures to the **vertex** (so `r ≈
+   tan θ·edgelen`, angle-dependent).  But the literature's normal-distance estimate measures
+   to the edge **line**: since `sideForm v b q = 0` for every `q ∈ [v,b]` (affine combo),
+   `|sideForm v b z| ≤ M·infDist z [v,b] < M·δ₀` in a `δ₀`-tube — **independent of the corner
+   angle** (the geometry is Euclidean via `dotp`/`sideForm`; only the metric `dist` is sup).
+   The glue lemmas take `hthin` as a hypothesis, agnostic to its source, so we feed it from
+   the strip width instead.  **PROVEN this session, sorry-free + axiom-clean:**
+   `abs_sideForm_le_dist_of_mem_segment` (`|sideForm v b z| ≤ M·dist q z`, any `q ∈ [v,b]`);
+   `abs_sideForm_le_M_infDist` (`≤ M·infDist z [v,b]`); `thin_of_infDist_outgoing` (produces
+   the exact outgoing-glue `hthin` from `α ≤ footParam v b z ∧ infDist z [v,b] < δ₀` under an
+   **angle-free** threshold `K·M·δ₀ < |τ|·α·P`; incoming form symmetric via the `a↔b` swap).
+   CONSEQUENCE: the collar no longer needs metric vertex disks pinned to `r ≈ tan θ·edgelen`;
+   the band/sector reconciliation fires from the tube half-width alone, uniformly.  Mathlib
+   has no Jordan/crosscut/arc-separation lemma to import (searched) — the collar must be
+   built, but this estimate removes the obstruction.  STILL TODO unchanged below, now with a
+   clear path: bands carry an `infDist z (segCarrier i) < δ₀` strip certificate, vertex
+   pieces are `τ`-selected sectors, all glued by `thin_of_infDist_*` (no `ρ_v` wall);
+   `exists_delta_nonadjacent_tube_sep` kills non-adjacent overlaps; `exists_delta_corner_confine`
+   remains available for the adjacent band–band case.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

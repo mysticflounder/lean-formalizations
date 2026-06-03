@@ -1337,6 +1337,110 @@ theorem abs_sideForm_le_dist (v b z : Plane) :
     _ ≤ |b.1 - v.1| * dist v z + |b.2 - v.2| * dist v z := by gcongr
     _ = (|b.1 - v.1| + |b.2 - v.2|) * dist v z := by ring
 
+/-- **Sharp transverse bound (to any segment point).**  Since `sideForm v b q = 0` for
+every `q` on the segment `[v,b]`, the transverse coordinate `|sideForm v b z|` is at most
+`‖b−v‖₁` times the sup-distance from `z` to that point `q` — not merely to the vertex `v`.
+This is the literature's normal-distance estimate (the geometry is Euclidean even though
+the metric is the sup norm), and it is what discharges the corner glue's thinness from a
+thin-tube half-width *uniformly in the corner angle*. -/
+theorem abs_sideForm_le_dist_of_mem_segment {v b q : Plane}
+    (hq : q ∈ segment ℝ v b) (z : Plane) :
+    |sideForm v b z| ≤ (|b.1 - v.1| + |b.2 - v.2|) * dist q z := by
+  have hq0 : sideForm v b q = 0 := by
+    obtain ⟨c, d, _, _, hcd, hq'⟩ := hq
+    rw [← hq']
+    have hc1 : c = 1 - d := by linarith
+    simp only [sideForm, Prod.fst_add, Prod.snd_add, Prod.smul_fst, Prod.smul_snd,
+      smul_eq_mul, hc1]
+    ring
+  have h1 : |z.1 - q.1| ≤ dist q z := by
+    rw [Prod.dist_eq]
+    calc |z.1 - q.1| = dist q.1 z.1 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist q.1 z.1) (dist q.2 z.2) := le_max_left _ _
+  have h2 : |z.2 - q.2| ≤ dist q z := by
+    rw [Prod.dist_eq]
+    calc |z.2 - q.2| = dist q.2 z.2 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist q.1 z.1) (dist q.2 z.2) := le_max_right _ _
+  have hexp : sideForm v b z
+      = (b.1 - v.1) * (z.2 - q.2) - (b.2 - v.2) * (z.1 - q.1) := by
+    have hdiff : sideForm v b z - sideForm v b q
+        = (b.1 - v.1) * (z.2 - q.2) - (b.2 - v.2) * (z.1 - q.1) := by
+      simp only [sideForm]; ring
+    rw [hq0, sub_zero] at hdiff; exact hdiff
+  calc |sideForm v b z|
+      = |(b.1 - v.1) * (z.2 - q.2) - (b.2 - v.2) * (z.1 - q.1)| := by rw [hexp]
+    _ ≤ |(b.1 - v.1) * (z.2 - q.2)| + |(b.2 - v.2) * (z.1 - q.1)| := by
+          rw [sub_eq_add_neg]; refine (abs_add_le _ _).trans ?_; rw [abs_neg]
+    _ = |b.1 - v.1| * |z.2 - q.2| + |b.2 - v.2| * |z.1 - q.1| := by rw [abs_mul, abs_mul]
+    _ ≤ |b.1 - v.1| * dist q z + |b.2 - v.2| * dist q z := by gcongr
+    _ = (|b.1 - v.1| + |b.2 - v.2|) * dist q z := by ring
+
+/-- **Sharp transverse bound (to the whole segment).**  `|sideForm v b z|` is at most
+`‖b−v‖₁ · infDist z [v,b]`.  In a tube of half-width `δ₀` around the carrier this is
+`< ‖b−v‖₁ · δ₀`, *independent of the corner angle* — the estimate that dissolves the
+`tan θ` glue wall of the discarded local architecture. -/
+theorem abs_sideForm_le_M_infDist (v b z : Plane) :
+    |sideForm v b z|
+      ≤ (|b.1 - v.1| + |b.2 - v.2|) * Metric.infDist z (segment ℝ v b) := by
+  set M := |b.1 - v.1| + |b.2 - v.2| with hM
+  have hMnn : 0 ≤ M := add_nonneg (abs_nonneg _) (abs_nonneg _)
+  have hne : (segment ℝ v b).Nonempty := ⟨v, left_mem_segment ℝ v b⟩
+  rcases eq_or_lt_of_le hMnn with hM0 | hMpos
+  · -- M = 0 ⟹ b = v ⟹ sideForm vanishes
+    have hsum : |b.1 - v.1| + |b.2 - v.2| = 0 := by rw [hM] at hM0; linarith
+    have hb1 : |b.1 - v.1| = 0 := by linarith [abs_nonneg (b.1 - v.1), abs_nonneg (b.2 - v.2)]
+    have hb2 : |b.2 - v.2| = 0 := by linarith [abs_nonneg (b.1 - v.1), abs_nonneg (b.2 - v.2)]
+    have e1 : b.1 - v.1 = 0 := abs_eq_zero.mp hb1
+    have e2 : b.2 - v.2 = 0 := abs_eq_zero.mp hb2
+    have hsf : sideForm v b z = 0 := by simp only [sideForm, e1, e2]; ring
+    rw [hsf, abs_zero]
+    exact mul_nonneg hMnn Metric.infDist_nonneg
+  · have hper : ∀ q ∈ segment ℝ v b, |sideForm v b z| / M ≤ dist z q := by
+      intro q hq
+      have hpt := abs_sideForm_le_dist_of_mem_segment hq z
+      rw [dist_comm q z] at hpt
+      rw [div_le_iff₀ hMpos]; linarith
+    have hinf : |sideForm v b z| / M ≤ Metric.infDist z (segment ℝ v b) :=
+      (Metric.le_infDist hne).2 hper
+    rw [div_le_iff₀ hMpos] at hinf
+    rw [mul_comm]; exact hinf
+
+/-- **Angle-free corner thinness (outgoing edge).**  The corner glue's thinness
+hypothesis (`mem_vertexPlus_of_outgoing` etc.), discharged from closeness to the edge
+*line* (`infDist z [v,b] < δ₀`) and a foot lower bound (`α ≤ footParam v b z`), under a
+threshold on `δ₀` that is *independent of the corner angle*.  This replaces
+`exists_radius_thin` (whose vertex-distance radius `r ≈ tanθ·‖edge‖` shrank with the
+angle, the wall): here the only smallness needed is the tube half-width, uniformly. -/
+theorem thin_of_infDist_outgoing {a v b z : Plane} (hbv : b ≠ v) {α δ₀ : ℝ}
+    (hfoot : α ≤ footParam v b z)
+    (hstrip : Metric.infDist z (segment ℝ v b) < δ₀)
+    (hδ : |dotp (v - a) (b - v)| * (|b.1 - v.1| + |b.2 - v.2|) * δ₀
+           < |sideForm a v b| * (α * dotp (b - v) (b - v))) :
+    |dotp (v - a) (b - v)| * |sideForm v b z|
+      < |sideForm a v b| * dotp (z - v) (b - v) := by
+  have hP : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  set M := |b.1 - v.1| + |b.2 - v.2| with hM
+  set K := |dotp (v - a) (b - v)| with hK
+  have hKnn : 0 ≤ K := abs_nonneg _
+  have hMnn : 0 ≤ M := add_nonneg (abs_nonneg _) (abs_nonneg _)
+  have hsf : |sideForm v b z| ≤ M * Metric.infDist z (segment ℝ v b) :=
+    abs_sideForm_le_M_infDist v b z
+  -- tangential coordinate: dotp (z−v)(b−v) = footParam · ‖b−v‖²  ≥ α·‖b−v‖²
+  have hdot : dotp (z - v) (b - v) = footParam v b z * dotp (b - v) (b - v) := by
+    rw [footParam]; field_simp
+  have hge : α * dotp (b - v) (b - v) ≤ dotp (z - v) (b - v) := by
+    rw [hdot]; exact mul_le_mul_of_nonneg_right hfoot (le_of_lt hP)
+  calc K * |sideForm v b z|
+      ≤ K * (M * Metric.infDist z (segment ℝ v b)) := by
+        exact mul_le_mul_of_nonneg_left hsf hKnn
+    _ ≤ K * (M * δ₀) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left (le_of_lt hstrip) hMnn) hKnn
+    _ = K * M * δ₀ := by ring
+    _ < |sideForm a v b| * (α * dotp (b - v) (b - v)) := hδ
+    _ ≤ |sideForm a v b| * dotp (z - v) (b - v) :=
+        mul_le_mul_of_nonneg_left hge (abs_nonneg _)
+
 /-- **Quantitative tangential bound.**  The dot product of a displacement `z − p`
 with the edge direction `t − s` is controlled by the sup-distance `dist p z` and the
 ℓ¹ size of the direction.  Metric companion of `abs_sideForm_le_dist`; it is what
