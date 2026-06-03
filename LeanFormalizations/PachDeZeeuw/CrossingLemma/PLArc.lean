@@ -1603,4 +1603,57 @@ theorem overlap_mem_reflexSector_iff {a v b z : Plane}
     · exact h
   · intro h; exact Or.inr h
 
+/-! ### Cover: the segment-coordinate bridge
+
+A spine point `p` lies on some closed edge `segment ℝ s t`, so `p = a•s + b•t` with
+`a, b ≥ 0`, `a + b = 1`.  Its foot parameter is exactly `b ∈ [0,1]`, and its distance
+to either endpoint scales linearly with the barycentric weight — these convert "foot
+near a vertex" into "metrically near that vertex" for the disk case of the cover. -/
+
+/-- The foot parameter of a point on the closed segment lies in `[0,1]`. -/
+theorem footParam_mem_Icc_of_mem_segment {s t : Plane} (h : t ≠ s) {p : Plane}
+    (hp : p ∈ segment ℝ s t) : footParam s t p ∈ Set.Icc (0 : ℝ) 1 := by
+  obtain ⟨a, b, ha, hb, hab, rfl⟩ := hp
+  have hrw : a • s + b • t = (1 - b) • s + b • t := by rw [show a = 1 - b by linarith]
+  rw [hrw, footParam_affineComb h b, Set.mem_Icc]
+  exact ⟨hb, by linarith⟩
+
+/-- Distance from an affine combination to the source endpoint scales with the target
+weight: `dist (a•s + b•t) s = |b|·dist t s`. -/
+theorem dist_affineComb_src {s t : Plane} {a b : ℝ} (hab : a + b = 1) :
+    dist (a • s + b • t) s = |b| * dist t s := by
+  rw [dist_eq_norm]
+  have h1 : a • s + b • t - s = b • (t - s) := by rw [show a = 1 - b by linarith]; module
+  rw [h1, norm_smul, Real.norm_eq_abs, ← dist_eq_norm]
+
+/-- Distance from an affine combination to the target endpoint scales with the source
+weight: `dist (a•s + b•t) t = |a|·dist s t`. -/
+theorem dist_affineComb_tgt {s t : Plane} {a b : ℝ} (hab : a + b = 1) :
+    dist (a • s + b • t) t = |a| * dist s t := by
+  rw [dist_eq_norm]
+  have h1 : a • s + b • t - t = a • (s - t) := by rw [show b = 1 - a by linarith]; module
+  rw [h1, norm_smul, Real.norm_eq_abs, ← dist_eq_norm]
+
+/-! ### Cover, Case A: a tube point near the middle of an edge lands in its band
+
+The first half of the cover (task iii).  If a spine point `p` has foot parameter in
+the *middle* band `[α, 1−α]` of edge `(s,t)` and the evaluation point `z` is close
+enough (the tube radius times the edge's ℓ¹ size beats `α·‖t−s‖²`), then the foot
+parameter only moves by `< α`, so `z` is still strictly between the endpoints:
+`z ∈ edgeBand s t`.  The complementary case (`p` near a vertex) is handled by the
+vertex disk. -/
+theorem mem_edgeBand_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (hα : 0 < α)
+    {p z : Plane} (hp : footParam s t p ∈ Set.Icc α (1 - α))
+    (hclose : (|t.1 - s.1| + |t.2 - s.2|) * dist p z < α * dotp (t - s) (t - s)) :
+    z ∈ edgeBand s t := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  have hlip := abs_footParam_sub_le h p z
+  have hMP : (|t.1 - s.1| + |t.2 - s.2|) / dotp (t - s) (t - s) * dist p z < α := by
+    rw [div_mul_eq_mul_div, div_lt_iff₀ hP]; exact hclose
+  have hdiff : |footParam s t z - footParam s t p| < α := lt_of_le_of_lt hlip hMP
+  rw [Set.mem_Icc] at hp
+  rw [abs_lt] at hdiff
+  rw [edgeBand, Set.mem_setOf_eq, Set.mem_Ioo]
+  exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
+
 end CrossingLemma.PlaneArcSeparation

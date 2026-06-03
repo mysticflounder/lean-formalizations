@@ -477,7 +477,14 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    s t p = dotp(z−p,t−s) / ‖t−s‖²`, and the Lipschitz bound `abs_footParam_sub_le :
    |footParam s t z − footParam s t p| ≤ (|t.1−s.1|+|t.2−s.2|)/‖t−s‖² · dist p z` —
    so a tube point within `δ₀` of a mid-edge spine point stays in the edge band once
-   `δ₀` is small relative to the edge length and the slab cutoffs `αᵢ`.  STILL TODO in
+   `δ₀` is small relative to the edge length and the slab cutoffs `αᵢ`.  Also DONE:
+   the **Case A core** `mem_edgeBand_of_footParam_mem` — if `footParam s t p ∈ [α,1−α]`
+   and `(|t.1−s.1|+|t.2−s.2|)·dist p z < α·‖t−s‖²` then `z ∈ edgeBand s t` (the
+   tube-radius ⇒ band membership step) — and the **segment-coordinate bridge**:
+   `footParam_mem_Icc_of_mem_segment` (`p ∈ segment ℝ s t ⇒ footParam ∈ [0,1]`),
+   `dist_affineComb_src : dist (a•s+b•t) s = |b|·dist t s`, `dist_affineComb_tgt :
+   dist (a•s+b•t) t = |a|·dist s t` (convert "foot near a vertex" into "metrically near
+   that vertex" for the disk case).  STILL TODO in
    (ii): the per-vertex `diskᵥ` (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
