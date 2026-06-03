@@ -3083,4 +3083,104 @@ theorem disjoint_endCapSrcMinus_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSe
   intro z hzs hzt
   exact (Set.disjoint_left.mp hball) hzs.1.1 hzt.1.1
 
+/-! #### P3 disjointness — end cap ↔ non-incident band, and end cap ↔ sector.
+
+The remaining cross pairings.  An endpoint vertex `v` lies on its single incident edge only;
+for any edge `i` not incident to `v` the vertex is at positive `infDist` from `segCarrier i`,
+so a `ρ`-ball about `v` and a `δ₀`-strip about edge `i` are separated once the radii fit the
+budget `ρ + δ₀ ≤ infDist v (segCarrier i)`.  End cap ↔ sector is pure ball disjointness
+(`v ≠ verts (succ j)`). -/
+
+/-- **Vertex ball ↔ strip support via an `infDist` budget.**  If the vertex `v` is at least
+`ρ' + δ₀` from edge `i` (in `infDist`), the `ρ'`-ball about `v` misses edge `i`'s `δ₀`-strip
+support.  `infDist` is `1`-Lipschitz, so a point within `ρ'` of `v` and within `δ₀` of the
+edge would put `v` within `ρ' + δ₀` of the edge. -/
+theorem disjoint_vertexBall_stripSupport_of_budget (β : PolyArc) {v : Plane} {ρ' δ₀ : ℝ}
+    (i : Fin β.numSegs)
+    (hbudget : ρ' + δ₀ ≤ Metric.infDist v (β.segCarrier i)) :
+    Disjoint (Metric.ball v ρ') (stripSupport β δ₀ i) := by
+  rw [Set.disjoint_left]
+  intro z hzball hzs
+  have hd : dist v z < ρ' := by rw [dist_comm]; exact Metric.mem_ball.mp hzball
+  have hi : Metric.infDist z (β.segCarrier i) < δ₀ := hzs
+  have htri : Metric.infDist v (β.segCarrier i)
+      ≤ Metric.infDist z (β.segCarrier i) + dist v z :=
+    Metric.infDist_le_infDist_add_dist
+  linarith
+
+/-- Source `+` cap ↔ `−` band on a non-incident edge (`i ≠ firstSeg`). -/
+theorem disjoint_endCapSrcPlus_bandStripMinus_nonincident (β : PolyArc)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
+    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
+    Disjoint (endCapSrcPlus β ρ) (bandStripMinus β α δ₀ i) :=
+  (disjoint_vertexBall_stripSupport_of_budget β i hbudget).mono
+    (fun _ hz => hz.1.1) (bandStripMinus_subset_stripSupport β α δ₀ i)
+
+/-- Source `−` cap ↔ `+` band on a non-incident edge (`i ≠ firstSeg`). -/
+theorem disjoint_endCapSrcMinus_bandStripPlus_nonincident (β : PolyArc)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
+    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
+    Disjoint (endCapSrcMinus β ρ) (bandStripPlus β α δ₀ i) :=
+  (disjoint_vertexBall_stripSupport_of_budget β i hbudget).mono
+    (fun _ hz => hz.1.1) (bandStripPlus_subset_stripSupport β α δ₀ i)
+
+/-- Target `+` cap ↔ `−` band on a non-incident edge (`i ≠ lastSeg`). -/
+theorem disjoint_endCapTgtPlus_bandStripMinus_nonincident (β : PolyArc)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
+    (hbudget : ρ (Fin.last β.numSegs) + δ₀
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
+    Disjoint (endCapTgtPlus β ρ) (bandStripMinus β α δ₀ i) :=
+  (disjoint_vertexBall_stripSupport_of_budget β i hbudget).mono
+    (fun _ hz => hz.1.1) (bandStripMinus_subset_stripSupport β α δ₀ i)
+
+/-- Target `−` cap ↔ `+` band on a non-incident edge (`i ≠ lastSeg`). -/
+theorem disjoint_endCapTgtMinus_bandStripPlus_nonincident (β : PolyArc)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
+    (hbudget : ρ (Fin.last β.numSegs) + δ₀
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
+    Disjoint (endCapTgtMinus β ρ) (bandStripPlus β α δ₀ i) :=
+  (disjoint_vertexBall_stripSupport_of_budget β i hbudget).mono
+    (fun _ hz => hz.1.1) (bandStripPlus_subset_stripSupport β α δ₀ i)
+
+/-- Source `+` cap ↔ a sector (different vertices: `verts 0 ≠ verts (succ j)`), a ball
+budget. -/
+theorem disjoint_endCapSrcPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
+    (hball : Disjoint (Metric.ball (β.verts 0) (ρ 0))
+                      (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j)))) :
+    Disjoint (endCapSrcPlus β ρ) (sectorMinus β ρ j hj1) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzs
+  exact (Set.disjoint_left.mp hball) hzc.1.1 hzs.2
+
+/-- Target `+` cap ↔ a sector, a ball budget. -/
+theorem disjoint_endCapTgtPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
+    (hball : Disjoint (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))
+                      (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j)))) :
+    Disjoint (endCapTgtPlus β ρ) (sectorMinus β ρ j hj1) := by
+  rw [Set.disjoint_left]
+  intro z hzc hzs
+  exact (Set.disjoint_left.mp hball) hzc.1.1 hzs.2
+
+/-- A sector ↔ source `−` cap, a ball budget. -/
+theorem disjoint_sectorPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
+    (hball : Disjoint (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j)))
+                      (Metric.ball (β.verts 0) (ρ 0))) :
+    Disjoint (sectorPlus β ρ j hj1) (endCapSrcMinus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzs hzc
+  exact (Set.disjoint_left.mp hball) hzs.2 hzc.1.1
+
+/-- A sector ↔ target `−` cap, a ball budget. -/
+theorem disjoint_sectorPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
+    (hball : Disjoint (Metric.ball (β.verts (Fin.succ j)) (ρ (Fin.succ j)))
+                      (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))) :
+    Disjoint (sectorPlus β ρ j hj1) (endCapTgtMinus β ρ) := by
+  rw [Set.disjoint_left]
+  intro z hzs hzc
+  exact (Set.disjoint_left.mp hball) hzs.2 hzc.1.1
+
 end CrossingLemma.PlaneArcSeparation
