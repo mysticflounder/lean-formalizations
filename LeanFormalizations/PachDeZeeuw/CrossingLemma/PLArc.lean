@@ -1881,4 +1881,85 @@ theorem exists_delta_cover_budget (β : PolyArc) {α : ℝ} (hα : 0 < α)
       rw [hg]; exact le_trans (min_le_right _ _) (min_le_right _ _)
     linarith
 
+/-! ### Task (iv), C1: the endpoint pinch
+
+At an arc **endpoint** there is only one incident edge and no corner sector, so the
+local two-sided picture would fail (a free-endpoint slit disk is connected).  The
+crosscut frontier condition rescues it: the endpoint lies in `Rᶜ`, so the tapered-tube
+radius `min(δ₀, infDist p Rᶜ / 2)` pinches to `0` as the spine point `p` approaches the
+endpoint, and the tube never wraps around the end.  Concretely, a tube point `z` whose
+spine witness `p` sits on the endpoint-incident edge `[s,t]` (with `s` the endpoint)
+stays on the **forward** side: its foot parameter is strictly positive.
+
+The single piece of genuine arithmetic is the sup-norm / ℓ¹ / ℓ² comparison
+`(|x|+|y|)·max|x| |y| ≤ 2(x²+y²)`, which controls the foot Lipschitz constant against the
+tube's `/2` taper. -/
+
+/-- The plane ℓ¹·ℓ∞ ≤ 2·ℓ² inequality: `(|x|+|y|)·max |x| |y| ≤ 2(x²+y²)`. -/
+theorem l1_linf_le_two_l2sq (x y : ℝ) :
+    (|x| + |y|) * max |x| |y| ≤ 2 * (x ^ 2 + y ^ 2) := by
+  rcases le_total |y| |x| with h | h
+  · rw [max_eq_left h]
+    nlinarith [sq_abs x, sq_abs y, mul_le_mul_of_nonneg_left h (abs_nonneg x), sq_nonneg y]
+  · rw [max_eq_right h]
+    nlinarith [sq_abs x, sq_abs y, mul_le_mul_of_nonneg_left h (abs_nonneg y), sq_nonneg x]
+
+/-- The endpoint-pinch comparison in geometric form: the edge's ℓ¹ size times its
+sup-norm length is at most twice its squared ℓ² length. -/
+theorem l1_mul_dist_le_two_dotp (s t : Plane) :
+    (|t.1 - s.1| + |t.2 - s.2|) * dist s t ≤ 2 * dotp (t - s) (t - s) := by
+  have hd : dist s t = max |t.1 - s.1| |t.2 - s.2| := by
+    rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq, abs_sub_comm s.1 t.1, abs_sub_comm s.2 t.2]
+  have hdot : dotp (t - s) (t - s) = (t.1 - s.1) ^ 2 + (t.2 - s.2) ^ 2 := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  rw [hd, hdot]
+  exact l1_linf_le_two_l2sq (t.1 - s.1) (t.2 - s.2)
+
+/-- **Endpoint pinch.**  If `p` lies on the closed edge `[s,t]` and the evaluation point
+`z` is within *half* the distance from `p` to the source endpoint `s`, then `z` is still
+on the forward side of the edge: `footParam s t z > 0`.  At a call site the half-distance
+budget comes from the tube taper `dist z p < infDist p Rᶜ / 2 ≤ dist p s / 2` once the
+endpoint `s ∈ Rᶜ`. -/
+theorem footParam_pos_of_close_to_seg {s t : Plane} (h : t ≠ s) {p z : Plane}
+    (hp : p ∈ segment ℝ s t) (hzp : dist z p < dist p s / 2) :
+    0 < footParam s t z := by
+  obtain ⟨a, b, ha, hb, hab, rfl⟩ := hp
+  have haeq : a = 1 - b := by linarith
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  have hfp : footParam s t (a • s + b • t) = b := by rw [haeq]; exact footParam_affineComb h b
+  have hps : dist (a • s + b • t) s = b * dist s t := by
+    rw [dist_affineComb_src hab, abs_of_nonneg hb, dist_comm t s]
+  rw [hps] at hzp
+  have hbpos : 0 < b := by
+    by_contra hc
+    push Not at hc
+    have hb0 : b = 0 := le_antisymm hc hb
+    rw [hb0, zero_mul, zero_div] at hzp
+    exact absurd hzp (not_lt.mpr dist_nonneg)
+  have hlip := abs_footParam_sub_le h (a • s + b • t) z
+  rw [hfp] at hlip
+  set L1 := |t.1 - s.1| + |t.2 - s.2| with hL1
+  have hL1nn : 0 ≤ L1 := add_nonneg (abs_nonneg _) (abs_nonneg _)
+  set q := dist (a • s + b • t) z with hqdef
+  have hqz : q < b * dist s t / 2 := by rw [hqdef, dist_comm]; exact hzp
+  have hkey : L1 * dist s t ≤ 2 * dotp (t - s) (t - s) := by
+    rw [hL1]; exact l1_mul_dist_le_two_dotp s t
+  have hfrac : L1 / dotp (t - s) (t - s) * q < b := by
+    rcases eq_or_lt_of_le hL1nn with hL10 | hL1pos
+    · rw [← hL10, zero_div, zero_mul]; exact hbpos
+    · have hstep1 : L1 / dotp (t - s) (t - s) * q
+          < L1 / dotp (t - s) (t - s) * (b * dist s t / 2) :=
+        mul_lt_mul_of_pos_left hqz (div_pos hL1pos hP)
+      have heq : L1 / dotp (t - s) (t - s) * (b * dist s t / 2)
+          = b * (L1 * dist s t / (2 * dotp (t - s) (t - s))) := by
+        field_simp
+      have hle1 : L1 * dist s t / (2 * dotp (t - s) (t - s)) ≤ 1 :=
+        (div_le_one (by positivity)).mpr (by linarith [hkey])
+      have hstep2 : L1 / dotp (t - s) (t - s) * (b * dist s t / 2) ≤ b := by
+        rw [heq]; nlinarith [mul_le_mul_of_nonneg_left hle1 hb]
+      linarith
+  have hlow : b - L1 / dotp (t - s) (t - s) * q ≤ footParam s t z := by
+    have := (abs_le.mp hlip).1; linarith
+  linarith
+
 end CrossingLemma.PlaneArcSeparation

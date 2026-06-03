@@ -504,12 +504,30 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `reflexSector_swap` (sector symmetric under `a↔b`) and
    `overlap_mem_convexSector_iff_incoming` / `overlap_mem_reflexSector_iff_incoming`
    (apply the outgoing glue to the reversed corner `(b,v,a)`; pins the sector to the
-   *incoming*-edge sign `sign(τ·sideForm a v z)`).  STILL TODO: (iv) the per-vertex
-   `diskᵥ` side-split (ball
-   small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
-   single global label `g`; choose `δ₀`/`ρⱼ` discharging the cover budget; assemble
-   `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the
-   sector witnesses `a+b−v`, `3v−a−b`).
+   *incoming*-edge sign `sign(τ·sideForm a v z)`).  **(iv) IN PROGRESS — concrete
+   plan (2026-06-02), 7 checkpoints C1–C7, hardest first.** The Plan pass found **three
+   corrections** to the original sketch: (a) the standalone "tube witness is on edge 0"
+   lemma is *false* (an adjacent edge-1 spine point near `v₀`'s perpendicular foot can
+   be within `ρ₀+δ₀` of the endpoint for obtuse turns) — instead **fuse the pinch into
+   the cover's `b<α` branch** (routing to `ball(verts 0)(ρ₀)` only happens via `hsrc`
+   with `i=0`, where `p ∈ segCarrier 0` is in scope); (b) the edge slabs must be
+   **narrowed to `footParam ∈ (α′,1−α′)`** (full `(0,1)` only gives `footParam<1`, but
+   the glue thin-hyp needs `footParam ≤ 1−α` to get `α·‖a−v‖² ≤ dotp(z−v,a−v) =
+   ‖a−v‖²·(1−footParam)`) — use a double cutoff `α′=α/2`; (c) choose `α` from a **global
+   geometric minimum** (`α ≤ Rmin/(2(Lmax+1))`) to reconcile cover-wants-`ρ`-large vs
+   disk-localisation-wants-`ρ`-small, and add hypotheses `IsCorner` at each interior
+   vertex (not derivable from `PolyArc`) and `ρ₀ ≤ infDist(verts 0)(segCarrier 1)`.
+   **C1 DONE (the endpoint pinch — highest-risk):** `l1_linf_le_two_l2sq`
+   (`(|x|+|y|)·max|x| |y| ≤ 2(x²+y²)`), `l1_mul_dist_le_two_dotp` (geometric form:
+   `(|t.1−s.1|+|t.2−s.2|)·dist s t ≤ 2·‖t−s‖²`), and
+   `footParam_pos_of_close_to_seg` (`p ∈ segment ℝ s t` and `dist z p < dist p s / 2`
+   ⇒ `0 < footParam s t z`) — at a call site the half-distance budget comes from the
+   tube taper `dist z p < infDist p Rᶜ/2 ≤ dist p s/2` once the endpoint `s ∈ Rᶜ`; all
+   sorry-free, axiom-clean.  STILL TODO: C2 narrowed-band defs + `vertexPlus/Minus`
+   (τ-selected) + band↔sector glue consistency; C3 `exists_collarData` budget (global
+   `α`, double cutoff, narrowed cover variant); C4 separation plumbing (off-carrier,
+   disjoint-supports via `exists_pos_nonadjacent_sep`); C5 `collarPlus/Minus` defs +
+   OPEN + NONEMPTY; C6 UNION `= T\carrier`; C7 DISJOINT.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
