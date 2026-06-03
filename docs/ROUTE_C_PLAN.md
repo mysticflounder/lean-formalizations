@@ -498,7 +498,13 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    there is a single `δ₀>0` satisfying all three budget families at once (`δ₀` = half
    the finite `Finset.inf'` over edges of `min(α·‖Δ‖²/‖Δ‖₁, ρ−α·distᵢ, ρ−α·distᵢ)`);
    plus `segDir_l1_pos` (each edge has positive ℓ¹ length).  So the cover now reduces
-   to choosing `α` and `ρⱼ` (with `ρⱼ > α·distᵢ`).  STILL TODO: (iv) the per-vertex
+   to choosing `α` and `ρⱼ` (with `ρⱼ > α·distᵢ`).  **Incoming-edge glue DONE** (each
+   edge's band overlaps *two* disks — its source disk where it is the corner's outgoing
+   edge, and its target disk where it is the incoming edge): `convexSector_swap` /
+   `reflexSector_swap` (sector symmetric under `a↔b`) and
+   `overlap_mem_convexSector_iff_incoming` / `overlap_mem_reflexSector_iff_incoming`
+   (apply the outgoing glue to the reversed corner `(b,v,a)`; pins the sector to the
+   *incoming*-edge sign `sign(τ·sideForm a v z)`).  STILL TODO: (iv) the per-vertex
    `diskᵥ` side-split (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; choose `δ₀`/`ρⱼ` discharging the cover budget; assemble

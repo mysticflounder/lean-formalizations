@@ -1614,6 +1614,57 @@ theorem overlap_mem_reflexSector_iff {a v b z : Plane}
     · exact h
   · intro h; exact Or.inr h
 
+/-! ### Corner glue for the incoming edge (by the `a ↔ b` symmetry)
+
+Each edge's band overlaps *two* vertex disks: the source disk (where the edge is the
+*outgoing* edge of the corner) and the target disk (where it is the *incoming* edge).
+The outgoing case is handled above; the incoming case follows because the corner is
+symmetric under swapping the two arms (`convexSector b v a = convexSector a v b`), so
+the outgoing lemma applied to the reversed corner `(b,v,a)` pins the sector to the
+*incoming*-edge sign `sign (τ · sideForm a v z)`. -/
+
+/-- The convex sector is symmetric under swapping the two corner arms. -/
+theorem convexSector_swap (a v b : Plane) : convexSector b v a = convexSector a v b := by
+  ext z
+  have eτ : cornerTurn b v a = - cornerTurn a v b := by
+    rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b]
+  simp only [convexSector, Set.mem_setOf_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
+    neg_mul_neg]
+  exact And.comm
+
+/-- The reflex sector is symmetric under swapping the two corner arms. -/
+theorem reflexSector_swap (a v b : Plane) : reflexSector b v a = reflexSector a v b := by
+  ext z
+  have eτ : cornerTurn b v a = - cornerTurn a v b := by
+    rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b]
+  simp only [reflexSector, Set.mem_setOf_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
+    neg_mul_neg]
+  exact Or.comm
+
+/-- On the overlap with the *incoming* edge's band (foot well along `(a,v)`, disk thin),
+`z` is in the convex sector iff the incoming-edge half-plane sign matches the turn. -/
+theorem overlap_mem_convexSector_iff_incoming {a v b z : Plane}
+    (hG : 0 < dotp (z - v) (a - v))
+    (hthin : |dotp (v - b) (a - v)| * |sideForm v a z|
+              < |sideForm b v a| * dotp (z - v) (a - v)) :
+    z ∈ convexSector a v b ↔ 0 < cornerTurn a v b * sideForm a v z := by
+  rw [← convexSector_swap a v b, overlap_mem_convexSector_iff hG hthin,
+    show cornerTurn b v a = - cornerTurn a v b from by
+      rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b],
+    sideForm_swap a v z, neg_mul_neg]
+
+/-- On the overlap with the *incoming* edge's band, `z` is in the reflex sector iff the
+incoming-edge half-plane sign opposes the turn. -/
+theorem overlap_mem_reflexSector_iff_incoming {a v b z : Plane}
+    (hG : 0 < dotp (z - v) (a - v))
+    (hthin : |dotp (v - b) (a - v)| * |sideForm v a z|
+              < |sideForm b v a| * dotp (z - v) (a - v)) :
+    z ∈ reflexSector a v b ↔ cornerTurn a v b * sideForm a v z < 0 := by
+  rw [← reflexSector_swap a v b, overlap_mem_reflexSector_iff hG hthin,
+    show cornerTurn b v a = - cornerTurn a v b from by
+      rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b],
+    sideForm_swap a v z, neg_mul_neg]
+
 /-! ### Cover: the segment-coordinate bridge
 
 A spine point `p` lies on some closed edge `segment ℝ s t`, so `p = a•s + b•t` with
