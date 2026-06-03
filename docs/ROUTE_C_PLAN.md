@@ -429,10 +429,30 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    coefficient, so `footParam ∈ (α,β)` selects the middle of an edge). Foot
    decomposition recorded: with `d=t−s`, `sideForm s t z = μ·dotp d d` for
    `z−s = λd + μ·rot90 d`, so `sign(sideForm) = sign μ` is the perpendicular side.
-   **Remaining in sub-node 3:** define `slabᵢ`/`diskᵥ` and the per-piece side label;
-   prove the slab/disk **overlap-consistency** lemmas (the genuine crux — the
-   vertex-dodging makes them true); show the pieces **cover** `T\β`; assemble
-   `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty.
+
+   **OVERLAP-CONSISTENCY ENGINE DONE (2026-06-02, sorry-free, axiom-clean) — the
+   genuine crux.** The single identity driving the corner glue (verified by `ring`):
+
+       sideForm a v z · dotp(b−v,b−v)
+         = sideForm a v b · dotp(z−v,b−v) + dotp(v−a,b−v) · sideForm v b z
+
+   (`sideForm_cross_identity`).  From it, `pos_turn_sideForm_of_overlap`: on the
+   overlap — foot strictly along edge `(v,b)` (`0 < dotp(z−v,b−v)`) and disk thin
+   enough that `|dotp(v−a,b−v)|·|sideForm v b z| < |sideForm a v b|·dotp(z−v,b−v)` —
+   one gets `0 < sideForm a v b · sideForm a v z`, i.e. `z` is pinned to the turn
+   side w.r.t. the incoming edge.  Hence on the overlap
+   `z ∈ convexSector ⟺ 0 < (sideForm a v b)·(sideForm v b z)`, so the slab label
+   (`sign sideForm v b z`) and the disk label (convex/reflex) coincide.  This is
+   exactly the vertex-region conflict resolved.  Proof is pure ordered-field
+   algebra: the `τ·G` term dominates `|K·S|` via the thinness hypothesis (an `abs`
+   bound + the identity, closed by `nlinarith`).
+
+   **Remaining in sub-node 3:** (i) discharge the thinness hypothesis from a concrete
+   disk radius / slab cutoff (`|sideForm v b z| ≤ (|b.1−v.1|+|b.2−v.2|)·dist v z`, so
+   `r` small suffices — pure coordinate `dist`/`abs` bounds); (ii) define `slabᵢ`,
+   `diskᵥ`, and the per-piece side label `g`; (iii) show the pieces **cover** `T\β`;
+   (iv) assemble `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk
+   non-emptiness via the sector witnesses `a+b−v`, `3v−a−b`).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

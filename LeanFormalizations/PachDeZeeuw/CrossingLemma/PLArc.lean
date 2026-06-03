@@ -1237,4 +1237,71 @@ theorem footParam_affineComb {s t : Plane} (h : t ≠ s) (c : ℝ) :
   have hz : ((1 - c) • s + c • t) - s = c • (t - s) := by module
   rw [footParam, hz, dotp_smul_left, mul_div_assoc, div_self (ne_of_gt hpos), mul_one]
 
+/-! ### The slab/disk overlap-consistency engine
+
+The single algebraic identity that drives the corner glue: the side of `z` w.r.t. the
+incoming edge `(a,v)` is the side w.r.t. the outgoing edge `(v,b)` *corrected by the
+tangential position* of `z` along `(v,b)`.  Writing `τ = sideForm a v b` (the turn),
+`P = dotp (b−v) (b−v)`, `G = dotp (z−v) (b−v)` (`= footParam·P`),
+`K = dotp (v−a) (b−v)`:
+
+    sideForm a v z · P = τ · G + K · sideForm v b z.
+
+So when `z` is transversally close to edge `(v,b)` (`|sideForm v b z|` small) yet has
+its foot well along the edge (`G > 0`, bounded away from `v`), the `τ·G` term dominates
+and `sideForm a v z` is *pinned* to the side of the turn — which is exactly why the
+slab label (`sign sideForm v b z`) and the disk label (convex/reflex sector) agree on
+the overlap, provided the disk is thin enough that `|K·sideForm v b z| < |τ|·G`. -/
+
+/-- **Cross-edge side identity** (pure `ring`).  See the section note. -/
+theorem sideForm_cross_identity (a v b z : Plane) :
+    sideForm a v z * dotp (b - v) (b - v)
+      = sideForm a v b * dotp (z - v) (b - v)
+        + dotp (v - a) (b - v) * sideForm v b z := by
+  simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub]; ring
+
+/-- **Overlap consistency (algebraic core).**  On the slab/disk overlap — foot of `z`
+strictly along edge `(v,b)` (`0 < dotp (z−v) (b−v)`) and the disk thin enough that
+`|K·sideForm v b z| < |τ|·dotp (z−v) (b−v)` — the side of `z` relative to the incoming
+edge `(a,v)` agrees with the turn `τ = sideForm a v b`: `0 < τ · sideForm a v z`.
+Consequently `z ∈ convexSector ⟺ 0 < τ·sideForm v b z` there, so the slab label and the
+disk label coincide. -/
+theorem pos_turn_sideForm_of_overlap (a v b z : Plane)
+    (hG : 0 < dotp (z - v) (b - v))
+    (hthin : |dotp (v - a) (b - v)| * |sideForm v b z|
+              < |sideForm a v b| * dotp (z - v) (b - v)) :
+    0 < sideForm a v b * sideForm a v z := by
+  -- `b ≠ v` and `P := dotp (b−v) (b−v) > 0`.
+  have hbv : b ≠ v := by
+    rintro rfl; simp [dotp, sub_self] at hG
+  have hP : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  -- `τ ≠ 0` (else the thinness `(≥0) < 0` is impossible).
+  have hτ : sideForm a v b ≠ 0 := by
+    rintro h0
+    rw [h0, abs_zero, zero_mul] at hthin
+    exact absurd hthin (not_lt.mpr (mul_nonneg (abs_nonneg _) (abs_nonneg _)))
+  have hτpos : 0 < |sideForm a v b| := abs_pos.mpr hτ
+  have hid := sideForm_cross_identity a v b z
+  have hbound := mul_lt_mul_of_pos_left hthin hτpos
+  -- `τ · (K · S) ≥ −|τ|·|K|·|S|`.
+  have habs : -(|sideForm a v b| * (|dotp (v - a) (b - v)| * |sideForm v b z|))
+              ≤ sideForm a v b * (dotp (v - a) (b - v) * sideForm v b z) := by
+    have he : |sideForm a v b * (dotp (v - a) (b - v) * sideForm v b z)|
+            = |sideForm a v b| * (|dotp (v - a) (b - v)| * |sideForm v b z|) := by
+      rw [abs_mul, abs_mul]
+    have hle := neg_abs_le (sideForm a v b * (dotp (v - a) (b - v) * sideForm v b z))
+    rwa [he] at hle
+  -- Bridge `|τ|·|τ|·G = τ·τ·G`.
+  have hsq : |sideForm a v b| * (|sideForm a v b| * dotp (z - v) (b - v))
+           = sideForm a v b * sideForm a v b * dotp (z - v) (b - v) := by
+    rw [← mul_assoc, abs_mul_abs_self]
+  -- Pin the sign in `τ · A · P`.
+  have key : 0 < sideForm a v b * sideForm a v z * dotp (b - v) (b - v) := by
+    have e : sideForm a v b * sideForm a v z * dotp (b - v) (b - v)
+           = sideForm a v b * sideForm a v b * dotp (z - v) (b - v)
+             + sideForm a v b * (dotp (v - a) (b - v) * sideForm v b z) := by
+      linear_combination sideForm a v b * hid
+    rw [e]; nlinarith [habs, hbound, hsq]
+  nlinarith [key, hP]
+
 end CrossingLemma.PlaneArcSeparation
