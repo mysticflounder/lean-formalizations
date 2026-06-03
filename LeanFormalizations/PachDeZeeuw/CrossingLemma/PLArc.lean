@@ -3346,4 +3346,214 @@ theorem disjoint_sectorPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numS
         (hρsep _) hij hij1).mono
         (bandStripMinus_subset_stripSupport β α δ₀ i) (fun _ hz => hz.2)).symm
 
+/-- **sector⁺ ↔ sector⁻, all index pairs.**  Same vertex → opposite-sign clash; different
+vertices → ball separation. -/
+theorem disjoint_sectorPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs) :
+    Disjoint (sectorPlus β ρ j hj1) (sectorMinus β ρ k hk1) := by
+  by_cases hjk : (j : ℕ) = (k : ℕ)
+  · have hjkF : j = k := Fin.ext hjk
+    subst hjkF
+    exact disjoint_sectorPlus_sectorMinus β ρ j hj1
+  · have hne : Fin.succ j ≠ Fin.succ k :=
+      fun h => hjk (congrArg Fin.val (Fin.succ_injective _ h))
+    exact disjoint_sectorPlus_sectorMinus_diff β ρ j k hj1 hk1 (hballs _ _ hne)
+
+/-- **Source `+` cap ↔ band⁻, all band indices.**  Own edge → sign clash; else the
+endpoint-edge budget. -/
+theorem disjoint_endCapSrcPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ : ℝ}
+    (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
+    (i : Fin β.numSegs) : Disjoint (endCapSrcPlus β ρ) (bandStripMinus β α δ₀ i) := by
+  by_cases hi : (i : ℕ) = 0
+  · have hieq : i = β.firstSeg := Fin.ext (hi.trans (rfl : (β.firstSeg : ℕ) = 0).symm)
+    rw [hieq]; exact disjoint_endCapSrcPlus_bandStripMinus_self β ρ α δ₀
+  · exact disjoint_endCapSrcPlus_bandStripMinus_nonincident β ρ i (hbudsrc i hi)
+
+/-- **Source `−` cap ↔ band⁺, all band indices.** -/
+theorem disjoint_endCapSrcMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ : ℝ}
+    (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
+    (i : Fin β.numSegs) : Disjoint (endCapSrcMinus β ρ) (bandStripPlus β α δ₀ i) := by
+  by_cases hi : (i : ℕ) = 0
+  · have hieq : i = β.firstSeg := Fin.ext (hi.trans (rfl : (β.firstSeg : ℕ) = 0).symm)
+    rw [hieq]; exact disjoint_endCapSrcMinus_bandStripPlus_self β ρ α δ₀
+  · exact disjoint_endCapSrcMinus_bandStripPlus_nonincident β ρ i (hbudsrc i hi)
+
+/-- **Target `+` cap ↔ band⁻, all band indices.** -/
+theorem disjoint_endCapTgtPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ : ℝ}
+    (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      ρ (Fin.last β.numSegs) + δ₀
+        ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
+    (i : Fin β.numSegs) : Disjoint (endCapTgtPlus β ρ) (bandStripMinus β α δ₀ i) := by
+  by_cases hi : (i : ℕ) = β.numSegs - 1
+  · have hieq : i = β.lastSeg := Fin.ext (hi.trans (rfl : (β.lastSeg : ℕ) = β.numSegs - 1).symm)
+    rw [hieq]; exact disjoint_endCapTgtPlus_bandStripMinus_self β ρ α δ₀
+  · exact disjoint_endCapTgtPlus_bandStripMinus_nonincident β ρ i (hbudtgt i hi)
+
+/-- **Target `−` cap ↔ band⁺, all band indices.** -/
+theorem disjoint_endCapTgtMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ : ℝ}
+    (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      ρ (Fin.last β.numSegs) + δ₀
+        ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
+    (i : Fin β.numSegs) : Disjoint (endCapTgtMinus β ρ) (bandStripPlus β α δ₀ i) := by
+  by_cases hi : (i : ℕ) = β.numSegs - 1
+  · have hieq : i = β.lastSeg := Fin.ext (hi.trans (rfl : (β.lastSeg : ℕ) = β.numSegs - 1).symm)
+    rw [hieq]; exact disjoint_endCapTgtMinus_bandStripPlus_self β ρ α δ₀
+  · exact disjoint_endCapTgtMinus_bandStripPlus_nonincident β ρ i (hbudtgt i hi)
+
+/-- `Fin.succ j ≠ Fin.last` when `j+1 < numSegs` (the sector vertex is interior). -/
+private theorem succ_ne_last_of_lt (β : PolyArc) {j : Fin β.numSegs}
+    (hj1 : (j : ℕ) + 1 < β.numSegs) : (Fin.succ j : Fin (β.numSegs + 1)) ≠ Fin.last β.numSegs := by
+  intro h
+  have := congrArg Fin.val h
+  simp [Fin.val_succ, Fin.val_last] at this
+  omega
+
+/-- **Source `+` cap ↔ sector⁻, all sector indices** (ball separation). -/
+theorem disjoint_endCapSrcPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (endCapSrcPlus β ρ) (sectorMinus β ρ j hj1) :=
+  disjoint_endCapSrcPlus_sectorMinus β ρ j hj1 (hballs 0 (Fin.succ j) (Fin.succ_ne_zero j).symm)
+
+/-- **Target `+` cap ↔ sector⁻, all sector indices** (ball separation). -/
+theorem disjoint_endCapTgtPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (endCapTgtPlus β ρ) (sectorMinus β ρ j hj1) :=
+  disjoint_endCapTgtPlus_sectorMinus β ρ j hj1
+    (hballs (Fin.last β.numSegs) (Fin.succ j) (succ_ne_last_of_lt β hj1).symm)
+
+/-- **sector⁺ ↔ source `−` cap, all sector indices** (ball separation). -/
+theorem disjoint_sectorPlus_endCapSrcMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (sectorPlus β ρ j hj1) (endCapSrcMinus β ρ) :=
+  disjoint_sectorPlus_endCapSrcMinus β ρ j hj1 (hballs (Fin.succ j) 0 (Fin.succ_ne_zero j))
+
+/-- **sector⁺ ↔ target `−` cap, all sector indices** (ball separation). -/
+theorem disjoint_sectorPlus_endCapTgtMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (sectorPlus β ρ j hj1) (endCapTgtMinus β ρ) :=
+  disjoint_sectorPlus_endCapTgtMinus β ρ j hj1
+    (hballs (Fin.succ j) (Fin.last β.numSegs) (succ_ne_last_of_lt β hj1))
+
+/-! #### P3 disjointness — the master assembly.
+
+`collarPlus` and `collarMinus` share the ground set `taperedTube R S δ₀ \ carrier`, so their
+disjointness reduces to the disjointness of their union-parts.  Expanding both `±` unions
+into their four pieces (band strips, vertex sectors, source cap, target cap) gives a 4×4
+grid; each of the sixteen cells is dispatched to one of the per-cell lemmas above. -/
+
+/-- **The two collar sides are disjoint.**  Bundles the geometric admissibility of the
+parameters: `hα` (narrowing width positive), `hsep`/`hδ₀sep`/`hρsep` (a non-adjacent
+edge separation at width `δsep` dominating both `δ₀` and every disk radius), `hadj_tgt`/
+`hadj_src` (the corner band/band impossibility at both adjacency orientations),
+`hτ`/`hδin`/`hδout` (per-corner turn nonzero and the angle-free thinness thresholds),
+`hballs` (pairwise-disjoint vertex/endpoint disks), and `hbudsrc`/`hbudtgt` (endpoint disks
+separated from non-incident edges). -/
+theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α δsep : ℝ}
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
+    (hadj_tgt : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs) (z : Plane),
+      z ∈ edgeBandMid (β.segSrc c) (β.segTgt c) α →
+      Metric.infDist z (β.segCarrier c) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False)
+    (hadj_src : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs) (z : Plane),
+      z ∈ edgeBandMid (β.segSrc ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) α →
+      Metric.infDist z (β.segCarrier c) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False)
+    (hτ : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
+    (hδin : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segSrc c - β.segTgt c)|
+          * (|(β.segSrc c).1 - (β.segTgt c).1| + |(β.segSrc c).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)|
+          * (α * dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c)))
+    (hδout : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segSrc c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)|
+          * (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segTgt c).1|
+              + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
+          * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)))
+    (hballs : ∀ p q : Fin (β.numSegs + 1), p ≠ q →
+      Disjoint (Metric.ball (β.verts p) (ρ p)) (Metric.ball (β.verts q) (ρ q)))
+    (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
+    (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      ρ (Fin.last β.numSegs) + δ₀
+        ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
+    Disjoint (collarPlus β R S δ₀ α ρ) (collarMinus β R S δ₀ α ρ) := by
+  have h0last : (0 : Fin (β.numSegs + 1)) ≠ Fin.last β.numSegs := by
+    intro h; have h2 := congrArg Fin.val h
+    simp [Fin.val_last] at h2; have := β.numSegs_pos; omega
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  have hP := hzp.2
+  have hM := hzm.2
+  rcases hP with ((hp | hp) | hp) | hp
+  · obtain ⟨i, hpi⟩ := Set.mem_iUnion.mp hp
+    rcases hM with ((hm | hm) | hm) | hm
+    · obtain ⟨k, hmk⟩ := Set.mem_iUnion.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_bandStripPlus_bandStripMinus_all β hδ₀sep hsep hadj_tgt hadj_src i k) hpi hmk
+    · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_bandStripPlus_sectorMinus_all β ρ hα hδ₀sep hsep hρsep hτ hδin hδout i k hk1)
+        hpi hmk
+    · exact Set.disjoint_left.mp
+        (disjoint_endCapSrcMinus_bandStripPlus_all β ρ hbudsrc i).symm hpi hm
+    · exact Set.disjoint_left.mp
+        (disjoint_endCapTgtMinus_bandStripPlus_all β ρ hbudtgt i).symm hpi hm
+  · obtain ⟨j, hj1, hpj⟩ := Set.mem_iUnion₂.mp hp
+    rcases hM with ((hm | hm) | hm) | hm
+    · obtain ⟨k, hmk⟩ := Set.mem_iUnion.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_sectorPlus_bandStripMinus_all β ρ hα hδ₀sep hsep hρsep hτ hδin hδout k j hj1)
+        hpj hmk
+    · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_sectorPlus_sectorMinus_all β ρ hballs j k hj1 hk1) hpj hmk
+    · exact Set.disjoint_left.mp
+        (disjoint_sectorPlus_endCapSrcMinus_all β ρ hballs j hj1) hpj hm
+    · exact Set.disjoint_left.mp
+        (disjoint_sectorPlus_endCapTgtMinus_all β ρ hballs j hj1) hpj hm
+  · rcases hM with ((hm | hm) | hm) | hm
+    · obtain ⟨k, hmk⟩ := Set.mem_iUnion.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_endCapSrcPlus_bandStripMinus_all β ρ hbudsrc k) hp hmk
+    · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_endCapSrcPlus_sectorMinus_all β ρ hballs k hk1) hp hmk
+    · exact Set.disjoint_left.mp (disjoint_endCapSrcPlus_endCapSrcMinus β ρ) hp hm
+    · exact Set.disjoint_left.mp
+        (disjoint_endCapSrc_endCapTgt β ρ (hballs 0 (Fin.last β.numSegs) h0last)) hp hm
+  · rcases hM with ((hm | hm) | hm) | hm
+    · obtain ⟨k, hmk⟩ := Set.mem_iUnion.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_endCapTgtPlus_bandStripMinus_all β ρ hbudtgt k) hp hmk
+    · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
+      exact Set.disjoint_left.mp
+        (disjoint_endCapTgtPlus_sectorMinus_all β ρ hballs k hk1) hp hmk
+    · exact Set.disjoint_left.mp
+        (disjoint_endCapSrcMinus_endCapTgtPlus β ρ (hballs 0 (Fin.last β.numSegs) h0last)).symm
+        hp hm
+    · exact Set.disjoint_left.mp (disjoint_endCapTgtPlus_endCapTgtMinus β ρ) hp hm
+
 end CrossingLemma.PlaneArcSeparation

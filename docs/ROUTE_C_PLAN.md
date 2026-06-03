@@ -634,11 +634,28 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `disjoint_stripSupport_vertexBall_nonincident` (non-incident band↔sector via
    non-adjacent sep).  End caps (sign/ball): `disjoint_endCap*Plus_endCap*Minus`,
    `disjoint_endCap*±_bandStrip∓_self` (same-edge sign), `disjoint_endCapSrc*_endCapTgt*`
-   (ball budget).  STILL TODO in P3: end-cap ↔ non-incident band (endpoint-to-edge
-   separation budget: `verts 0 / verts last ∉ segCarrier i` for non-incident `i`, a min
-   over edges), then the master `disjoint_collarPlus_collarMinus` assembling every case
-   under one `δ₀/α/ρ`, and the concrete `δ₀` existence (min of all angle-free thresholds
-   + non-adjacent-sep + corner-confine + ball/endpoint budgets).
+   (ball budget).
+
+   **P3 COMPLETE (2026-06-03).**  Added the last cases and the master.  End-cap ↔
+   non-incident band: `disjoint_vertexBall_stripSupport_of_budget` (infDist 1-Lipschitz,
+   budget `ρ_end + δ₀ ≤ infDist v (segCarrier i)`) ⇒ `disjoint_endCap*±_bandStrip∓_nonincident`.
+   End-cap ↔ sector: ball separation (`disjoint_endCap*Plus_sectorMinus`,
+   `disjoint_sectorPlus_endCap*Minus`).  Mirror corner lemma `not_mem_adjacent_band_strip_src`
+   (outgoing arm, shared vertex = edge `(i+1)`'s source, `footParam 0`) needed because
+   band⁺↔band⁻ adjacency occurs in both orderings.  Then per-cell **all-indices** lemmas,
+   each doing its index case analysis once: `disjoint_bandStripPlus_bandStripMinus_all`
+   (trichotomy: same/adjacent×2/non-adjacent), `disjoint_bandStripPlus_sectorMinus_all` &
+   `disjoint_sectorPlus_bandStripMinus_all` (incident incoming/outgoing + non-incident),
+   `disjoint_sectorPlus_sectorMinus_all`, the cap↔band & cap↔sector `_all` wrappers.
+   **MASTER `disjoint_collarPlus_collarMinus`**: shares the ground `taperedTube\carrier`,
+   so reduces to the union-parts; `rcases` both 4-piece unions, dispatch the 4×4 grid.
+   Admissibility bundle: `hα`, `hsep`/`hδ₀sep`/`hρsep` (non-adjacent sep at `δsep` ≥ `δ₀`
+   and all disk radii), `hadj_tgt`/`hadj_src`, `hτ`/`hδin`/`hδout`, `hballs`,
+   `hbudsrc`/`hbudtgt`.  Verified axiom-clean via `#print axioms`.
+
+   **STILL TODO in (iv):** (3) concrete `δ₀/α/ρ` EXISTENCE discharging the master's
+   admissibility bundle (min over corners of angle-free thresholds + non-adjacent-sep +
+   corner-confine(r=α/L) + ball/endpoint budgets); (4) P2 union `=W`; (5) P4 nonempty.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
