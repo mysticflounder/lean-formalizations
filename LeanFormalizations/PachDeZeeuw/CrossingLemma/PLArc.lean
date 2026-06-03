@@ -870,6 +870,143 @@ theorem param_mem_segCarrier (t : Set.Icc (0 : ℝ) 1) :
   rw [segCarrier, segSrc, segTgt, hcollapse]
   exact ⟨1 - β.locCoord t, β.locCoord t, by linarith, h0, by ring, rfl⟩
 
+/-- The segment index is monotone in the parameter. -/
+theorem idx_mono {t t' : Set.Icc (0 : ℝ) 1} (h : (t : ℝ) ≤ (t' : ℝ)) :
+    (β.idx t : ℕ) ≤ (β.idx t' : ℕ) := by
+  unfold idx
+  simp only [Fin.val_mk]
+  have hnpos : (0 : ℝ) ≤ (β.numSegs : ℝ) := by positivity
+  have hflle : ⌊(β.numSegs : ℝ) * (t : ℝ)⌋ ≤ ⌊(β.numSegs : ℝ) * (t' : ℝ)⌋ :=
+    Int.floor_le_floor (by nlinarith [h, hnpos])
+  exact min_le_min (Int.toNat_le_toNat hflle) (le_refl _)
+
+/-- **Injectivity of the PL parametrisation.**  The three-case argument:
+same segment (affine injectivity), adjacent segments (`consecutive_meet` pins both
+to the shared vertex), non-adjacent segments (`nonadjacent_disjoint` contradiction). -/
+theorem injective_param : Function.Injective β.param := by
+  -- reduce to the case `(t:ℝ) ≤ (t':ℝ)` and prove `t = t'`
+  have key : ∀ t t' : Set.Icc (0 : ℝ) 1, (t : ℝ) ≤ (t' : ℝ) →
+      β.param t = β.param t' → t = t' := by
+    intro t t' hle hpar
+    set i := β.idx t with hi
+    set j := β.idx t' with hj
+    have hij : (i : ℕ) ≤ (j : ℕ) := by rw [hi, hj]; exact β.idx_mono hle
+    -- the local coordinates
+    obtain ⟨hs0, hs1⟩ := β.locCoord_mem t
+    obtain ⟨hs0', hs1'⟩ := β.locCoord_mem t'
+    set s := β.locCoord t with hsdef
+    set s' := β.locCoord t' with hsdef'
+    -- collapse both points onto their segments
+    have hpt : β.param t
+        = (1 - s) • β.verts (Fin.castSucc i) + s • β.verts (Fin.succ i) := by
+      rw [hsdef]; unfold param
+      exact β.paramRaw_collapse_of (t : ℝ) i s (by rw [hi]; exact β.nx_eq_idx_add_locCoord t)
+        hs0 hs1
+    have hpt' : β.param t'
+        = (1 - s') • β.verts (Fin.castSucc j) + s' • β.verts (Fin.succ j) := by
+      rw [hsdef']; unfold param
+      exact β.paramRaw_collapse_of (t' : ℝ) j s' (by rw [hj]; exact β.nx_eq_idx_add_locCoord t')
+        hs0' hs1'
+    -- membership on respective carriers
+    have hmemi : β.param t ∈ β.segCarrier i := hi ▸ β.param_mem_segCarrier t
+    have hmemj : β.param t' ∈ β.segCarrier j := hj ▸ β.param_mem_segCarrier t'
+    -- a tool: recover t from `n*t = i + s`
+    have hrecover : ∀ (u : Set.Icc (0 : ℝ) 1) (k : Fin β.numSegs) (a : ℝ),
+        (β.numSegs : ℝ) * (u : ℝ) = (k : ℝ) + a → (u : ℝ) = ((k : ℝ) + a) / (β.numSegs : ℝ) := by
+      intro u k a hu
+      have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+        have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+      field_simp at hu ⊢; linarith [hu]
+    -- side vertices distinct
+    rcases Nat.lt_or_ge ((i : ℕ) + 1) (j : ℕ) with hgap | hadjle
+    · -- non-adjacent: contradiction from disjointness
+      exfalso
+      have hdisj := β.nonadjacent_disjoint i j hgap
+      rw [Set.disjoint_left] at hdisj
+      exact hdisj hmemi (hpar ▸ hmemj)
+    · -- (i+1 ≥ j) and i ≤ j: either j = i or j = i+1
+      rcases Nat.lt_or_ge (i : ℕ) (j : ℕ) with hlt' | hge'
+      · -- j = i + 1 (adjacent)
+        have hjeq : (j : ℕ) = (i : ℕ) + 1 := by omega
+        -- the common point is in the intersection, hence = verts (succ i)
+        have hcm : (i : ℕ) + 1 < β.numSegs := by have := j.isLt; omega
+        have hjsucc : β.verts (Fin.castSucc j) = β.verts (Fin.succ i) := by
+          congr 1; apply Fin.ext; simp [Fin.castSucc, Fin.castAdd, Fin.succ, hjeq]
+        have hjsucc2 : β.verts (Fin.succ j) = β.verts (Fin.succ ⟨(i : ℕ) + 1, hcm⟩) := by
+          congr 1; apply Fin.ext; simp [Fin.succ, hjeq]
+        -- common point lies in the consecutive_meet intersection
+        have hcommon : β.param t ∈
+            segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i))
+              ∩ segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hcm⟩)) := by
+          constructor
+          · have := hmemi; rwa [segCarrier, segSrc, segTgt] at this
+          · have := hpar ▸ hmemj
+            rw [segCarrier, segSrc, segTgt, hjsucc, hjsucc2] at this
+            exact this
+        have heqv : β.param t = β.verts (Fin.succ i) :=
+          β.consecutive_meet i hcm hcommon
+        -- on segment i: param t = right endpoint ⇒ s = 1 ⇒ n*t = i+1
+        have hAB : β.verts (Fin.castSucc i) ≠ β.verts (Fin.succ i) := by
+          intro hcon; exact absurd (β.distinct hcon) (by
+            apply Fin.ne_of_val_ne; simp [Fin.castSucc, Fin.castAdd, Fin.succ])
+        have hs_one : s = 1 := by
+          apply affine_eq_right hAB
+          rw [← hpt, heqv]
+        -- on segment j: param t' = left endpoint ⇒ s' = 0 ⇒ n*t' = j
+        have hAB' : β.verts (Fin.castSucc j) ≠ β.verts (Fin.succ j) := by
+          intro hcon; exact absurd (β.distinct hcon) (by
+            apply Fin.ne_of_val_ne; simp [Fin.castSucc, Fin.castAdd, Fin.succ])
+        have hs'_zero : s' = 0 := by
+          apply affine_eq_left hAB'
+          rw [← hpt', ← hpar, heqv, hjsucc]
+        -- now both n*t and n*t' equal i+1
+        have hnt : (β.numSegs : ℝ) * (t : ℝ) = (i : ℝ) + 1 := by
+          rw [hi]; have := β.nx_eq_idx_add_locCoord t; rw [← hsdef, hs_one] at this; linarith
+        have hnt' : (β.numSegs : ℝ) * (t' : ℝ) = (i : ℝ) + 1 := by
+          have hjr : (j : ℝ) = (i : ℝ) + 1 := by exact_mod_cast hjeq
+          have h := β.nx_eq_idx_add_locCoord t'
+          rw [← hj, ← hsdef', hs'_zero, hjr] at h
+          rw [h]; ring
+        apply Subtype.ext
+        have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+          have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+        have : (β.numSegs : ℝ) * (t : ℝ) = (β.numSegs : ℝ) * (t' : ℝ) := by rw [hnt, hnt']
+        exact mul_left_cancel₀ (ne_of_gt hnpos) this
+      · -- j = i (same segment)
+        have hjeqi : (j : ℕ) = (i : ℕ) := le_antisymm hge' hij
+        have hji : j = i := Fin.ext hjeqi
+        -- rewrite the `t'` collapse onto segment `i`
+        rw [hji] at hpt'
+        -- both points on segment i; affine injectivity gives s = s'
+        have hAB : β.verts (Fin.castSucc i) ≠ β.verts (Fin.succ i) := by
+          intro hcon; exact absurd (β.distinct hcon) (by
+            apply Fin.ne_of_val_ne; simp [Fin.castSucc, Fin.castAdd, Fin.succ])
+        have hss' : s = s' := by
+          apply affine_inj hAB
+          rw [← hpt, ← hpt', hpar]
+        apply Subtype.ext
+        have hnt := β.nx_eq_idx_add_locCoord t
+        have hnt' := β.nx_eq_idx_add_locCoord t'
+        rw [← hi, ← hsdef] at hnt
+        rw [← hj, ← hsdef'] at hnt'
+        have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+          have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+        have hjr : (j : ℝ) = (i : ℝ) := by exact_mod_cast hjeqi
+        have heq : (β.numSegs : ℝ) * (t : ℝ) = (β.numSegs : ℝ) * (t' : ℝ) := by
+          rw [hnt, hnt', hjr, hss']
+        exact mul_left_cancel₀ (ne_of_gt hnpos) heq
+  -- dispatch the WLOG
+  intro t t' hpar
+  rcases le_or_gt (t : ℝ) (t' : ℝ) with h | h
+  · exact key t t' h hpar
+  · exact (key t' t (le_of_lt h) hpar.symm).symm
+
+/-- The polygonal arc as a `SimpleArc Plane`. -/
+noncomputable def toSimpleArc : SimpleArc Plane where
+  toFun := β.param
+  continuous_toFun := β.continuous_param
+  injective_toFun := β.injective_param
+
 end PolyArc
 
 end CrossingLemma.PlaneArcSeparation
