@@ -3926,6 +3926,248 @@ theorem exists_pos_tgt_edge_sep (β : PolyArc) :
     simp only [hf]; rw [if_neg hi]
   rwa [hfi] at hle
 
+/-! ### P4 (nonempty) — a scaled-normal witness off the first-edge midpoint.
+
+Each collar side contains the midpoint of edge `0` pushed a tiny `ε` along the edge
+normal: the push keeps the foot parameter at `1/2` (so the point is in the first
+band, given `α < 1/2`), gives `sideForm` the chosen sign, and — with `ε·‖edge‖₁`
+below the tube cap, the region clearance, and the separation to every other edge —
+lands the point in `taperedTube ∖ carrier` close to edge `0`. -/
+
+/-- Midpoint of the first edge (foot parameter `1/2`, on the first segment). -/
+noncomputable def firstMid (β : PolyArc) : Plane :=
+  (((β.segSrc β.firstSeg).1 + (β.segTgt β.firstSeg).1) / 2,
+   ((β.segSrc β.firstSeg).2 + (β.segTgt β.firstSeg).2) / 2)
+
+theorem firstMid_mem_segCarrier (β : PolyArc) :
+    firstMid β ∈ β.segCarrier β.firstSeg := by
+  rw [PolyArc.segCarrier]
+  refine ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, ?_⟩
+  refine Prod.ext ?_ ?_ <;>
+    simp only [firstMid, Prod.smul_fst, Prod.smul_snd, smul_eq_mul, Prod.fst_add,
+      Prod.snd_add] <;> ring
+
+theorem firstMid_footParam (β : PolyArc) :
+    footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) (firstMid β) = 1 / 2 := by
+  have hP : dotp (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
+      (β.segTgt β.firstSeg - β.segSrc β.firstSeg) ≠ 0 :=
+    (dotp_self_pos (β.segTgt_ne_segSrc β.firstSeg)).ne'
+  rw [footParam]
+  have hnum : dotp (firstMid β - β.segSrc β.firstSeg)
+        (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
+      = dotp (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
+          (β.segTgt β.firstSeg - β.segSrc β.firstSeg) / 2 := by
+    simp only [dotp, firstMid, Prod.fst_sub, Prod.snd_sub]; ring
+  rw [hnum]; field_simp
+
+theorem firstMid_notMem_segCarrier (β : PolyArc) {k : Fin β.numSegs} (hk : k ≠ β.firstSeg) :
+    firstMid β ∉ β.segCarrier k := by
+  intro hmem
+  have hf0 : firstMid β ∈ segment ℝ (β.verts (Fin.castSucc β.firstSeg))
+      (β.verts (Fin.succ β.firstSeg)) := by
+    have h := firstMid_mem_segCarrier β
+    rwa [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt] at h
+  have hfk : firstMid β ∈ segment ℝ (β.verts (Fin.castSucc k)) (β.verts (Fin.succ k)) := by
+    rwa [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt] at hmem
+  have hk0 : (k : ℕ) ≠ 0 := by
+    intro h; exact hk (Fin.ext (by simp [PolyArc.firstSeg, h]))
+  rcases Nat.lt_or_ge 1 (k : ℕ) with hgt | hle
+  · have hadj : (β.firstSeg : Fin β.numSegs).val + 1 < (k : ℕ) := by
+      simp only [PolyArc.firstSeg]; omega
+    exact (Set.disjoint_left.mp (β.nonadjacent_disjoint β.firstSeg k hadj)) hf0 hfk
+  · have hk1 : (k : ℕ) = 1 := by omega
+    have hlt : (β.firstSeg : Fin β.numSegs).val + 1 < β.numSegs := by
+      simp only [PolyArc.firstSeg]; have := k.isLt; omega
+    have hkeq : k = ⟨(β.firstSeg : Fin β.numSegs).val + 1, hlt⟩ :=
+      Fin.ext (by simp only [PolyArc.firstSeg, Fin.val_mk]; omega)
+    have hcast : (Fin.castSucc ⟨(β.firstSeg : Fin β.numSegs).val + 1, hlt⟩ : Fin (β.numSegs + 1))
+        = Fin.succ β.firstSeg := Fin.ext (by simp [Fin.val_succ])
+    have hfk' : firstMid β ∈ segment ℝ (β.verts (Fin.succ β.firstSeg))
+        (β.verts (Fin.succ ⟨(β.firstSeg : Fin β.numSegs).val + 1, hlt⟩)) := by
+      rw [hkeq] at hfk; rwa [hcast] at hfk
+    have hsingle : firstMid β ∈ ({β.verts (Fin.succ β.firstSeg)} : Set Plane) :=
+      β.consecutive_meet β.firstSeg hlt ⟨hf0, hfk'⟩
+    rw [Set.mem_singleton_iff] at hsingle
+    have hfoot1 : footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) (firstMid β) = 1 := by
+      rw [hsingle]
+      exact footParam_tgt (β.segTgt_ne_segSrc β.firstSeg)
+    have h12 := firstMid_footParam β
+    rw [hfoot1] at h12; norm_num at h12
+
+/-- A single positive radius `B` below which a witness within `B` of `firstMid β` is
+inside the tube cap, the region clearance, and the separation to every other edge. -/
+theorem exists_firstMid_radius (β : PolyArc) (R : Set Plane) {δ₀ : ℝ} (hδ₀ : 0 < δ₀)
+    (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
+    ∃ B : ℝ, 0 < B ∧ B ≤ δ₀ ∧ B ≤ Metric.infDist (firstMid β) Rᶜ / 2
+      ∧ ∀ k : Fin β.numSegs, k ≠ β.firstSeg →
+          B ≤ Metric.infDist (firstMid β) (β.segCarrier k) := by
+  classical
+  set f : Fin β.numSegs → ℝ :=
+    fun k => if k = β.firstSeg then 1 else Metric.infDist (firstMid β) (β.segCarrier k) with hf
+  have hfpos : ∀ k, 0 < f k := by
+    intro k; simp only [hf]; split
+    · exact one_pos
+    · rename_i h
+      exact ((β.segCarrier_isCompact k).isClosed.notMem_iff_infDist_pos
+        ⟨β.segSrc k, left_mem_segment ℝ _ _⟩).mp (firstMid_notMem_segCarrier β h)
+  have hne : (Finset.univ : Finset (Fin β.numSegs)).Nonempty := ⟨β.firstSeg, Finset.mem_univ _⟩
+  set σ := Finset.univ.inf' hne f with hσ
+  have hσpos : 0 < σ := by rw [hσ, Finset.lt_inf'_iff]; exact fun k _ => hfpos k
+  refine ⟨min δ₀ (min (Metric.infDist (firstMid β) Rᶜ / 2) σ),
+    lt_min hδ₀ (lt_min (by linarith) hσpos), min_le_left _ _,
+    le_trans (min_le_right _ _) (min_le_left _ _), fun k hk => ?_⟩
+  have hle : σ ≤ f k := Finset.inf'_le f (Finset.mem_univ k)
+  have hfk : f k = Metric.infDist (firstMid β) (β.segCarrier k) := by
+    simp only [hf]; rw [if_neg hk]
+  rw [hfk] at hle
+  exact le_trans (le_trans (min_le_right _ _) (min_le_right _ _)) hle
+
+/-- The coordinate-free core: a point close to `firstMid β` (within the tube cap, the
+region clearance, and every other edge's separation) and off the first edge's line is
+in the ground set `taperedTube ∖ carrier` and is `< δ₀` from the first segment. -/
+theorem firstMid_push_in_ground (β : PolyArc) (R S : Set Plane) {δ₀ : ℝ}
+    (hmS : firstMid β ∈ S) {w : Plane}
+    (htube : dist w (firstMid β) < δ₀)
+    (hR : dist w (firstMid β) < Metric.infDist (firstMid β) Rᶜ / 2)
+    (hsep : ∀ k : Fin β.numSegs, k ≠ β.firstSeg →
+      dist w (firstMid β) < Metric.infDist (firstMid β) (β.segCarrier k))
+    (hsf0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) w ≠ 0) :
+    w ∈ taperedTube R S δ₀ \ β.carrier
+      ∧ Metric.infDist w (β.segCarrier β.firstSeg) < δ₀ := by
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [taperedTube]
+    exact Set.mem_iUnion₂.mpr ⟨firstMid β, hmS, Metric.mem_ball.mpr (lt_min htube hR)⟩
+  · rw [PolyArc.carrier, Set.mem_iUnion]
+    rintro ⟨k, hk⟩
+    by_cases hkf : k = β.firstSeg
+    · subst hkf
+      rw [PolyArc.segCarrier] at hk
+      exact hsf0 (sideForm_eq_zero_of_mem_segment _ _ hk)
+    · have htri : Metric.infDist (firstMid β) (β.segCarrier k)
+          ≤ Metric.infDist w (β.segCarrier k) + dist (firstMid β) w :=
+        Metric.infDist_le_infDist_add_dist
+      rw [Metric.infDist_zero_of_mem hk, zero_add, dist_comm] at htri
+      exact absurd (hsep k hkf) (not_lt.mpr htri)
+  · exact lt_of_le_of_lt (Metric.infDist_le_dist_of_mem (firstMid_mem_segCarrier β)) htube
+
+/-- **P4⁺ (nonempty).**  Needs the first-edge midpoint inside the spine `S` and
+strictly interior to `R`, and `α < 1/2`. -/
+theorem collarPlus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα2 : α < 1 / 2)
+    (hmS : firstMid β ∈ S) (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
+    (collarPlus β R S δ₀ α ρ).Nonempty := by
+  obtain ⟨B, hBpos, hBδ, hBR, hBseg⟩ := exists_firstMid_radius β R hδ₀ hmR
+  set s := β.segSrc β.firstSeg with hs
+  set t := β.segTgt β.firstSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
+  set L := |t.1 - s.1| + |t.2 - s.2| with hLdef
+  have hLpos : 0 < L := by
+    rw [hLdef]; by_contra h; push_neg at h
+    have ha1 := abs_nonneg (t.1 - s.1); have ha2 := abs_nonneg (t.2 - s.2)
+    exact hts (Prod.ext (by have := abs_eq_zero.mp (by linarith : |t.1 - s.1| = 0); linarith)
+      (by have := abs_eq_zero.mp (by linarith : |t.2 - s.2| = 0); linarith))
+  have hLp1 : (0 : ℝ) < L + 1 := by linarith
+  set ε := B / (L + 1) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have hεL : ε * L < B := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ hLp1]; nlinarith
+  set w : Plane := ((s.1 + t.1) / 2 - ε * (t.2 - s.2), (s.2 + t.2) / 2 + ε * (t.1 - s.1)) with hw
+  have e1 : w.1 = (s.1 + t.1) / 2 - ε * (t.2 - s.2) := by rw [hw]
+  have e2 : w.2 = (s.2 + t.2) / 2 + ε * (t.1 - s.1) := by rw [hw]
+  have hm1 : (firstMid β).1 = (s.1 + t.1) / 2 := by rw [hs, ht]; rfl
+  have hm2 : (firstMid β).2 = (s.2 + t.2) / 2 := by rw [hs, ht]; rfl
+  have hdwm : dist w (firstMid β) ≤ ε * L := by
+    rw [Prod.dist_eq, hm1, hm2, Real.dist_eq, Real.dist_eq, e1, e2,
+      show (s.1 + t.1) / 2 - ε * (t.2 - s.2) - (s.1 + t.1) / 2 = -(ε * (t.2 - s.2)) from by ring,
+      show (s.2 + t.2) / 2 + ε * (t.1 - s.1) - (s.2 + t.2) / 2 = ε * (t.1 - s.1) from by ring]
+    simp only [abs_neg, abs_mul, abs_of_pos hεpos]
+    rw [hLdef]
+    apply max_le <;>
+      nlinarith [mul_nonneg hεpos.le (abs_nonneg (t.1 - s.1)),
+        mul_nonneg hεpos.le (abs_nonneg (t.2 - s.2))]
+  have hdwmB : dist w (firstMid β) < B := lt_of_le_of_lt hdwm hεL
+  have hsfw : sideForm s t w = ε * dotp (t - s) (t - s) := by
+    simp only [sideForm, dotp, e1, e2, Prod.fst_sub, Prod.snd_sub]; ring
+  have hsfpos : 0 < sideForm s t w := by rw [hsfw]; exact mul_pos hεpos hP
+  have hfoot : footParam s t w = 1 / 2 := by
+    rw [footParam]
+    have hnum : dotp (w - s) (t - s) = dotp (t - s) (t - s) / 2 := by
+      simp only [dotp, e1, e2, Prod.fst_sub, Prod.snd_sub]; ring
+    rw [hnum]; field_simp
+  obtain ⟨hground, hinf⟩ := firstMid_push_in_ground β R S hmS
+    (lt_of_lt_of_le hdwmB hBδ) (lt_of_lt_of_le hdwmB hBR)
+    (fun k hk => lt_of_lt_of_le hdwmB (hBseg k hk)) hsfpos.ne'
+  refine ⟨w, hground, Set.mem_union_left _
+    (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩)))⟩
+  rw [bandStripPlus, edgePlusMid]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [edgeBandMid, Set.mem_setOf_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
+    constructor <;> linarith
+  · show 0 < sideForm s t w
+    exact hsfpos
+  · show Metric.infDist w (β.segCarrier β.firstSeg) < δ₀
+    exact hinf
+
+/-- **P4⁻ (nonempty).** -/
+theorem collarMinus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα2 : α < 1 / 2)
+    (hmS : firstMid β ∈ S) (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
+    (collarMinus β R S δ₀ α ρ).Nonempty := by
+  obtain ⟨B, hBpos, hBδ, hBR, hBseg⟩ := exists_firstMid_radius β R hδ₀ hmR
+  set s := β.segSrc β.firstSeg with hs
+  set t := β.segTgt β.firstSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
+  set L := |t.1 - s.1| + |t.2 - s.2| with hLdef
+  have hLpos : 0 < L := by
+    rw [hLdef]; by_contra h; push_neg at h
+    have ha1 := abs_nonneg (t.1 - s.1); have ha2 := abs_nonneg (t.2 - s.2)
+    exact hts (Prod.ext (by have := abs_eq_zero.mp (by linarith : |t.1 - s.1| = 0); linarith)
+      (by have := abs_eq_zero.mp (by linarith : |t.2 - s.2| = 0); linarith))
+  have hLp1 : (0 : ℝ) < L + 1 := by linarith
+  set ε := B / (L + 1) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have hεL : ε * L < B := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ hLp1]; nlinarith
+  set w : Plane := ((s.1 + t.1) / 2 + ε * (t.2 - s.2), (s.2 + t.2) / 2 - ε * (t.1 - s.1)) with hw
+  have e1 : w.1 = (s.1 + t.1) / 2 + ε * (t.2 - s.2) := by rw [hw]
+  have e2 : w.2 = (s.2 + t.2) / 2 - ε * (t.1 - s.1) := by rw [hw]
+  have hm1 : (firstMid β).1 = (s.1 + t.1) / 2 := by rw [hs, ht]; rfl
+  have hm2 : (firstMid β).2 = (s.2 + t.2) / 2 := by rw [hs, ht]; rfl
+  have hdwm : dist w (firstMid β) ≤ ε * L := by
+    rw [Prod.dist_eq, hm1, hm2, Real.dist_eq, Real.dist_eq, e1, e2,
+      show (s.1 + t.1) / 2 + ε * (t.2 - s.2) - (s.1 + t.1) / 2 = ε * (t.2 - s.2) from by ring,
+      show (s.2 + t.2) / 2 - ε * (t.1 - s.1) - (s.2 + t.2) / 2 = -(ε * (t.1 - s.1)) from by ring]
+    simp only [abs_neg, abs_mul, abs_of_pos hεpos]
+    rw [hLdef]
+    apply max_le <;>
+      nlinarith [mul_nonneg hεpos.le (abs_nonneg (t.1 - s.1)),
+        mul_nonneg hεpos.le (abs_nonneg (t.2 - s.2))]
+  have hdwmB : dist w (firstMid β) < B := lt_of_le_of_lt hdwm hεL
+  have hsfw : sideForm s t w = -(ε * dotp (t - s) (t - s)) := by
+    simp only [sideForm, dotp, e1, e2, Prod.fst_sub, Prod.snd_sub]; ring
+  have hsfneg : sideForm s t w < 0 := by
+    rw [hsfw]; have := mul_pos hεpos hP; linarith
+  have hfoot : footParam s t w = 1 / 2 := by
+    rw [footParam]
+    have hnum : dotp (w - s) (t - s) = dotp (t - s) (t - s) / 2 := by
+      simp only [dotp, e1, e2, Prod.fst_sub, Prod.snd_sub]; ring
+    rw [hnum]; field_simp
+  obtain ⟨hground, hinf⟩ := firstMid_push_in_ground β R S hmS
+    (lt_of_lt_of_le hdwmB hBδ) (lt_of_lt_of_le hdwmB hBR)
+    (fun k hk => lt_of_lt_of_le hdwmB (hBseg k hk)) (ne_of_lt hsfneg)
+  refine ⟨w, hground, Set.mem_union_left _
+    (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩)))⟩
+  rw [bandStripMinus, edgeMinusMid]
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [edgeBandMid, Set.mem_setOf_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
+    constructor <;> linarith
+  · show sideForm s t w < 0
+    exact hsfneg
+  · show Metric.infDist w (β.segCarrier β.firstSeg) < δ₀
+    exact hinf
+
 /-! #### P3 existence — the per-corner threshold.
 
 For each interior vertex (corner `c`), a single positive `δ` below which the corner's

@@ -681,8 +681,28 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    on the open-segment locus (`edgeBand_inter_sideForm_zero_eq_openSegment`), sign picks
    the strip.  All `#print axioms`-clean `[propext, Classical.choice, Quot.sound]`.
 
-   **STILL TODO in (iv):** (5) P4 nonempty (scaled-edge witness off edge-0 midpoint,
-   pushed perpendicular by `< δ₀`, in `bandStrip±ᶠⁱʳˢᵗ`).  Then G1/G3/G4/Z1.
+   **P4 COMPLETE (2026-06-03), step (5) DONE — COLLAR FINISHED.**  `collarPlus_nonempty`
+   / `collarMinus_nonempty`: each side contains the first-edge midpoint `firstMid β`
+   (foot `1/2`) pushed `ε` along the edge normal (`±` chooses the side).  Needs
+   `firstMid β ∈ S`, `0 < infDist (firstMid β) Rᶜ` (midpoint interior to `R`), `α < 1/2`.
+   Witness validity is coordinate-free in `firstMid_push_in_ground` (point within the
+   tube cap + region clearance + every-other-edge separation, off edge-0's line ⇒ in
+   `taperedTube ∖ carrier` and `< δ₀` from edge 0); the push radius `B` comes from
+   `exists_firstMid_radius` (`inf'` over edges, guarded at `firstSeg`), positivity from
+   `firstMid_notMem_segCarrier` (the midpoint lies on no other edge: gap≥2 ⇒
+   `nonadjacent_disjoint`; `k=1` ⇒ `consecutive_meet` forces `= verts 1`, but foot `1/2≠1`).
+   The `ε·‖edge‖₁ < B` bound is sup-norm-safe (`Prod.dist_eq` + `max_le`).  All
+   `#print axioms`-clean `[propext, Classical.choice, Quot.sound]`, 8477 jobs.
+
+   **COLLAR (task iv) COMPLETE.**  All four `IsTwoSidedPartition`-style properties of the
+   two collar charts are proved with concrete parameters (modulo the `hturn` no-straight-
+   corners non-degeneracy + the per-instantiation hypotheses the assembly discharges):
+   P1 `isOpen_collar{Plus,Minus}`, P2 `union_collarPlus_collarMinus`, P3
+   `disjoint_collarPlus_collarMinus`/`exists_collar_disjoint`, P4 `collar{Plus,Minus}_nonempty`.
+   NOTE: the collar charts are *not* connected — they feed the covering-map G-nodes
+   (G1/G3/G4/Z1), which produce the connected `U,V` for `IsTwoSidedPartition`.
+   **NEXT: G1/G3/G4/Z1** (two-chart cover ⇒ covering map; lift `id`; assemble
+   `SplitsIntoTwo`; discharge the sorry at `PlaneArcSeparation.lean:377`).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
