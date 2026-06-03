@@ -1460,4 +1460,63 @@ theorem edgeMinus_nonempty {s t : Plane} (h : t ≠ s) : (edgeMinus s t).Nonempt
       simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub]; ring
     rw [hsf]; linarith [hP]
 
+/-- **Collinearity ⇒ affine displacement.**  If `z` lies on the line through `s,t`
+(`sideForm s t z = 0`) and `t ≠ s`, then `z − s` is exactly `footParam`-times the
+edge vector: `z − s = footParam s t z • (t − s)`.  Pure 2-D linear algebra: the
+displacement is both parallel (cross product `= sideForm = 0`) and has the stated
+tangential component, and a nonzero vector pins both. -/
+theorem sub_eq_footParam_smul_of_sideForm_zero {s t z : Plane} (h : t ≠ s)
+    (hz : sideForm s t z = 0) :
+    z - s = footParam s t z • (t - s) := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  have hPne : dotp (t - s) (t - s) ≠ 0 := ne_of_gt hP
+  have hfP : footParam s t z * dotp (t - s) (t - s) = dotp (z - s) (t - s) := by
+    rw [footParam]; field_simp
+  refine Prod.ext ?_ ?_
+  · refine mul_right_cancel₀ hPne ?_
+    rw [Prod.smul_fst, smul_eq_mul]
+    have e : footParam s t z * (t - s).1 * dotp (t - s) (t - s)
+           = (t - s).1 * dotp (z - s) (t - s) := by
+      rw [mul_comm (footParam s t z) ((t - s).1), mul_assoc, hfP]
+    rw [e]
+    simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub] at hz ⊢
+    linear_combination (-(t.2 - s.2)) * hz
+  · refine mul_right_cancel₀ hPne ?_
+    rw [Prod.smul_snd, smul_eq_mul]
+    have e : footParam s t z * (t - s).2 * dotp (t - s) (t - s)
+           = (t - s).2 * dotp (z - s) (t - s) := by
+      rw [mul_comm (footParam s t z) ((t - s).2), mul_assoc, hfP]
+    rw [e]
+    simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub] at hz ⊢
+    linear_combination (t.1 - s.1) * hz
+
+/-- **The band's zero locus is exactly the open segment.**  Inside the edge band
+(`footParam ∈ (0,1)`) the side-functional vanishes precisely on the open segment
+`(s,t)`.  This is the per-edge analogue of `ball_inter_cornerLocus`: it identifies
+the part of the arc that the band must exclude, so `edgeBand ∖ β = edgePlus ⊔
+edgeMinus` once the band is thin enough to avoid the non-incident segments. -/
+theorem edgeBand_inter_sideForm_zero_eq_openSegment {s t : Plane} (h : t ≠ s) :
+    edgeBand s t ∩ {z | sideForm s t z = 0} = openSegment ℝ s t := by
+  ext z
+  simp only [edgeBand, Set.mem_inter_iff, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hband, hzero⟩
+    have hsub := sub_eq_footParam_smul_of_sideForm_zero h hzero
+    set c := footParam s t z with hc
+    rw [openSegment_eq_image]
+    refine ⟨c, hband, ?_⟩
+    show (1 - c) • s + c • t = z
+    have hz2 : z = s + c • (t - s) := by rw [← hsub]; abel
+    rw [hz2]; module
+  · intro hz
+    obtain ⟨a, b, ha, hb, hab, rfl⟩ := hz
+    have hab' : a = 1 - b := by linarith
+    subst hab'
+    refine ⟨?_, ?_⟩
+    · rw [footParam_affineComb h b]
+      simp only [Set.mem_Ioo]
+      exact ⟨hb, by linarith⟩
+    · simp only [sideForm, Prod.fst_add, Prod.snd_add, Prod.smul_fst, Prod.smul_snd,
+        smul_eq_mul]; ring
+
 end CrossingLemma.PlaneArcSeparation

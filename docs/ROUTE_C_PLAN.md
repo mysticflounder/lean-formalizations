@@ -459,7 +459,12 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `edgePlus`/`edgeMinus` (`isOpen_*`, `disjoint_edgePlus_edgeMinus`,
    `edgePlus_union_edgeMinus : edgePlus ⊔ edgeMinus = edgeBand ∖ {sideForm = 0}`, and
    both `*_nonempty` via the midpoint pushed off by the edge normal, foot `= 1/2`,
-   `sideForm = ±‖t−s‖²`).  The per-vertex sides are the existing L2 corner sectors
+   `sideForm = ±‖t−s‖²`).  Also DONE: the band's zero locus is exactly the open
+   segment — `edgeBand_inter_sideForm_zero_eq_openSegment : edgeBand s t ∩
+   {sideForm = 0} = openSegment ℝ s t` (per-edge analogue of `ball_inter_cornerLocus`,
+   the part of the arc the band must exclude), resting on the collinearity lemma
+   `sub_eq_footParam_smul_of_sideForm_zero : sideForm s t z = 0 → z − s =
+   footParam s t z • (t − s)`.  The per-vertex sides are the existing L2 corner sectors
    (`convexSector`/`reflexSector`).  STILL TODO in (ii): the per-vertex `diskᵥ` (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
