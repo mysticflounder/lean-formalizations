@@ -2088,4 +2088,32 @@ theorem mem_vertexMinus_of_incoming {a v b z : Plane} (hτ : cornerTurn a v b �
   · rw [if_pos hpos, overlap_mem_reflexSector_iff_incoming hG hthin]
     exact mul_neg_of_pos_of_neg hpos hsf
 
+/-! ### Task (iv), C3: the narrowed-band cover (double cutoff) with endpoint pinch
+
+The mid-band variant of the cover.  Run the trichotomy with **disk cutoff `α`** but a
+tighter **band closeness budget `α/2`**: a mid-edge spine point's tube point then lands
+in the *narrowed* band `edgeBandMid (α/2)` (foot in `(α/2, 1−α/2) ⊇ [α,1−α]`), which is
+what the glue (C2) needs.  Near-vertex points go to the vertex disks; at the two arc
+**endpoints** the disk branch additionally carries the **pinch** (`footParam > 0` at the
+source, `< 1` at the target), available because the routing to an endpoint disk happens
+only through the `b<α` (resp. `b>1−α`) branch of the *endpoint-incident* edge, where the
+spine witness `p` is in scope on that edge and the tube taper gives `dist z p <
+infDist p Rᶜ / 2 ≤ dist p (endpoint) / 2`. -/
+
+/-- Mid-band membership from a spine foot in `[α,1−α]` and an `α/2` closeness budget:
+the evaluation point's foot stays in `(α/2, 1−α/2)`, i.e. `z ∈ edgeBandMid s t (α/2)`. -/
+theorem mem_edgeBandMid_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (hα : 0 < α)
+    {p z : Plane} (hp : footParam s t p ∈ Set.Icc α (1 - α))
+    (hclose : (|t.1 - s.1| + |t.2 - s.2|) * dist p z < α / 2 * dotp (t - s) (t - s)) :
+    z ∈ edgeBandMid s t (α / 2) := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  have hlip := abs_footParam_sub_le h p z
+  have hMP : (|t.1 - s.1| + |t.2 - s.2|) / dotp (t - s) (t - s) * dist p z < α / 2 := by
+    rw [div_mul_eq_mul_div, div_lt_iff₀ hP]; exact hclose
+  have hdiff : |footParam s t z - footParam s t p| < α / 2 := lt_of_le_of_lt hlip hMP
+  rw [Set.mem_Icc] at hp
+  rw [abs_lt] at hdiff
+  rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo]
+  exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
+
 end CrossingLemma.PlaneArcSeparation
