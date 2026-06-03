@@ -592,11 +592,98 @@ theorem isClosed_carrier : IsClosed β.carrier := by
   rw [carrier]
   exact isClosed_iUnion_of_finite (fun i => (β.segCarrier_isCompact i).isClosed)
 
+/-- The source endpoint `verts 0` lies on no edge other than the first
+(`firstSeg`).  For `i ≠ firstSeg`: gap `≥ 2` → `nonadjacent_disjoint`; adjacent
+(`i = 1`) → `consecutive_meet` forces `verts 0 = verts 1`, contradicting `distinct`. -/
+theorem src_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ 0) :
+    β.verts 0 ∉ β.segCarrier i := by
+  intro hmem
+  have hcs0 : (Fin.castSucc ⟨0, β.numSegs_pos⟩ : Fin (β.numSegs + 1)) = 0 :=
+    Fin.ext (by simp)
+  have hv0 : β.verts 0 ∈ β.segCarrier ⟨0, β.numSegs_pos⟩ := by
+    rw [PolyArc.segCarrier, PolyArc.segSrc, hcs0]; exact left_mem_segment ℝ _ _
+  have hf' : β.verts 0 ∈ segment ℝ (β.verts (Fin.castSucc ⟨0, β.numSegs_pos⟩))
+      (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩)) := by
+    rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hv0
+  rcases Nat.lt_or_ge 1 (i : ℕ) with hgt | hle
+  · have hadj : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1 < (i : ℕ) := by simpa using hgt
+    have hdisj := β.nonadjacent_disjoint ⟨0, β.numSegs_pos⟩ i hadj
+    have hi' : β.verts 0 ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
+      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+    exact (Set.disjoint_left.mp hdisj) hf' hi'
+  · have hi1 : (i : ℕ) = 1 := by omega
+    have hlt : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1 < β.numSegs := by
+      have := i.isLt; simp only [Fin.val_mk]; omega
+    have hcast : (Fin.castSucc ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩
+        : Fin (β.numSegs + 1)) = Fin.succ ⟨0, β.numSegs_pos⟩ :=
+      Fin.ext (by simp [Fin.val_succ])
+    have hieq : i = ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩ :=
+      Fin.ext (by simp only [Fin.val_mk]; omega)
+    have hi' : β.verts 0 ∈ segment ℝ (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩))
+        (β.verts (Fin.succ ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩)) := by
+      have hseg : β.segCarrier ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩
+          = segment ℝ (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩))
+            (β.verts (Fin.succ ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩)) := by
+        rw [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+      rw [← hseg, ← hieq]; exact hmem
+    have hmeet := β.consecutive_meet ⟨0, β.numSegs_pos⟩ hlt
+    have hsingle : β.verts 0 ∈ ({β.verts (Fin.succ ⟨0, β.numSegs_pos⟩)} : Set Plane) :=
+      hmeet ⟨hf', hi'⟩
+    rw [Set.mem_singleton_iff] at hsingle
+    have heq0 : (0 : Fin (β.numSegs + 1)) = Fin.succ ⟨0, β.numSegs_pos⟩ := β.distinct hsingle
+    have hval := congrArg Fin.val heq0
+    simp [Fin.val_succ] at hval
+
 /-- Index of the first segment (`0`). -/
 def firstSeg : Fin β.numSegs := ⟨0, β.numSegs_pos⟩
 
 /-- Index of the last segment (`numSegs − 1`). -/
 def lastSeg : Fin β.numSegs := ⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩
+
+/-- The target endpoint `verts (last)` lies on no edge other than the last
+(`lastSeg`).  Symmetric to `src_notMem_segCarrier`. -/
+theorem tgt_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ β.numSegs - 1) :
+    β.verts (Fin.last β.numSegs) ∉ β.segCarrier i := by
+  intro hmem
+  have hpos := β.numSegs_pos
+  have hsl : (Fin.succ β.lastSeg : Fin (β.numSegs + 1)) = Fin.last β.numSegs := by
+    apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last, Fin.val_mk]; omega
+  have hvL : β.verts (Fin.last β.numSegs) ∈ β.segCarrier β.lastSeg := by
+    rw [PolyArc.segCarrier, PolyArc.segTgt, hsl]; exact right_mem_segment ℝ _ _
+  have hfL : β.verts (Fin.last β.numSegs) ∈ segment ℝ (β.verts (Fin.castSucc β.lastSeg))
+      (β.verts (Fin.succ β.lastSeg)) := by
+    rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hvL
+  have hilt : (i : ℕ) < β.numSegs - 1 := by have := i.isLt; omega
+  have hlast : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+  rcases Nat.lt_or_ge ((i : ℕ) + 1) (β.numSegs - 1) with hgt | hge
+  · have hadj : (i : ℕ) + 1 < (β.lastSeg : ℕ) := by rw [hlast]; exact hgt
+    have hdisj := β.nonadjacent_disjoint i β.lastSeg hadj
+    have hi' : β.verts (Fin.last β.numSegs)
+        ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
+      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+    exact (Set.disjoint_left.mp hdisj) hi' hfL
+  · have hieq1 : (i : ℕ) + 1 = β.numSegs - 1 := by omega
+    have hlt : (i : ℕ) + 1 < β.numSegs := by omega
+    have hclast : (⟨(i : ℕ) + 1, hlt⟩ : Fin β.numSegs) = β.lastSeg :=
+      Fin.ext (by simp only [PolyArc.lastSeg, Fin.val_mk]; omega)
+    have hmeet := β.consecutive_meet i hlt
+    have hfirst : β.verts (Fin.last β.numSegs)
+        ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
+      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+    have hsecond : β.verts (Fin.last β.numSegs)
+        ∈ segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hlt⟩)) := by
+      have hcast : (Fin.castSucc ⟨(i : ℕ) + 1, hlt⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      have hseg : β.segCarrier ⟨(i : ℕ) + 1, hlt⟩
+          = segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hlt⟩)) := by
+        rw [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+      rw [← hseg, hclast]; exact hvL
+    have hsingle := hmeet ⟨hfirst, hsecond⟩
+    rw [Set.mem_singleton_iff] at hsingle
+    have heqL : (Fin.last β.numSegs) = Fin.succ i := β.distinct hsingle
+    have hval := congrArg Fin.val heqL
+    simp only [Fin.val_succ, Fin.val_last] at hval
+    omega
 
 /-- **Non-adjacent separation `d_sep > 0`.**  There is a single `δ > 0` strictly
 below every distance between a point of a segment and a point of a non-consecutive
