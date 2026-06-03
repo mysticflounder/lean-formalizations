@@ -653,9 +653,21 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    and all disk radii), `hadj_tgt`/`hadj_src`, `hτ`/`hδin`/`hδout`, `hballs`,
    `hbudsrc`/`hbudtgt`.  Verified axiom-clean via `#print axioms`.
 
-   **STILL TODO in (iv):** (3) concrete `δ₀/α/ρ` EXISTENCE discharging the master's
-   admissibility bundle (min over corners of angle-free thresholds + non-adjacent-sep +
-   corner-confine(r=α/L) + ball/endpoint budgets); (4) P2 union `=W`; (5) P4 nonempty.
+   **P3 EXISTENCE COMPLETE (2026-06-03), step (3) DONE.**  `exists_collar_disjoint`:
+   for any `α > 0`, given the arc has no straight corners (`hturn`: `cornerTurn ≠ 0` at
+   every interior vertex — a non-degeneracy the residual closure supplies), there exist
+   `δ₀ > 0` and a constant disk radius `ρ` with `Disjoint (collarPlus …) (collarMinus …)`.
+   Supporting pieces: `src_notMem_segCarrier`/`tgt_notMem_segCarrier` (endpoint on no
+   non-incident edge); `exists_pos_disk_radius` (pairwise-disjoint disks, `inf'` over
+   `offDiag`), `exists_pos_{src,tgt}_edge_sep` (endpoint-edge gaps), `not_mem_adjacent_band_strip_src`
+   (the outgoing-arm mirror), `exists_corner_delta` (per-corner threshold: confine at
+   `r = α/(1+L_c+L_{c+1})` + the `M/(K+1)` thinness thresholds, `M = ±cornerTurn·α·‖edge‖² > 0`).
+   The assembly skolemizes the corner thresholds and sets `δ₀ = ρ = M5/2` (`M5` = min of
+   corner-`inf'`, `δsep`, `dsrc/2`, `dtgt/2`, `ρ₀`).  All `#print axioms`-clean.
+
+   **STILL TODO in (iv):** (4) P2 union `=W` (tube∖carrier ⊆ collarPlus ∪ collarMinus,
+   via the C3b cover `taperedTube_subset_bands_union_disks` + disk→sector / endpoint→cap);
+   (5) P4 nonempty.  Then G1/G3/G4/Z1.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

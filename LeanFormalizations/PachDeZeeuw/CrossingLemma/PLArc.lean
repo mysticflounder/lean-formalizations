@@ -3833,4 +3833,63 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
       exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left hleout hKoutnn) hKδout
   · exact ⟨1, one_pos, fun h => absurd h hc1⟩
 
+/-! #### P3 existence — the global assembly.
+
+Picks concrete admissible parameters: a common `δ₀ = ρ₀` taken as half the minimum of the
+per-corner thresholds, the non-adjacent separation `δsep`, the endpoint-edge gaps, and the
+disk radius.  Every hypothesis family of `disjoint_collarPlus_collarMinus` is then below its
+budget, so the two collar sides are disjoint. -/
+
+/-- **The two collar sides can be made disjoint** by a concrete choice of `δ₀` and a
+constant disk-radius `ρ`, for any narrowing width `α > 0`, provided the arc has no straight
+corners (`hturn`). -/
+theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα : 0 < α)
+    (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0) :
+    ∃ (δ₀ : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ), 0 < δ₀ ∧ (∀ p, 0 < ρ p) ∧
+      Disjoint (collarPlus β R S δ₀ α ρ) (collarMinus β R S δ₀ α ρ) := by
+  classical
+  choose δfun hδfunpos hδfunprop using exists_corner_delta β hα hturn
+  obtain ⟨δsep, hδseppos, hsep⟩ := exists_delta_nonadjacent_tube_sep β
+  obtain ⟨ρ₀, hρ₀pos, hballs0⟩ := exists_pos_disk_radius β
+  obtain ⟨dsrc, hdsrcpos, hsrcsep⟩ := exists_pos_src_edge_sep β
+  obtain ⟨dtgt, hdtgtpos, htgtsep⟩ := exists_pos_tgt_edge_sep β
+  have hne : (Finset.univ : Finset (Fin β.numSegs)).Nonempty :=
+    ⟨⟨0, β.numSegs_pos⟩, Finset.mem_univ _⟩
+  set δcorner := Finset.univ.inf' hne δfun with hδcdef
+  have hδcornerpos : 0 < δcorner := by
+    rw [hδcdef, Finset.lt_inf'_iff]; exact fun c _ => hδfunpos c
+  set M5 := min δcorner (min δsep (min (dsrc / 2) (min (dtgt / 2) ρ₀))) with hM5def
+  have hM5pos : 0 < M5 := by
+    rw [hM5def]
+    exact lt_min hδcornerpos (lt_min hδseppos
+      (lt_min (by linarith) (lt_min (by linarith) hρ₀pos)))
+  have h1 : M5 ≤ δcorner := min_le_left _ _
+  have h2 : M5 ≤ δsep := le_trans (min_le_right _ _) (min_le_left _ _)
+  have h3 : M5 ≤ dsrc / 2 :=
+    le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
+  have h4 : M5 ≤ dtgt / 2 := le_trans (min_le_right _ _)
+    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))
+  have h5 : M5 ≤ ρ₀ := le_trans (min_le_right _ _)
+    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
+  refine ⟨M5 / 2, fun _ => M5 / 2, by linarith, fun _ => by linarith, ?_⟩
+  have ht_δfun : ∀ c : Fin β.numSegs, M5 / 2 ≤ δfun c := by
+    intro c
+    have : δcorner ≤ δfun c := Finset.inf'_le δfun (Finset.mem_univ c)
+    linarith
+  have ht_pos : (0 : ℝ) < M5 / 2 := by linarith
+  refine disjoint_collarPlus_collarMinus β R S (fun _ => M5 / 2) hα (by linarith)
+    hsep (fun _ => by linarith)
+    (fun c hc1 z hmid hzi hzi1 =>
+      (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).1 z hmid hzi hzi1)
+    (fun c hc1 z hmid hzi hzi1 =>
+      (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.1 z hmid hzi hzi1)
+    hturn
+    (fun c hc1 => (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.2.1)
+    (fun c hc1 => (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.2.2)
+    (fun p q hpq => (hballs0 p q hpq).mono
+      (Metric.ball_subset_ball (by linarith)) (Metric.ball_subset_ball (by linarith)))
+    (fun i hi => by have := hsrcsep i hi; linarith)
+    (fun i hi => by have := htgtsep i hi; linarith)
+
 end CrossingLemma.PlaneArcSeparation
