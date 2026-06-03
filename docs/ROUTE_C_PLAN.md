@@ -465,7 +465,13 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    the part of the arc the band must exclude), resting on the collinearity lemma
    `sub_eq_footParam_smul_of_sideForm_zero : sideForm s t z = 0 → z − s =
    footParam s t z • (t − s)`.  The per-vertex sides are the existing L2 corner sectors
-   (`convexSector`/`reflexSector`).  STILL TODO in (ii): the per-vertex `diskᵥ` (ball
+   (`convexSector`/`reflexSector`).  Also DONE: the **corner glue** packaged as
+   `overlap_mem_convexSector_iff` / `overlap_mem_reflexSector_iff` — on the slab/disk
+   overlap the incoming half-plane condition is automatic
+   (`pos_turn_sideForm_of_overlap`), so sector membership is decided purely by the
+   outgoing-edge sign `sign(τ·sideForm v b z)`; this is the bridge that makes a single
+   global `g` well-defined across each corner.  STILL TODO in (ii): the per-vertex
+   `diskᵥ` (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
    `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the

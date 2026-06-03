@@ -1519,4 +1519,43 @@ theorem edgeBand_inter_sideForm_zero_eq_openSegment {s t : Plane} (h : t ≠ s) 
     · simp only [sideForm, Prod.fst_add, Prod.snd_add, Prod.smul_fst, Prod.smul_snd,
         smul_eq_mul]; ring
 
+/-! ### Corner glue: on the overlap the sector is governed by the outgoing edge
+
+On the slab/disk overlap (where `pos_turn_sideForm_of_overlap` applies) the incoming
+half-plane condition `0 < τ·sideForm a v z` is automatic, so membership in the convex
+/ reflex sector is decided purely by the **outgoing** edge `(v,b)` side
+(`sign (τ · sideForm v b z)`).  This is precisely the bridge between the per-vertex
+sector label and the per-edge sign label that makes the global side function `g`
+well-defined across each corner. -/
+
+/-- On the overlap, `z` is in the convex sector iff the outgoing-edge half-plane
+condition holds. -/
+theorem overlap_mem_convexSector_iff {a v b z : Plane}
+    (hG : 0 < dotp (z - v) (b - v))
+    (hthin : |dotp (v - a) (b - v)| * |sideForm v b z|
+              < |sideForm a v b| * dotp (z - v) (b - v)) :
+    z ∈ convexSector a v b ↔ 0 < cornerTurn a v b * sideForm v b z := by
+  have hpin := pos_turn_sideForm_of_overlap a v b z hG hthin
+  constructor
+  · intro hz; exact hz.2
+  · intro h2
+    refine ⟨?_, h2⟩
+    show 0 < cornerTurn a v b * sideForm a v z
+    rw [cornerTurn]; exact hpin
+
+/-- On the overlap, `z` is in the reflex sector iff the outgoing-edge half-plane
+condition fails (with the opposite strict sign). -/
+theorem overlap_mem_reflexSector_iff {a v b z : Plane}
+    (hG : 0 < dotp (z - v) (b - v))
+    (hthin : |dotp (v - a) (b - v)| * |sideForm v b z|
+              < |sideForm a v b| * dotp (z - v) (b - v)) :
+    z ∈ reflexSector a v b ↔ cornerTurn a v b * sideForm v b z < 0 := by
+  have hpin := pos_turn_sideForm_of_overlap a v b z hG hthin
+  have hav : 0 < cornerTurn a v b * sideForm a v z := by rw [cornerTurn]; exact hpin
+  constructor
+  · rintro (h | h)
+    · exact absurd h (not_lt.mpr (le_of_lt hav))
+    · exact h
+  · intro h; exact Or.inr h
+
 end CrossingLemma.PlaneArcSeparation
