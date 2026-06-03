@@ -3722,4 +3722,115 @@ theorem exists_pos_tgt_edge_sep (β : PolyArc) :
     simp only [hf]; rw [if_neg hi]
   rwa [hfi] at hle
 
+/-! #### P3 existence — the per-corner threshold.
+
+For each interior vertex (corner `c`), a single positive `δ` below which the corner's
+band/band impossibility (both arms) and the two angle-free thinness inequalities all hold
+at any width `δ₀ ≤ δ`.  Combines `exists_delta_corner_confine` (at radius `r = α/(1+L_c+
+L_{c+1})`, so both Lipschitz budgets `L·r ≤ α` are met) with the `M/(K+1)` thresholds for
+the `hδin`/`hδout` shapes (whose `sideForm` factor is `±cornerTurn ≠ 0`).  Stated totally
+over `c` (vacuous when `c` is not a corner) so the global step can skolemize and minimise. -/
+theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
+    (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
+    (c : Fin β.numSegs) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ (hc1 : (c : ℕ) + 1 < β.numSegs) (δ₀ : ℝ), 0 < δ₀ → δ₀ ≤ δ →
+      (∀ z : Plane, z ∈ edgeBandMid (β.segSrc c) (β.segTgt c) α →
+        Metric.infDist z (β.segCarrier c) < δ₀ →
+        Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False) ∧
+      (∀ z : Plane,
+        z ∈ edgeBandMid (β.segSrc ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) α →
+        Metric.infDist z (β.segCarrier c) < δ₀ →
+        Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False) ∧
+      (|dotp (β.segTgt c - β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segSrc c - β.segTgt c)|
+          * (|(β.segSrc c).1 - (β.segTgt c).1| + |(β.segSrc c).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)|
+          * (α * dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c))) ∧
+      (|dotp (β.segTgt c - β.segSrc c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)|
+          * (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segTgt c).1|
+              + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
+          * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c))) := by
+  by_cases hc1 : (c : ℕ) + 1 < β.numSegs
+  · have hva : β.segTgt c ≠ β.segSrc c := β.segTgt_ne_segSrc c
+    have hcc1 : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segSrc ⟨(c : ℕ) + 1, hc1⟩ :=
+      β.segTgt_ne_segSrc _
+    have htt : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segTgt c := by
+      rw [PolyArc.segTgt, PolyArc.segTgt]; intro h
+      have hval := congrArg Fin.val (β.distinct h)
+      simp only [Fin.val_succ, Fin.val_mk] at hval; omega
+    set Lc := (|(β.segTgt c).1 - (β.segSrc c).1| + |(β.segTgt c).2 - (β.segSrc c).2|)
+        / dotp (β.segTgt c - β.segSrc c) (β.segTgt c - β.segSrc c) with hLcdef
+    set Lc1 := (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segSrc ⟨(c : ℕ) + 1, hc1⟩).1|
+          + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segSrc ⟨(c : ℕ) + 1, hc1⟩).2|)
+        / dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segSrc ⟨(c : ℕ) + 1, hc1⟩)
+               (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segSrc ⟨(c : ℕ) + 1, hc1⟩) with hLc1def
+    have hLcpos : 0 < Lc := div_pos (segDir_l1_pos β c) (dotp_self_pos hva)
+    have hLc1pos : 0 < Lc1 := div_pos (segDir_l1_pos β ⟨(c : ℕ) + 1, hc1⟩) (dotp_self_pos hcc1)
+    set r := α / (1 + Lc + Lc1) with hrdef
+    have hrden : (0 : ℝ) < 1 + Lc + Lc1 := by linarith
+    have hrpos : 0 < r := div_pos hα hrden
+    have hLcr : Lc * r ≤ α := by
+      rw [hrdef, ← mul_div_assoc, div_le_iff₀ hrden]; nlinarith [hLcpos, hLc1pos, hα]
+    have hLc1r : Lc1 * r ≤ α := by
+      rw [hrdef, ← mul_div_assoc, div_le_iff₀ hrden]; nlinarith [hLcpos, hLc1pos, hα]
+    obtain ⟨δconf, hδconfpos, hconf⟩ := exists_delta_corner_confine β c hc1 hrpos
+    have hsf_in_ne : sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c) ≠ 0 := by
+      have key : sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)
+          = - cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) := by
+        rw [cornerTurn, sideForm_swap, ← sideForm_cyclic]
+      rw [key]; exact neg_ne_zero.mpr (hturn c hc1)
+    have hsf_out_ne : sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0 :=
+      hturn c hc1
+    have hdotc : 0 < dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c) :=
+      dotp_self_pos hva.symm
+    have hdotc1 : 0 < dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+        (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c) := dotp_self_pos htt
+    set Kin := |dotp (β.segTgt c - β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segSrc c - β.segTgt c)|
+        * (|(β.segSrc c).1 - (β.segTgt c).1| + |(β.segSrc c).2 - (β.segTgt c).2|) with hKindef
+    set Min := |sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)|
+        * (α * dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c)) with hMindef
+    set Kout := |dotp (β.segTgt c - β.segSrc c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)|
+        * (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segTgt c).1|
+            + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) with hKoutdef
+    set Mout := |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
+        * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+                   (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)) with hMoutdef
+    have hKinnn : 0 ≤ Kin := by rw [hKindef]; positivity
+    have hKoutnn : 0 ≤ Kout := by rw [hKoutdef]; positivity
+    have hMinpos : 0 < Min := by
+      rw [hMindef]; exact mul_pos (abs_pos.mpr hsf_in_ne) (mul_pos hα hdotc)
+    have hMoutpos : 0 < Mout := by
+      rw [hMoutdef]; exact mul_pos (abs_pos.mpr hsf_out_ne) (mul_pos hα hdotc1)
+    have hKδin : Kin * (Min / (Kin + 1)) < Min := by
+      rw [← mul_div_assoc, div_lt_iff₀ (by linarith : (0 : ℝ) < Kin + 1)]
+      nlinarith [hMinpos, hKinnn]
+    have hKδout : Kout * (Mout / (Kout + 1)) < Mout := by
+      rw [← mul_div_assoc, div_lt_iff₀ (by linarith : (0 : ℝ) < Kout + 1)]
+      nlinarith [hMoutpos, hKoutnn]
+    refine ⟨min δconf (min (Min / (Kin + 1)) (Mout / (Kout + 1))),
+      lt_min hδconfpos (lt_min (div_pos hMinpos (by linarith)) (div_pos hMoutpos (by linarith))),
+      ?_⟩
+    intro hc1' δ₀ h0 hle
+    have hleconf : δ₀ ≤ δconf := le_trans hle (min_le_left _ _)
+    have hlein : δ₀ ≤ Min / (Kin + 1) :=
+      le_trans hle (le_trans (min_le_right _ _) (min_le_left _ _))
+    have hleout : δ₀ ≤ Mout / (Kout + 1) :=
+      le_trans hle (le_trans (min_le_right _ _) (min_le_right _ _))
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · intro z hmid hzi hzi1
+      refine not_mem_adjacent_band_strip β c hc1 (fun w hwi hwi1 =>
+        hconf w (lt_of_lt_of_le hwi hleconf) (lt_of_lt_of_le hwi1 hleconf)) ?_ hmid hzi hzi1
+      rw [← hLcdef]; exact hLcr
+    · intro z hmid hzi hzi1
+      refine not_mem_adjacent_band_strip_src β c hc1 (fun w hwi hwi1 =>
+        hconf w (lt_of_lt_of_le hwi hleconf) (lt_of_lt_of_le hwi1 hleconf)) ?_ hmid hzi hzi1
+      rw [← hLc1def]; exact hLc1r
+    · rw [← hKindef, ← hMindef]
+      exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left hlein hKinnn) hKδin
+    · rw [← hKoutdef, ← hMoutdef]
+      exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left hleout hKoutnn) hKδout
+  · exact ⟨1, one_pos, fun h => absurd h hc1⟩
+
 end CrossingLemma.PlaneArcSeparation
