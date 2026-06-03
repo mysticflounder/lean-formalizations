@@ -619,6 +619,19 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    adjacent band↔band / band↔sector / sector↔sector via `thin_of_infDist_*` glue +
    `disjoint_vertexPlus_vertexMinus` + ball disjointness; `δ₀` from a global min of the
    angle-free thresholds + non-adjacent-sep + corner-confine).
+
+   **P3 PROGRESS (2026-06-03).**  Clean cases: `disjoint_bandStripPlus_bandStripMinus`
+   (same edge), `disjoint_sectorPlus_sectorMinus` (same vertex), `stripSupport` +
+   `disjoint_stripSupport_nonadjacent` (non-consecutive bands).  Adjacent band↔band:
+   `not_mem_adjacent_band_strip` (corner-confine + footParam-Lipschitz, threshold
+   `L_i·r ≤ α`, angle-free).  Adjacent band↔sector (the corner glue showcase):
+   `bandStrip_incoming_mem_vertex±` / `bandStrip_outgoing_mem_vertex±` reconcile the
+   band's `sideForm` sign with the sector side via `thin_of_infDist_incoming/outgoing`
+   + `mem_vertex*_of_incoming/outgoing` (the outgoing case bridges `segSrc(j+1)=segTgt j`),
+   giving `disjoint_bandStrip±_sector∓_incoming/outgoing` — each takes the angle-free `hδ`
+   threshold as a hypothesis.  STILL TODO in P3: non-incident band↔sector and
+   sector↔sector (ball-vs-edge / ball-vs-ball separation), end caps, then the master
+   `disjoint_collarPlus_collarMinus` assembling all cases + the concrete `δ₀`.
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
