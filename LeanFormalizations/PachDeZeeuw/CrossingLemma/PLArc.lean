@@ -2623,4 +2623,61 @@ theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
   · exact isOpen_iUnion (fun i => isOpen_bandStripMinus β α δ₀ i)
   · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorMinus β ρ i hi1))
 
+/-! #### P3 disjointness — the clean (sign / same-locus) cases.
+
+The full `collarPlus ∩ collarMinus = ∅` is a case bash over which geometric locus each
+side's witness comes from.  The cases needing no metric budget are collected first:
+opposite-sign pieces on the *same* edge or *same* vertex contradict directly. -/
+
+/-- A band-strip's positive and negative halves on the **same edge** are disjoint
+(opposite `sideForm` signs). -/
+theorem disjoint_bandStripPlus_bandStripMinus (β : PolyArc) (α δ₀ : ℝ)
+    (i : Fin β.numSegs) :
+    Disjoint (bandStripPlus β α δ₀ i) (bandStripMinus β α δ₀ i) := by
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  have hp : 0 < sideForm (β.segSrc i) (β.segTgt i) z := hzp.1.2
+  have hm : sideForm (β.segSrc i) (β.segTgt i) z < 0 := hzm.1.2
+  linarith
+
+/-- A vertex sector's positive and negative halves at the **same vertex** are disjoint
+(`disjoint_vertexPlus_vertexMinus`). -/
+theorem disjoint_sectorPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    Disjoint (sectorPlus β ρ i hi1) (sectorMinus β ρ i hi1) := by
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  exact (Set.disjoint_left.mp
+    (disjoint_vertexPlus_vertexMinus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)))
+    hzp.1 hzm.1
+
+/-- The **strip support** of edge `i` at width `δ`: points within `δ` of the closed
+segment.  Both `bandStrip±` sit inside the support at their own width `δ₀`. -/
+def stripSupport (β : PolyArc) (δ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+  {z | Metric.infDist z (β.segCarrier i) < δ}
+
+theorem bandStripPlus_subset_stripSupport (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    bandStripPlus β α δ₀ i ⊆ stripSupport β δ₀ i :=
+  fun _ hz => hz.2
+
+theorem bandStripMinus_subset_stripSupport (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    bandStripMinus β α δ₀ i ⊆ stripSupport β δ₀ i :=
+  fun _ hz => hz.2
+
+theorem stripSupport_mono (β : PolyArc) {δ δ' : ℝ} (h : δ ≤ δ') (i : Fin β.numSegs) :
+    stripSupport β δ i ⊆ stripSupport β δ' i :=
+  fun _ hz => lt_of_lt_of_le hz h
+
+/-- **Non-adjacent strip supports are disjoint**, once `δ` is below the non-adjacent
+separation `exists_delta_nonadjacent_tube_sep`.  This kills every band↔band cross-overlap
+between non-consecutive edges (regardless of sign). -/
+theorem disjoint_stripSupport_nonadjacent (β : PolyArc) {δ : ℝ}
+    (hsep : ∀ i j : Fin β.numSegs, (i : ℕ) + 1 < (j : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier i) < δ → Metric.infDist z (β.segCarrier j) < δ → False)
+    (i j : Fin β.numSegs) (hij : (i : ℕ) + 1 < (j : ℕ)) :
+    Disjoint (stripSupport β δ i) (stripSupport β δ j) := by
+  rw [Set.disjoint_left]
+  intro z hzi hzj
+  exact hsep i j hij z hzi hzj
+
 end CrossingLemma.PlaneArcSeparation
