@@ -587,6 +587,17 @@ theorem segCarrier_isCompact (i : Fin β.numSegs) : IsCompact (β.segCarrier i) 
   rw [segCarrier, segment_eq_image ℝ (β.segSrc i) (β.segTgt i)]
   exact isCompact_Icc.image (by fun_prop)
 
+/-- The carrier is closed (a finite union of compact, hence closed, segments). -/
+theorem isClosed_carrier : IsClosed β.carrier := by
+  rw [carrier]
+  exact isClosed_iUnion_of_finite (fun i => (β.segCarrier_isCompact i).isClosed)
+
+/-- Index of the first segment (`0`). -/
+def firstSeg : Fin β.numSegs := ⟨0, β.numSegs_pos⟩
+
+/-- Index of the last segment (`numSegs − 1`). -/
+def lastSeg : Fin β.numSegs := ⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩
+
 /-- **Non-adjacent separation `d_sep > 0`.**  There is a single `δ > 0` strictly
 below every distance between a point of a segment and a point of a non-consecutive
 segment.  This is the thinness budget of the L3 collar: a tube of radius `< δ`
@@ -2468,5 +2479,148 @@ theorem exists_delta_nonadjacent_tube_sep (β : PolyArc) :
   have htri : dist x y ≤ dist x z + dist z y := dist_triangle x z y
   have hxz : dist x z < ds / 2 := by rw [dist_comm]; exact hxd
   linarith
+
+/-! ### Task (iv), assembly — the two-sided collar `collarPlus` / `collarMinus`
+
+The ground set is `W = taperedTube R S δ₀ \ β.carrier` (the tube with the arc's
+carrier removed, so every point carries a definite side).  `collarPlus`/`collarMinus`
+cut `W` into its two sides as a union of three families mirroring the cover
+`taperedTube_subset_midBands_union_disks`:
+
+* **band strips** `edge±Mid_i(α)` plus the strip certificate
+  `infDist z (segCarrier i) < δ₀` (the angle-free corner glue's input for `P3`);
+* **vertex sectors** `vertex±(a,v,b) ∩ ball(v, ρ_v)` at each interior shared vertex
+  (`a, v, b` the two incident arms of segments `i, i+1`);
+* **end caps** `ball(end, ρ) ∩ {foot in range} ∩ {±sideForm}` at the two endpoints
+  (a single incident edge, no corner — the side is the lone `sideForm` sign).
+
+`P1` (open), `P4` (nonempty), `P2` (union `= W`), `P3` (disjoint) are proved below. -/
+
+/-- Positive band-strip of edge `i`: the narrowed positive band carrying the strip
+certificate `infDist z (segCarrier i) < δ₀`. -/
+noncomputable def bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+  edgePlusMid (β.segSrc i) (β.segTgt i) α ∩ {z | Metric.infDist z (β.segCarrier i) < δ₀}
+
+/-- Negative band-strip of edge `i`. -/
+noncomputable def bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+  edgeMinusMid (β.segSrc i) (β.segTgt i) α ∩ {z | Metric.infDist z (β.segCarrier i) < δ₀}
+
+/-- Positive vertex sector at the shared vertex `verts (i+1)` of segments `i, i+1`. -/
+noncomputable def sectorPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
+  vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+    ∩ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i))
+
+/-- Negative vertex sector at the shared vertex of segments `i, i+1`. -/
+noncomputable def sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
+  vertexMinus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+    ∩ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i))
+
+/-- Positive end cap at the source endpoint `verts 0` (edge `firstSeg`, foot `> 0`). -/
+noncomputable def endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  Metric.ball (β.verts 0) (ρ 0)
+    ∩ {z | 0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
+    ∩ {z | 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
+
+/-- Negative end cap at the source endpoint. -/
+noncomputable def endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  Metric.ball (β.verts 0) (ρ 0)
+    ∩ {z | 0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
+    ∩ {z | sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0}
+
+/-- Positive end cap at the target endpoint `verts last` (edge `lastSeg`, foot `< 1`). -/
+noncomputable def endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs))
+    ∩ {z | footParam (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 1}
+    ∩ {z | 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z}
+
+/-- Negative end cap at the target endpoint. -/
+noncomputable def endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs))
+    ∩ {z | footParam (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 1}
+    ∩ {z | sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0}
+
+/-- The **positive collar side**: the tube-minus-carrier intersected with the union of
+all positive band strips, vertex sectors, and end caps. -/
+noncomputable def collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  (taperedTube R S δ₀ \ β.carrier) ∩
+    ( (⋃ i, bandStripPlus β α δ₀ i)
+      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
+      ∪ endCapSrcPlus β ρ
+      ∪ endCapTgtPlus β ρ )
+
+/-- The **negative collar side**. -/
+noncomputable def collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+  (taperedTube R S δ₀ \ β.carrier) ∩
+    ( (⋃ i, bandStripMinus β α δ₀ i)
+      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
+      ∪ endCapSrcMinus β ρ
+      ∪ endCapTgtMinus β ρ )
+
+theorem isOpen_bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    IsOpen (bandStripPlus β α δ₀ i) :=
+  (isOpen_edgePlusMid _ _ _).inter
+    (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const)
+
+theorem isOpen_bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    IsOpen (bandStripMinus β α δ₀ i) :=
+  (isOpen_edgeMinusMid _ _ _).inter
+    (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const)
+
+theorem isOpen_sectorPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    IsOpen (sectorPlus β ρ i hi1) :=
+  (isOpen_vertexPlus _ _ _).inter Metric.isOpen_ball
+
+theorem isOpen_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    IsOpen (sectorMinus β ρ i hi1) :=
+  (isOpen_vertexMinus _ _ _).inter Metric.isOpen_ball
+
+theorem isOpen_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    IsOpen (endCapSrcPlus β ρ) :=
+  (Metric.isOpen_ball.inter (isOpen_lt continuous_const (continuous_footParam _ _))).inter
+    (isOpen_lt continuous_const (continuous_sideForm _ _))
+
+theorem isOpen_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    IsOpen (endCapSrcMinus β ρ) :=
+  (Metric.isOpen_ball.inter (isOpen_lt continuous_const (continuous_footParam _ _))).inter
+    (isOpen_lt (continuous_sideForm _ _) continuous_const)
+
+theorem isOpen_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    IsOpen (endCapTgtPlus β ρ) :=
+  (Metric.isOpen_ball.inter (isOpen_lt (continuous_footParam _ _) continuous_const)).inter
+    (isOpen_lt continuous_const (continuous_sideForm _ _))
+
+theorem isOpen_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    IsOpen (endCapTgtMinus β ρ) :=
+  (Metric.isOpen_ball.inter (isOpen_lt (continuous_footParam _ _) continuous_const)).inter
+    (isOpen_lt (continuous_sideForm _ _) continuous_const)
+
+/-- The ground set `W = taperedTube R S δ₀ \ β.carrier` is open. -/
+theorem isOpen_collarGround (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ) :
+    IsOpen (taperedTube R S δ₀ \ β.carrier) :=
+  (isOpen_taperedTube R S δ₀).inter β.isClosed_carrier.isOpen_compl
+
+/-- **P1⁺ (open).** -/
+theorem isOpen_collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) : IsOpen (collarPlus β R S δ₀ α ρ) := by
+  refine (isOpen_collarGround β R S δ₀).inter ?_
+  refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcPlus β ρ)).union
+    (isOpen_endCapTgtPlus β ρ)
+  · exact isOpen_iUnion (fun i => isOpen_bandStripPlus β α δ₀ i)
+  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorPlus β ρ i hi1))
+
+/-- **P1⁻ (open).** -/
+theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) : IsOpen (collarMinus β R S δ₀ α ρ) := by
+  refine (isOpen_collarGround β R S δ₀).inter ?_
+  refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcMinus β ρ)).union
+    (isOpen_endCapTgtMinus β ρ)
+  · exact isOpen_iUnion (fun i => isOpen_bandStripMinus β α δ₀ i)
+  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorMinus β ρ i hi1))
 
 end CrossingLemma.PlaneArcSeparation

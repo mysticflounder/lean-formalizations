@@ -602,6 +602,23 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    pieces are `τ`-selected sectors, all glued by `thin_of_infDist_*` (no `ρ_v` wall);
    `exists_delta_nonadjacent_tube_sep` kills non-adjacent overlaps; `exists_delta_corner_confine`
    remains available for the adjacent band–band case.
+
+   **COLLAR ASSEMBLY — DEFINITIONS + P1 DOWN (2026-06-03).**  The two collar sides are
+   now defined sorry-free + axiom-clean.  Ground set `W = taperedTube R S δ₀ \ β.carrier`
+   (`isClosed_carrier` added).  `collarPlus/Minus β R S δ₀ α ρ := W ∩ (⋃ᵢ bandStrip±ᵢ ∪
+   ⋃ᵥ sector±ᵥ ∪ endCapSrc± ∪ endCapTgt±)` where `bandStrip±ᵢ = edge±Mid(segSrc i)(segTgt
+   i) α ∩ {infDist z (segCarrier i) < δ₀}` (strip certificate), `sector±ᵢ (hi1:(i)+1<n) =
+   vertex±(segSrc i, segTgt i, segTgt (i+1)) ∩ ball(verts (i+1), ρ (i+1))` (interior shared
+   vertices, indexed by the LEFT segment `i`), and the two end caps `ball(end, ρ) ∩ {foot in
+   range} ∩ {±sideForm}` (single incident edge `firstSeg`/`lastSeg`, no corner).  **P1**
+   (`isOpen_collarPlus/Minus`) PROVEN via per-piece openness lemmas.  STILL TODO: **P4**
+   nonempty (scaled-edge witness), **P2** union `=W` (via `taperedTube_subset_midBands_union_disks`
+   with cover-α := 2α, disk branch ⇒ sector via `compl_sectors_eq_cornerLocus` +
+   `ball_inter_cornerLocus`, endpoint branches ⇒ end caps), **P3** disjoint (case bash:
+   same-edge sideForm contradiction; non-adjacent via `exists_delta_nonadjacent_tube_sep`;
+   adjacent band↔band / band↔sector / sector↔sector via `thin_of_infDist_*` glue +
+   `disjoint_vertexPlus_vertexMinus` + ball disjointness; `δ₀` from a global min of the
+   angle-free thresholds + non-adjacent-sep + corner-confine).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
