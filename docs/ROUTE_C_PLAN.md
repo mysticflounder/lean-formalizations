@@ -447,9 +447,13 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    algebra: the `τ·G` term dominates `|K·S|` via the thinness hypothesis (an `abs`
    bound + the identity, closed by `nlinarith`).
 
-   **Remaining in sub-node 3:** (i) discharge the thinness hypothesis from a concrete
-   disk radius / slab cutoff (`|sideForm v b z| ≤ (|b.1−v.1|+|b.2−v.2|)·dist v z`, so
-   `r` small suffices — pure coordinate `dist`/`abs` bounds); (ii) define `slabᵢ`,
+   **Remaining in sub-node 3:** (i) **DONE** — `exists_radius_thin`: for `b ≠ v`,
+   `0 < α`, and a nonzero turn `sideForm a v b ≠ 0`, there is `r > 0` such that on the
+   overlap `dist v z ≤ r ∧ α·‖b−v‖² ≤ dotp(z−v,b−v)` the thinness hypothesis of
+   `pos_turn_sideForm_of_overlap` holds (explicit `r = |τ|·α·‖b−v‖² /
+   (|dotp(v−a,b−v)|·(|b.1−v.1|+|b.2−v.2|)+1)`; proof via `abs_sideForm_le_dist` +
+   ordered-field algebra). So a sufficiently small vertex disk makes the slab and disk
+   labels agree on their overlap. (ii) define `slabᵢ`,
    `diskᵥ`, and the per-piece side label `g`; (iii) show the pieces **cover** `T\β`;
    (iv) assemble `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk
    non-emptiness via the sector witnesses `a+b−v`, `3v−a−b`).

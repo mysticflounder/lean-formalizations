@@ -1326,4 +1326,48 @@ theorem abs_sideForm_le_dist (v b z : Plane) :
     _ ≤ |b.1 - v.1| * dist v z + |b.2 - v.2| * dist v z := by gcongr
     _ = (|b.1 - v.1| + |b.2 - v.2|) * dist v z := by ring
 
+/-- **Thinness from a disk radius (task i).**  Given a vertex `v` with outgoing edge
+to `b` (`b ≠ v`) and a nonzero turn `sideForm a v b ≠ 0`, there is a strictly positive
+radius `r` such that on the overlap of the vertex disk `dist v z ≤ r` with the slab
+lower bound `α·‖b−v‖² ≤ dotp (z−v) (b−v)` (i.e. the foot parameter is at least `α`),
+the thinness hypothesis of `pos_turn_sideForm_of_overlap` holds.  Combined with that
+lemma this pins the side of `z` to the turn side throughout the overlap, so the slab
+label and the disk label agree.  The radius is explicit:
+`r = |τ|·α·‖b−v‖² / (|dotp (v−a) (b−v)|·(|b.1−v.1|+|b.2−v.2|) + 1)`. -/
+theorem exists_radius_thin (a v b : Plane) (α : ℝ)
+    (hbv : b ≠ v) (hα : 0 < α) (hτ : sideForm a v b ≠ 0) :
+    ∃ r, 0 < r ∧ ∀ z : Plane,
+      dist v z ≤ r →
+      α * dotp (b - v) (b - v) ≤ dotp (z - v) (b - v) →
+      |dotp (v - a) (b - v)| * |sideForm v b z|
+        < |sideForm a v b| * dotp (z - v) (b - v) := by
+  have hP : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  have hMnn : (0 : ℝ) ≤ |b.1 - v.1| + |b.2 - v.2| := add_nonneg (abs_nonneg _) (abs_nonneg _)
+  have hKnn : (0 : ℝ) ≤ |dotp (v - a) (b - v)| := abs_nonneg _
+  have hsf : 0 < |sideForm a v b| := abs_pos.mpr hτ
+  have hN : 0 < |sideForm a v b| * (α * dotp (b - v) (b - v)) := mul_pos hsf (mul_pos hα hP)
+  have hD : 0 < |dotp (v - a) (b - v)| * (|b.1 - v.1| + |b.2 - v.2|) + 1 := by positivity
+  refine ⟨(|sideForm a v b| * (α * dotp (b - v) (b - v)))
+            / (|dotp (v - a) (b - v)| * (|b.1 - v.1| + |b.2 - v.2|) + 1),
+          div_pos hN hD, ?_⟩
+  intro z hdist hlow
+  have hsv : |sideForm v b z| ≤ (|b.1 - v.1| + |b.2 - v.2|) * dist v z :=
+    abs_sideForm_le_dist v b z
+  set K := |dotp (v - a) (b - v)| with hKdef
+  set M := |b.1 - v.1| + |b.2 - v.2| with hMdef
+  set N := |sideForm a v b| * (α * dotp (b - v) (b - v)) with hNdef
+  set r := N / (K * M + 1) with hrdef
+  have hrpos : 0 < r := div_pos hN hD
+  have hDne : (K * M + 1) ≠ 0 := ne_of_gt hD
+  have hr_eq : r * (K * M + 1) = N := by rw [hrdef]; field_simp
+  calc K * |sideForm v b z|
+      ≤ K * (M * dist v z) := mul_le_mul_of_nonneg_left hsv hKnn
+    _ ≤ K * (M * r) := mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left hdist hMnn) hKnn
+    _ = N - r := by rw [← hr_eq]; ring
+    _ < N := by linarith [hrpos]
+    _ = |sideForm a v b| * (α * dotp (b - v) (b - v)) := hNdef
+    _ ≤ |sideForm a v b| * dotp (z - v) (b - v) :=
+          mul_le_mul_of_nonneg_left hlow (le_of_lt hsf)
+
 end CrossingLemma.PlaneArcSeparation
