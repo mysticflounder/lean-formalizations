@@ -1326,6 +1326,51 @@ theorem abs_sideForm_le_dist (v b z : Plane) :
     _ ≤ |b.1 - v.1| * dist v z + |b.2 - v.2| * dist v z := by gcongr
     _ = (|b.1 - v.1| + |b.2 - v.2|) * dist v z := by ring
 
+/-- **Quantitative tangential bound.**  The dot product of a displacement `z − p`
+with the edge direction `t − s` is controlled by the sup-distance `dist p z` and the
+ℓ¹ size of the direction.  Metric companion of `abs_sideForm_le_dist`; it is what
+makes `footParam` Lipschitz (`abs_footParam_sub_le`). -/
+theorem abs_dotp_sub_le_dist (s t p z : Plane) :
+    |dotp (z - p) (t - s)| ≤ (|t.1 - s.1| + |t.2 - s.2|) * dist p z := by
+  have h1 : |z.1 - p.1| ≤ dist p z := by
+    rw [Prod.dist_eq]
+    calc |z.1 - p.1| = dist p.1 z.1 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist p.1 z.1) (dist p.2 z.2) := le_max_left _ _
+  have h2 : |z.2 - p.2| ≤ dist p z := by
+    rw [Prod.dist_eq]
+    calc |z.2 - p.2| = dist p.2 z.2 := by rw [Real.dist_eq, abs_sub_comm]
+      _ ≤ max (dist p.1 z.1) (dist p.2 z.2) := le_max_right _ _
+  calc |dotp (z - p) (t - s)|
+      = |(z.1 - p.1) * (t.1 - s.1) + (z.2 - p.2) * (t.2 - s.2)| := by
+        rw [dotp]; simp only [Prod.fst_sub, Prod.snd_sub]
+    _ ≤ |(z.1 - p.1) * (t.1 - s.1)| + |(z.2 - p.2) * (t.2 - s.2)| := abs_add_le _ _
+    _ = |z.1 - p.1| * |t.1 - s.1| + |z.2 - p.2| * |t.2 - s.2| := by rw [abs_mul, abs_mul]
+    _ ≤ dist p z * |t.1 - s.1| + dist p z * |t.2 - s.2| := by gcongr
+    _ = (|t.1 - s.1| + |t.2 - s.2|) * dist p z := by ring
+
+/-- The difference of `footParam` at two evaluation points is the tangential
+displacement `dotp (z − p) (t − s)` divided by the (constant) squared length. -/
+theorem footParam_sub (s t p z : Plane) :
+    footParam s t z - footParam s t p
+      = dotp (z - p) (t - s) / dotp (t - s) (t - s) := by
+  rw [footParam, footParam, div_sub_div_same]
+  congr 1
+  simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+
+/-- **`footParam` is Lipschitz** in the evaluation point (constant `‖t−s‖₁ / ‖t−s‖₂²`).
+This is what turns a small tube radius into a small change of foot parameter, so a tube
+point near a mid-edge spine point stays inside that edge's band. -/
+theorem abs_footParam_sub_le {s t : Plane} (h : t ≠ s) (p z : Plane) :
+    |footParam s t z - footParam s t p|
+      ≤ (|t.1 - s.1| + |t.2 - s.2|) / dotp (t - s) (t - s) * dist p z := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  have key := abs_dotp_sub_le_dist s t p z
+  rw [footParam_sub, abs_div, abs_of_pos hP, div_le_iff₀ hP]
+  have hrhs : (|t.1 - s.1| + |t.2 - s.2|) / dotp (t - s) (t - s) * dist p z
+      * dotp (t - s) (t - s) = (|t.1 - s.1| + |t.2 - s.2|) * dist p z := by
+    field_simp
+  rw [hrhs]; exact key
+
 /-- **Thinness from a disk radius (task i).**  Given a vertex `v` with outgoing edge
 to `b` (`b ≠ v`) and a nonzero turn `sideForm a v b ≠ 0`, there is a strictly positive
 radius `r` such that on the overlap of the vertex disk `dist v z ≤ r` with the slab

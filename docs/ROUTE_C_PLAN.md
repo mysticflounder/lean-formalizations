@@ -470,8 +470,15 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    overlap the incoming half-plane condition is automatic
    (`pos_turn_sideForm_of_overlap`), so sector membership is decided purely by the
    outgoing-edge sign `sign(τ·sideForm v b z)`; this is the bridge that makes a single
-   global `g` well-defined across each corner.  STILL TODO in (ii): the per-vertex
-   `diskᵥ` (ball
+   global `g` well-defined across each corner.  Also DONE (cover foundations, the
+   metric tooling that converts the tube radius into a foot-parameter change):
+   `abs_dotp_sub_le_dist : |dotp(z−p,t−s)| ≤ (|t.1−s.1|+|t.2−s.2|)·dist p z` (metric
+   companion of `abs_sideForm_le_dist`), `footParam_sub : footParam s t z − footParam
+   s t p = dotp(z−p,t−s) / ‖t−s‖²`, and the Lipschitz bound `abs_footParam_sub_le :
+   |footParam s t z − footParam s t p| ≤ (|t.1−s.1|+|t.2−s.2|)/‖t−s‖² · dist p z` —
+   so a tube point within `δ₀` of a mid-edge spine point stays in the edge band once
+   `δ₀` is small relative to the edge length and the slab cutoffs `αᵢ`.  STILL TODO in
+   (ii): the per-vertex `diskᵥ` (ball
    small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
    single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
    `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the
