@@ -608,4 +608,151 @@ theorem exists_pos_nonadjacent_sep :
 
 end PolyArc
 
+/-! ### §L3 sub-node 1(b) — the PL parametrisation `PolyArc → SimpleArc Plane`
+
+We parametrise the arc by the **ramp-sum** form.  With `ρ(u) := min (max u 0) 1`
+(the clamp of `u` to `[0,1]`), the map
+`paramRaw x = verts 0 + ∑ i, ρ(n·x − i) • (verts (i+1) − verts i)`
+is manifestly continuous (a finite sum of continuous-scalar • constant terms) and
+telescopes on each parameter sub-interval `[i/n, (i+1)/n]` to the affine
+interpolation `(1−s)•verts i + s•verts (i+1)` of the `i`-th segment.  This makes
+continuity trivial and reduces injectivity to per-segment affine injectivity plus
+the simplicity fields. -/
+
+/-- The **ramp** (clamp to `[0,1]`): `ρ(u) = min (max u 0) 1`.  Continuous, `= 0`
+for `u ≤ 0`, `= u` for `u ∈ [0,1]`, `= 1` for `u ≥ 1`. -/
+def ramp (u : ℝ) : ℝ := min (max u 0) 1
+
+theorem ramp_continuous : Continuous ramp := by
+  unfold ramp; fun_prop
+
+theorem ramp_of_le_zero {u : ℝ} (h : u ≤ 0) : ramp u = 0 := by
+  unfold ramp; rw [max_eq_right h, min_eq_left (by norm_num)]
+
+theorem ramp_of_mem {u : ℝ} (h0 : 0 ≤ u) (h1 : u ≤ 1) : ramp u = u := by
+  unfold ramp; rw [max_eq_left h0, min_eq_left h1]
+
+theorem ramp_of_one_le {u : ℝ} (h : 1 ≤ u) : ramp u = 1 := by
+  unfold ramp; rw [min_eq_right (le_max_of_le_left h)]
+
+namespace PolyArc
+
+variable (β : PolyArc)
+
+/-- The raw PL parametrisation on all of `ℝ` (ramp-sum form). -/
+noncomputable def paramRaw (x : ℝ) : Plane :=
+  β.verts 0 +
+    ∑ i : Fin β.numSegs,
+      ramp ((β.numSegs : ℝ) * x - (i : ℝ)) •
+        (β.verts (Fin.succ i) - β.verts (Fin.castSucc i))
+
+theorem continuous_paramRaw : Continuous β.paramRaw := by
+  unfold paramRaw
+  refine continuous_const.add (continuous_finsetSum _ (fun i _ => ?_))
+  exact (ramp_continuous.comp (by fun_prop)).smul continuous_const
+
+/-- The PL parametrisation as a map on `Icc 0 1`. -/
+noncomputable def param (t : Set.Icc (0 : ℝ) 1) : Plane := β.paramRaw (t : ℝ)
+
+theorem continuous_param : Continuous β.param :=
+  β.continuous_paramRaw.comp continuous_subtype_val
+
+/-! #### Telescoping and the per-interval collapse
+
+`vertAt m` is `verts` clamped to the last vertex for `m > numSegs`; this lets us run
+the elementary `Finset.sum_range_sub` telescope on the partial sums of segment
+difference-vectors. -/
+
+/-- `verts` extended to `ℕ`, clamped at the last index. -/
+def vertAt (m : ℕ) : Plane := β.verts ⟨min m β.numSegs, by
+  have := Nat.min_le_right m β.numSegs; omega⟩
+
+theorem vertAt_eq_of_le {m : ℕ} (hm : m ≤ β.numSegs) (k : Fin (β.numSegs + 1))
+    (hk : (k : ℕ) = m) : β.vertAt m = β.verts k := by
+  unfold vertAt
+  congr 1
+  apply Fin.ext
+  simp only [Fin.val_mk, hk, min_eq_left hm]
+
+theorem vertAt_zero : β.vertAt 0 = β.verts 0 :=
+  β.vertAt_eq_of_le (by omega) 0 (by simp)
+
+/-- The `k`-th difference vector `verts (k+1) − verts k` agrees with the telescoping
+difference of `vertAt`, for `k < numSegs`. -/
+theorem diff_eq_vertAt_sub {k : ℕ} (hk : k < β.numSegs) :
+    β.verts (Fin.succ (⟨k, hk⟩ : Fin β.numSegs))
+        - β.verts (Fin.castSucc (⟨k, hk⟩ : Fin β.numSegs))
+      = β.vertAt (k + 1) - β.vertAt k := by
+  rw [β.vertAt_eq_of_le (by omega) (Fin.succ (⟨k, hk⟩ : Fin β.numSegs)) (by simp [Fin.succ]),
+    β.vertAt_eq_of_le (by omega) (Fin.castSucc (⟨k, hk⟩ : Fin β.numSegs)) (by simp [Fin.castSucc, Fin.castAdd])]
+
+/-- Telescoping the difference vectors over an initial range:
+`∑_{k<j} (verts (k+1) − verts k) = verts j − verts 0` for `j ≤ numSegs`. -/
+theorem sum_range_diff {j : ℕ} (hj : j ≤ β.numSegs) :
+    ∑ k ∈ Finset.range j,
+        (β.vertAt (k + 1) - β.vertAt k) = β.vertAt j - β.vertAt 0 := by
+  exact Finset.sum_range_sub β.vertAt j
+
+/-- **Per-interval collapse (local-coordinate form).**  If the rescaled position
+`n·x` equals `i + s` with `s ∈ [0,1]`, then `paramRaw x` is the affine interpolation
+of the `i`-th segment with parameter `s`. -/
+theorem paramRaw_collapse_of (x : ℝ) (i : Fin β.numSegs) (s : ℝ)
+    (hx : (β.numSegs : ℝ) * x = (i : ℝ) + s) (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+    β.paramRaw x
+      = (1 - s) • β.verts (Fin.castSucc i) + s • β.verts (Fin.succ i) := by
+  unfold paramRaw
+  -- rewrite each summand to the telescoping difference of `vertAt`
+  have hstep : ∀ k : Fin β.numSegs,
+      ramp ((β.numSegs : ℝ) * x - (k : ℝ)) •
+          (β.verts (Fin.succ k) - β.verts (Fin.castSucc k))
+        = ramp ((β.numSegs : ℝ) * x - (k : ℝ)) •
+          (β.vertAt ((k : ℕ) + 1) - β.vertAt (k : ℕ)) := by
+    intro k; rw [β.diff_eq_vertAt_sub k.isLt]
+  rw [Finset.sum_congr rfl (fun k _ => hstep k)]
+  -- move to a sum over `range n`
+  rw [show (∑ k : Fin β.numSegs, ramp ((β.numSegs : ℝ) * x - (k : ℝ)) •
+        (β.vertAt ((k : ℕ) + 1) - β.vertAt (k : ℕ)))
+      = ∑ k ∈ Finset.range β.numSegs, ramp ((β.numSegs : ℝ) * x - (k : ℝ)) •
+        (β.vertAt (k + 1) - β.vertAt k) from
+    Fin.sum_univ_eq_sum_range
+      (fun k => ramp ((β.numSegs : ℝ) * x - (k : ℝ)) •
+        (β.vertAt (k + 1) - β.vertAt k)) β.numSegs]
+  have hi : (i : ℕ) < β.numSegs := i.isLt
+  -- ramp = 1 for indices < i
+  have hlt : ∀ k ∈ Finset.range (i : ℕ),
+      ramp ((β.numSegs : ℝ) * x - (k : ℝ)) • (β.vertAt (k + 1) - β.vertAt k)
+        = β.vertAt (k + 1) - β.vertAt k := by
+    intro k hk
+    rw [Finset.mem_range] at hk
+    have hki : (k : ℝ) + 1 ≤ (i : ℝ) := by exact_mod_cast hk
+    rw [ramp_of_one_le (by rw [hx]; linarith), one_smul]
+  -- ramp = 0 for indices > i
+  have hgt : ∀ k ∈ Finset.range β.numSegs \ Finset.range ((i : ℕ) + 1),
+      ramp ((β.numSegs : ℝ) * x - (k : ℝ)) • (β.vertAt (k + 1) - β.vertAt k) = 0 := by
+    intro k hk
+    rw [Finset.mem_sdiff, Finset.mem_range, Finset.mem_range, not_lt] at hk
+    have hki : (i : ℝ) + 1 ≤ (k : ℝ) := by exact_mod_cast hk.2
+    rw [ramp_of_le_zero (by rw [hx]; linarith), zero_smul]
+  -- compute the sum
+  rw [← Finset.sum_range_add_sum_Ico _ (by omega : (i : ℕ) + 1 ≤ β.numSegs)]
+  have hIco : (Finset.Ico ((i : ℕ) + 1) β.numSegs)
+      = Finset.range β.numSegs \ Finset.range ((i : ℕ) + 1) := by
+    ext k; simp only [Finset.mem_Ico, Finset.mem_sdiff, Finset.mem_range]; omega
+  rw [hIco, Finset.sum_eq_zero hgt, add_zero]
+  rw [Finset.sum_range_succ, Finset.sum_congr rfl hlt, β.sum_range_diff (by omega)]
+  -- ramp at index i is s
+  rw [show ramp ((β.numSegs : ℝ) * x - ((i : ℕ) : ℝ)) = s from by
+        rw [hx]; rw [show (i : ℝ) + s - ((i : ℕ) : ℝ) = s from by push_cast; ring]
+        exact ramp_of_mem hs0 hs1, β.vertAt_zero]
+  -- finish algebraically
+  have hvi : β.vertAt (i : ℕ) = β.verts (Fin.castSucc i) :=
+    β.vertAt_eq_of_le (by omega) (Fin.castSucc i) (by simp [Fin.castSucc, Fin.castAdd])
+  have hvi1 : β.vertAt ((i : ℕ) + 1) = β.verts (Fin.succ i) :=
+    β.vertAt_eq_of_le (by omega) (Fin.succ i) (by simp [Fin.succ])
+  rw [hvi, hvi1]
+  rw [smul_sub, sub_smul, one_smul]
+  abel
+
+end PolyArc
+
 end CrossingLemma.PlaneArcSeparation
