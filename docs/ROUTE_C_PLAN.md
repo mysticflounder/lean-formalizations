@@ -453,10 +453,18 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `pos_turn_sideForm_of_overlap` holds (explicit `r = |τ|·α·‖b−v‖² /
    (|dotp(v−a,b−v)|·(|b.1−v.1|+|b.2−v.2|)+1)`; proof via `abs_sideForm_le_dist` +
    ordered-field algebra). So a sufficiently small vertex disk makes the slab and disk
-   labels agree on their overlap. (ii) define `slabᵢ`,
-   `diskᵥ`, and the per-piece side label `g`; (iii) show the pieces **cover** `T\β`;
-   (iv) assemble `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk
-   non-emptiness via the sector witnesses `a+b−v`, `3v−a−b`).
+   labels agree on their overlap. (ii) **PARTIAL** — the per-edge local model is
+   DONE: `edgeBand s t = {z | footParam s t z ∈ (0,1)}` (the slab strictly between the
+   two endpoints, bounded away from the vertices) splits into the two open sides
+   `edgePlus`/`edgeMinus` (`isOpen_*`, `disjoint_edgePlus_edgeMinus`,
+   `edgePlus_union_edgeMinus : edgePlus ⊔ edgeMinus = edgeBand ∖ {sideForm = 0}`, and
+   both `*_nonempty` via the midpoint pushed off by the edge normal, foot `= 1/2`,
+   `sideForm = ±‖t−s‖²`).  The per-vertex sides are the existing L2 corner sectors
+   (`convexSector`/`reflexSector`).  STILL TODO in (ii): the per-vertex `diskᵥ` (ball
+   small enough to invoke `exists_radius_thin`) and the assembly of slabs+disks into a
+   single global label `g`; (iii) show the pieces **cover** `T\β`; (iv) assemble
+   `T⁺,T⁻` open, disjoint, union `= T\β`, both nonempty (the disk non-emptiness via the
+   sector witnesses `a+b−v`, `3v−a−b`).
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close

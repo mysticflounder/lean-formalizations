@@ -1370,4 +1370,94 @@ theorem exists_radius_thin (a v b : Plane) (α : ℝ)
     _ ≤ |sideForm a v b| * dotp (z - v) (b - v) :=
           mul_le_mul_of_nonneg_left hlow (le_of_lt hsf)
 
+/-! ### The per-edge local model: the band split into two sides
+
+The edge counterpart of the corner sectors.  The open **band**
+`edgeBand s t = {z | footParam s t z ∈ (0,1)}` is the infinite slab between the two
+lines perpendicular to the edge `[s,t]` at `s` and at `t`.  Inside the band the
+side-functional vanishes exactly on the open segment, so removing it splits the
+band into the two open half-band sides `edgePlus`, `edgeMinus`.  Across a vertex
+these edge sides are reconciled with the corner sectors by the overlap-consistency
+engine (`pos_turn_sideForm_of_overlap` + `exists_radius_thin`). -/
+
+/-- The open **band** of the edge `[s,t]`: points whose foot parameter is strictly
+between the two endpoints.  Bounded away from the vertices (foot `∈ (0,1)`), so the
+band excludes the vertex neighbourhoods where the corner sectors take over. -/
+def edgeBand (s t : Plane) : Set Plane := {z | footParam s t z ∈ Set.Ioo (0 : ℝ) 1}
+
+/-- The **positive side** of the edge band (`sideForm s t z > 0`). -/
+def edgePlus (s t : Plane) : Set Plane := edgeBand s t ∩ {z | 0 < sideForm s t z}
+
+/-- The **negative side** of the edge band (`sideForm s t z < 0`). -/
+def edgeMinus (s t : Plane) : Set Plane := edgeBand s t ∩ {z | sideForm s t z < 0}
+
+theorem isOpen_edgeBand (s t : Plane) : IsOpen (edgeBand s t) :=
+  isOpen_Ioo.preimage (continuous_footParam s t)
+
+theorem isOpen_edgePlus (s t : Plane) : IsOpen (edgePlus s t) :=
+  (isOpen_edgeBand s t).inter (isOpen_lt continuous_const (continuous_sideForm s t))
+
+theorem isOpen_edgeMinus (s t : Plane) : IsOpen (edgeMinus s t) :=
+  (isOpen_edgeBand s t).inter (isOpen_lt (continuous_sideForm s t) continuous_const)
+
+theorem disjoint_edgePlus_edgeMinus (s t : Plane) :
+    Disjoint (edgePlus s t) (edgeMinus s t) := by
+  rw [Set.disjoint_left]
+  rintro z hp hm
+  simp only [edgePlus, edgeMinus, Set.mem_inter_iff, Set.mem_setOf_eq] at hp hm
+  linarith [hp.2, hm.2]
+
+/-- The two edge sides are exactly the band minus its side-functional zero locus
+(the open segment).  `edgeBand ∖ {sideForm = 0} = edgePlus ⊔ edgeMinus`. -/
+theorem edgePlus_union_edgeMinus (s t : Plane) :
+    edgePlus s t ∪ edgeMinus s t = edgeBand s t \ {z | sideForm s t z = 0} := by
+  ext z
+  simp only [edgePlus, edgeMinus, Set.mem_union, Set.mem_inter_iff, Set.mem_diff,
+    Set.mem_setOf_eq]
+  constructor
+  · rintro (⟨hb, h⟩ | ⟨hb, h⟩)
+    · exact ⟨hb, ne_of_gt h⟩
+    · exact ⟨hb, ne_of_lt h⟩
+  · rintro ⟨hb, hne⟩
+    rcases lt_or_gt_of_ne hne with h | h
+    · exact Or.inr ⟨hb, h⟩
+    · exact Or.inl ⟨hb, h⟩
+
+/-- The positive side is nonempty: the midpoint pushed off by the left normal
+`(−(t.2−s.2), t.1−s.1)` lands on it (foot parameter `1/2`, `sideForm = ‖t−s‖² > 0`). -/
+theorem edgePlus_nonempty {s t : Plane} (h : t ≠ s) : (edgePlus s t).Nonempty := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  refine ⟨((s.1 + t.1) / 2 - (t.2 - s.2), (s.2 + t.2) / 2 + (t.1 - s.1)), ?_, ?_⟩
+  · have hfoot : footParam s t ((s.1 + t.1) / 2 - (t.2 - s.2),
+        (s.2 + t.2) / 2 + (t.1 - s.1)) = 1 / 2 := by
+      rw [footParam]
+      have hnum : dotp (((s.1 + t.1) / 2 - (t.2 - s.2), (s.2 + t.2) / 2 + (t.1 - s.1)) - s)
+            (t - s) = dotp (t - s) (t - s) / 2 := by
+        simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+      rw [hnum]; field_simp
+    simp only [edgeBand, Set.mem_setOf_eq, hfoot, Set.mem_Ioo]; norm_num
+  · show 0 < sideForm s t _
+    have hsf : sideForm s t ((s.1 + t.1) / 2 - (t.2 - s.2), (s.2 + t.2) / 2 + (t.1 - s.1))
+          = dotp (t - s) (t - s) := by
+      simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub]; ring
+    rw [hsf]; exact hP
+
+/-- The negative side is nonempty: the midpoint pushed off by the right normal. -/
+theorem edgeMinus_nonempty {s t : Plane} (h : t ≠ s) : (edgeMinus s t).Nonempty := by
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos h
+  refine ⟨((s.1 + t.1) / 2 + (t.2 - s.2), (s.2 + t.2) / 2 - (t.1 - s.1)), ?_, ?_⟩
+  · have hfoot : footParam s t ((s.1 + t.1) / 2 + (t.2 - s.2),
+        (s.2 + t.2) / 2 - (t.1 - s.1)) = 1 / 2 := by
+      rw [footParam]
+      have hnum : dotp (((s.1 + t.1) / 2 + (t.2 - s.2), (s.2 + t.2) / 2 - (t.1 - s.1)) - s)
+            (t - s) = dotp (t - s) (t - s) / 2 := by
+        simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+      rw [hnum]; field_simp
+    simp only [edgeBand, Set.mem_setOf_eq, hfoot, Set.mem_Ioo]; norm_num
+  · show sideForm s t _ < 0
+    have hsf : sideForm s t ((s.1 + t.1) / 2 + (t.2 - s.2), (s.2 + t.2) / 2 - (t.1 - s.1))
+          = - dotp (t - s) (t - s) := by
+      simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub]; ring
+    rw [hsf]; linarith [hP]
+
 end CrossingLemma.PlaneArcSeparation
