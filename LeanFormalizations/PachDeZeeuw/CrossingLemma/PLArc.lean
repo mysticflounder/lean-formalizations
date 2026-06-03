@@ -2726,6 +2726,46 @@ theorem not_mem_adjacent_band_strip (β : PolyArc) {α δ₀ r : ℝ} (i : Fin �
   have := (abs_lt.mp hbound).1
   linarith
 
+/-- **Adjacent band ↔ strip impossibility, outgoing arm.**  The mirror of
+`not_mem_adjacent_band_strip` for a point in edge `(i+1)`'s narrowed mid-band that is also
+within `δ₀` of both edges `i` and `i+1`.  Here the shared vertex is edge `(i+1)`'s *source*
+(`footParam = 0`), so the Lipschitz budget uses edge `(i+1)`'s constant. -/
+theorem not_mem_adjacent_band_strip_src (β : PolyArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
+    (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hconf : ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ i)) < r)
+    (hLr : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+            + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+            / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+                   (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) * r ≤ α)
+    {z : Plane}
+    (hmid : z ∈ edgeBandMid (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) α)
+    (hzi : Metric.infDist z (β.segCarrier i) < δ₀)
+    (hzi1 : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀) : False := by
+  set k : Fin β.numSegs := ⟨(i : ℕ) + 1, hi1⟩ with hk
+  have hne : β.segTgt k ≠ β.segSrc k := β.segTgt_ne_segSrc k
+  have hidx : (Fin.castSucc k : Fin (β.numSegs + 1)) = Fin.succ i :=
+    Fin.ext (by simp [Fin.val_succ, hk])
+  have hsv : β.segSrc k = β.verts (Fin.succ i) := by rw [PolyArc.segSrc, hidx]
+  have hfp_gt : α < footParam (β.segSrc k) (β.segTgt k) z := hmid.1
+  have hconf' : dist z (β.verts (Fin.succ i)) < r := hconf z hzi hzi1
+  have hfs : footParam (β.segSrc k) (β.segTgt k) (β.segSrc k) = 0 := footParam_src _ _
+  have hlip := abs_footParam_sub_le hne (β.segSrc k) z
+  rw [hfs, sub_zero] at hlip
+  set L := (|(β.segTgt k).1 - (β.segSrc k).1| + |(β.segTgt k).2 - (β.segSrc k).2|)
+            / dotp (β.segTgt k - β.segSrc k) (β.segTgt k - β.segSrc k) with hL
+  have hLpos : 0 < L := div_pos (segDir_l1_pos β k) (dotp_self_pos hne)
+  have hdist : dist (β.segSrc k) z = dist z (β.verts (Fin.succ i)) := by rw [hsv, dist_comm]
+  rw [hdist] at hlip
+  have hbound : |footParam (β.segSrc k) (β.segTgt k) z| < α :=
+    calc |footParam (β.segSrc k) (β.segTgt k) z|
+        ≤ L * dist z (β.verts (Fin.succ i)) := hlip
+      _ < L * r := mul_lt_mul_of_pos_left hconf' hLpos
+      _ ≤ α := hLr
+  have := (abs_lt.mp hbound).2
+  linarith
+
 /-! #### P3 disjointness — adjacent band ↔ sector (the corner glue).
 
 Edge `i` is the **incoming** arm `a→v` of the corner `a = segSrc i, v = segTgt i,
@@ -3182,5 +3222,128 @@ theorem disjoint_sectorPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs 
   rw [Set.disjoint_left]
   intro z hzs hzc
   exact (Set.disjoint_left.mp hball) hzs.2 hzc.1.1
+
+/-! #### P3 — the per-cell "all indices" lemmas.
+
+Each of the following resolves one cell of the `collarPlus × collarMinus` disjointness grid
+across *all* index pairs, doing its own index case analysis once.  The master assembly then
+glues them via `Set.disjoint_union_*` / `Set.disjoint_iUnion_*`.
+
+The band-adjacency content is bundled as `hadj_tgt`/`hadj_src` — exactly the conclusions of
+`not_mem_adjacent_band_strip` / `not_mem_adjacent_band_strip_src` (the existence step feeds
+those their corner confinement + Lipschitz budgets). -/
+
+/-- **band⁺ ↔ band⁻, all index pairs.**  Same edge → sign clash; adjacent → the corner
+impossibility (target arm if the `+` band is the lower edge, source arm if upper);
+non-adjacent → the strip separation. -/
+theorem disjoint_bandStripPlus_bandStripMinus_all (β : PolyArc) {α δ₀ δsep : ℝ}
+    (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hadj_tgt : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs) (z : Plane),
+      z ∈ edgeBandMid (β.segSrc c) (β.segTgt c) α →
+      Metric.infDist z (β.segCarrier c) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False)
+    (hadj_src : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs) (z : Plane),
+      z ∈ edgeBandMid (β.segSrc ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) α →
+      Metric.infDist z (β.segCarrier c) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False)
+    (i k : Fin β.numSegs) :
+    Disjoint (bandStripPlus β α δ₀ i) (bandStripMinus β α δ₀ k) := by
+  rw [Set.disjoint_left]
+  intro z hzp hzm
+  rcases lt_trichotomy (i : ℕ) (k : ℕ) with hlt | heq | hgt
+  · rcases eq_or_lt_of_le (Nat.succ_le_of_lt hlt) with hadj | hfar
+    · -- k = i+1 : plus band is the lower (target) arm
+      have hk1 : (i : ℕ) + 1 < β.numSegs := by have := k.isLt; omega
+      have hkeq : k = ⟨(i : ℕ) + 1, hk1⟩ := Fin.ext (by simpa using hadj.symm)
+      rw [hkeq] at hzm
+      exact hadj_tgt i hk1 z hzp.1.1 hzp.2 hzm.2
+    · exact hsep i k hfar z (lt_of_lt_of_le hzp.2 hδ₀sep) (lt_of_lt_of_le hzm.2 hδ₀sep)
+  · have hik : i = k := Fin.ext heq
+    rw [hik] at hzp
+    have hp : 0 < sideForm (β.segSrc k) (β.segTgt k) z := hzp.1.2
+    have hm : sideForm (β.segSrc k) (β.segTgt k) z < 0 := hzm.1.2
+    linarith
+  · rcases eq_or_lt_of_le (Nat.succ_le_of_lt hgt) with hadj | hfar
+    · -- i = k+1 : plus band is the upper (source) arm
+      have hi1 : (k : ℕ) + 1 < β.numSegs := by have := i.isLt; omega
+      have hieq : i = ⟨(k : ℕ) + 1, hi1⟩ := Fin.ext (by simpa using hadj.symm)
+      rw [hieq] at hzp
+      exact hadj_src k hi1 z hzp.1.1 hzm.2 hzp.2
+    · exact hsep k i hfar z (lt_of_lt_of_le hzm.2 hδ₀sep) (lt_of_lt_of_le hzp.2 hδ₀sep)
+
+/-- **band⁺ ↔ sector⁻, all index pairs.**  Incident (`i = j` incoming, `i = j+1` outgoing)
+→ the corner glue; non-incident → strip/ball separation. -/
+theorem disjoint_bandStripPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ δsep : ℝ} (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
+    (hτ : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
+    (hδin : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segSrc c - β.segTgt c)|
+          * (|(β.segSrc c).1 - (β.segTgt c).1| + |(β.segSrc c).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)|
+          * (α * dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c)))
+    (hδout : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segSrc c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)|
+          * (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segTgt c).1|
+              + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
+          * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)))
+    (i j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (bandStripPlus β α δ₀ i) (sectorMinus β ρ j hj1) := by
+  by_cases hij : (i : ℕ) = (j : ℕ)
+  · have hijF : i = j := Fin.ext hij
+    rw [hijF]
+    exact disjoint_bandStripPlus_sectorMinus_incoming β ρ j hj1 hα (hτ j hj1) (hδin j hj1)
+  · by_cases hij1 : (i : ℕ) = (j : ℕ) + 1
+    · have hieq : i = ⟨(j : ℕ) + 1, hj1⟩ := Fin.ext hij1
+      rw [hieq]
+      exact disjoint_bandStripPlus_sectorMinus_outgoing β ρ j hj1 hα (hτ j hj1) (hδout j hj1)
+    · exact (disjoint_stripSupport_vertexBall_nonincident β ρ i j hj1 hsep hδ₀sep
+        (hρsep _) hij hij1).mono
+        (bandStripPlus_subset_stripSupport β α δ₀ i) (fun _ hz => hz.2)
+
+/-- **sector⁺ ↔ band⁻, all index pairs.**  The sign-swapped mirror of the previous. -/
+theorem disjoint_sectorPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {α δ₀ δsep : ℝ} (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
+    (hτ : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
+    (hδin : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segSrc c - β.segTgt c)|
+          * (|(β.segSrc c).1 - (β.segTgt c).1| + |(β.segSrc c).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) (β.segTgt c) (β.segSrc c)|
+          * (α * dotp (β.segSrc c - β.segTgt c) (β.segSrc c - β.segTgt c)))
+    (hδout : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      |dotp (β.segTgt c - β.segSrc c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)|
+          * (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segTgt c).1|
+              + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) * δ₀
+        < |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
+          * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
+                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)))
+    (i j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
+    Disjoint (sectorPlus β ρ j hj1) (bandStripMinus β α δ₀ i) := by
+  by_cases hij : (i : ℕ) = (j : ℕ)
+  · have hijF : i = j := Fin.ext hij
+    rw [hijF]
+    exact (disjoint_bandStripMinus_sectorPlus_incoming β ρ j hj1 hα (hτ j hj1) (hδin j hj1)).symm
+  · by_cases hij1 : (i : ℕ) = (j : ℕ) + 1
+    · have hieq : i = ⟨(j : ℕ) + 1, hj1⟩ := Fin.ext hij1
+      rw [hieq]
+      exact (disjoint_bandStripMinus_sectorPlus_outgoing β ρ j hj1 hα (hτ j hj1)
+        (hδout j hj1)).symm
+    · exact ((disjoint_stripSupport_vertexBall_nonincident β ρ i j hj1 hsep hδ₀sep
+        (hρsep _) hij hij1).mono
+        (bandStripMinus_subset_stripSupport β α δ₀ i) (fun _ hz => hz.2)).symm
 
 end CrossingLemma.PlaneArcSeparation
