@@ -742,7 +742,7 @@ theorem paramRaw_collapse_of (x : ℝ) (i : Fin β.numSegs) (s : ℝ)
   rw [Finset.sum_range_succ, Finset.sum_congr rfl hlt, β.sum_range_diff (by omega)]
   -- ramp at index i is s
   rw [show ramp ((β.numSegs : ℝ) * x - ((i : ℕ) : ℝ)) = s from by
-        rw [hx]; rw [show (i : ℝ) + s - ((i : ℕ) : ℝ) = s from by push_cast; ring]
+        rw [hx]; rw [show (i : ℝ) + s - ((i : ℕ) : ℝ) = s from by ring]
         exact ramp_of_mem hs0 hs1, β.vertAt_zero]
   -- finish algebraically
   have hvi : β.vertAt (i : ℕ) = β.verts (Fin.castSucc i) :=
@@ -1006,6 +1006,49 @@ noncomputable def toSimpleArc : SimpleArc Plane where
   toFun := β.param
   continuous_toFun := β.continuous_param
   injective_toFun := β.injective_param
+
+/-! #### Carrier relation (step (c)) -/
+
+/-- Every segment point is attained: for `z ∈ segCarrier i`, there is `t ∈ [0,1]`
+with `param t = z`.  (Take `t = (i + s)/n` for the affine parameter `s` of `z`.) -/
+theorem segCarrier_subset_range_param (i : Fin β.numSegs) :
+    β.segCarrier i ⊆ Set.range β.param := by
+  intro z hz
+  rw [segCarrier, segSrc, segTgt] at hz
+  obtain ⟨p, q, hp, hq, hpq, rfl⟩ := hz
+  -- `z = p•verts i + q•verts (i+1)` with `p + q = 1`, `p,q ≥ 0`; set `s := q`
+  have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+    have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+  set tv : ℝ := ((i : ℝ) + q) / (β.numSegs : ℝ) with htv
+  have hile : (i : ℝ) ≤ (β.numSegs : ℝ) - 1 := by
+    have : (i : ℕ) ≤ β.numSegs - 1 := by have := i.isLt; omega
+    have h2 : ((i : ℕ) : ℝ) ≤ ((β.numSegs - 1 : ℕ) : ℝ) := by exact_mod_cast this
+    rw [Nat.cast_sub (by have := β.numSegs_pos; omega)] at h2; push_cast at h2; linarith
+  have htv0 : 0 ≤ tv := by
+    rw [htv]; apply div_nonneg _ (le_of_lt hnpos)
+    have : (0 : ℝ) ≤ (i : ℝ) := by positivity
+    linarith
+  have htv1 : tv ≤ 1 := by
+    rw [htv, div_le_one hnpos]; linarith [hpq, hile, hq]
+  refine ⟨⟨tv, htv0, htv1⟩, ?_⟩
+  have hnt : (β.numSegs : ℝ) * tv = (i : ℝ) + q := by
+    rw [htv]; field_simp
+  have := β.paramRaw_collapse_of tv i q hnt hq (by linarith [hpq, hp])
+  unfold param
+  rw [show ((⟨tv, htv0, htv1⟩ : Set.Icc (0 : ℝ) 1) : ℝ) = tv from rfl, this]
+  have hps : p = 1 - q := by linarith
+  rw [hps]
+
+/-- **Carrier relation.**  The range of the PL parametrisation is exactly the
+`PolyArc` carrier (the union of its closed segments). -/
+theorem range_toSimpleArc : Set.range β.toSimpleArc = β.carrier := by
+  apply Set.Subset.antisymm
+  · rintro z ⟨t, rfl⟩
+    exact Set.mem_iUnion.mpr ⟨β.idx t, β.param_mem_segCarrier t⟩
+  · intro z hz
+    rw [carrier, Set.mem_iUnion] at hz
+    obtain ⟨i, hi⟩ := hz
+    exact β.segCarrier_subset_range_param i hi
 
 end PolyArc
 

@@ -345,15 +345,24 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
 1. **`PolyArc → SimpleArc Plane` coercion** (PL parametrisation): continuous,
    injective piecewise-affine `Icc 0 1 → Plane`; relate `carrier`/`arcInterior` to
    `PolyArc.carrier` and the endpoint set. Plumbing, real. *(deps: none external)*
-   **Started 2026-06-02:** `PolyArc` now carries the no-self-crossing field
-   `nonadjacent_disjoint` (non-consecutive closed segments disjoint), and the metric
-   backbone is PROVEN: `segCarrier_isCompact`, and `exists_pos_nonadjacent_sep` —
-   the **uniform `d_sep > 0`** separating every non-adjacent segment pair (via
-   `exists_pos_forall_lt_dist` = `Metric.exists_pos_forall_lt_edist` in `dist` form,
-   minimised over the finitely many pairs). All sorry-free, axiom-clean. *Still TODO
-   for sub-node 1:* the `consecutive_meet` field (adjacent segments meet only at the
-   shared vertex) and the parametrisation map + its continuity/injectivity, then the
-   `carrier`/`arcInterior` relations.
+   **DONE (a)+(b)+(c) 2026-06-02, sorry-free, axiom-clean
+   `[propext, Classical.choice, Quot.sound]`:**
+   - (a) `PolyArc` carries the no-self-crossing fields `nonadjacent_disjoint`
+     (non-consecutive closed segments disjoint) **and now `consecutive_meet`**
+     (adjacent segments meet only at the shared vertex). Metric backbone PROVEN:
+     `segCarrier_isCompact`, `exists_pos_nonadjacent_sep` (uniform `d_sep > 0`).
+   - (b) **The parametrisation is built and PROVEN.** Ramp-sum form: `ramp` (clamp to
+     `[0,1]`), `paramRaw` / `param` with `continuous_param`; `vertAt` telescoping
+     helpers + `paramRaw_collapse_of` (per-interval affine collapse). Index
+     assignment `idx` (clamped floor) with `locCoord ∈ [0,1]`, `param_mem_segCarrier`,
+     `idx_mono`. Affine injectivity `affine_inj`/`affine_eq_left`/`affine_eq_right`.
+     `injective_param` via the three-case argument (same segment / adjacent via
+     `consecutive_meet` / non-adjacent via `nonadjacent_disjoint`). Coercion
+     `PolyArc.toSimpleArc : SimpleArc Plane`.
+   - (c) **Carrier relation PROVEN:** `range_toSimpleArc : Set.range β.toSimpleArc =
+     β.carrier` (via `segCarrier_subset_range_param`). *Still TODO for sub-node 1:*
+     the `arcInterior`/endpoint-set relations (relate `arcInterior β.toSimpleArc` to
+     the open segments / interior vertices and the two endpoints `src`/`tgt`).
 2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`. Construction =
    thin tube — per segment an open slab around the *open* segment, per interior
    vertex a small disk, radius = `min` over (dist to non-adjacent segments, dist to
@@ -386,9 +395,15 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
 `compl_sectors_eq_cornerLocus`), sub-node-3's "sectors avoid incident segments",
 **and the metric disk-localisation `ball_inter_cornerLocus`** are PROVEN sorry-free
 and axiom-clean in `PLArc.lean`. **Sub-node 3 (local separation) is now
-algebraically complete.** What remains in L3 is sub-node 2 (the tube as a metric
-object) and sub-node 1 (the `PolyArc → SimpleArc` coercion), then the global g and
-the G-nodes.
+algebraically complete.** **Sub-node 1 — the `PolyArc → SimpleArc Plane` coercion —
+is now PROVEN (parts (a)+(b)+(c)):** the `consecutive_meet` simplicity field, the
+ramp-sum parametrisation with continuity (`continuous_param`) and injectivity
+(`injective_param`), the coercion `toSimpleArc`, and the carrier relation
+`range_toSimpleArc = carrier`; all sorry-free, axiom-clean
+`[propext, Classical.choice, Quot.sound]`. **The only loose end in sub-node 1** is
+the `arcInterior`/endpoint relations (not yet needed downstream). What remains in L3
+is sub-node 2 (the tapered tube as a metric object), then the global g and the
+G-nodes.
 
 ### Tube + global side-function design (decided 2026-06-02, before coding sub-node 2)
 
