@@ -28,7 +28,7 @@ import Mathlib
 
 namespace CrossingLemma.PLCover
 
-open Set Topology
+open Set Topology Bundle
 open scoped Classical
 
 universe u
@@ -264,6 +264,152 @@ theorem open_iff_sheet0 (s : ZMod 2) {W : Set B} (hW : W ⊆ D.V₀) :
       hemb.isOpenMap _ hval
     rw [Subtype.image_preimage_coe] at hWopen
     rwa [inter_eq_right.mpr hW] at hWopen
+
+/-! ### Chart 1 (symmetric, with the `g`-twist on the chart-0 side) -/
+
+theorem mk1_mem_sheet1 {y : ↥D.V₁} {t' t : ZMod 2} :
+    D.mk1 y t' ∈ D.sheet1 t ↔ t' = t := by
+  constructor
+  · rintro ⟨y'', h⟩
+    obtain ⟨hyy, hg⟩ := D.mk1_eq_mk1.mp h
+    rw [hyy] at hg
+    exact (add_right_cancel hg).symm
+  · rintro rfl; exact ⟨y, rfl⟩
+
+/-- The bridge from chart 0 to chart 1 on the overlap. -/
+theorem mk0_eq_mk1 (x : ↥D.V₀) (s : ZMod 2) (hx : (x : B) ∈ D.V₁) :
+    D.mk0 x s = D.mk1 ⟨(x : B), hx⟩ (s + D.g (x : B)) := by
+  rw [D.mk1_eq_mk0 ⟨(x : B), hx⟩ (s + D.g (x : B)) x.2, mk0_eq_mk0]
+  refine ⟨rfl, ?_⟩
+  have h2 : ∀ a : ZMod 2, a + a = 0 := by decide
+  rw [add_assoc, h2, add_zero]
+
+theorem mk0_mem_sheet1 {x : ↥D.V₀} {t s : ZMod 2} (hx : (x : B) ∈ D.V₁) :
+    D.mk0 x s ∈ D.sheet1 t ↔ s + D.g (x : B) = t := by
+  rw [D.mk0_eq_mk1 x s hx, mk1_mem_sheet1]
+
+theorem injOn_p_sheet1 (t : ZMod 2) : (D.sheet1 t).InjOn D.p := by
+  rintro a ⟨y, rfl⟩ b ⟨y', rfl⟩ hab
+  rw [p_mk1, p_mk1] at hab
+  rw [mk1_eq_mk1]; exact ⟨hab, by rw [hab]⟩
+
+theorem surjOn_p_sheet1 (t : ZMod 2) : (D.sheet1 t).SurjOn D.p D.V₁ := by
+  intro b hb
+  exact ⟨D.mk1 ⟨b, hb⟩ t, ⟨⟨b, hb⟩, rfl⟩, rfl⟩
+
+theorem pairwise_disjoint_sheet1 : Pairwise (Function.onFun Disjoint D.sheet1) := by
+  intro t t' htt
+  show Disjoint (D.sheet1 t) (D.sheet1 t')
+  rw [Set.disjoint_left]
+  rintro e ⟨y, rfl⟩ ⟨y', hy'⟩
+  obtain ⟨hyy, hg⟩ := D.mk1_eq_mk1.mp hy'
+  rw [hyy] at hg
+  exact htt (add_right_cancel hg).symm
+
+theorem exhaustive_sheet1 : D.p ⁻¹' D.V₁ ⊆ ⋃ t, D.sheet1 t := by
+  intro e he
+  rcases D.exists_rep e with ⟨x, s, rfl⟩ | ⟨y, t, rfl⟩
+  · rw [Set.mem_preimage, p_mk0] at he
+    exact Set.mem_iUnion.mpr ⟨s + D.g (x : B), ⟨(x : B), he⟩, (D.mk0_eq_mk1 x s he).symm⟩
+  · exact Set.mem_iUnion.mpr ⟨t, y, rfl⟩
+
+/-- The inr-chart preimage of `p⁻¹W ∩ sheet1 t` (the clean side). -/
+theorem inr_preim_sheet1 (t : ZMod 2) {W : Set B} (_hW : W ⊆ D.V₁) :
+    Sum.inr ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' (D.p ⁻¹' W ∩ D.sheet1 t))
+      = (Subtype.val ⁻¹' W) ×ˢ ({t} : Set (ZMod 2)) := by
+  ext ⟨y, t'⟩
+  simp only [Set.mem_preimage, mk'_inr, Set.mem_inter_iff, p_mk1, mk1_mem_sheet1,
+    Set.mem_prod, Set.mem_singleton_iff]
+
+/-- The inl-chart preimage of `p⁻¹W ∩ sheet1 t` (the twisted side). -/
+theorem inl_preim_sheet1 (t : ZMod 2) {W : Set B} (hW : W ⊆ D.V₁) :
+    Sum.inl ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' (D.p ⁻¹' W ∩ D.sheet1 t))
+      = (Subtype.val ⁻¹' (W ∩ D.Pp)) ×ˢ ({t} : Set (ZMod 2))
+        ∪ (Subtype.val ⁻¹' (W ∩ D.Pm)) ×ˢ ({t + 1} : Set (ZMod 2)) := by
+  ext ⟨x, s⟩
+  simp only [Set.mem_preimage, mk'_inl, Set.mem_inter_iff, p_mk0, Set.mem_union,
+    Set.mem_prod, Set.mem_singleton_iff]
+  have h2 : (1 : ZMod 2) + 1 = 0 := by decide
+  constructor
+  · rintro ⟨hxW, hsheet⟩
+    have hx1 : (x : B) ∈ D.V₁ := hW hxW
+    have hs : s + D.g (x : B) = t := (D.mk0_mem_sheet1 hx1).mp hsheet
+    have hov : (x : B) ∈ D.Pp ∪ D.Pm := by rw [← D.overlap]; exact ⟨x.2, hx1⟩
+    rcases hov with hpp | hpm
+    · left
+      refine ⟨⟨hxW, hpp⟩, ?_⟩
+      rwa [D.g_of_notMem_Pm (Set.disjoint_left.mp D.disjoint_Pp_Pm hpp), add_zero] at hs
+    · right
+      refine ⟨⟨hxW, hpm⟩, ?_⟩
+      rw [D.g_of_mem_Pm hpm] at hs
+      rw [← hs, add_assoc, h2, add_zero]
+  · rintro (⟨⟨hxW, hpp⟩, rfl⟩ | ⟨⟨hxW, hpm⟩, rfl⟩)
+    · refine ⟨hxW, (D.mk0_mem_sheet1 (hW hxW)).mpr ?_⟩
+      rw [D.g_of_notMem_Pm (Set.disjoint_left.mp D.disjoint_Pp_Pm hpp), add_zero]
+    · refine ⟨hxW, (D.mk0_mem_sheet1 (hW hxW)).mpr ?_⟩
+      rw [D.g_of_mem_Pm hpm, add_assoc, h2, add_zero]
+
+/-- **The sheet-homeomorphism condition for chart 1.** -/
+theorem open_iff_sheet1 (t : ZMod 2) {W : Set B} (hW : W ⊆ D.V₁) :
+    IsOpen W ↔ IsOpen (D.p ⁻¹' W ∩ D.sheet1 t) := by
+  constructor
+  · intro hWopen
+    rw [isOpen_E_iff]
+    refine ⟨?_, ?_⟩
+    · rw [D.inl_preim_sheet1 t hW]
+      exact ((((hWopen.inter D.isOpen_Pp).preimage continuous_subtype_val).prod
+          (isOpen_discrete _))).union
+        (((hWopen.inter D.isOpen_Pm).preimage continuous_subtype_val).prod (isOpen_discrete _))
+    · rw [D.inr_preim_sheet1 t hW]
+      exact (hWopen.preimage continuous_subtype_val).prod (isOpen_discrete _)
+  · intro hA
+    rw [isOpen_E_iff] at hA
+    have hinr := hA.2
+    rw [D.inr_preim_sheet1 t hW] at hinr
+    have hc : Continuous (fun y : ↥D.V₁ => (y, t)) := continuous_id.prodMk continuous_const
+    have hval : IsOpen (Subtype.val ⁻¹' W : Set ↥D.V₁) := by
+      have := hc.isOpen_preimage _ hinr
+      simpa [Set.preimage, Set.mem_prod] using this
+    have hemb := D.isOpen_V₁.isOpenEmbedding_subtypeVal
+    have hWopen : IsOpen (Subtype.val '' (Subtype.val ⁻¹' W : Set ↥D.V₁)) :=
+      hemb.isOpenMap _ hval
+    rw [Subtype.image_preimage_coe] at hWopen
+    rwa [inter_eq_right.mpr hW] at hWopen
+
+/-! ### The covering map -/
+
+/-- A function `B → E` exists (using the cover `V₀ ∪ V₁ = univ`), as required by
+`IsOpen.trivializationDiscrete`. -/
+theorem nonempty_fun : Nonempty (B → D.E) := by
+  refine ⟨fun b => ?_⟩
+  by_cases h : b ∈ D.V₀
+  · exact D.mk0 ⟨b, h⟩ 0
+  · have hb : b ∈ D.V₀ ∪ D.V₁ := by rw [D.cover]; exact Set.mem_univ b
+    exact D.mk1 ⟨b, hb.resolve_left h⟩ 0
+
+/-- The chart-`0` trivialization (base set `V₀`, fiber `ZMod 2`). -/
+noncomputable def triv0 : Trivialization (ZMod 2) D.p :=
+  haveI := D.nonempty_fun
+  D.isOpen_V₀.trivializationDiscrete D.sheet0 D.V₀ D.open_iff_sheet0
+    D.injOn_p_sheet0 D.surjOn_p_sheet0 D.pairwise_disjoint_sheet0 D.exhaustive_sheet0
+
+/-- The chart-`1` trivialization (base set `V₁`, fiber `ZMod 2`). -/
+noncomputable def triv1 : Trivialization (ZMod 2) D.p :=
+  haveI := D.nonempty_fun
+  D.isOpen_V₁.trivializationDiscrete D.sheet1 D.V₁ D.open_iff_sheet1
+    D.injOn_p_sheet1 D.surjOn_p_sheet1 D.pairwise_disjoint_sheet1 D.exhaustive_sheet1
+
+@[simp] theorem triv0_baseSet : D.triv0.baseSet = D.V₀ := rfl
+@[simp] theorem triv1_baseSet : D.triv1.baseSet = D.V₁ := rfl
+
+/-- **`p : E → B` is a covering map.** -/
+theorem isCoveringMap_p : IsCoveringMap D.p := by
+  apply IsFiberBundle.isCoveringMap (F := ZMod 2)
+  intro x
+  by_cases h : x ∈ D.V₀
+  · exact ⟨D.triv0, by rw [triv0_baseSet]; exact h⟩
+  · have hb : x ∈ D.V₀ ∪ D.V₁ := by rw [D.cover]; exact Set.mem_univ x
+    exact ⟨D.triv1, by rw [triv1_baseSet]; exact hb.resolve_left h⟩
 
 end GlueData
 
