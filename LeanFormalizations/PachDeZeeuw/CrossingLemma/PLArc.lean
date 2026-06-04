@@ -5018,6 +5018,140 @@ theorem dist_liftPlus_tgt_le (s t : Plane) (c ε : ℝ) :
             (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg ε))
       _ = (|1 - c| + |ε|) * dist s t := by ring
 
+/-- Sup-metric distance between two lifted edge points: both the foot-parameter gap and the
+normal-lift gap contribute, each scaled by the edge length. -/
+theorem dist_liftPlus_liftPlus_le (s t : Plane) (c ε c' ε' : ℝ) :
+    dist (liftPlus s t c ε) (liftPlus s t c' ε') ≤ (|c - c'| + |ε - ε'|) * dist s t := by
+  rw [Prod.dist_eq]; apply max_le
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).1 - (liftPlus s t c' ε').1
+        = (c - c') * (t.1 - s.1) - (ε - ε') * (t.2 - s.2) := by
+      simp only [liftPlus_fst]; ring
+    rw [e]
+    calc |(c - c') * (t.1 - s.1) - (ε - ε') * (t.2 - s.2)|
+          ≤ |(c - c') * (t.1 - s.1)| + |(ε - ε') * (t.2 - s.2)| := abs_sub _ _
+      _ = |c - c'| * |t.1 - s.1| + |ε - ε'| * |t.2 - s.2| := by rw [abs_mul, abs_mul]
+      _ ≤ |c - c'| * dist s t + |ε - ε'| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg _))
+            (mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg _))
+      _ = (|c - c'| + |ε - ε'|) * dist s t := by ring
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).2 - (liftPlus s t c' ε').2
+        = (c - c') * (t.2 - s.2) + (ε - ε') * (t.1 - s.1) := by
+      simp only [liftPlus_snd]; ring
+    rw [e]
+    calc |(c - c') * (t.2 - s.2) + (ε - ε') * (t.1 - s.1)|
+          ≤ |(c - c') * (t.2 - s.2)| + |(ε - ε') * (t.1 - s.1)| := abs_add_le _ _
+      _ = |c - c'| * |t.2 - s.2| + |ε - ε'| * |t.1 - s.1| := by rw [abs_mul, abs_mul]
+      _ ≤ |c - c'| * dist s t + |ε - ε'| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg _))
+            (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg _))
+      _ = (|c - c'| + |ε - ε'|) * dist s t := by ring
+
+/-- **Local overlap of the source-positive cap slices** (obligation B of the clipped end-cap
+connectivity). The slice family is `endCapSrcPlus β ρ ∩ ball(p c, r c)` with `p c = liftPlus s t c 0`
+the foot-`c` point of the first edge and `r c = min(δ₀, ½·infDist(p c) Rᶜ)`. Consecutive slices
+share a common point: the lift `w = liftPlus s t c ε` (a tiny `+`-side push of `p c`). The proof
+is done **entirely in the sup metric** (`dist_liftPlus_liftPlus_le`, `dist_liftPlus_src_le`): `w`
+is in the cap (`sideForm = ε·‖t−s‖₂² > 0`, `foot = c > 0`, `dist(w,v₀) < ρ 0`), in `ball(p c, r c)`
+(`dist_sup(w, p c) ≤ ε·dist(s,t) < r c`), and — using the 1-Lipschitz lower bound on `infDist`
+(`Metric.infDist_le_infDist_add_dist`) to keep `r c'` from collapsing — in `ball(p c', r c')`.
+Inputs: `δ₀ > 0`, the cap-radius budget `c_max·dist(s,t) < ρ 0`, and radius positivity
+`0 < infDist(p c) Rᶜ` on the foot range. -/
+theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
+    (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
+    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+      0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ) :
+    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+      ((endCapSrcPlus β ρ ∩ Metric.ball
+            (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
+            (min δ₀ (Metric.infDist
+              (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2)))
+        ∩ (endCapSrcPlus β ρ ∩ Metric.ball
+            (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c' 0)
+            (min δ₀ (Metric.infDist
+              (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c' 0) Rᶜ / 2)))).Nonempty := by
+  intro c hc
+  obtain ⟨hc0, hcle⟩ := hc
+  set s := β.segSrc β.firstSeg with hs
+  set t := β.segTgt β.firstSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
+  have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
+  have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
+  have hv0 : β.verts 0 = s := by
+    have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
+      apply Fin.ext; simp [PolyArc.firstSeg]
+    rw [hs, PolyArc.segSrc, hcast]
+  set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
+  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hcle⟩
+  set K := min (min δ₀ (I0 / 4)) (ρ 0 - c * dist s t) with hK
+  have hKpos : 0 < K := by
+    refine lt_min (lt_min hδ₀ (by positivity)) ?_
+    have hcc : c * dist s t ≤ c_max * dist s t := mul_le_mul_of_nonneg_right hcle hD.le
+    linarith [hρ]
+  set ε := K / (2 * (dist s t + 1)) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have hεD : ε * dist s t < K / 2 := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]; nlinarith [hKpos, hD]
+  have hKδ : K ≤ δ₀ := le_trans (min_le_left _ _) (min_le_left _ _)
+  have hKI : K ≤ I0 / 4 := le_trans (min_le_left _ _) (min_le_right _ _)
+  have hKρ : K ≤ ρ 0 - c * dist s t := min_le_right _ _
+  refine ⟨ε, hεpos, ?_⟩
+  intro c' hc' hcc'
+  set w := liftPlus s t c ε with hw
+  -- `w` is in the cap.
+  have hwfoot : footParam s t w = c := by rw [hw]; exact footParam_liftPlus hts c ε
+  have hwside : 0 < sideForm s t w := by
+    rw [hw, sideForm_liftPlus]; exact mul_pos hεpos hP
+  have hwball0 : dist w (β.verts 0) < ρ 0 := by
+    rw [hv0]
+    have hle : dist w s ≤ (c + ε) * dist s t := by
+      have h := dist_liftPlus_src_le s t c ε
+      rw [abs_of_nonneg hc0.le, abs_of_nonneg hεpos.le] at h; rw [hw]; exact h
+    have : (c + ε) * dist s t < ρ 0 := by nlinarith [hεD, hKρ, hKpos]
+    exact lt_of_le_of_lt hle this
+  have hwcap : w ∈ endCapSrcPlus β ρ := by
+    refine ⟨⟨Metric.mem_ball.mpr hwball0, ?_⟩, hwside⟩
+    show 0 < footParam s t w; rw [hwfoot]; exact hc0
+  -- `w` is in slice `c`.
+  have hwsl_c : w ∈ Metric.ball (liftPlus s t c 0) (min δ₀ (I0 / 2)) := by
+    rw [Metric.mem_ball]
+    have hle : dist w (liftPlus s t c 0) ≤ ε * dist s t := by
+      have h := dist_liftPlus_liftPlus_le s t c ε c 0
+      simp only [sub_self, abs_zero, sub_zero, zero_add] at h
+      rw [abs_of_nonneg hεpos.le] at h; rw [hw]; exact h
+    have hlt : ε * dist s t < min δ₀ (I0 / 2) := by
+      refine lt_min (by nlinarith [hεD, hKδ]) (by nlinarith [hεD, hKI])
+    exact lt_of_le_of_lt hle hlt
+  -- 1-Lipschitz lower bound on the radius at `c'`.
+  have hppdist : dist (liftPlus s t c 0) (liftPlus s t c' 0) ≤ |c - c'| * dist s t := by
+    have h := dist_liftPlus_liftPlus_le s t c 0 c' 0
+    simpa using h
+  have hI0' : I0 ≤ Metric.infDist (liftPlus s t c' 0) Rᶜ + |c - c'| * dist s t := by
+    have h := Metric.infDist_le_infDist_add_dist (x := liftPlus s t c 0)
+      (y := liftPlus s t c' 0) (s := Rᶜ)
+    rw [← hI0] at h; linarith [h, hppdist]
+  have hccD : |c - c'| * dist s t < ε * dist s t := by
+    have : |c - c'| < ε := by rw [abs_sub_comm]; exact hcc'
+    exact mul_lt_mul_of_pos_right this hD
+  -- `w` is in slice `c'`.
+  have hwsl_c' : w ∈ Metric.ball (liftPlus s t c' 0)
+      (min δ₀ (Metric.infDist (liftPlus s t c' 0) Rᶜ / 2)) := by
+    rw [Metric.mem_ball]
+    have hle : dist w (liftPlus s t c' 0) ≤ (|c - c'| + ε) * dist s t := by
+      have h := dist_liftPlus_liftPlus_le s t c ε c' 0
+      rw [sub_zero, abs_of_nonneg hεpos.le] at h; rw [hw]; exact h
+    have hI0'lo : I0 / 2 < Metric.infDist (liftPlus s t c' 0) Rᶜ := by
+      nlinarith [hI0', hccD, hεD, hKI]
+    have hlt : (|c - c'| + ε) * dist s t
+        < min δ₀ (Metric.infDist (liftPlus s t c' 0) Rᶜ / 2) := by
+      refine lt_min ?_ ?_
+      · nlinarith [hccD, hεD, hKδ]
+      · nlinarith [hccD, hεD, hKI, hI0'lo]
+    exact lt_of_le_of_lt hle hlt
+  exact ⟨w, ⟨hwcap, hwsl_c⟩, ⟨hwcap, hwsl_c'⟩⟩
+
 /-- **hO3.** The source end cap meets band `firstSeg`. -/
 theorem overlap_endCapSrcPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
