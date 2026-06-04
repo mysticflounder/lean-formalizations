@@ -34,12 +34,24 @@ The public theorem name is:
 
 The headline Lean theorems (unconditional, complete) are:
 
-* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`
   — **the strongest form**: every finite set with no three collinear points
   — no other hypothesis — admits ONE injective planar projection realizing
   the exact count `2n(n−1)` and absolute minimality among planar sets of
   the same size, whose image is in full planar general position (no three
-  collinear AND no four concyclic) and has zero rotational energy.
+  collinear AND no four concyclic), has zero rotational energy, AND whose
+  image distances are in bijection with the upstairs ±difference classes:
+  `#distances(T(G)) = #((G−G)∖{0}/±)`.  The distance-transport conjuncts
+  strictly strengthen `rotationEnergy = 0` (a projection kernel can collapse
+  two ±difference classes into one downstairs translation class, invisible
+  to the rotation channel); they are what turns the profile statement into
+  a distance-count statement.
+* `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`
+  — the sphere-slice corollary: for an EFPR lattice-sphere slice this
+  reduces "the projected near-enemy has few distances" to the external
+  arithmetic fact that the slice has few ±difference classes.
+* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+  — the same without the distance-transport conjuncts.
 * `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
   — the sphere-slice corollary: the complete projected EFPR enemy profile
   in one statement, with no affine-independence caveat.
@@ -132,6 +144,13 @@ Supporting chain (all complete):
   (via `eq_or_eq_neg_of_forall_inner_sub_mul_inner_add`), the downstairs
   distance bridge, and the rotation-channel vanishing of the image under
   full distance-class separation
+* `dist_image_eq_iff_of_sep` / `card_dist_image_eq_card_diffClasses` — the
+  distance transport bridge: under the separation property two image
+  distances agree iff the upstairs difference vectors agree up to sign
+  (backward direction pure linearity), and consequently the image distance
+  count equals the upstairs ±difference-class count (classes encoded as
+  unordered pairs `{v, -v}`; the separation property also forces
+  injectivity, so the image-side distance set is the honest object)
 * `nearEnemy_exists_projectionGeneric_image_noThreeCollinear_rotationFree`
   — existence with the distance-class factor family added: the generic
   projection keeps triples non-collinear downstairs AND separates all
@@ -1628,6 +1647,145 @@ theorem rotationEnergy_image_eq_zero
     rw [← map_sub, ← map_sub, ← map_neg, hvw']
   exact hsep a ha b hb c hc e he hvw hvw' hdist
 
+/-- **Distance transport bridge**: under the distance-class separation
+property, two image distances agree exactly when the upstairs difference
+vectors agree up to sign.  The backward direction is pure linearity; the
+forward direction is the separation property.  Note that
+`rotationEnergy (image) = 0` alone would NOT suffice for the forward
+direction: a projection kernel can identify two distinct ±difference
+classes downstairs, producing a distance coincidence that is
+translation-related downstairs and hence invisible to the rotation
+channel. -/
+theorem dist_image_eq_iff_of_sep
+    {G : Finset (EuclideanSpace ℝ ι)}
+    {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+    (hsep : ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+      a - b ≠ c - e → a - b ≠ -(c - e) →
+      dist (T a) (T b) ≠ dist (T c) (T e))
+    {a b c e : EuclideanSpace ℝ ι}
+    (ha : a ∈ G) (hb : b ∈ G) (hc : c ∈ G) (he : e ∈ G) :
+    dist (T a) (T b) = dist (T c) (T e) ↔
+      (a - b = c - e ∨ a - b = -(c - e)) := by
+  constructor
+  · intro h
+    by_contra hcon
+    exact hsep a ha b hb c hc e he (fun h' ↦ hcon (Or.inl h'))
+      (fun h' ↦ hcon (Or.inr h')) h
+  · rintro (h | h)
+    · rw [dist_eq_norm, dist_eq_norm, ← map_sub, ← map_sub, h]
+    · rw [dist_eq_norm, dist_eq_norm, ← map_sub, ← map_sub, h, map_neg,
+        norm_neg]
+
+omit [Fintype ι] in
+/-- The separation property forces injectivity on `G`: take `c = e = a` in
+`hsep`. -/
+private theorem injOn_of_sep
+    {G : Finset (EuclideanSpace ℝ ι)}
+    {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+    (hsep : ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+      a - b ≠ c - e → a - b ≠ -(c - e) →
+      dist (T a) (T b) ≠ dist (T c) (T e)) :
+    ∀ a ∈ G, ∀ b ∈ G, a ≠ b → T a ≠ T b := by
+  intro a ha b hb hab h
+  refine hsep a ha b hb a ha a ha ?_ ?_ (by rw [h])
+  · rw [sub_self]
+    exact sub_ne_zero.mpr hab
+  · rw [sub_self, neg_zero]
+    exact sub_ne_zero.mpr hab
+
+/-- **Distance-count transport**: under the distance-class separation
+property, the number of distinct pairwise distances of the image equals the
+number of ±difference classes of `G` — `#distances(T(G)) = #((G−G)∖{0}/±)`,
+the classes encoded as unordered pairs `{v, -v}`.  This is the bridge that
+turns `E_R = 0` existence statements into distance-count statements: the
+"few distances" of a projected difference-economical set (e.g. an EFPR
+lattice-sphere slice) is exactly the upstairs ±difference-class count. -/
+theorem card_dist_image_eq_card_diffClasses
+    {G : Finset (EuclideanSpace ℝ ι)}
+    {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+    (hsep : ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+      a - b ≠ c - e → a - b ≠ -(c - e) →
+      dist (T a) (T b) ≠ dist (T c) (T e)) :
+    (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2).card =
+      ((G.offDiag).image fun p ↦
+        ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card := by
+  -- the downstairs distance set is indexed by upstairs off-diagonal pairs
+  have himg : (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2) =
+      (G.offDiag).image fun p ↦ dist (T p.1) (T p.2) := by
+    ext d
+    simp only [Finset.mem_image]
+    constructor
+    · rintro ⟨⟨q₁, q₂⟩, hq, rfl⟩
+      obtain ⟨hq₁, hq₂, hne⟩ := Finset.mem_offDiag.mp hq
+      obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hq₁
+      obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hq₂
+      exact ⟨(a, b),
+        Finset.mem_offDiag.mpr ⟨ha, hb, fun h ↦ hne (congrArg _ h)⟩, rfl⟩
+    · rintro ⟨⟨a, b⟩, hab, rfl⟩
+      obtain ⟨ha, hb, hne⟩ := Finset.mem_offDiag.mp hab
+      exact ⟨(T a, T b),
+        Finset.mem_offDiag.mpr ⟨Finset.mem_image_of_mem _ ha,
+          Finset.mem_image_of_mem _ hb, injOn_of_sep hsep a ha b hb hne⟩,
+        rfl⟩
+  -- two distances agree iff the two ±difference classes agree
+  have key : ∀ p ∈ G.offDiag, ∀ q ∈ G.offDiag,
+      dist (T p.1) (T p.2) = dist (T q.1) (T q.2) ↔
+        ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι)) =
+          {q.1 - q.2, q.2 - q.1} := by
+    intro p hp q hq
+    obtain ⟨hp1, hp2, -⟩ := Finset.mem_offDiag.mp hp
+    obtain ⟨hq1, hq2, -⟩ := Finset.mem_offDiag.mp hq
+    rw [dist_image_eq_iff_of_sep hsep hp1 hp2 hq1 hq2]
+    constructor
+    · rintro (h | h)
+      · have h' : p.2 - p.1 = q.2 - q.1 := by
+          rw [← neg_sub p.1 p.2, ← neg_sub q.1 q.2, h]
+        rw [h, h']
+      · have h1 : p.1 - p.2 = q.2 - q.1 := by rw [h, neg_sub]
+        have h2 : p.2 - p.1 = q.1 - q.2 := by
+          rw [← neg_sub p.1 p.2, h1, neg_sub]
+        rw [h1, h2, Finset.pair_comm]
+    · intro h
+      have hmem : p.1 - p.2 ∈ ({q.1 - q.2, q.2 - q.1} :
+          Finset (EuclideanSpace ℝ ι)) := h ▸ Finset.mem_insert_self _ _
+      rcases Finset.mem_insert.mp hmem with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (by rw [Finset.mem_singleton.mp h', neg_sub])
+  -- both counts equal the count of the joint (distance, class) image
+  rw [himg]
+  set pairF : EuclideanSpace ℝ ι × EuclideanSpace ℝ ι →
+      ℝ × Finset (EuclideanSpace ℝ ι) :=
+    fun p ↦ (dist (T p.1) (T p.2), {p.1 - p.2, p.2 - p.1}) with hpairF
+  have hfst : Set.InjOn
+      (Prod.fst : ℝ × Finset (EuclideanSpace ℝ ι) → ℝ)
+      ↑((G.offDiag).image pairF) := by
+    intro x hx y hy hxy
+    obtain ⟨p, hp, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hx)
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hy)
+    simp only [hpairF, Prod.mk.injEq]
+    exact ⟨hxy, (key p hp q hq).mp hxy⟩
+  have hsnd : Set.InjOn
+      (Prod.snd : ℝ × Finset (EuclideanSpace ℝ ι) →
+        Finset (EuclideanSpace ℝ ι))
+      ↑((G.offDiag).image pairF) := by
+    intro x hx y hy hxy
+    obtain ⟨p, hp, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hx)
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hy)
+    simp only [hpairF, Prod.mk.injEq]
+    exact ⟨(key p hp q hq).mpr hxy, hxy⟩
+  calc ((G.offDiag).image fun p ↦ dist (T p.1) (T p.2)).card
+      = (((G.offDiag).image pairF).image Prod.fst).card := by
+        rw [Finset.image_image]
+        rfl
+    _ = ((G.offDiag).image pairF).card :=
+        Finset.card_image_of_injOn hfst
+    _ = (((G.offDiag).image pairF).image Prod.snd).card :=
+        (Finset.card_image_of_injOn hsnd).symm
+    _ = ((G.offDiag).image fun p ↦
+          ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card := by
+        rw [Finset.image_image]
+        rfl
+
 /-- **Existence of a generic projection, witness-parameterized core**: for
 any finite set whose off-pair quadruples each carry a nonzero constraint
 polynomial, a generic projection exists.  The master polynomial multiplies a
@@ -3122,6 +3280,107 @@ theorem nearEnemy_sphereSlice_exists_projection_image_isoscelesFree
   · intro h
     exact hp23 (eq_of_sub_eq_sub_of_mem_sphere (hG _ hp₁) (hG _ hp₂)
       (hG _ hp₃) (by linear_combination (norm := module) h))
+
+/-- **Near Enemy Theorem for Bisector Energy, complete profile with distance
+transport**: every finite set with no three collinear points admits ONE
+injective planar projection realizing the absolute minimum bisector energy
+`2n(n−1)`, whose image is in full planar general position, whose image has
+zero rotational energy, AND whose image distances are in bijection with the
+±difference classes of `G`: two image distances agree exactly when the
+upstairs difference vectors agree up to sign, so
+`#distances(T(G)) = #((G−G)∖{0}/±)`.  This is the bridge that turns the
+profile theorems into distance-count statements — for a
+difference-economical upstairs set (e.g. an EFPR lattice-sphere slice), the
+image has exactly as few distances as the upstairs ±difference-class count,
+which is an external arithmetic fact about the specific set.  Note the
+final two conjuncts strictly strengthen `rotationEnergy = 0`: a projection
+kernel can collapse two distinct ±difference classes into one downstairs
+translation class, which the rotation channel cannot see. -/
+theorem nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P') ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      rotationEnergy (G.image fun x ↦ T x) = 0 ∧
+      (∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+        (dist (T a) (T b) = dist (T c) (T e) ↔
+          (a - b = c - e ∨ a - b = -(c - e)))) ∧
+      (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2).card =
+        ((G.offDiag).image fun p ↦
+          ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card := by
+  obtain ⟨T, hT, htriple, hquad, hsep⟩ :=
+    nearEnemy_noThreeCollinear_exists_projectionGeneric_image_generalPosition_rotationFree
+      hG
+  refine ⟨T, injOn_of_projectionGeneric hT,
+    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
+    nearEnemy_genericProjection_bisectorEnergy_minimal hT, ?_, ?_,
+    rotationEnergy_image_eq_zero hsep,
+    fun a ha b hb c hc e he ↦ dist_image_eq_iff_of_sep hsep ha hb hc he,
+    card_dist_image_eq_card_diffClasses hsep⟩
+  · intro q₁ hq₁ q₂ hq₂ q₃ hq₃ h₁₂ h₁₃ h₂₃
+    obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+    obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+    obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+    exact htriple p₁ hp₁ p₂ hp₂ p₃ hp₃
+      (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
+      (fun h => h₂₃ (congrArg _ h))
+  · intro q₁ hq₁ q₂ hq₂ q₃ hq₃ q₄ hq₄ h₁₂ h₁₃ h₁₄ h₂₃ h₂₄ h₃₄
+    obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+    obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+    obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+    obtain ⟨p₄, hp₄, rfl⟩ := Finset.mem_image.mp hq₄
+    exact hquad p₁ hp₁ p₂ hp₂ p₃ hp₃ p₄ hp₄
+      (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
+      (fun h => h₁₄ (congrArg _ h)) (fun h => h₂₃ (congrArg _ h))
+      (fun h => h₂₄ (congrArg _ h)) (fun h => h₃₄ (congrArg _ h))
+
+/-- **Near Enemy Theorem for Bisector Energy, sphere-slice complete profile
+with distance transport**: every finite subset of a sphere in any Euclidean
+space admits ONE injective planar projection with the exact bisector floor
+`2n(n−1)`, absolute minimality, image in full planar general position, zero
+rotational energy, AND image distances in bijection with the upstairs
+±difference classes — `#distances(T(G)) = #((G−G)∖{0}/±)`.  For an EFPR
+lattice-sphere slice this reduces "the projected near-enemy has few
+distances" to the (external, arithmetic) fact that the slice has few
+±difference classes. -/
+theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P') ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      rotationEnergy (G.image fun x ↦ T x) = 0 ∧
+      (∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+        (dist (T a) (T b) = dist (T c) (T e) ↔
+          (a - b = c - e ∨ a - b = -(c - e)))) ∧
+      (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2).card =
+        ((G.offDiag).image fun p ↦
+          ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card :=
+  nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+    fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
+      not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
 
 end Unconditional
 
