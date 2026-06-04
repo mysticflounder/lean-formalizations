@@ -4916,4 +4916,127 @@ theorem overlap_endCapTgtPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs
   · show footParam s t z < 1; rw [hfoot]; linarith
   · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
 
+theorem dotp_liftPlus_sub_src (s t : Plane) (c ε : ℝ) :
+    dotp (liftPlus s t c ε - s) (t - s) = c * dotp (t - s) (t - s) := by
+  simp only [dotp, Prod.fst_sub, Prod.snd_sub, liftPlus_fst, liftPlus_snd]; ring
+
+theorem dotp_liftPlus_sub_tgt (s t : Plane) (c ε : ℝ) :
+    dotp (liftPlus s t c ε - t) (s - t) = (1 - c) * dotp (s - t) (s - t) := by
+  simp only [dotp, Prod.fst_sub, Prod.snd_sub, liftPlus_fst, liftPlus_snd]; ring
+
+/-- **hO1.** The vertex sector at `verts (i+1)` meets band `i` (the incoming edge). -/
+theorem overlap_sectorPlus_bandStripPlus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    (sectorPlus β ρ i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hav : v ≠ a := β.segTgt_ne_segSrc i
+  have hDpos : 0 < dotp (v - a) (v - a) := dotp_self_pos hav
+  have heq : dotp (a - v) (a - v) = dotp (v - a) (v - a) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  have hbva : sideForm b v a ≠ 0 := by
+    have he : sideForm b v a = - sideForm a v b := by simp only [sideForm]; ring
+    rw [he]; simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm b v a| := abs_pos.mpr hbva
+  set ε := min (δ₀ / (dist a v + 1)) (2 * α * |sideForm b v a| / (|dotp (v - b) (a - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have hb1 : ε * (dist a v + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - b) (a - v)| + 1) ≤ 2 * α * |sideForm b v a| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist a v < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus a v (1 - 2 * α) ε with hz
+  have hfoot : footParam a v z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hav (1 - 2 * α) ε
+  have hside : 0 < sideForm a v z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hDpos
+  have hGval : dotp (z - v) (a - v) = 2 * α * dotp (a - v) (a - v) := by
+    rw [hz, dotp_liftPlus_sub_tgt, show (1 : ℝ) - (1 - 2 * α) = 2 * α from by ring]
+  have hG : 0 < dotp (z - v) (a - v) := by rw [hGval, heq]; positivity
+  have hmemV : z ∈ vertexPlus a v b := by
+    refine mem_vertexPlus_of_incoming hturn hG ?_ hside
+    have hsva : |sideForm v a z| = ε * dotp (v - a) (v - a) := by
+      rw [sideForm_swap a v z, hz, sideForm_liftPlus, abs_neg, abs_mul,
+        abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsva, hGval, heq]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist a v := by
+      have h := dist_liftPlus_tgt_le a v (1 - 2 * α) ε
+      have he : |1 - (1 - 2 * α)| = 2 * α := by
+        rw [show 1 - (1 - 2 * α) = 2 * α from by ring, abs_of_nonneg (by linarith)]
+      rw [he, abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier i) < δ₀ := by
+    have h := infDist_liftPlus_le_segment a v (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier i = segment ℝ a v from rfl]
+    linarith [h, hεL]
+  exact ⟨z, ⟨hmemV, hball⟩,
+    ⟨⟨by show footParam a v z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
+/-- **hO2.** The vertex sector at `verts (i+1)` meets band `i+1` (the outgoing edge). -/
+theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+      < ρ (Fin.succ i)) :
+    (sectorPlus β ρ i hi1 ∩ bandStripPlus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hsvb : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = v := rfl
+  rw [hsvb] at hbud
+  have hbv : b ≠ v := β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+  have hDpos : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  have havb : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm a v b| := abs_pos.mpr havb
+  set ε := min (δ₀ / (dist v b + 1)) (2 * α * |sideForm a v b| / (|dotp (v - a) (b - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have hb1 : ε * (dist v b + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - a) (b - v)| + 1) ≤ 2 * α * |sideForm a v b| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist v b < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus v b (2 * α) ε with hz
+  have hfoot : footParam v b z = 2 * α := by rw [hz]; exact footParam_liftPlus hbv (2 * α) ε
+  have hside : 0 < sideForm v b z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hDpos
+  have hGval : dotp (z - v) (b - v) = 2 * α * dotp (b - v) (b - v) := by
+    rw [hz, dotp_liftPlus_sub_src]
+  have hG : 0 < dotp (z - v) (b - v) := by rw [hGval]; positivity
+  have hmemV : z ∈ vertexPlus a v b := by
+    refine mem_vertexPlus_of_outgoing hturn hG ?_ hside
+    have hsvb' : |sideForm v b z| = ε * dotp (b - v) (b - v) := by
+      rw [hz, sideForm_liftPlus, abs_mul, abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsvb', hGval]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist v b := by
+      have h := dist_liftPlus_src_le v b (2 * α) ε
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+    have h := infDist_liftPlus_le_segment v b (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ = segment ℝ v b from rfl]
+    linarith [h, hεL]
+  exact ⟨z, ⟨hmemV, hball⟩,
+    ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
 end CrossingLemma.PlaneArcSeparation
