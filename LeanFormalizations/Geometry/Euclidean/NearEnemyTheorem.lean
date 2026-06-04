@@ -34,13 +34,18 @@ The public theorem name is:
 
 The headline Lean theorems (unconditional, complete) are:
 
-* `nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
   — **the strongest form**: every finite set with no three collinear points
-  and every four points affinely independent admits ONE injective planar
-  projection realizing the exact count `2n(n−1)` and absolute minimality
-  among planar sets of the same size, whose image is in full planar general
-  position (no three collinear AND no four concyclic) and has zero
-  rotational energy.
+  — no other hypothesis — admits ONE injective planar projection realizing
+  the exact count `2n(n−1)` and absolute minimality among planar sets of
+  the same size, whose image is in full planar general position (no three
+  collinear AND no four concyclic) and has zero rotational energy.
+* `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+  — the sphere-slice corollary: the complete projected EFPR enemy profile
+  in one statement, with no affine-independence caveat.
+* `nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+  — the earlier grand combined form under no-3-collinear + 4-wise affine
+  independence (now superseded by the no-3-collinear-only form).
 * `nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition` — the
   same without the rotation-free clause.
 * `nearEnemy_exists_bisectorEnergy_minimal_image_noThreeCollinear` — under
@@ -105,6 +110,12 @@ Supporting chain (all complete):
   per-quadruple nonvanishing for affinely independent quadruples (via the
   parabola-determinant extraction along row scalings and a Vandermonde
   weight vector), and the downstairs circle bridge
+* `circPoly_ne_zero_of_coplanar` / `circPoly_ne_zero_of_noThreeCollinear` —
+  the coplanar concyclicity witness (Gram–Schmidt frame + planar core: the
+  second-moment determinants are not all zero by a line-pair conic, and an
+  explicit frame trichotomy `id` / `diag(2,1)` / shear produces a nonzero
+  circle determinant) and the combined per-quadruple witness needing only
+  two non-collinear triples — the formerly open coplanar case is closed
 * `nearEnemy_exists_projectionGeneric_image_generalPosition` — existence
   with both extra factor families: the image is in full planar general
   position (no three collinear, no four concyclic)
@@ -2443,6 +2454,217 @@ theorem nearEnemy_exists_projectionGeneric_image_generalPosition_rotationFree
       exact ⟨⟨⟨ha, hb⟩, hc, he⟩, hvw, hvw'⟩
     exact hdpairs_eval _ hmem (eval_distClassPoly_eq_zero_of_dist_eq hdist)
 
+/-- **Existence of a generic projection, grand combined form under
+no-three-collinear alone**: the affine-independence hypothesis of the grand
+combined form is dropped — the coplanar concyclicity witness
+(`circPoly_ne_zero_of_noThreeCollinear`) covers planar quadruples, so a
+finite set with no three collinear points admits a generic projection whose
+image has no three collinear points, no four concyclic points, AND all
+difference-distinct distance classes separated. -/
+theorem nearEnemy_noThreeCollinear_exists_projectionGeneric_image_generalPosition_rotationFree
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      ProjectionGeneric T G ∧
+      (∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+        ¬ Collinear ℝ ({T p₁, T p₂, T p₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, ∀ p₄ ∈ G,
+        p₁ ≠ p₂ → p₁ ≠ p₃ → p₁ ≠ p₄ → p₂ ≠ p₃ → p₂ ≠ p₄ → p₃ ≠ p₄ →
+        ¬ EuclideanGeometry.Cospherical
+          ({T p₁, T p₂, T p₃, T p₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+        a - b ≠ c - e → a - b ≠ -(c - e) →
+        dist (T a) (T b) ≠ dist (T c) (T e) := by
+  -- Constraint index sets.
+  set Quads : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    (G.offDiag ×ˢ G.offDiag).filter
+      (fun pq ↦ ({pq.1.1, pq.1.2} : Set (EuclideanSpace ℝ ι)) ≠
+        {pq.2.1, pq.2.2}) with hQuads
+  set Triples : Finset (EuclideanSpace ℝ ι ×
+      EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) :=
+    (G ×ˢ G ×ˢ G).filter
+      (fun p ↦ p.1 ≠ p.2.1 ∧ p.1 ≠ p.2.2 ∧ p.2.1 ≠ p.2.2) with hTriples
+  set Quads4 : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    ((G ×ˢ G) ×ˢ (G ×ˢ G)).filter
+      (fun q ↦ q.1.1 ≠ q.1.2 ∧ q.1.1 ≠ q.2.1 ∧ q.1.1 ≠ q.2.2 ∧
+        q.1.2 ≠ q.2.1 ∧ q.1.2 ≠ q.2.2 ∧ q.2.1 ≠ q.2.2) with hQuads4
+  set DPairs : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    ((G ×ˢ G) ×ˢ (G ×ˢ G)).filter
+      (fun q ↦ q.1.1 - q.1.2 ≠ q.2.1 - q.2.2 ∧
+        q.1.1 - q.1.2 ≠ -(q.2.1 - q.2.2)) with hDPairs
+  -- Per-constraint nonzero witnesses.
+  have hwq_ne : ∀ pq ∈ Quads, quadWitness pq ≠ 0 := by
+    intro pq hpq
+    rw [hQuads, Finset.mem_filter, Finset.mem_product] at hpq
+    obtain ⟨⟨h1, h2⟩, hne⟩ := hpq
+    rw [Finset.mem_offDiag] at h1 h2
+    rw [quadWitness]
+    by_cases hdet : detPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2 ≠ 0
+    · rwa [if_pos hdet]
+    · rw [if_neg hdet]
+      push Not at hdet
+      rcases detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
+        (nearEnemy_noThreeCollinear_offPair_not_both_vanish
+          (fun hab' hca hcb =>
+            hG _ h1.1 _ h1.2.1 _ h2.1 hab' hca.symm hcb.symm)
+          h1.2.2 hne) with h | h
+      · exact absurd hdet h
+      · exact h
+  have htr_ne : ∀ tr ∈ Triples, detPoly tr.2.1 tr.1 tr.2.2 tr.1 ≠ 0 := by
+    intro tr htr hd
+    rw [hTriples, Finset.mem_filter, Finset.mem_product,
+      Finset.mem_product] at htr
+    obtain ⟨⟨h1, h2, h3⟩, h12, h13, h23⟩ := htr
+    exact hG _ h1 _ h2 _ h3 h12 h13 h23 (collinear_of_detPoly_eq_zero hd)
+  have hq4_ne : ∀ q ∈ Quads4, circPoly q.1.1 q.1.2 q.2.1 q.2.2 ≠ 0 := by
+    intro q hq
+    rw [hQuads4, Finset.mem_filter, Finset.mem_product, Finset.mem_product,
+      Finset.mem_product] at hq
+    obtain ⟨⟨⟨ha, hb⟩, hc, he⟩, h12, h13, h14, h23, h24, h34⟩ := hq
+    exact circPoly_ne_zero_of_noThreeCollinear h12 h14
+      (hG _ ha _ hb _ hc h12 h13 h23)
+      (hG _ hb _ hc _ he h23 h24 h34)
+  have hdp_ne : ∀ q ∈ DPairs,
+      distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2) ≠ 0 := by
+    intro q hq
+    rw [hDPairs, Finset.mem_filter] at hq
+    exact distClassPoly_ne_zero (fun h ↦ hq.2.1 h.symm)
+      (fun h ↦ hq.2.2 (by rw [h, neg_neg]))
+  -- The master polynomial and its nonvanishing point.
+  set master : MvPolynomial (Fin 2 × ι) ℝ :=
+    ((((∏ ab ∈ G.offDiag, innerPoly 0 (ab.1 - ab.2)) *
+        ∏ pq ∈ Quads, quadWitness pq) *
+      ∏ tr ∈ Triples, detPoly tr.2.1 tr.1 tr.2.2 tr.1) *
+      ∏ q ∈ Quads4, circPoly q.1.1 q.1.2 q.2.1 q.2.2) *
+      ∏ q ∈ DPairs, distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2) with hmaster
+  have hmaster_ne : master ≠ 0 := by
+    rw [hmaster]
+    exact mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero
+      (Finset.prod_ne_zero_iff.mpr fun ab hab ↦
+        innerPoly_ne_zero (Finset.mem_offDiag.mp hab).2.2)
+      (Finset.prod_ne_zero_iff.mpr hwq_ne))
+      (Finset.prod_ne_zero_iff.mpr htr_ne))
+      (Finset.prod_ne_zero_iff.mpr hq4_ne))
+      (Finset.prod_ne_zero_iff.mpr hdp_ne)
+  have hpoint : ∃ f : Fin 2 × ι → ℝ, eval f master ≠ 0 := by
+    by_contra h
+    push Not at h
+    exact hmaster_ne (MvPolynomial.funext fun f ↦ by simpa using h f)
+  obtain ⟨f, hf⟩ := hpoint
+  -- All factor evaluations are nonzero at `f`.
+  rw [hmaster, map_mul, map_mul, map_mul, map_mul, map_prod, map_prod,
+    map_prod, map_prod, map_prod] at hf
+  have hpairs_eval : ∀ ab ∈ G.offDiag, eval f (innerPoly 0 (ab.1 - ab.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (left_ne_zero_of_mul (left_ne_zero_of_mul
+      (left_ne_zero_of_mul (left_ne_zero_of_mul hf))))
+  have hquads_eval : ∀ pq ∈ Quads, eval f (quadWitness pq) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul (left_ne_zero_of_mul
+      (left_ne_zero_of_mul (left_ne_zero_of_mul hf))))
+  have htriples_eval : ∀ tr ∈ Triples,
+      eval f (detPoly tr.2.1 tr.1 tr.2.2 tr.1) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul (left_ne_zero_of_mul
+      (left_ne_zero_of_mul hf)))
+  have hquads4_eval : ∀ q ∈ Quads4,
+      eval f (circPoly q.1.1 q.1.2 q.2.1 q.2.2) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul (left_ne_zero_of_mul hf))
+  have hdpairs_eval : ∀ q ∈ DPairs,
+      eval f (distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul hf)
+  -- The projection with rows read off `f`.
+  refine ⟨rowMap (rowOf f), ⟨?_, ?_⟩, ?_, ?_, ?_⟩
+  · -- Injectivity / nondegeneracy.
+    intro a ha b hb hab hT0
+    have hmem : (a, b) ∈ G.offDiag := Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩
+    apply hpairs_eval (a, b) hmem
+    rw [eval_innerPoly]
+    have h0 : rowMap (rowOf f) (a - b) 0 = 0 := by rw [hT0]; rfl
+    rwa [rowMap_apply] at h0
+  · -- Coincidence-avoidance.
+    intro a ha b hb c hc e he hab hce hne hbad
+    obtain ⟨⟨t, hpar⟩, horth⟩ := hbad
+    have hmem : ((a, b), (c, e)) ∈ Quads := by
+      rw [hQuads, Finset.mem_filter, Finset.mem_product]
+      exact ⟨⟨Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩,
+        Finset.mem_offDiag.mpr ⟨hc, he, hce⟩⟩, hne⟩
+    apply hquads_eval _ hmem
+    rw [quadWitness]
+    have hcomp : ∀ k : Fin 2, ⟪rowOf f k, c - e⟫ = t * ⟪rowOf f k, a - b⟫ := by
+      intro k
+      have h := congrArg (fun v : EuclideanSpace ℝ (Fin 2) ↦ v k) hpar
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul, inner_sub_right]
+        using h
+    by_cases hdet : detPoly a b c e ≠ 0
+    · rw [if_pos hdet]
+      simp only [detPoly, map_sub, map_mul, eval_innerPoly]
+      rw [hcomp 0, hcomp 1]
+      ring
+    · rw [if_neg hdet]
+      simp only [orthPoly, map_add, map_mul, eval_innerPoly]
+      have hexp : ⟪rowMap (rowOf f) (a + b - (c + e)),
+          rowMap (rowOf f) (a - b)⟫ =
+          ⟪rowOf f 0, a + b - (c + e)⟫ * ⟪rowOf f 0, a - b⟫ +
+            ⟪rowOf f 1, a + b - (c + e)⟫ * ⟪rowOf f 1, a - b⟫ := by
+        rw [PiLp.inner_apply]
+        simp only [Fin.sum_univ_two, RCLike.inner_apply, rowMap_apply,
+          starRingEnd_apply, star_trivial, inner_add_right, inner_sub_right]
+        ring
+      rw [← hexp, horth]
+  · -- Triple non-collinearity downstairs.
+    intro p₁ h₁ p₂ h₂ p₃ h₃ h₁₂ h₁₃ h₂₃ hcol
+    have hmem : (p₁, p₂, p₃) ∈ Triples := by
+      rw [hTriples, Finset.mem_filter, Finset.mem_product, Finset.mem_product]
+      exact ⟨⟨h₁, h₂, h₃⟩, h₁₂, h₁₃, h₂₃⟩
+    apply htriples_eval _ hmem
+    rw [collinear_iff_of_mem (Set.mem_insert _ _)] at hcol
+    obtain ⟨v, hv⟩ := hcol
+    obtain ⟨r₂, hr₂⟩ := hv _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _))
+    obtain ⟨r₃, hr₃⟩ := hv _
+      (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ rfl))
+    have hcomp₂ : ∀ k : Fin 2,
+        ⟪rowOf f k, p₂⟫ - ⟪rowOf f k, p₁⟫ = r₂ * v k := by
+      intro k
+      have hT : rowMap (rowOf f) (p₂ - p₁) = r₂ • v := by
+        rw [map_sub, hr₂, vadd_eq_add]
+        abel
+      have hk := congrArg (fun u : EuclideanSpace ℝ (Fin 2) ↦ u k) hT
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul] using hk
+    have hcomp₃ : ∀ k : Fin 2,
+        ⟪rowOf f k, p₃⟫ - ⟪rowOf f k, p₁⟫ = r₃ * v k := by
+      intro k
+      have hT : rowMap (rowOf f) (p₃ - p₁) = r₃ • v := by
+        rw [map_sub, hr₃, vadd_eq_add]
+        abel
+      have hk := congrArg (fun u : EuclideanSpace ℝ (Fin 2) ↦ u k) hT
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul] using hk
+    simp only [detPoly, map_sub, map_mul, eval_innerPoly, inner_sub_right]
+    rw [hcomp₂ 0, hcomp₂ 1, hcomp₃ 0, hcomp₃ 1]
+    ring
+  · -- Quadruple non-concyclicity downstairs.
+    intro p₁ h₁ p₂ h₂ p₃ h₃ p₄ h₄ h₁₂ h₁₃ h₁₄ h₂₃ h₂₄ h₃₄ hcos
+    obtain ⟨z, ρ, hz⟩ := hcos
+    have hmem : ((p₁, p₂), (p₃, p₄)) ∈ Quads4 := by
+      rw [hQuads4, Finset.mem_filter, Finset.mem_product, Finset.mem_product,
+        Finset.mem_product]
+      exact ⟨⟨⟨h₁, h₂⟩, h₃, h₄⟩, h₁₂, h₁₃, h₁₄, h₂₃, h₂₄, h₃₄⟩
+    exact hquads4_eval _ hmem (eval_circPoly_eq_zero_of_dist_eq
+      (hz _ (Set.mem_insert _ _))
+      (hz _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _)))
+      (hz _ (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _
+        (Set.mem_insert _ _))))
+      (hz _ (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _
+        (Set.mem_insert_of_mem _ rfl)))))
+  · -- Distance-class separation downstairs.
+    intro a ha b hb c hc e he hvw hvw' hdist
+    have hmem : ((a, b), (c, e)) ∈ DPairs := by
+      rw [hDPairs, Finset.mem_filter, Finset.mem_product, Finset.mem_product,
+        Finset.mem_product]
+      exact ⟨⟨⟨ha, hb⟩, hc, he⟩, hvw, hvw'⟩
+    exact hdpairs_eval _ hmem (eval_distClassPoly_eq_zero_of_dist_eq hdist)
+
 /-- **Existence of a generic projection** for any finite sphere subset.
 Derived from the general-position form: a line meets a sphere in at most
 two points, so sphere subsets have no three collinear points. -/
@@ -2607,9 +2829,11 @@ planar general position — no three collinear points and no four concyclic
 points.  This is the complete general-position profile of the projected
 near enemy in one statement.
 
-The affine-independence hypothesis on quadruples is what the per-quadruple
-concyclicity witness consumes; whether coplanar (but non-collinear)
-quadruples also admit the witness is open here. -/
+The affine-independence hypothesis on quadruples is what the
+affinely-independent concyclicity witness consumes; the coplanar witness
+(`circPoly_ne_zero_of_noThreeCollinear`) has since removed it — see
+`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree`
+for the hypothesis-free form. -/
 theorem nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition
     {G : Finset (EuclideanSpace ℝ ι)}
     (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
@@ -2718,9 +2942,9 @@ general position (no three collinear, no four concyclic), AND whose image
 has zero rotational energy.  The complete projected enemy profile in a
 single statement.
 
-As in the full-general-position form, the affine-independence hypothesis is
-what the per-quadruple concyclicity witness consumes; the rotation-free
-sphere-slice form above does not need it. -/
+As in the full-general-position form, the affine-independence hypothesis
+fed the affinely-independent concyclicity witness; the coplanar witness has
+since removed it — see the no-three-collinear-only form below. -/
 theorem nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree
     {G : Finset (EuclideanSpace ℝ ι)}
     (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
@@ -2764,6 +2988,84 @@ theorem nearEnemy_exists_bisectorEnergy_minimal_image_generalPosition_rotationFr
       (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
       (fun h => h₁₄ (congrArg _ h)) (fun h => h₂₃ (congrArg _ h))
       (fun h => h₂₄ (congrArg _ h)) (fun h => h₃₄ (congrArg _ h))
+
+/-- **Near Enemy Theorem for Bisector Energy, complete profile form**: every
+finite set with no three collinear points — no other hypothesis — admits ONE
+injective planar projection that realizes the absolute minimum bisector
+energy `2n(n−1)`, whose image is in full planar general position (no three
+collinear, no four concyclic), and whose image has zero rotational energy.
+The coplanar concyclicity witness removed the affine-independence
+hypothesis of the grand combined form. -/
+theorem nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P') ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      rotationEnergy (G.image fun x ↦ T x) = 0 := by
+  obtain ⟨T, hT, htriple, hquad, hsep⟩ :=
+    nearEnemy_noThreeCollinear_exists_projectionGeneric_image_generalPosition_rotationFree
+      hG
+  refine ⟨T, injOn_of_projectionGeneric hT,
+    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
+    nearEnemy_genericProjection_bisectorEnergy_minimal hT, ?_, ?_,
+    rotationEnergy_image_eq_zero hsep⟩
+  · intro q₁ hq₁ q₂ hq₂ q₃ hq₃ h₁₂ h₁₃ h₂₃
+    obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+    obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+    obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+    exact htriple p₁ hp₁ p₂ hp₂ p₃ hp₃
+      (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
+      (fun h => h₂₃ (congrArg _ h))
+  · intro q₁ hq₁ q₂ hq₂ q₃ hq₃ q₄ hq₄ h₁₂ h₁₃ h₁₄ h₂₃ h₂₄ h₃₄
+    obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+    obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+    obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+    obtain ⟨p₄, hp₄, rfl⟩ := Finset.mem_image.mp hq₄
+    exact hquad p₁ hp₁ p₂ hp₂ p₃ hp₃ p₄ hp₄
+      (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
+      (fun h => h₁₄ (congrArg _ h)) (fun h => h₂₃ (congrArg _ h))
+      (fun h => h₂₄ (congrArg _ h)) (fun h => h₃₄ (congrArg _ h))
+
+/-- **Near Enemy Theorem for Bisector Energy, sphere-slice complete profile
+form**: every finite subset of a sphere in any Euclidean space admits ONE
+injective planar projection realizing the absolute minimum bisector energy
+`2n(n−1)`, whose image is in full planar general position (no three
+collinear, no four concyclic), and whose image has zero rotational energy.
+This is the complete projected EFPR enemy profile in a single kernel-checked
+statement, with no affine-independence caveat — the coplanar concyclicity
+witness covers the planar quadruples that sphere slices contain. -/
+theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P') ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      rotationEnergy (G.image fun x ↦ T x) = 0 :=
+  nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree
+    fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
+      not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
 
 end Unconditional
 
