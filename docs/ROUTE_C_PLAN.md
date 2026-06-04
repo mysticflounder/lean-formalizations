@@ -927,16 +927,45 @@ This **pins, with no slack, the only remaining geometric obligations**:
       satisfiable despite the endpoint tube-pinch) gives `δ₀ ≤ ½·infDist(y) Rᶜ`, so the tube ball
       at `y` has radius `δ₀ > dist_sup(z,y)` and swallows `z`. (The earlier "attained sup-nearest
       `q*`" plan would have worked too but needed the delicate argmin lemma; this is simpler.)
-    * (3) **`endCap ∩ (tube∖carrier)` preconnected — TODO (new core), paper proof RESOLVED.**
+    * (3) **`endCap ∩ (tube∖carrier)` preconnected — IN PROGRESS (new core); engine LANDED,
+      two geometric obligations remain.**
       ⚠ The earlier "shrink toward the edge" idea (scale the normal component) is **WRONG in the
       sup metric for tilted edges** — perpendicular motion is *not* sup-distance-monotone (same
-      Euclidean-vs-sup trap as the obstruction). **Correct argument:** every clipped-cap point `z`
-      sits in a *convex* sup-ball `ball(p, r_p) ⊆ tube` with spine point `p ∈ S` on the carrier
-      edge; the **straight segment `[z,p]`** stays in that ball (balls are convex), so `z`
-      connects within the tube to a point just shy of `p` (off-carrier, `sideForm > 0` for a small
-      step), at `foot ≈ foot(p)`. These edge-adjacent points connect *along the spine* through
-      consecutively-overlapping tube balls, reaching the band-overlap point (`hO3`). Uses only
-      convexity of sup-balls + spine continuity — no monotonicity. `×2` (src/tgt) `×2` (plus/minus).
+      Euclidean-vs-sup trap as the obstruction). The "straight segment `[z,p]` to the spine point"
+      framing was also imprecise (the spine point `p` is on the carrier, off the cap; the segment
+      leaves the cap). **The clean, formalized decomposition** (commits `7dd08f7`, `1f5ef4d`):
+      - **Off-carrier (LANDED, ×4):** `endCap{Src,Tgt}{Plus,Minus} ⊆ carrierᶜ` under a smallness
+        bound on the cap radius (`ρ` at the endpoint `≤` distance to every non-incident edge;
+        incident edge excluded by the strict `sideForm` side). So the clipped cap
+        `(tube∖carrier) ∩ endCap` **= `tube ∩ endCap`** — the carrier drops out.
+      - **Slice decomposition:** with `cap = endCapSrcPlus`, `tube ∩ cap = ⋃_{c∈Ioc 0 c_max}
+        (cap ∩ ball(p c, r c))`, where `p c = (1−c)·s + c·t` is the foot-`c` point on the first
+        edge (`= liftPlus s t c 0`) and `r c = min(δ₀, ½·infDist(p c) Rᶜ)`. Each slice is
+        **convex** (convex cap ∩ ball), hence preconnected. Indexing by the foot-parameter `c`
+        (a real interval) sidesteps the empty-fibre / far-edge problem: only first-edge spine
+        points reach the small cap.
+      - **Nerve engine (LANDED, geometry-free):** `reflTransGen_meets_of_local_overlap` — over a
+        preconnected `t ⊆ ℝ`, *local overlap* of a fibre family upgrades to global
+        reflexive-transitive meets-connectivity (clopen argument). Feeds Mathlib's
+        `IsPreconnected.biUnion_of_reflTransGen`.
+      - **Assembly (LANDED):** `isPreconnected_cap_inter_ball_cover` — given the cover equality
+        and local overlap, the union of convex slices is preconnected. Reduces the clipped cap to
+        exactly two geometric obligations.
+      - **REMAINING obligation A — cover equality (`hcover`).** Every `tube∩cap` point's tube
+        witness `q∈S` is a first-edge point `p(c_q)` with `c_q∈(0,c_max]` (needs
+        `ρ₀+δ₀ ≤ dist(v₀, segCarrier i)` for non-first edges, and `c_max·‖edge‖ < ρ₀` so the
+        cap does not reach `foot ≥ c_max`); conversely each slice `⊆ tube∩cap` since `p(c)∈S`.
+      - **REMAINING obligation B — local overlap (`hov`), the genuinely-new sup-metric geometry.**
+        Shared point `w = liftPlus s t c η` (small `η>0`): `w∈cap` (`sideForm = η·‖t−s‖₂² > 0`,
+        `foot = c > 0`, `dist(w,v₀) < ρ₀` for `c≤c_max`), `w∈ball(p c, r c)` since
+        `dist_sup(w, p c) = η·dist_sup(s,t) < r c` (pick `η < r(c)/dist(s,t)`), and
+        `w∈ball(p c', r c')` for `|c−c'|<ε` via `dist_sup(w,p c') ≤ (η+ε)·dist(s,t)` and the
+        **1-Lipschitz** lower bound `infDist(p c')Rᶜ ≥ infDist(p c)Rᶜ − |c−c'|·dist(s,t)`
+        (`Metric.infDist_le_infDist_add_dist`) ⇒ `r(c') ≥ min(δ₀, ¼·infDist(p c)Rᶜ) > 0`. All
+        in the **sup metric** (`dist_sup(p c, p c') = |c−c'|·dist(s,t)`). Needs the
+        **radius-positivity** input `0 < infDist(p c) Rᶜ` for `c∈(0,c_max]` (open first edge
+        `⊆ interior R`) — a region-geometry hypothesis discharged at instantiation.
+      - Then `×2` (src/tgt) `×2` (plus/minus) mirrors.
     * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
       (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪
       (W∩endCap)(opt)`, reusing the `isPreconnected_union_opt` cascade with the clipped-cap
