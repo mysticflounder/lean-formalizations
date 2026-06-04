@@ -887,6 +887,28 @@ This **pins, with no slack, the only remaining geometric obligations**:
   hypothesis **`hsub`** (pieces ⊆ `taperedTube∖carrier` — the no-taper containment,
   `δ₀ ≤ ½·infDist over S`) plus the overlap budgets `ρ(succ i) > δ₀ + 2α·‖edge‖` and
   `α < 1/3`. `hsub` is discharged at instantiation (next bullet).
+  * **⚠ OBSTRUCTION FOUND (2026-06-03): `hsub` is UNSATISFIABLE for the bare end caps.**
+    `hsub` requires the *bare* piece-union (incl. `endCapSrcPlus`/`endCapTgtPlus`) to lie
+    in `taperedTube R S δ₀ ∖ carrier`. The bare end cap provably does **not** fit the tube.
+    Counterexample (rigorous, axiom-free): the source endpoint `v₀ = verts 0 ∈ Rᶜ` (the
+    standing P2 hypothesis `hsrc0`). With `u` = unit dir of the first edge, `n` = unit
+    `+`-side normal, set `z = v₀ + a·u + a·n` for small `a > 0`. Then `z ∈ endCapSrcPlus`
+    (`foot = a/‖edge‖ > 0`, `sideForm = a·‖edge‖² > 0`, `dist(z,v₀) = a√2 < ρ₀`), but
+    `z ∈ taperedTube` would need `p ∈ S ⊆ carrier` with `dist(z,p) < ½·infDist(p,Rᶜ) ≤
+    ½·dist(p,v₀)`; for `p` at arclength `s` on the first edge this is `√((a−s)²+a²) < s/2`,
+    i.e. `(3/4)s² − 2a·s + 2a² < 0`, discriminant `4a² − 6a² = −2a² < 0` ⟹ always positive
+    ⟹ no `p` works (other edges are farther). **Root cause:** the endpoints lie on `∂R`, so
+    the tube radius `min(δ₀, ½·infDist p Rᶜ)` tapers to `0` there, while the end-cap wedge
+    (a 90° quarter-disk) does not — and the wedge even pokes *outside `R`* near `v₀`.
+    Bands & sectors are fine (band foot-params `∈ (α,1−α)` keep the projection on the
+    *interior* of an edge, bounded away from the frontier; sectors sit in `ball(v,ρ_v)`
+    around an *interior* vertex `v ∈ arcInterior ⊆ R`). So the obstruction is **end-cap
+    only**. `isPreconnected_collarPlus/Minus` remain valid *conditional* theorems; what
+    fails is their instantiation. **Fix (Option A, chosen):** reprove P5 for `collarPlus`
+    as *defined* (keeping the `(taperedTube∖carrier) ∩` prefix — i.e. the clipped collar),
+    dropping `hsub`. New content needed: (1) `band_i ⊆ tube` and (2) `sector ⊆ tube`
+    (interior no-taper containment, small `δ₀`/`ρ_v`); (3) **`endCap ∩ (tube∖carrier)`
+    preconnected** (the clipped sliver — the genuinely new lemma); (4) reassemble the chain.
 * **G4** — every `z ∈ R∖carrier` has its relative component meet `taperedTube∖carrier`
   (component-boundary-in-carrier topology; tractable, not Jordan-strength).
 * **Collar instantiation** — produce one parameter bundle `(δ₀, α, ρ, S=arcInterior)`
