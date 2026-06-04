@@ -32,12 +32,16 @@ The public theorem name is:
 
 `Near Enemy Theorem for Bisector Energy`
 
-The headline Lean theorem (unconditional, complete) is:
+The headline Lean theorems (unconditional, complete) are:
 
-* `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal` — every finite
-  sphere subset admits an injective planar projection realizing both the
-  exact count `2n(n−1)` and absolute minimality among planar sets of the
-  same size.
+* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal` — **the
+  strongest form**: every finite set with no three collinear points admits
+  an injective planar projection realizing both the exact count `2n(n−1)`
+  and absolute minimality among planar sets of the same size.
+* `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal` — the sphere-slice
+  form, a corollary: a line meets a sphere in at most two points
+  (`not_collinear_of_mem_sphere`), so sphere subsets have no three
+  collinear points.
 
 Conditional forms (on the `ProjectionGeneric` interface):
 
@@ -47,14 +51,24 @@ Conditional forms (on the `ProjectionGeneric` interface):
 Supporting chain (all complete):
 
 * `ProjectionGeneric` — the coincidence-avoidance interface
-* `nearEnemy_offPair_not_both_vanish` — per-quadruple certificate
+* `nearEnemy_noThreeCollinear_parallel_midpoint_eq_samePair` — upstairs
+  general-position line rigidity (equal sums + parallel differences put all
+  four points on one line)
+* `not_collinear_of_mem_sphere` — sphere ⟹ no-three-collinear bridge
+* `nearEnemy_offPair_not_both_vanish_of_rigid` — per-quadruple certificate,
+  rigidity-parameterized core (sphere and general-position instantiations:
+  `nearEnemy_offPair_not_both_vanish`,
+  `nearEnemy_noThreeCollinear_offPair_not_both_vanish`)
 * `sharedBisector_parallel_and_sum_orth` — downstairs translation
 * `nearEnemy_sharedBisector_forces_samePair` — shared-bisector criterion
 * `nearEnemy_bisectors_injective_on_unorderedPairs` — bisector injectivity
 * `two_mul_pairCount_le_bisectorEnergy` — universal floor
 * `bisectorEnergy_eq_of_bisectorInjective` — floor counting
-* `nearEnemy_exists_projectionGeneric` — existence of a generic projection
-  (`MvPolynomial` nonvanishing; `MvPolynomial.funext` used exactly once)
+* `exists_projectionGeneric_of_forall_offPair_witness` — existence of a
+  generic projection, witness-parameterized core (`MvPolynomial`
+  nonvanishing; `MvPolynomial.funext` used exactly once); instantiations
+  `nearEnemy_noThreeCollinear_exists_projectionGeneric` and
+  `nearEnemy_exists_projectionGeneric`
 
 Mathematical content currently in this module, in proof-pipeline order:
 
@@ -77,12 +91,18 @@ Mathematical content currently in this module, in proof-pipeline order:
      the companion zero-rotation-energy statement for the same family: with
      all `±`-classes separated, every congruent quadruple downstairs is a
      translation or half-turn.)
-2. **Upstairs sphere rigidity**:
+2. **Upstairs line rigidity** (the geometric core, two forms):
+   * `nearEnemy_noThreeCollinear_parallel_midpoint_eq_samePair` — two pairs
+     with the same midpoint and parallel differences lie on one line, so a
+     no-three-collinear hypothesis forces them to be the same unordered
+     pair.  This is the form the headline consumes.
    * `sphereSlice_chordLength_sq_eq_of_same_midpoint` — chords of one sphere
      with a common midpoint have equal length (parallelogram law).
    * `nearEnemy_sphereSlice_parallel_midpoint_eq_samePair` — two chords of
      one sphere with the same midpoint and parallel differences are the same
-     unordered pair: the upstairs geometric core of the theorem.
+     unordered pair: the original sphere-specific rigidity, kept as
+     standalone content; the headline now reaches the sphere through
+     `not_collinear_of_mem_sphere` instead.
 
 The chain is complete: no stage remains, no `sorry` anywhere, and every
 theorem depends only on the standard axioms
@@ -301,10 +321,96 @@ theorem nearEnemy_sphereSlice_parallel_midpoint_eq_samePair
       rw [hcb, hea]
       exact Set.pair_comm a b
 
+/-! ## Upstairs general-position rigidity -/
+
+/-- General-position line rigidity for the Near Enemy Theorem for Bisector
+Energy: if no three of the points are collinear, two pairs with the same
+midpoint and parallel difference vectors are the same unordered pair.
+
+Equal sums and parallel differences place all four points on one line
+through the common midpoint, so a no-three-collinear hypothesis on the
+triple `{a, b, c}` is all the rigidity the argument needs.  This strictly
+generalizes the sphere-slice rigidity: a line meets a sphere in at most two
+points (`not_collinear_of_mem_sphere`). -/
+theorem nearEnemy_noThreeCollinear_parallel_midpoint_eq_samePair
+    {ι : Type*} [Fintype ι]
+    {a b c e : EuclideanSpace ℝ ι}
+    (hgp : a ≠ b → c ≠ a → c ≠ b →
+      ¬ Collinear ℝ ({a, b, c} : Set (EuclideanSpace ℝ ι)))
+    (hmid : a + b = c + e)
+    (hpar : ∃ t : ℝ, c - e = t • (a - b)) :
+    ({a, b} : Set (EuclideanSpace ℝ ι)) =
+      ({c, e} : Set (EuclideanSpace ℝ ι)) := by
+  obtain ⟨t, ht⟩ := hpar
+  by_cases hab : a = b
+  · -- Degenerate chord: the parallel hypothesis collapses `c = e`, and the
+    -- shared midpoint then collapses everything to one point.
+    subst hab
+    have hce : c = e := by simpa [sub_eq_zero] using ht
+    subst hce
+    have hca : c = a := by
+      refine smul_right_injective (EuclideanSpace ℝ ι) (two_ne_zero (α := ℝ)) ?_
+      calc (2 : ℝ) • c = c + c := two_smul ℝ c
+        _ = a + a := hmid.symm
+        _ = (2 : ℝ) • a := (two_smul ℝ a).symm
+    rw [hca]
+  · by_cases hca : c = a
+    · -- `c = a`: equal sums force `e = b`.
+      have hbe : b = e := by
+        have h := hmid
+        rw [hca] at h
+        exact add_left_cancel h
+      rw [hca, ← hbe]
+    · by_cases hcb : c = b
+      · -- `c = b`: equal sums force `e = a`.
+        have hae : a = e := by
+          have h := hmid
+          rw [hcb, add_comm a b] at h
+          exact add_left_cancel h
+        rw [hcb, ← hae, Set.pair_comm a b]
+      · -- `a`, `b`, `c` pairwise distinct: equal sums and parallel
+        -- differences put `c` on the line through `a` and `b`, contradicting
+        -- the no-three-collinear hypothesis.
+        exfalso
+        apply hgp hab hca hcb
+        rw [collinear_iff_of_mem (Set.mem_insert a {b, c})]
+        refine ⟨a - b, fun p hp => ?_⟩
+        simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
+        rcases hp with rfl | rfl | rfl
+        · exact ⟨0, by simp⟩
+        · exact ⟨-1, by rw [vadd_eq_add]; module⟩
+        · refine ⟨(t - 1) / 2, ?_⟩
+          refine smul_right_injective (EuclideanSpace ℝ ι) (two_ne_zero (α := ℝ)) ?_
+          rw [vadd_eq_add]
+          linear_combination (norm := module) -hmid + ht
+
+/-- Three distinct points of one Euclidean sphere are never collinear: a
+line meets a sphere in at most two points.  This is the bridge showing the
+general-position form of the theorem subsumes the sphere-slice form. -/
+theorem not_collinear_of_mem_sphere
+    {ι : Type*} [Fintype ι]
+    {center p₁ p₂ p₃ : EuclideanSpace ℝ ι} {R : ℝ}
+    (h₁ : p₁ ∈ Metric.sphere center R)
+    (h₂ : p₂ ∈ Metric.sphere center R)
+    (h₃ : p₃ ∈ Metric.sphere center R)
+    (h₁₂ : p₁ ≠ p₂) (h₁₃ : p₁ ≠ p₃) (h₂₃ : p₂ ≠ p₃) :
+    ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι)) := by
+  have hcos : EuclideanGeometry.Cospherical
+      ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι)) := by
+    refine ⟨center, R, fun p hp => ?_⟩
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
+    rcases hp with rfl | rfl | rfl
+    · simpa using h₁
+    · simpa using h₂
+    · simpa using h₃
+  exact affineIndependent_iff_not_collinear_set.mp
+    (hcos.affineIndependent_of_ne h₁₂ h₁₃ h₂₃)
+
 /-! ## Per-quadruple genericity certificate -/
 
-/-- **Per-quadruple certificate**: for two distinct chords of one sphere (the
-first nondegenerate), the two identical-vanishing conditions that a
+/-- **Per-quadruple certificate, rigidity-parameterized core**: for two
+distinct pairs (the first nondegenerate) subject to a line-rigidity
+hypothesis, the two identical-vanishing conditions that a
 bisector-coincidence under projection would force cannot BOTH hold: the
 projected-determinant form (parallelism) and the orthogonality form
 (midpoint relation) are not simultaneously identically zero over all row
@@ -314,14 +420,12 @@ This is the input the existence-of-a-generic-projection argument consumes:
 for each off-pair quadruple, at least one of the two constraint polynomials
 in the projection entries is not identically zero, so a generic projection
 avoids the coincidence.  Contrapositive assembly of the coefficient lemma,
-the parallelism lemma, and sphere rigidity. -/
-theorem nearEnemy_offPair_not_both_vanish
+the parallelism lemma, and the supplied line rigidity. -/
+theorem nearEnemy_offPair_not_both_vanish_of_rigid
     {ι : Type*} [Fintype ι]
-    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
-    (ha : a ∈ Metric.sphere center R)
-    (hb : b ∈ Metric.sphere center R)
-    (hc : c ∈ Metric.sphere center R)
-    (he : e ∈ Metric.sphere center R)
+    {a b c e : EuclideanSpace ℝ ι}
+    (hrigid : a + b = c + e → (∃ t : ℝ, c - e = t • (a - b)) →
+      ({a, b} : Set (EuclideanSpace ℝ ι)) = {c, e})
     (hab : a ≠ b)
     (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
     ¬ ((∀ p q : EuclideanSpace ℝ ι,
@@ -344,8 +448,41 @@ theorem nearEnemy_offPair_not_both_vanish
         rw [zero_smul] at ht
         exact habv ht
       exact ⟨t⁻¹, by rw [ht, smul_smul, inv_mul_cancel₀ ht0, one_smul]⟩
-  -- Sphere rigidity closes the contradiction.
-  exact hne (nearEnemy_sphereSlice_parallel_midpoint_eq_samePair ha hb hc he hmid hpar)
+  -- Line rigidity closes the contradiction.
+  exact hne (hrigid hmid hpar)
+
+/-- **Per-quadruple certificate, sphere form**: the rigidity-parameterized
+core instantiated with sphere-slice rigidity. -/
+theorem nearEnemy_offPair_not_both_vanish
+    {ι : Type*} [Fintype ι]
+    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
+    (ha : a ∈ Metric.sphere center R)
+    (hb : b ∈ Metric.sphere center R)
+    (hc : c ∈ Metric.sphere center R)
+    (he : e ∈ Metric.sphere center R)
+    (hab : a ≠ b)
+    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+    ¬ ((∀ p q : EuclideanSpace ℝ ι,
+          ⟪p, a - b⟫ * ⟪q, c - e⟫ - ⟪p, c - e⟫ * ⟪q, a - b⟫ = 0) ∧
+        (∀ r : EuclideanSpace ℝ ι, ⟪r, a + b - (c + e)⟫ * ⟪r, a - b⟫ = 0)) :=
+  nearEnemy_offPair_not_both_vanish_of_rigid
+    (nearEnemy_sphereSlice_parallel_midpoint_eq_samePair ha hb hc he) hab hne
+
+/-- **Per-quadruple certificate, general-position form**: the
+rigidity-parameterized core instantiated with no-three-collinear
+rigidity. -/
+theorem nearEnemy_noThreeCollinear_offPair_not_both_vanish
+    {ι : Type*} [Fintype ι]
+    {a b c e : EuclideanSpace ℝ ι}
+    (hgp : a ≠ b → c ≠ a → c ≠ b →
+      ¬ Collinear ℝ ({a, b, c} : Set (EuclideanSpace ℝ ι)))
+    (hab : a ≠ b)
+    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+    ¬ ((∀ p q : EuclideanSpace ℝ ι,
+          ⟪p, a - b⟫ * ⟪q, c - e⟫ - ⟪p, c - e⟫ * ⟪q, a - b⟫ = 0) ∧
+        (∀ r : EuclideanSpace ℝ ι, ⟪r, a + b - (c + e)⟫ * ⟪r, a - b⟫ = 0)) :=
+  nearEnemy_offPair_not_both_vanish_of_rigid
+    (nearEnemy_noThreeCollinear_parallel_midpoint_eq_samePair hgp) hab hne
 
 /-! ## Generic projections -/
 
@@ -752,22 +889,20 @@ theorem innerPoly_ne_zero {a b : EuclideanSpace ℝ ι} (hab : a ≠ b) :
   rw [eval_innerPoly_rows, map_zero, Matrix.cons_val_zero] at heval
   exact sub_ne_zero.mpr hab (inner_self_eq_zero.mp heval)
 
-/-- **Per-quadruple witness**: for an off-pair quadruple on a sphere, at
-least one of the two constraint polynomials is nonzero as a polynomial.
-This is the polynomial-side form of the per-quadruple certificate. -/
-theorem detPoly_ne_zero_or_orthPoly_ne_zero
-    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
-    (ha : a ∈ Metric.sphere center R)
-    (hb : b ∈ Metric.sphere center R)
-    (hc : c ∈ Metric.sphere center R)
-    (he : e ∈ Metric.sphere center R)
-    (hab : a ≠ b)
-    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+/-- **Per-quadruple witness, certificate-parameterized core**: if the two
+identical-vanishing conditions cannot both hold for a quadruple, at least
+one of the two constraint polynomials is nonzero as a polynomial.  This is
+the polynomial-side form of the per-quadruple certificate. -/
+theorem detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
+    {a b c e : EuclideanSpace ℝ ι}
+    (hnb : ¬ ((∀ p q : EuclideanSpace ℝ ι,
+          ⟪p, a - b⟫ * ⟪q, c - e⟫ - ⟪p, c - e⟫ * ⟪q, a - b⟫ = 0) ∧
+        (∀ r : EuclideanSpace ℝ ι, ⟪r, a + b - (c + e)⟫ * ⟪r, a - b⟫ = 0))) :
     detPoly a b c e ≠ 0 ∨ orthPoly a b c e ≠ 0 := by
   by_contra h
   push Not at h
   obtain ⟨hd, ho⟩ := h
-  refine nearEnemy_offPair_not_both_vanish ha hb hc he hab hne ⟨?_, ?_⟩
+  refine hnb ⟨?_, ?_⟩
   · intro p q
     have h0 := congrArg (eval fun ki ↦ ![p, q] ki.1 ki.2) hd
     rw [map_zero] at h0
@@ -777,13 +912,32 @@ theorem detPoly_ne_zero_or_orthPoly_ne_zero
     rw [map_zero] at h0
     simpa [orthPoly, eval_innerPoly_rows] using h0
 
-/-- **Existence of a generic projection** for any finite sphere subset.  The
-master polynomial multiplies a witness polynomial per constraint; it is
-nonzero over the infinite integral domain `ℝ[X]`, so it has a nonvanishing
-point, and the rows read off that point give a generic projection. -/
-theorem nearEnemy_exists_projectionGeneric
-    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
-    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+/-- **Per-quadruple witness, sphere form**: for an off-pair quadruple on a
+sphere, at least one of the two constraint polynomials is nonzero as a
+polynomial. -/
+theorem detPoly_ne_zero_or_orthPoly_ne_zero
+    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
+    (ha : a ∈ Metric.sphere center R)
+    (hb : b ∈ Metric.sphere center R)
+    (hc : c ∈ Metric.sphere center R)
+    (he : e ∈ Metric.sphere center R)
+    (hab : a ≠ b)
+    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+    detPoly a b c e ≠ 0 ∨ orthPoly a b c e ≠ 0 :=
+  detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
+    (nearEnemy_offPair_not_both_vanish ha hb hc he hab hne)
+
+/-- **Existence of a generic projection, witness-parameterized core**: for
+any finite set whose off-pair quadruples each carry a nonzero constraint
+polynomial, a generic projection exists.  The master polynomial multiplies a
+witness polynomial per constraint; it is nonzero over the infinite integral
+domain `ℝ[X]`, so it has a nonvanishing point, and the rows read off that
+point give a generic projection. -/
+theorem exists_projectionGeneric_of_forall_offPair_witness
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hW : ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G, a ≠ b → c ≠ e →
+      ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e} →
+      detPoly a b c e ≠ 0 ∨ orthPoly a b c e ≠ 0) :
     ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
       ProjectionGeneric T G := by
   -- Constraint index set for the quadruple constraints.
@@ -803,8 +957,7 @@ theorem nearEnemy_exists_projectionGeneric
     · rwa [if_pos hdet]
     · rw [if_neg hdet]
       push Not at hdet
-      rcases detPoly_ne_zero_or_orthPoly_ne_zero (hG _ h1.1) (hG _ h1.2.1)
-        (hG _ h2.1) (hG _ h2.2.1) h1.2.2 hne with h | h
+      rcases hW _ h1.1 _ h1.2.1 _ h2.1 _ h2.2.1 h1.2.2 h2.2.2 hne with h | h
       · exact absurd hdet h
       · exact h
   -- The master polynomial and its nonvanishing point.
@@ -869,6 +1022,33 @@ theorem nearEnemy_exists_projectionGeneric
         ring
       rw [← hexp, horth]
 
+/-- **Existence of a generic projection** for any finite set with no three
+collinear points. -/
+theorem nearEnemy_noThreeCollinear_exists_projectionGeneric
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      ProjectionGeneric T G :=
+  exists_projectionGeneric_of_forall_offPair_witness
+    fun a ha b hb c hc _e _he hab _hce hne =>
+      detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
+        (nearEnemy_noThreeCollinear_offPair_not_both_vanish
+          (fun hab' hca hcb => hG a ha b hb c hc hab' hca.symm hcb.symm)
+          hab hne)
+
+/-- **Existence of a generic projection** for any finite sphere subset.
+Derived from the general-position form: a line meets a sphere in at most
+two points, so sphere subsets have no three collinear points. -/
+theorem nearEnemy_exists_projectionGeneric
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      ProjectionGeneric T G :=
+  nearEnemy_noThreeCollinear_exists_projectionGeneric
+    fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
+      not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
+
 end Existence
 
 /-! ## The Near Enemy Theorem for Bisector Energy (unconditional form) -/
@@ -879,10 +1059,31 @@ open scoped Classical
 
 variable {ι : Type*} [Fintype ι]
 
-/-- **Near Enemy Theorem for Bisector Energy**: every finite subset of a
-sphere in any Euclidean space admits a planar projection that is injective
-on it and realizes the absolute minimum bisector energy `2n(n−1)` — every
-unordered point-pair has a distinct perpendicular bisector. -/
+/-- **Near Enemy Theorem for Bisector Energy, general-position form**: every
+finite set with no three collinear points in any Euclidean space admits a
+planar projection that is injective on it and realizes the absolute minimum
+bisector energy `2n(n−1)` — every unordered point-pair has a distinct
+perpendicular bisector.  This is the strongest form proved here; the
+sphere-slice form is the corollary below. -/
+theorem nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      ∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P' := by
+  obtain ⟨T, hT⟩ := nearEnemy_noThreeCollinear_exists_projectionGeneric hG
+  exact ⟨T, injOn_of_projectionGeneric hT,
+    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
+    nearEnemy_genericProjection_bisectorEnergy_minimal hT⟩
+
+/-- **Near Enemy Theorem for Bisector Energy, sphere-slice form**: every
+finite subset of a sphere in any Euclidean space admits a planar projection
+that is injective on it and realizes the absolute minimum bisector energy
+`2n(n−1)`.  Corollary of the general-position form: a line meets a sphere
+in at most two points. -/
 theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal
     {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
     (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
@@ -890,11 +1091,10 @@ theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal
       Set.InjOn (fun x ↦ T x) ↑G ∧
       bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
       ∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
-        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P' := by
-  obtain ⟨T, hT⟩ := nearEnemy_exists_projectionGeneric hG
-  exact ⟨T, injOn_of_projectionGeneric hT,
-    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
-    nearEnemy_genericProjection_bisectorEnergy_minimal hT⟩
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P' :=
+  nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal
+    fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
+      not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
 
 end Unconditional
 
