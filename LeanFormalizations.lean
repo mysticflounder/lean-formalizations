@@ -7,6 +7,7 @@ Authors: Adam McKenna
 -- Combinatorics / additive combinatorics
 import LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers
 import LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph
+import LeanFormalizations.Combinatorics.Additive.ThreeAPFreeOfNoThreeCollinear
 
 -- Combinatorics / combinatorial maps + planar edge bound (complete, axiom-clean)
 import LeanFormalizations.Combinatorics.CombinatorialMap
@@ -16,6 +17,10 @@ import LeanFormalizations.Combinatorics.UnitDistance.Counting
 
 -- Euclidean geometry
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
+-- Near Enemy Theorem for Bisector Energy: generic-projection algebra +
+-- sphere-slice rigidity (complete, axiom-clean); canonical home of the
+-- module also mirrored in the erdos-98 repo.
+import LeanFormalizations.Geometry.Euclidean.NearEnemyTheorem
 
 -- Convex geometry: line-slices of convex sets + a simple convex polygon model
 -- (complete, axiom-clean)
