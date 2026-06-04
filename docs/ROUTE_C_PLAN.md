@@ -951,20 +951,35 @@ This **pins, with no slack, the only remaining geometric obligations**:
       - **Assembly (LANDED):** `isPreconnected_cap_inter_ball_cover` — given the cover equality
         and local overlap, the union of convex slices is preconnected. Reduces the clipped cap to
         exactly two geometric obligations.
-      - **REMAINING obligation A — cover equality (`hcover`).** Every `tube∩cap` point's tube
-        witness `q∈S` is a first-edge point `p(c_q)` with `c_q∈(0,c_max]` (needs
-        `ρ₀+δ₀ ≤ dist(v₀, segCarrier i)` for non-first edges, and `c_max·‖edge‖ < ρ₀` so the
-        cap does not reach `foot ≥ c_max`); conversely each slice `⊆ tube∩cap` since `p(c)∈S`.
-      - **REMAINING obligation B — local overlap (`hov`), the genuinely-new sup-metric geometry.**
-        Shared point `w = liftPlus s t c η` (small `η>0`): `w∈cap` (`sideForm = η·‖t−s‖₂² > 0`,
-        `foot = c > 0`, `dist(w,v₀) < ρ₀` for `c≤c_max`), `w∈ball(p c, r c)` since
-        `dist_sup(w, p c) = η·dist_sup(s,t) < r c` (pick `η < r(c)/dist(s,t)`), and
-        `w∈ball(p c', r c')` for `|c−c'|<ε` via `dist_sup(w,p c') ≤ (η+ε)·dist(s,t)` and the
-        **1-Lipschitz** lower bound `infDist(p c')Rᶜ ≥ infDist(p c)Rᶜ − |c−c'|·dist(s,t)`
-        (`Metric.infDist_le_infDist_add_dist`) ⇒ `r(c') ≥ min(δ₀, ¼·infDist(p c)Rᶜ) > 0`. All
-        in the **sup metric** (`dist_sup(p c, p c') = |c−c'|·dist(s,t)`). Needs the
-        **radius-positivity** input `0 < infDist(p c) Rᶜ` for `c∈(0,c_max]` (open first edge
-        `⊆ interior R`) — a region-geometry hypothesis discharged at instantiation.
+      - **Obligation B — local overlap (`hov`), LANDED for the principal foot regime**
+        (`local_overlap_endCapSrcPlus`, commit `fed9620`). The genuinely-new sup-metric geometry,
+        done correctly (the locus of the earlier Euclidean overclaim). Shared point
+        `w = liftPlus s t c ε` (small `ε>0`): `w∈cap` (`sideForm = ε·‖t−s‖₂² > 0`, `foot = c > 0`,
+        `dist(w,v₀) ≤ (c+ε)·dist(s,t) < ρ₀`), `w∈ball(p c, r c)` (`dist_sup(w, p c) ≤
+        ε·dist(s,t) < r c`), and `w∈ball(p c', r c')` for `|c−c'|<ε` via the **1-Lipschitz** lower
+        bound `infDist(p c')Rᶜ ≥ infDist(p c)Rᶜ − |c−c'|·dist(s,t)`
+        (`Metric.infDist_le_infDist_add_dist`) ⇒ `r(c') ≥ min(δ₀, ¼·infDist(p c)Rᶜ)`. Inputs:
+        `δ₀>0`, cap-radius budget `c_max·dist(s,t) < ρ₀`, radius positivity `0 < infDist(p c) Rᶜ`
+        on `(0,c_max]` (open first edge `⊆ interior R`). All in the **sup metric**
+        (`dist_sup(p c, p c') = |c−c'|·dist(s,t)` via `dist_liftPlus_liftPlus_le`).
+      - **Obligation A — cover equality (`hcover`), REMAINING; ⚠ regime-consistency subtlety
+        (found 2026-06-04, {{NEEDS_RESEARCH}}).** The slice union is trivially `⊇` (each
+        `cap∩ball(p c,r c) ⊆ tube∩cap` once `p(c)∈S`). The `⊆` direction needs every `tube∩cap`
+        point's tube witness `q∈S` to be a first-edge point `p(c_q)`; the non-first edges are
+        excluded by `ρ₀+δ₀ ≤ dist(v₀, segCarrier i)`. **But the witness foot can be large:**
+        a cap point `z` (`dist(z,v₀)<ρ₀`) lies in `ball(q,r_q)`, `r_q≤δ₀`, so
+        `dist(q,v₀)<ρ₀+δ₀`, i.e. `c_q < (ρ₀+δ₀)/dist(s,t)` — strictly **beyond** the overlap
+        lemma's regime `c_max < ρ₀/dist(s,t)` (where the at-foot-`c` lift stays in the cap). The
+        slices in the sliver `c ∈ (ρ₀/dist(s,t), (ρ₀+δ₀)/dist(s,t))` can be nonempty (thin
+        far-side caps near `dist = ρ₀`), and the at-foot-`c` lift leaves the cap there, so they
+        need a **different shared-point argument** (any interior point of the nonempty slice `c`
+        lies in `ball(p c')` for `c'` close, by continuity of `r` — i.e. the overlap reduces to
+        slice-nonemptiness + `r` continuity, no explicit lift). **Open design choices:** (i) widen
+        the overlap lemma to all `c∈(0,c_top]` using the nonemptiness-based shared point instead of
+        the lift; or (ii) prove the sliver slices are in fact empty under a tightened budget
+        (unverified); or (iii) re-index to make the cover range coincide with the lift regime.
+        Resolving this is the true remaining crux of the clipped cap — do NOT claim B done until
+        the cover range and the overlap regime are reconciled.
       - Then `×2` (src/tgt) `×2` (plus/minus) mirrors.
     * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
       (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪
