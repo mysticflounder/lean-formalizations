@@ -49,6 +49,12 @@ The headline Lean theorems (unconditional, complete) are:
   form, a corollary: a line meets a sphere in at most two points
   (`not_collinear_of_mem_sphere`), so sphere subsets have no three
   collinear points.
+* `nearEnemy_exists_projection_image_rotationEnergy_zero` — the
+  rotation-channel companion, with NO hypothesis at all: every finite set in
+  any Euclidean space admits an injective planar projection whose image has
+  zero rotational energy (`rotationEnergy`, the proper-rotation channel of
+  the congruent-quadruple count) — every congruent quadruple of the image is
+  translation or half-turn related.
 
 Conditional forms (on the `ProjectionGeneric` interface):
 
@@ -91,6 +97,13 @@ Supporting chain (all complete):
 * `nearEnemy_exists_projectionGeneric_image_generalPosition` — existence
   with both extra factor families: the image is in full planar general
   position (no three collinear, no four concyclic)
+* `distClassPoly` / `distClassPoly_ne_zero` /
+  `eval_distClassPoly_eq_zero_of_dist_eq` /
+  `rotationEnergy_image_eq_zero` — the distance-class constraint polynomial
+  `‖Tv‖² - ‖Tw‖²`, its unconditional per-pair nonvanishing for `w ≠ ±v`
+  (via `eq_or_eq_neg_of_forall_inner_sub_mul_inner_add`), the downstairs
+  distance bridge, and the rotation-channel vanishing of the image under
+  full distance-class separation
 
 Mathematical content currently in this module, in proof-pipeline order:
 
@@ -109,10 +122,10 @@ Mathematical content currently in this module, in proof-pipeline order:
    * `eq_or_eq_neg_of_forall_inner_sub_mul_inner_add` — distance-class
      separation: `‖Tv‖² - ‖Tw‖² = Σ_k ⟪T_k, v-w⟫⟪T_k, v+w⟫`, so identical
      vanishing forces `w = ±v`; distinct `±`-difference classes stay
-     separated under generic projection. (This is also the algebraic core of
-     the companion zero-rotation-energy statement for the same family: with
-     all `±`-classes separated, every congruent quadruple downstairs is a
-     translation or half-turn.)
+     separated under generic projection. (This is the algebraic core of the
+     zero-rotation-energy companion, now formalized: with all `±`-classes
+     separated, every congruent quadruple downstairs is a translation or
+     half-turn — `nearEnemy_exists_projection_image_rotationEnergy_zero`.)
 2. **Upstairs line rigidity** (the geometric core, two forms):
    * `nearEnemy_noThreeCollinear_parallel_midpoint_eq_samePair` — two pairs
      with the same midpoint and parallel differences lie on one line, so a
@@ -231,6 +244,25 @@ noncomputable def bisectorEnergy (P : Finset (EuclideanSpace ℝ (Fin 2))) : ℕ
   (((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
     q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
       perpBisector q.1.1 q.1.2 = perpBisector q.2.1 q.2.2).card
+
+/-! ## Rotation vocabulary -/
+
+open scoped Classical in
+/-- Rotational energy (proper-rotation channel) of a finite planar point set:
+the number of ordered congruent quadruples of nondegenerate ordered pairs
+whose difference vectors are neither equal nor opposite.  A congruent
+quadruple `(a, b, c, e)` (`a ≠ b`, `c ≠ e`, `dist a b = dist c e`) is
+realized by a unique orientation-preserving isometry taking `(a, b)` to
+`(c, e)`; that isometry is a translation iff `a - b = c - e`, a half-turn iff
+`a - b = -(c - e)`, and a proper rotation (angle `∉ {0, π}`) otherwise — so
+the channel split is decided by difference vectors alone, and this counts
+the proper-rotation channel. -/
+noncomputable def rotationEnergy (P : Finset (EuclideanSpace ℝ (Fin 2))) : ℕ :=
+  (((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
+    q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+      dist q.1.1 q.1.2 = dist q.2.1 q.2.2 ∧
+      q.1.1 - q.1.2 ≠ q.2.1 - q.2.2 ∧
+      q.1.1 - q.1.2 ≠ -(q.2.1 - q.2.2)).card
 
 /-! ## Upstairs sphere rigidity -/
 
@@ -1163,6 +1195,81 @@ theorem eval_circPoly_eq_zero_of_dist_eq
       ⟪rowOf f 1, a⟫ * (⟪rowOf f 0, b⟫ - ⟪rowOf f 0, c⟫) +
       (⟪rowOf f 0, b⟫ * ⟪rowOf f 1, c⟫ - ⟪rowOf f 0, c⟫ * ⟪rowOf f 1, b⟫)) * h₄
 
+/-- Distance-class constraint polynomial of a pair of difference vectors:
+the difference `‖Tv‖² - ‖Tw‖²` of the squared norms of the projected
+vectors, as a polynomial in the projection entries. -/
+noncomputable def distClassPoly (v w : EuclideanSpace ℝ ι) :
+    MvPolynomial (Fin 2 × ι) ℝ :=
+  innerPoly 0 v ^ 2 + innerPoly 1 v ^ 2 -
+    (innerPoly 0 w ^ 2 + innerPoly 1 w ^ 2)
+
+/-- **Per-pair distance-class witness**: for difference vectors that are
+neither equal nor opposite, the distance-class constraint polynomial is
+nonzero as a polynomial.  No nondegeneracy or general-position hypothesis is
+needed: identical vanishing forces `w = ±v` by the distance-class separation
+lemma. -/
+theorem distClassPoly_ne_zero {v w : EuclideanSpace ℝ ι}
+    (h1 : w ≠ v) (h2 : w ≠ -v) : distClassPoly v w ≠ 0 := by
+  intro h0
+  have key : ∀ r : EuclideanSpace ℝ ι, ⟪r, v - w⟫ * ⟪r, v + w⟫ = 0 := by
+    intro r
+    have heval := congrArg (eval fun ki ↦ ![r, 0] ki.1 ki.2) h0
+    rw [map_zero] at heval
+    simp only [distClassPoly, map_add, map_sub, map_pow, eval_innerPoly_rows,
+      Matrix.cons_val_zero, Matrix.cons_val_one, inner_zero_left] at heval
+    rw [inner_sub_right, inner_add_right]
+    linear_combination heval
+  rcases eq_or_eq_neg_of_forall_inner_sub_mul_inner_add key with h | h
+  · exact h1 h
+  · exact h2 h
+
+/-- **Downstairs distance bridge**: if two projected pairs have equal planar
+distance, the distance-class constraint polynomial of their difference
+vectors evaluates to zero at the entry assignment. -/
+theorem eval_distClassPoly_eq_zero_of_dist_eq
+    {f : Fin 2 × ι → ℝ} {a b c e : EuclideanSpace ℝ ι}
+    (h : dist (rowMap (rowOf f) a) (rowMap (rowOf f) b) =
+      dist (rowMap (rowOf f) c) (rowMap (rowOf f) e)) :
+    eval f (distClassPoly (a - b) (c - e)) = 0 := by
+  have h2 : dist (rowMap (rowOf f) a) (rowMap (rowOf f) b) ^ 2 =
+      dist (rowMap (rowOf f) c) (rowMap (rowOf f) e) ^ 2 := by rw [h]
+  rw [EuclideanSpace.dist_sq_eq, EuclideanSpace.dist_sq_eq] at h2
+  simp only [Fin.sum_univ_two, Real.dist_eq, sq_abs, rowMap_apply] at h2
+  simp only [distClassPoly, map_add, map_sub, map_pow, eval_innerPoly,
+    inner_sub_right]
+  linear_combination h2
+
+/-- **Downstairs rotation-channel vanishing**: a projection that separates
+the planar distances of all difference-distinct (non-translation,
+non-half-turn) pairs of pairs of `G` has an image with zero rotational
+energy — every congruent quadruple of the image is translation or half-turn
+related. -/
+theorem rotationEnergy_image_eq_zero
+    {G : Finset (EuclideanSpace ℝ ι)}
+    {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+    (hsep : ∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+      a - b ≠ c - e → a - b ≠ -(c - e) →
+      dist (T a) (T b) ≠ dist (T c) (T e)) :
+    rotationEnergy (G.image fun x ↦ T x) = 0 := by
+  rw [rotationEnergy, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+  rintro ⟨⟨q₁, q₂⟩, q₃, q₄⟩ hq
+  simp only [Finset.mem_product] at hq
+  obtain ⟨⟨h1, h2⟩, h3, h4⟩ := hq
+  obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp h1
+  obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp h2
+  obtain ⟨c, hc, rfl⟩ := Finset.mem_image.mp h3
+  obtain ⟨e, he, rfl⟩ := Finset.mem_image.mp h4
+  rintro ⟨-, -, hdist, hne1, hne2⟩
+  by_cases hvw : a - b = c - e
+  · refine hne1 ?_
+    show T a - T b = T c - T e
+    rw [← map_sub, ← map_sub, hvw]
+  by_cases hvw' : a - b = -(c - e)
+  · refine hne2 ?_
+    show T a - T b = -(T c - T e)
+    rw [← map_sub, ← map_sub, ← map_neg, hvw']
+  exact hsep a ha b hb c hc e he hvw hvw' hdist
+
 /-- **Existence of a generic projection, witness-parameterized core**: for
 any finite set whose off-pair quadruples each carry a nonzero constraint
 polynomial, a generic projection exists.  The master polynomial multiplies a
@@ -1620,6 +1727,72 @@ theorem nearEnemy_exists_projectionGeneric
   nearEnemy_noThreeCollinear_exists_projectionGeneric
     fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
       not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
+
+/-- **Universal rotation-killing projection**: every finite set in any
+Euclidean space admits an injective planar projection whose image has zero
+rotational energy — every congruent quadruple of the image is translation or
+half-turn related.  No hypothesis on `G` at all: the per-pair distance-class
+witnesses are unconditionally nonzero, so the master-product argument
+applies to every finite set. -/
+theorem nearEnemy_exists_projection_image_rotationEnergy_zero
+    (G : Finset (EuclideanSpace ℝ ι)) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      rotationEnergy (G.image fun x ↦ T x) = 0 := by
+  -- Constraint index set: pairs of pairs with difference-distinct vectors.
+  set DPairs : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    ((G ×ˢ G) ×ˢ (G ×ˢ G)).filter
+      (fun q ↦ q.1.1 - q.1.2 ≠ q.2.1 - q.2.2 ∧
+        q.1.1 - q.1.2 ≠ -(q.2.1 - q.2.2)) with hDPairs
+  have hdp_ne : ∀ q ∈ DPairs,
+      distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2) ≠ 0 := by
+    intro q hq
+    rw [hDPairs, Finset.mem_filter] at hq
+    exact distClassPoly_ne_zero (fun h ↦ hq.2.1 h.symm)
+      (fun h ↦ hq.2.2 (by rw [h, neg_neg]))
+  -- The master polynomial and its nonvanishing point.
+  set master : MvPolynomial (Fin 2 × ι) ℝ :=
+    (∏ ab ∈ G.offDiag, innerPoly 0 (ab.1 - ab.2)) *
+      ∏ q ∈ DPairs, distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2) with hmaster
+  have hmaster_ne : master ≠ 0 := by
+    rw [hmaster]
+    exact mul_ne_zero
+      (Finset.prod_ne_zero_iff.mpr fun ab hab ↦
+        innerPoly_ne_zero (Finset.mem_offDiag.mp hab).2.2)
+      (Finset.prod_ne_zero_iff.mpr hdp_ne)
+  have hpoint : ∃ f : Fin 2 × ι → ℝ, eval f master ≠ 0 := by
+    by_contra h
+    push Not at h
+    exact hmaster_ne (MvPolynomial.funext fun f ↦ by simpa using h f)
+  obtain ⟨f, hf⟩ := hpoint
+  -- All factor evaluations are nonzero at `f`.
+  rw [hmaster, map_mul, map_prod, map_prod] at hf
+  have hpairs_eval : ∀ ab ∈ G.offDiag, eval f (innerPoly 0 (ab.1 - ab.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (left_ne_zero_of_mul hf)
+  have hdpairs_eval : ∀ q ∈ DPairs,
+      eval f (distClassPoly (q.1.1 - q.1.2) (q.2.1 - q.2.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul hf)
+  refine ⟨rowMap (rowOf f), ?_, ?_⟩
+  · -- Injectivity on `G`.
+    intro a ha b hb hTab
+    by_contra hab
+    have hmem : (a, b) ∈ G.offDiag := Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩
+    apply hpairs_eval (a, b) hmem
+    rw [eval_innerPoly]
+    have hT0 : rowMap (rowOf f) (a - b) = 0 := by
+      rw [map_sub, sub_eq_zero]
+      exact hTab
+    have h0 : rowMap (rowOf f) (a - b) 0 = 0 := by rw [hT0]; rfl
+    rwa [rowMap_apply] at h0
+  · -- Zero rotational energy downstairs.
+    apply rotationEnergy_image_eq_zero
+    intro a ha b hb c hc e he hvw hvw' hdist
+    have hmem : ((a, b), (c, e)) ∈ DPairs := by
+      rw [hDPairs, Finset.mem_filter, Finset.mem_product, Finset.mem_product,
+        Finset.mem_product]
+      exact ⟨⟨⟨ha, hb⟩, hc, he⟩, hvw, hvw'⟩
+    exact hdpairs_eval _ hmem (eval_distClassPoly_eq_zero_of_dist_eq hdist)
 
 end Existence
 
