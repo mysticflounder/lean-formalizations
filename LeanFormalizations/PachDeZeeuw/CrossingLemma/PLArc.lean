@@ -5396,4 +5396,81 @@ theorem sectorMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ :
   rw [Metric.mem_ball]
   exact lt_of_lt_of_le (Metric.mem_ball.mp hz.2) (le_min hρδ hρR)
 
+/-- **Band containment (positive side).**  A positive band-strip point lies in the tapered
+tube.  The strip certificate gives a carrier witness `y` within `δ₀` (sup metric) of `z`; the
+Lipschitz bound on `footParam` (`abs_footParam_sub_le`) and the smallness hypothesis `hsmall`
+keep `y`'s foot-parameter inside `(α/2, 1−α/2)`, so `y` is a *strictly interior* carrier point.
+`hS` then places `y` in the spine `S`, and `hR` (only needed on the safe window, where it is
+satisfiable even for the end edges) gives `δ₀ ≤ ½·infDist y Rᶜ`, so the tube ball at `y` has
+radius `δ₀` and swallows `z`.  No sup-metric arg-min geometry is required. -/
+theorem bandStripPlus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hα : 0 < α)
+    (hsmall : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hS : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Ioo (0 : ℝ) 1 → y ∈ S)
+    (hR : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) (1 - α / 2) →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2) :
+    bandStripPlus β α δ₀ i ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  have hz1 : footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo α (1 - α) := hz.1.1
+  have hstrip : Metric.infDist z (β.segCarrier i) < δ₀ := hz.2
+  have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+  have hKnonneg : 0 ≤ (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+      / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) :=
+    div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+      (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc i)))
+  have hb : |footParam (β.segSrc i) (β.segTgt i) z - footParam (β.segSrc i) (β.segTgt i) y|
+      ≤ α / 2 :=
+    le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc i) y z)
+      (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg) hsmall)
+  obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+  have hfy_lo : α / 2 < footParam (β.segSrc i) (β.segTgt i) y := by linarith [hz1.1]
+  have hfy_hi : footParam (β.segSrc i) (β.segTgt i) y < 1 - α / 2 := by linarith [hz1.2]
+  have hyS : y ∈ S := hS y hyseg ⟨by linarith, by linarith⟩
+  have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 :=
+    hR y hyseg ⟨le_of_lt hfy_lo, le_of_lt hfy_hi⟩
+  rw [taperedTube]
+  refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+  rw [Metric.mem_ball, min_eq_left hyR]
+  exact hyz
+
+/-- **Band containment (negative side).**  Identical to the positive side: the proof uses only
+the foot-parameter window and the strip certificate, not the side-functional sign. -/
+theorem bandStripMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hα : 0 < α)
+    (hsmall : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hS : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Ioo (0 : ℝ) 1 → y ∈ S)
+    (hR : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) (1 - α / 2) →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2) :
+    bandStripMinus β α δ₀ i ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  have hz1 : footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo α (1 - α) := hz.1.1
+  have hstrip : Metric.infDist z (β.segCarrier i) < δ₀ := hz.2
+  have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+  have hKnonneg : 0 ≤ (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+      / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) :=
+    div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+      (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc i)))
+  have hb : |footParam (β.segSrc i) (β.segTgt i) z - footParam (β.segSrc i) (β.segTgt i) y|
+      ≤ α / 2 :=
+    le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc i) y z)
+      (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg) hsmall)
+  obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+  have hfy_lo : α / 2 < footParam (β.segSrc i) (β.segTgt i) y := by linarith [hz1.1]
+  have hfy_hi : footParam (β.segSrc i) (β.segTgt i) y < 1 - α / 2 := by linarith [hz1.2]
+  have hyS : y ∈ S := hS y hyseg ⟨by linarith, by linarith⟩
+  have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 :=
+    hR y hyseg ⟨le_of_lt hfy_lo, le_of_lt hfy_hi⟩
+  rw [taperedTube]
+  refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+  rw [Metric.mem_ball, min_eq_left hyR]
+  exact hyz
+
 end CrossingLemma.PlaneArcSeparation
