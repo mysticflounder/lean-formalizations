@@ -10,3 +10,5 @@
 # copyrighted reference books — local-only, not redistributable
 # (arXiv .tex sources under docs/references/ stay tracked)
 /docs/references/*.pdf
+# proof-blueprint DB is a build artifact (intent/ is the durable record)
+/data/proof-blueprint.db

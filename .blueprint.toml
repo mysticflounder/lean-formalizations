@@ -1,0 +1,21 @@
+[project]
+name = "lean-formalizations"
+slug = "lean-formalizations"
+
+[paths]
+db          = "data/proof-blueprint.db"
+lean_lib    = "."
+lake_script = "lake-build.sh"
+
+[obligations]
+root_slug = "root"
+
+[publish]
+# target_symbol = "Mod.top_level_theorem"  # what verify-publish gates
+state = "wip"  # "wip" | "complete"; while "wip", sorryAx is auto-approved in the spine view
+
+[axioms]
+# Project-declared approved custom axioms (full FQ names). The Lean core
+# axioms (propext, Classical.choice, Quot.sound, Lean.ofReduceBool,
+# Lean.ofReduceNat) are always approved; do NOT list them here.
+approved = []
