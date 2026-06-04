@@ -4725,6 +4725,28 @@ theorem reflTransGen_meets_of_local_overlap {α : Type*} [TopologicalSpace α]
         exact hεov a' ha'E.1 w hwt (by rw [← Real.dist_eq]; exact Metric.mem_ball.mp hwa'), hwt⟩
   exact ha'E.2 ⟨ha'E.1, hreach_w.tail hRwa'⟩
 
+/-- **Convex-slice cover ⇒ preconnected.**  A set `X` that is the union, over a foot-parameter
+range `Ioc 0 c_max`, of convex slices `cap ∩ ball (p c) (r c)` (a convex cap met with a ball),
+in which consecutive slices overlap (local overlap), is preconnected.
+
+This is the assembly that turns the clipped end-cap connectivity into two purely geometric
+obligations: the *cover equality* `hcover` (the cap-tube intersection is exactly this union of
+slices) and the *local overlap* `hov` (nearby slices meet).  Convexity of each slice is free
+from convexity of the cap, and the union is preconnected by the nerve engine
+`reflTransGen_meets_of_local_overlap` feeding `IsPreconnected.biUnion_of_reflTransGen`. -/
+theorem isPreconnected_cap_inter_ball_cover {cap X : Set Plane} (hcap : Convex ℝ cap)
+    {c_max : ℝ} (p : ℝ → Plane) (r : ℝ → ℝ)
+    (hcover : X = ⋃ c ∈ Set.Ioc (0 : ℝ) c_max, (cap ∩ Metric.ball (p c) (r c)))
+    (hov : ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+        ((cap ∩ Metric.ball (p c) (r c)) ∩ (cap ∩ Metric.ball (p c') (r c'))).Nonempty) :
+    IsPreconnected X := by
+  rw [hcover]
+  refine IsPreconnected.biUnion_of_reflTransGen
+    (fun c _ => (hcap.inter (convex_ball _ _)).isPreconnected) ?_
+  intro c hc c' hc'
+  exact reflTransGen_meets_of_local_overlap isPreconnected_Ioc
+    (fun c => cap ∩ Metric.ball (p c) (r c)) hov hc hc'
+
 /-- **Linear-chain union.** If `s : Fin n → Set α` has each `s i` preconnected and each
 consecutive pair `s i, s (i+1)` meeting, then `⋃ i, s i` is preconnected. -/
 theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : ℕ}
