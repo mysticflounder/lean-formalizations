@@ -904,11 +904,35 @@ This **pins, with no slack, the only remaining geometric obligations**:
     *interior* of an edge, bounded away from the frontier; sectors sit in `ball(v,ρ_v)`
     around an *interior* vertex `v ∈ arcInterior ⊆ R`). So the obstruction is **end-cap
     only**. `isPreconnected_collarPlus/Minus` remain valid *conditional* theorems; what
-    fails is their instantiation. **Fix (Option A, chosen):** reprove P5 for `collarPlus`
-    as *defined* (keeping the `(taperedTube∖carrier) ∩` prefix — i.e. the clipped collar),
-    dropping `hsub`. New content needed: (1) `band_i ⊆ tube` and (2) `sector ⊆ tube`
-    (interior no-taper containment, small `δ₀`/`ρ_v`); (3) **`endCap ∩ (tube∖carrier)`
-    preconnected** (the clipped sliver — the genuinely new lemma); (4) reassemble the chain.
+    fails is their instantiation. **Fix (Option A, chosen 2026-06-03, Adam):** reprove P5
+    for `collarPlus` as *defined* (keeping the `(taperedTube∖carrier) ∩` prefix — the
+    clipped collar), dropping `hsub`. New content + progress:
+    * (1) **`sector ⊆ tube` — DONE** (`sectorPlus/Minus_subset_taperedTube`, PLArc.lean,
+      sorry-free, axiom-clean). Witness = the interior vertex `verts(i+1) ∈ S`; needs
+      `ρ(succ i) ≤ δ₀` and `ρ(succ i) ≤ ½·infDist(verts(i+1)) Rᶜ`.
+    * (2) **`band_i ⊆ tube` — TODO (the hard analytic lemma).** Witness = the attained
+      sup-nearest point `q* ∈ segCarrier i` (compact ⇒ `IsCompact.exists_infDist_eq_dist`);
+      `dist_sup(z,q*) = infDist_sup(z,seg) < δ₀`, so `z ∈ ball(q*, δ₀) ⊆ tube` once
+      `q* ∈ S` and `δ₀ ≤ ½·infDist(q*) Rᶜ`. **Crux:** the plane uses the *sup (L∞) metric*,
+      so `q*` is NOT the orthogonal foot, and for the first/last edges `q*` must be shown
+      `≠ v₀/vₗₐₛₜ` (the only `segCarrier` points outside `S = arcInterior`). True (verified:
+      for `foot ∈ (0,1)` the sup-nearest stays in the relative interior — checked on
+      `(0,0)→(4,2)`, `z=(0,2)`: `foot=0.2`, sup-nearest at `λ=1/3`), but needs a focused
+      sup-metric argmin-interior sub-lemma. *Interior edges (i≠first,last) are easy:* the
+      whole closed `segCarrier i ⊆ arcInterior = S`, and `½·infDist(·)Rᶜ` has a positive min
+      on it, so any `q*` works.
+    * (3) **`endCap ∩ (tube∖carrier)` preconnected — TODO (new core).** Path-connected via
+      "shrink toward the edge": for `z` in the clipped cap, scaling the normal component by
+      `t ∈ (0,1]` keeps it in the *same* covering ball (distance to every first-edge spine
+      point only decreases), in the wedge (`foot`,`sideForm` signs preserved), in the ball,
+      off-carrier — so `z` connects to points at small height `ε` over the edge; a horizontal
+      hop at fixed small `ε` between two such (over the compact `x`-range `[min,max] ⊆ (0,ℓ)`,
+      where `½·infDist Rᶜ ≥ ε`) connects any pair. `×2` (src/tgt) `×2` (plus/minus), mirror.
+    * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
+      (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪
+      (W∩endCap)(opt)`, reusing the `isPreconnected_union_opt` cascade with the clipped-cap
+      lemma (3) in place of `convex_endCap*`; overlaps land in `band ⊆ W` (the hO witnesses
+      are band points). Then drop `hsub` from `isPreconnected_collarPlus/Minus`.
 * **G4** — every `z ∈ R∖carrier` has its relative component meet `taperedTube∖carrier`
   (component-boundary-in-carrier topology; tractable, not Jordan-strength).
 * **Collar instantiation** — produce one parameter bundle `(δ₀, α, ρ, S=arcInterior)`
