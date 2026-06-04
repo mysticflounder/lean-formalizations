@@ -292,4 +292,178 @@ theorem nearEnemy_sphereSlice_parallel_midpoint_eq_samePair
       rw [hcb, hea]
       exact Set.pair_comm a b
 
+/-! ## Per-quadruple genericity certificate -/
+
+/-- **Per-quadruple certificate**: for two distinct chords of one sphere (the
+first nondegenerate), the two identical-vanishing conditions that a
+bisector-coincidence under projection would force cannot BOTH hold: the
+projected-determinant form (parallelism) and the orthogonality form
+(midpoint relation) are not simultaneously identically zero over all row
+vectors.
+
+This is the input the existence-of-a-generic-projection argument consumes:
+for each off-pair quadruple, at least one of the two constraint polynomials
+in the projection entries is not identically zero, so a generic projection
+avoids the coincidence.  Contrapositive assembly of the coefficient lemma,
+the parallelism lemma, and sphere rigidity. -/
+theorem nearEnemy_offPair_not_both_vanish
+    {ι : Type*} [Fintype ι]
+    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
+    (ha : a ∈ Metric.sphere center R)
+    (hb : b ∈ Metric.sphere center R)
+    (hc : c ∈ Metric.sphere center R)
+    (he : e ∈ Metric.sphere center R)
+    (hab : a ≠ b)
+    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+    ¬ ((∀ p q : EuclideanSpace ℝ ι,
+          ⟪p, a - b⟫ * ⟪q, c - e⟫ - ⟪p, c - e⟫ * ⟪q, a - b⟫ = 0) ∧
+        (∀ r : EuclideanSpace ℝ ι, ⟪r, a + b - (c + e)⟫ * ⟪r, a - b⟫ = 0)) := by
+  rintro ⟨hdet, hinn⟩
+  have habv : a - b ≠ 0 := sub_ne_zero.mpr hab
+  -- Coefficient lemma: identical vanishing of the orthogonality form forces
+  -- equal midpoints upstairs.
+  have hmid : a + b = c + e :=
+    sub_eq_zero.mp (eq_zero_of_forall_inner_mul_inner_eq_zero habv hinn)
+  -- Parallelism lemma: identical vanishing of the determinant form forces
+  -- parallel difference vectors upstairs (the swap branch has a nonzero
+  -- scalar, so it inverts).
+  have hpar : ∃ t : ℝ, c - e = t • (a - b) := by
+    rcases exists_smul_eq_of_forall_inner_det_eq_zero hdet with ⟨t, ht⟩ | ⟨t, ht⟩
+    · exact ⟨t, ht⟩
+    · have ht0 : t ≠ 0 := by
+        rintro rfl
+        rw [zero_smul] at ht
+        exact habv ht
+      exact ⟨t⁻¹, by rw [ht, smul_smul, inv_mul_cancel₀ ht0, one_smul]⟩
+  -- Sphere rigidity closes the contradiction.
+  exact hne (nearEnemy_sphereSlice_parallel_midpoint_eq_samePair ha hb hc he hmid hpar)
+
+/-! ## Generic projections -/
+
+/-- A linear projection to the plane is **generic** for a finite set `G` when
+it sends distinct points of `G` to distinct points (with nondegenerate
+difference vectors) and avoids, for every off-pair quadruple of `G`, the
+coincidence "projected differences parallel AND projected midpoint-difference
+orthogonal to the projected direction" — exactly the conjunction a shared
+perpendicular bisector downstairs would force.
+
+All polynomial content of the construction is isolated in the existence
+statement for such a `T`; the main theorem is conditional on this
+interface. -/
+def ProjectionGeneric {ι : Type*} [Fintype ι]
+    (T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2))
+    (G : Finset (EuclideanSpace ℝ ι)) : Prop :=
+  (∀ a ∈ G, ∀ b ∈ G, a ≠ b → T (a - b) ≠ 0) ∧
+  (∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G, a ≠ b → c ≠ e →
+    ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e} →
+    ¬ ((∃ t : ℝ, T (c - e) = t • T (a - b)) ∧
+        ⟪T (a + b - (c + e)), T (a - b)⟫ = 0))
+
+/-! ## Downstairs: a shared bisector forces the coincidence conditions -/
+
+/-- The module-local `perpBisector` is the coercion of mathlib's
+affine-subspace perpendicular bisector. -/
+theorem perpBisector_eq_coe (p q : EuclideanSpace ℝ (Fin 2)) :
+    perpBisector p q = ↑(AffineSubspace.perpBisector p q) := by
+  ext x
+  simp [perpBisector, AffineSubspace.mem_perpBisector_iff_dist_eq]
+
+/-- **Downstairs shared-bisector conditions**: if two point pairs in the plane
+have equal perpendicular bisectors, then (1) their difference vectors are
+parallel and (2) the difference of their pair-sums is orthogonal to the
+direction.
+
+Note carefully what is NOT concluded: the two midpoints need not be equal —
+both lie on the common bisector line and may differ along it.  (2) is only
+the component of the midpoint difference along the normal.  Equal midpoints
+materialize upstairs, out of identical vanishing over all projections, via
+the coefficient lemma. -/
+theorem sharedBisector_parallel_and_sum_orth
+    {p q p' q' : EuclideanSpace ℝ (Fin 2)}
+    (h : perpBisector p q = perpBisector p' q') :
+    (∃ t : ℝ, q' - p' = t • (q - p)) ∧ ⟪p + q - (p' + q'), q - p⟫ = 0 := by
+  -- Promote the set equality to mathlib's affine-subspace bisector.
+  have hS : AffineSubspace.perpBisector p q =
+      AffineSubspace.perpBisector p' q' :=
+    AffineSubspace.coe_injective
+      (by rw [← perpBisector_eq_coe, ← perpBisector_eq_coe, h])
+  constructor
+  · -- (1) Equal affine subspaces have equal directions; the directions are
+    -- the orthogonal complements of the difference-vector spans, and the
+    -- double orthogonal complement recovers the spans.
+    have hdir := congrArg AffineSubspace.direction hS
+    rw [AffineSubspace.direction_perpBisector,
+      AffineSubspace.direction_perpBisector] at hdir
+    have hspan : (ℝ ∙ (q -ᵥ p)) = (ℝ ∙ (q' -ᵥ p')) := by
+      have horth := congrArg Submodule.orthogonal hdir
+      rwa [Submodule.orthogonal_orthogonal, Submodule.orthogonal_orthogonal]
+        at horth
+    have hmem : q' - p' ∈ (ℝ ∙ (q - p)) := by
+      have hself : q' -ᵥ p' ∈ (ℝ ∙ (q' -ᵥ p')) :=
+        Submodule.mem_span_singleton_self _
+      rw [← hspan] at hself
+      simpa [vsub_eq_sub] using hself
+    obtain ⟨t, ht⟩ := Submodule.mem_span_singleton.mp hmem
+    exact ⟨t, ht.symm⟩
+  · -- (2) Both midpoints lie on the common bisector, so their difference is
+    -- in its direction, i.e. orthogonal to the normal `q - p`.
+    have hm : midpoint ℝ p q ∈ AffineSubspace.perpBisector p q :=
+      AffineSubspace.midpoint_mem_perpBisector p q
+    have hm' : midpoint ℝ p' q' ∈ AffineSubspace.perpBisector p q := by
+      rw [hS]
+      exact AffineSubspace.midpoint_mem_perpBisector p' q'
+    have hd := AffineSubspace.vsub_mem_direction hm hm'
+    rw [AffineSubspace.direction_perpBisector] at hd
+    have hinner : ⟪q - p, midpoint ℝ p q - midpoint ℝ p' q'⟫ = 0 := by
+      have := Submodule.mem_orthogonal_singleton_iff_inner_right.mp hd
+      simpa [vsub_eq_sub] using this
+    have h2m : (2 : ℝ) • (midpoint ℝ p q - midpoint ℝ p' q') =
+        p + q - (p' + q') := by
+      rw [smul_sub, two_smul, two_smul, midpoint_add_self, midpoint_add_self]
+    calc ⟪p + q - (p' + q'), q - p⟫
+        = ⟪(2 : ℝ) • (midpoint ℝ p q - midpoint ℝ p' q'), q - p⟫ := by
+          rw [h2m]
+      _ = 2 * ⟪midpoint ℝ p q - midpoint ℝ p' q', q - p⟫ :=
+          real_inner_smul_left _ _ _
+      _ = 2 * ⟪q - p, midpoint ℝ p q - midpoint ℝ p' q'⟫ := by
+          rw [real_inner_comm]
+      _ = 0 := by rw [hinner, mul_zero]
+
+/-! ## Generic projections give bisector injectivity on unordered pairs -/
+
+/-- **Shared-bisector criterion under a generic projection**: if a projection
+is generic for `G` and two nondegenerate pairs from `G` acquire the same
+perpendicular bisector downstairs, they were the same unordered pair
+upstairs.  Sphere-free: coincidence-avoidance forbids every off-pair
+quadruple directly; the sphere enters only the existence statement for a
+generic `T`. -/
+theorem nearEnemy_sharedBisector_forces_samePair
+    {ι : Type*} [Fintype ι]
+    {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hT : ProjectionGeneric T G)
+    {a b c e : EuclideanSpace ℝ ι}
+    (ha : a ∈ G) (hb : b ∈ G) (hc : c ∈ G) (he : e ∈ G)
+    (hab : a ≠ b) (hce : c ≠ e)
+    (hbis : perpBisector (T a) (T b) = perpBisector (T c) (T e)) :
+    ({a, b} : Set (EuclideanSpace ℝ ι)) = {c, e} := by
+  by_contra hne
+  obtain ⟨-, havoid⟩ := hT
+  apply havoid a ha b hb c hc e he hab hce hne
+  obtain ⟨⟨t, ht⟩, horth⟩ := sharedBisector_parallel_and_sum_orth hbis
+  constructor
+  · -- (1) downstairs parallelism transfers through linearity with the same
+    -- scalar: `T e - T c = t • (T b - T a)` rewrites to
+    -- `T (c - e) = t • T (a - b)`.
+    refine ⟨t, ?_⟩
+    rw [map_sub, map_sub]
+    linear_combination (norm := module) -ht
+  · -- (2) downstairs orthogonality transfers through linearity up to sign.
+    have e1 : T (a + b - (c + e)) = T a + T b - (T c + T e) := by
+      rw [map_sub, map_add, map_add]
+    have e2 : T (a - b) = -(T b - T a) := by
+      rw [map_sub]
+      module
+    rw [e1, e2, inner_neg_right, horth, neg_zero]
+
 end NearEnemy
