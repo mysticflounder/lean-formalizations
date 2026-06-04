@@ -32,17 +32,23 @@ The public theorem name is:
 
 `Near Enemy Theorem for Bisector Energy`
 
-The intended Lean theorem name is:
+The headline Lean theorems (conditional on the `ProjectionGeneric`
+interface) are:
 
-`nearEnemy_genericProjection_bisectorEnergy_minimal`
+* `nearEnemy_genericProjection_bisectorEnergy_eq_pairCount` — exact count
+  `2n(n−1)`
+* `nearEnemy_genericProjection_bisectorEnergy_minimal` — absolute minimality
+  among planar sets of the same size
 
-Intended supporting names:
+Supporting chain (all complete):
 
-* `nearEnemySphereSlice`
-* `nearEnemyProjectionGeneric`
-* `nearEnemy_sharedBisector_forces_samePair`
-* `nearEnemy_bisectors_injective_on_unorderedPairs`
-* `nearEnemy_genericProjection_bisectorEnergy_eq_pairCount`
+* `ProjectionGeneric` — the coincidence-avoidance interface
+* `nearEnemy_offPair_not_both_vanish` — per-quadruple certificate
+* `sharedBisector_parallel_and_sum_orth` — downstairs translation
+* `nearEnemy_sharedBisector_forces_samePair` — shared-bisector criterion
+* `nearEnemy_bisectors_injective_on_unorderedPairs` — bisector injectivity
+* `two_mul_pairCount_le_bisectorEnergy` — universal floor
+* `bisectorEnergy_eq_of_bisectorInjective` — floor counting
 
 Mathematical content currently in this module, in proof-pipeline order:
 
@@ -72,12 +78,13 @@ Mathematical content currently in this module, in proof-pipeline order:
      one sphere with the same midpoint and parallel differences are the same
      unordered pair: the upstairs geometric core of the theorem.
 
-The genericity wrapper itself (a polynomial in the projection entries that is
-not identically zero vanishes only on finitely many proper hypersurfaces,
-which a generic integer matrix avoids) remains pen-and-paper; the lemmas above
-are exactly the identical-vanishing characterizations it consumes. The
-remaining stages are the generic-projection shared-bisector criterion and the
-bisector-injectivity / energy-minimality statements.
+The only remaining stage is the existence of a generic projection for a
+finite sphere subset (`∃ T, ProjectionGeneric T G`, via `MvPolynomial`
+nonvanishing): the per-quadruple certificate
+`nearEnemy_offPair_not_both_vanish` supplies, for each constraint, a witness
+polynomial that is not identically zero, and a point avoiding the finitely
+many hypersurfaces makes every conditional theorem above unconditional for
+sphere subsets.
 -/
 
 open scoped RealInnerProductSpace
@@ -465,5 +472,200 @@ theorem nearEnemy_sharedBisector_forces_samePair
       rw [map_sub]
       module
     rw [e1, e2, inner_neg_right, horth, neg_zero]
+
+/-! ## Floor counting -/
+
+/-- The bisector map of a planar point set is injective on unordered
+nondegenerate pairs. -/
+def BisectorInjectiveOnPairs (P : Finset (EuclideanSpace ℝ (Fin 2))) : Prop :=
+  ∀ p ∈ P, ∀ q ∈ P, ∀ p' ∈ P, ∀ q' ∈ P, p ≠ q → p' ≠ q' →
+    perpBisector p q = perpBisector p' q' →
+    ({p, q} : Set (EuclideanSpace ℝ (Fin 2))) = {p', q'}
+
+section FloorCounting
+
+open scoped Classical
+
+/-- The trivial quadruples on an ordered nondegenerate pair: the pair repeated,
+either in the same order or swapped. -/
+def trivialQuad :
+    (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)) × Bool →
+      (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)) ×
+        (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)) :=
+  fun rb => (rb.1, if rb.2 then rb.1 else (rb.1.2, rb.1.1))
+
+private theorem trivialQuad_injOn (P : Finset (EuclideanSpace ℝ (Fin 2))) :
+    Set.InjOn trivialQuad ↑(P.offDiag ×ˢ (Finset.univ : Finset Bool)) := by
+  rintro ⟨⟨x, y⟩, b⟩ h1 ⟨⟨x', y'⟩, b'⟩ h2 heq
+  simp only [Finset.coe_product, Set.mem_prod, Finset.mem_coe,
+    Finset.mem_offDiag] at h1 h2
+  obtain ⟨⟨-, -, hxy⟩, -⟩ := h1
+  have hfst : (x, y) = (x', y') := congrArg Prod.fst heq
+  obtain ⟨rfl, rfl⟩ := Prod.ext_iff.mp hfst
+  have hsnd : (if b then (x, y) else (y, x)) =
+      (if b' then (x, y) else (y, x)) := congrArg Prod.snd heq
+  cases b <;> cases b'
+  · rfl
+  · exfalso
+    simp only [Bool.false_eq_true, if_false, if_true] at hsnd
+    exact hxy (Prod.ext_iff.mp hsnd).2
+  · exfalso
+    simp only [Bool.false_eq_true, if_false, if_true] at hsnd
+    exact hxy (Prod.ext_iff.mp hsnd).1
+  · rfl
+
+private theorem trivialQuad_mem_and_cond (P : Finset (EuclideanSpace ℝ (Fin 2)))
+    (q : (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)) ×
+      (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)))
+    (hq : q ∈ (P.offDiag ×ˢ (Finset.univ : Finset Bool)).image trivialQuad) :
+    q ∈ (P ×ˢ P) ×ˢ (P ×ˢ P) ∧ q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+      perpBisector q.1.1 q.1.2 = perpBisector q.2.1 q.2.2 := by
+  rw [Finset.mem_image] at hq
+  obtain ⟨⟨⟨x, y⟩, b⟩, hmem, rfl⟩ := hq
+  rw [Finset.mem_product, Finset.mem_offDiag] at hmem
+  obtain ⟨⟨hx, hy, hxy⟩, -⟩ := hmem
+  cases b <;>
+    simp only [trivialQuad, ite_true, ite_false, Bool.false_eq_true,
+      Finset.mem_product] <;>
+    exact ⟨⟨⟨hx, hy⟩, by aesop⟩, hxy, by aesop, by simp [perpBisector_comm]⟩
+
+private theorem mem_image_trivialQuad_of_injective
+    {P : Finset (EuclideanSpace ℝ (Fin 2))} (hP : BisectorInjectiveOnPairs P)
+    (q : (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)) ×
+      (EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2)))
+    (hmem : q ∈ (P ×ˢ P) ×ˢ (P ×ˢ P)) (hne1 : q.1.1 ≠ q.1.2)
+    (hne2 : q.2.1 ≠ q.2.2)
+    (hbis : perpBisector q.1.1 q.1.2 = perpBisector q.2.1 q.2.2) :
+    q ∈ (P.offDiag ×ˢ (Finset.univ : Finset Bool)).image trivialQuad := by
+  obtain ⟨⟨x, y⟩, z, w⟩ := q
+  rw [Finset.mem_product] at hmem
+  obtain ⟨h1, h2⟩ := hmem
+  rw [Finset.mem_product] at h1 h2
+  have hpair := hP x h1.1 y h1.2 z h2.1 w h2.2 hne1 hne2 hbis
+  rw [Finset.mem_image]
+  rcases Set.pair_eq_pair_iff.mp hpair with ⟨hz, hw⟩ | ⟨hz, hw⟩
+  · exact ⟨((x, y), true), by
+      rw [Finset.mem_product, Finset.mem_offDiag]
+      exact ⟨⟨h1.1, h1.2, hne1⟩, Finset.mem_univ _⟩,
+      by simp [trivialQuad, hz, hw]⟩
+  · exact ⟨((x, y), false), by
+      rw [Finset.mem_product, Finset.mem_offDiag]
+      exact ⟨⟨h1.1, h1.2, hne1⟩, Finset.mem_univ _⟩,
+      by simp [trivialQuad, ← hz, ← hw]⟩
+
+private theorem card_arith (n : ℕ) : n * n - n = n * (n - 1) := by
+  cases n with
+  | zero => rfl
+  | succ m => rw [Nat.succ_sub_one, Nat.mul_succ, Nat.add_sub_cancel]
+
+/-- **Universal bisector-energy floor**: every finite planar point set has
+bisector energy at least `2n(n−1)`, contributed by the trivial quadruples
+alone.  This is what makes "minimal" in the headline theorem a theorem rather
+than a count. -/
+theorem two_mul_pairCount_le_bisectorEnergy
+    (P : Finset (EuclideanSpace ℝ (Fin 2))) :
+    2 * P.card * (P.card - 1) ≤ bisectorEnergy P := by
+  have hsub : (P.offDiag ×ˢ (Finset.univ : Finset Bool)).image trivialQuad ⊆
+      ((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          perpBisector q.1.1 q.1.2 = perpBisector q.2.1 q.2.2 := by
+    intro q hq
+    rw [Finset.mem_filter]
+    obtain ⟨hmem, hcond⟩ := trivialQuad_mem_and_cond P q hq
+    exact ⟨hmem, hcond⟩
+  have hle := Finset.card_le_card hsub
+  rw [Finset.card_image_of_injOn (trivialQuad_injOn P), Finset.card_product,
+    Finset.offDiag_card, Finset.card_univ, Fintype.card_bool] at hle
+  calc 2 * P.card * (P.card - 1)
+      = (P.card * P.card - P.card) * 2 := by rw [card_arith]; ring
+    _ ≤ _ := hle
+
+/-- **Floor counting**: if the bisector map is injective on unordered pairs,
+the bisector energy is exactly `2n(n−1)` — only the trivial quadruples
+survive. -/
+theorem bisectorEnergy_eq_of_bisectorInjective
+    {P : Finset (EuclideanSpace ℝ (Fin 2))}
+    (hP : BisectorInjectiveOnPairs P) :
+    bisectorEnergy P = 2 * P.card * (P.card - 1) := by
+  have heq : (((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
+      q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+        perpBisector q.1.1 q.1.2 = perpBisector q.2.1 q.2.2) =
+      (P.offDiag ×ˢ (Finset.univ : Finset Bool)).image trivialQuad := by
+    apply Finset.Subset.antisymm
+    · intro q hq
+      rw [Finset.mem_filter] at hq
+      exact mem_image_trivialQuad_of_injective hP q hq.1 hq.2.1 hq.2.2.1 hq.2.2.2
+    · intro q hq
+      rw [Finset.mem_filter]
+      obtain ⟨hmem, hcond⟩ := trivialQuad_mem_and_cond P q hq
+      exact ⟨hmem, hcond⟩
+  have hcard : bisectorEnergy P =
+      ((P.offDiag ×ˢ (Finset.univ : Finset Bool)).image trivialQuad).card :=
+    congrArg Finset.card heq
+  rw [hcard, Finset.card_image_of_injOn (trivialQuad_injOn P),
+    Finset.card_product, Finset.offDiag_card, Finset.card_univ,
+    Fintype.card_bool, card_arith]
+  ring
+
+end FloorCounting
+
+/-! ## The Near Enemy Theorem for Bisector Energy (conditional form) -/
+
+section MainTheorem
+
+open scoped Classical
+
+variable {ι : Type*} [Fintype ι]
+  {T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)}
+  {G : Finset (EuclideanSpace ℝ ι)}
+
+/-- A generic projection is injective on `G`. -/
+theorem injOn_of_projectionGeneric (hT : ProjectionGeneric T G) :
+    Set.InjOn (fun x ↦ T x) ↑G := by
+  intro a ha b hb hTab
+  by_contra hab
+  exact hT.1 a ha b hb hab (by rw [map_sub, sub_eq_zero]; exact hTab)
+
+/-- **Bisector injectivity downstairs**: under a generic projection, the
+bisector map is injective on unordered pairs of the projected set. -/
+theorem nearEnemy_bisectors_injective_on_unorderedPairs
+    (hT : ProjectionGeneric T G) :
+    BisectorInjectiveOnPairs (G.image fun x ↦ T x) := by
+  intro p hp q hq p' hp' q' hq' hpq hpq' hbis
+  obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hp
+  obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hq
+  obtain ⟨c, hc, rfl⟩ := Finset.mem_image.mp hp'
+  obtain ⟨e, he, rfl⟩ := Finset.mem_image.mp hq'
+  have hab : a ≠ b := fun h ↦ hpq (by rw [h])
+  have hce : c ≠ e := fun h ↦ hpq' (by rw [h])
+  have hpair := nearEnemy_sharedBisector_forces_samePair hT ha hb hc he hab hce hbis
+  calc ({T a, T b} : Set (EuclideanSpace ℝ (Fin 2)))
+      = (fun x ↦ T x) '' {a, b} := (Set.image_pair _ _ _).symm
+    _ = (fun x ↦ T x) '' {c, e} := by rw [hpair]
+    _ = {T c, T e} := Set.image_pair _ _ _
+
+/-- **Near Enemy Theorem for Bisector Energy, exact count (conditional
+form)**: the image of a finite set under a generic projection has bisector
+energy exactly `2n(n−1)`.  Sphere-free; the sphere enters only the existence
+statement for a generic projection. -/
+theorem nearEnemy_genericProjection_bisectorEnergy_eq_pairCount
+    (hT : ProjectionGeneric T G) :
+    bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) := by
+  rw [bisectorEnergy_eq_of_bisectorInjective
+    (nearEnemy_bisectors_injective_on_unorderedPairs hT),
+    Finset.card_image_of_injOn (injOn_of_projectionGeneric hT)]
+
+/-- **Near Enemy Theorem for Bisector Energy, minimality (conditional
+form)**: the image of a finite set under a generic projection attains the
+absolute minimum bisector energy among all planar point sets of the same
+size. -/
+theorem nearEnemy_genericProjection_bisectorEnergy_minimal
+    (hT : ProjectionGeneric T G)
+    (P' : Finset (EuclideanSpace ℝ (Fin 2))) (hcard : P'.card = G.card) :
+    bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P' := by
+  rw [nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT, ← hcard]
+  exact two_mul_pairCount_le_bisectorEnergy P'
+
+end MainTheorem
 
 end NearEnemy
