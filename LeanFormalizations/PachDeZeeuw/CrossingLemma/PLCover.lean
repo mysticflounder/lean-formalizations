@@ -29,6 +29,7 @@ import Mathlib
 namespace CrossingLemma.PLCover
 
 open Set Topology
+open scoped Classical
 
 universe u
 
@@ -58,7 +59,13 @@ namespace GlueData
 variable (D : GlueData B)
 
 /-- The transition cochain: `1` on `Pm`, `0` elsewhere. -/
-noncomputable def g (b : B) : ZMod 2 := by classical exact if b ∈ D.Pm then 1 else 0
+noncomputable def g (b : B) : ZMod 2 := if b ∈ D.Pm then 1 else 0
+
+theorem g_of_mem_Pm {b : B} (h : b ∈ D.Pm) : D.g b = 1 := by
+  rw [g]; exact if_pos h
+
+theorem g_of_notMem_Pm {b : B} (h : b ∉ D.Pm) : D.g b = 0 := by
+  rw [g]; exact if_neg h
 
 /-- The disjoint union of the two trivial charts (each `base × fiber`). -/
 abbrev Chart : Type u := (↥D.V₀ × ZMod 2) ⊕ (↥D.V₁ × ZMod 2)
@@ -107,6 +114,11 @@ def sheet0 (s : ZMod 2) : Set D.E := Set.range (fun x => D.mk0 x s)
 /-- The chart-`1` sheet `t`: the image of `V₁ × {t}`. -/
 def sheet1 (t : ZMod 2) : Set D.E := Set.range (fun y => D.mk1 y t)
 
+@[simp] theorem mk'_inl (x : ↥D.V₀) (s : ZMod 2) :
+    (@Quotient.mk' D.Chart (Setoid.ker D.key) (Sum.inl (x, s)) : D.E) = D.mk0 x s := rfl
+@[simp] theorem mk'_inr (y : ↥D.V₁) (t : ZMod 2) :
+    (@Quotient.mk' D.Chart (Setoid.ker D.key) (Sum.inr (y, t)) : D.E) = D.mk1 y t := rfl
+
 @[simp] theorem p_mk0 (x : ↥D.V₀) (s : ZMod 2) : D.p (D.mk0 x s) = (x : B) := rfl
 @[simp] theorem q_mk0 (x : ↥D.V₀) (s : ZMod 2) : D.q (D.mk0 x s) = s := rfl
 @[simp] theorem p_mk1 (y : ↥D.V₁) (t : ZMod 2) : D.p (D.mk1 y t) = (y : B) := rfl
@@ -146,6 +158,112 @@ theorem exists_rep (e : D.E) :
     cases a with
     | inl xs => exact Or.inl ⟨xs.1, xs.2, rfl⟩
     | inr yt => exact Or.inr ⟨yt.1, yt.2, rfl⟩
+
+/-- Openness in `E` is detected chart-wise (quotient topology, split over the
+disjoint-union charts). -/
+theorem isOpen_E_iff {A : Set D.E} :
+    IsOpen A ↔
+      IsOpen (Sum.inl ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' A)) ∧
+      IsOpen (Sum.inr ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' A)) := by
+  rw [← isOpen_sum_iff]
+  exact (isQuotientMap_quotient_mk' (s := Setoid.ker D.key)).isOpen_preimage.symm
+
+theorem injOn_p_sheet0 (s : ZMod 2) : (D.sheet0 s).InjOn D.p := by
+  rintro a ⟨x, rfl⟩ b ⟨x', rfl⟩ hab
+  rw [p_mk0, p_mk0] at hab
+  rw [mk0_eq_mk0]; exact ⟨hab, rfl⟩
+
+theorem surjOn_p_sheet0 (s : ZMod 2) : (D.sheet0 s).SurjOn D.p D.V₀ := by
+  intro b hb
+  exact ⟨D.mk0 ⟨b, hb⟩ s, ⟨⟨b, hb⟩, rfl⟩, rfl⟩
+
+theorem pairwise_disjoint_sheet0 : Pairwise (Function.onFun Disjoint D.sheet0) := by
+  intro s s' hss
+  show Disjoint (D.sheet0 s) (D.sheet0 s')
+  rw [Set.disjoint_left]
+  rintro e ⟨x, rfl⟩ ⟨x', hx'⟩
+  exact hss ((D.mk0_eq_mk0.mp hx').2).symm
+
+theorem exhaustive_sheet0 : D.p ⁻¹' D.V₀ ⊆ ⋃ s, D.sheet0 s := by
+  intro e he
+  rcases D.exists_rep e with ⟨x, s, rfl⟩ | ⟨y, t, rfl⟩
+  · exact Set.mem_iUnion.mpr ⟨s, x, rfl⟩
+  · rw [Set.mem_preimage, p_mk1] at he
+    exact Set.mem_iUnion.mpr ⟨t + D.g (y : B), ⟨(y : B), he⟩, (D.mk1_eq_mk0 y t he).symm⟩
+
+theorem mk0_mem_sheet0 {x : ↥D.V₀} {s' s : ZMod 2} :
+    D.mk0 x s' ∈ D.sheet0 s ↔ s' = s := by
+  constructor
+  · rintro ⟨x'', h⟩; exact ((D.mk0_eq_mk0.mp h).2).symm
+  · rintro rfl; exact ⟨x, rfl⟩
+
+theorem mk1_mem_sheet0 {y : ↥D.V₁} {t s : ZMod 2} (hy : (y : B) ∈ D.V₀) :
+    D.mk1 y t ∈ D.sheet0 s ↔ t + D.g (y : B) = s := by
+  rw [D.mk1_eq_mk0 y t hy, mk0_mem_sheet0]
+
+/-- The inl-chart preimage of `p⁻¹W ∩ sheet0 s`. -/
+theorem inl_preim_sheet0 (s : ZMod 2) {W : Set B} (_hW : W ⊆ D.V₀) :
+    Sum.inl ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' (D.p ⁻¹' W ∩ D.sheet0 s))
+      = (Subtype.val ⁻¹' W) ×ˢ ({s} : Set (ZMod 2)) := by
+  ext ⟨x, s'⟩
+  simp only [Set.mem_preimage, mk'_inl, Set.mem_inter_iff, p_mk0, mk0_mem_sheet0,
+    Set.mem_prod, Set.mem_singleton_iff]
+
+/-- The inr-chart preimage of `p⁻¹W ∩ sheet0 s`. -/
+theorem inr_preim_sheet0 (s : ZMod 2) {W : Set B} (hW : W ⊆ D.V₀) :
+    Sum.inr ⁻¹' (@Quotient.mk' D.Chart (Setoid.ker D.key) ⁻¹' (D.p ⁻¹' W ∩ D.sheet0 s))
+      = (Subtype.val ⁻¹' (W ∩ D.Pp)) ×ˢ ({s} : Set (ZMod 2))
+        ∪ (Subtype.val ⁻¹' (W ∩ D.Pm)) ×ˢ ({s + 1} : Set (ZMod 2)) := by
+  ext ⟨y, t⟩
+  simp only [Set.mem_preimage, mk'_inr, Set.mem_inter_iff, p_mk1, Set.mem_union,
+    Set.mem_prod, Set.mem_singleton_iff]
+  have h2 : (1 : ZMod 2) + 1 = 0 := by decide
+  constructor
+  · rintro ⟨hyW, hsheet⟩
+    have hy0 : (y : B) ∈ D.V₀ := hW hyW
+    have ht : t + D.g (y : B) = s := (D.mk1_mem_sheet0 hy0).mp hsheet
+    have hov : (y : B) ∈ D.Pp ∪ D.Pm := by
+      rw [← D.overlap]; exact ⟨hy0, y.2⟩
+    rcases hov with hpp | hpm
+    · left
+      refine ⟨⟨hyW, hpp⟩, ?_⟩
+      rwa [D.g_of_notMem_Pm (Set.disjoint_left.mp D.disjoint_Pp_Pm hpp), add_zero] at ht
+    · right
+      refine ⟨⟨hyW, hpm⟩, ?_⟩
+      rw [D.g_of_mem_Pm hpm] at ht
+      rw [← ht, add_assoc, h2, add_zero]
+  · rintro (⟨⟨hyW, hpp⟩, rfl⟩ | ⟨⟨hyW, hpm⟩, rfl⟩)
+    · refine ⟨hyW, (D.mk1_mem_sheet0 (hW hyW)).mpr ?_⟩
+      rw [D.g_of_notMem_Pm (Set.disjoint_left.mp D.disjoint_Pp_Pm hpp), add_zero]
+    · refine ⟨hyW, (D.mk1_mem_sheet0 (hW hyW)).mpr ?_⟩
+      rw [D.g_of_mem_Pm hpm, add_assoc, h2, add_zero]
+
+/-- **The sheet-homeomorphism condition for chart 0.** -/
+theorem open_iff_sheet0 (s : ZMod 2) {W : Set B} (hW : W ⊆ D.V₀) :
+    IsOpen W ↔ IsOpen (D.p ⁻¹' W ∩ D.sheet0 s) := by
+  constructor
+  · intro hWopen
+    rw [isOpen_E_iff]
+    refine ⟨?_, ?_⟩
+    · rw [D.inl_preim_sheet0 s hW]
+      exact (hWopen.preimage continuous_subtype_val).prod (isOpen_discrete _)
+    · rw [D.inr_preim_sheet0 s hW]
+      exact ((((hWopen.inter D.isOpen_Pp).preimage continuous_subtype_val).prod
+          (isOpen_discrete _))).union
+        (((hWopen.inter D.isOpen_Pm).preimage continuous_subtype_val).prod (isOpen_discrete _))
+  · intro hA
+    rw [isOpen_E_iff] at hA
+    have hinl := hA.1
+    rw [D.inl_preim_sheet0 s hW] at hinl
+    have hc : Continuous (fun x : ↥D.V₀ => (x, s)) := continuous_id.prodMk continuous_const
+    have hval : IsOpen (Subtype.val ⁻¹' W : Set ↥D.V₀) := by
+      have := hc.isOpen_preimage _ hinl
+      simpa [Set.preimage, Set.mem_prod] using this
+    have hemb := D.isOpen_V₀.isOpenEmbedding_subtypeVal
+    have hWopen : IsOpen (Subtype.val '' (Subtype.val ⁻¹' W : Set ↥D.V₀)) :=
+      hemb.isOpenMap _ hval
+    rw [Subtype.image_preimage_coe] at hWopen
+    rwa [inter_eq_right.mpr hW] at hWopen
 
 end GlueData
 
