@@ -22,6 +22,16 @@ The mathematical content is:
 
 The proofs reuse the axiom-free geometry lemmas already available in
 `Erdos98Proof.Branch2.GeneralPositionGeometry`.
+
+The second half of the file states scratch *theorem shapes* for the
+general-position distance-energy question. STATUS (per
+`erdos-98/docs/dead-ends.md` §A2, 2026-05-28): the energy strengthening
+`E(P) = o(n³)` under general position is **open in both directions** — neither
+proven nor refuted — and is **not a reduction target** for Erdős #98 (it is
+strictly stronger; only the forward Cauchy–Schwarz direction holds). Do not
+conflate it with the **refuted** `E = O(n³√log n)` target for #89 (§A3): that
+refutation uses the integer grid, which is not admissible under general
+position. See the per-declaration docstrings below.
 -/
 
 namespace Erdos98Proof
@@ -115,14 +125,15 @@ noncomputable def distanceEnergyFromRealizedRadii (X : Finset ℝ²) : ℕ :=
 
 /-- Predicate for a coherent design formed by many fixed-radius bounded-degree graphs on the same vertex set.
 
-This is deliberately not defined as `True`; it is the open mathematical content
-of the proposed theorem shape. -/
-constant HasSynchronizedDistanceGraphDesign : Finset ℝ² → Prop
+This is deliberately left `opaque` rather than defined as `True`; it is the open
+mathematical content of the proposed theorem shape. Any consumer must supply a
+concrete definition before the statements below carry checkable content. -/
+opaque HasSynchronizedDistanceGraphDesign : Finset ℝ² → Prop
 
 /-- Predicate asserting cubic-scale distance energy. A concrete version would quantify a sequence of configurations and
 replace this predicate by an explicit lower bound such as
 `distanceEnergyFromRealizedRadii X ≥ c * X.card ^ 3` along an infinite family. -/
-constant HasCubicDistanceEnergy : Finset ℝ² → Prop
+opaque HasCubicDistanceEnergy : Finset ℝ² → Prop
 
 /-- Theorem shape for a possible distance-graph synchronization principle.
 
@@ -132,7 +143,12 @@ Informal statement:
 
 Here `GeneralPosition X` supplies no-3/no-4. The bounded-degree part is supplied by `generalPosition_distanceGraph_degree_le_three` and
 `generalPosition_singleDistance_orderedPairBudget`; the open content is that cubic distance
-energy forces a coherent distance-graph design. -/
+energy forces a coherent distance-graph design.
+
+STATUS (per `erdos-98/docs/dead-ends.md` §A2): OPEN — neither proven nor
+refuted. This is the structural-alternative face of the `E(P) = o(n³)`-under-
+general-position question, which §A2 records as open in both directions. It is
+NOT a citable reduction for Erdős #98. -/
 def BoundedDegreeDistanceGraphsForceSynchronization : Prop :=
   ∀ X : Finset ℝ²,
     GeneralPosition X →
@@ -174,7 +190,19 @@ def GeneralPositionDistanceColoringEnergyBound (B : ℕ → ℕ) : Prop :=
 /-- Turán-type distance-coloring statement for the general-position distance
 energy problem: there is a subcubic extremal function bounding the sum of
 squared color-class sizes over all Euclidean distance colorings arising from
-finite point sets with no three collinear and no four concyclic. -/
+finite point sets with no three collinear and no four concyclic.
+
+STATUS (per `erdos-98/docs/dead-ends.md` §A2, 2026-05-28): this is exactly the
+`E(P) = o(n³)`-under-general-position energy strengthening, and it is **OPEN IN
+BOTH DIRECTIONS** — neither proven nor refuted. It is **NOT a reduction target**
+for Erdős #98: Cauchy–Schwarz gives only `E = o(n³) ⟹ D = ω(n)`, so this
+statement is strictly *stronger* than #98, and no literature result supplies it
+("Guth–Katz strengthened to o(n³) via general position" does not exist; treating
+it as citable is the `hLowLevelOne` circularity). Do **not** conflate with the
+**refuted** `E = O(n³√log n)` target for #89 (§A3): that refutation is by the
+`√n×√n` integer grid (`E = Θ(n³ log n)`), and the grid is *not* admissible under
+the general-position hypothesis here. Further evidence:
+`erdos-98/docs/formalization/energy-method-ceiling-2026-05-28.md`. -/
 def GeneralPositionDistanceColoringTuranStatement : Prop :=
   ∃ B : ℕ → ℕ,
     IsSubcubicEnergyBound B ∧
@@ -183,12 +211,14 @@ def GeneralPositionDistanceColoringTuranStatement : Prop :=
 /-- Stability-style Turán reformulation: cubic-scale distance-coloring energy
 inside the general-position class forces a coherent synchronized design among
 the fixed-radius bounded-degree color graphs. This is the structural alternative
-behind the subcubic extremal statement. -/
+behind the subcubic extremal statement.
+
+This `Prop` is *definitionally identical* to
+`BoundedDegreeDistanceGraphsForceSynchronization`; it is kept under the
+Turán-facing name so both discussions can reference their own vocabulary.
+Same status: OPEN, and not a #98 reduction (`erdos-98/docs/dead-ends.md` §A2). -/
 def GeneralPositionDistanceColoringStabilityStatement : Prop :=
-  ∀ X : Finset ℝ²,
-    GeneralPosition X →
-    HasCubicDistanceEnergy X →
-    HasSynchronizedDistanceGraphDesign X
+  BoundedDegreeDistanceGraphsForceSynchronization
 
 end KLow
 end Erdos98Proof

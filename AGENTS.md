@@ -9,6 +9,14 @@ Standalone Lean 4 formalizations of general mathematical results, built against
 for lemmas useful on their own — ideally mathlib contributions. Much of it was
 salvaged from a dormant Erdős-98 project and re-extracted as mathlib-only modules.
 
+Whatever you are being asked to formalize should already be in a document.  If you
+don't have the document, download it or ask for it.  Do not just formalize based
+on your trained knowledge.
+
+Lemmas must match Mathlib idioms and be documented, preferably with the exact
+Lemma text from the source material, but at least, a reference to the work
+and the exact Lemma or Theorem number in the work.
+
 Read `README.md` for the per-module verified/partial/statement-surface triage and
 `ROADMAP.md` for planned work.
 
