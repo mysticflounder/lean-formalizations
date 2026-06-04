@@ -35,9 +35,14 @@ its own.
   - `Finset.balog_szemeredi_gowers_asymmetric_explicit` (explicit
     polynomial-in-`η` constants).
 - **`BSGEnergyToGraph.lean`** — energy → popular-difference-graph connector.
+- **`ThreeAPFreeOfNoThreeCollinear.lean`** — no-3-collinear ⟹ `ThreeAPFree`
+  (`threeAPFree_of_forall_not_collinear`): in a real vector space, `a + c = 2b`
+  makes `b` the midpoint of `a` and `c`, hence the three points collinear; so a
+  no-three-collinear set carries no nontrivial 3-term AP. The geometric source
+  of `ThreeAPFree` hypotheses for additive-energy arguments. **Axiom-clean.**
 
 mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine gap, while
-reusing mathlib's `Finset.addEnergy`. **All three theorems are axiom-clean.**
+reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
 
 ### `LeanFormalizations/Geometry/Euclidean/` — 2D two-point isometry classification
 
@@ -47,6 +52,23 @@ reusing mathlib's `Finset.addEnergy`. **All three theorems are axiom-clean.**
   (`twoPoint_isometry_set_finite`), plus the underlying linear-isometry bounds.
   Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation
   argument specific to two dimensions. **Axiom-clean.**
+- **`NearEnemyTheorem.lean`** — the **Near Enemy Theorem for Bisector Energy**
+  (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space
+  with no three collinear points admits ONE injective planar projection whose
+  image attains the exact bisector-energy floor `2n(n−1)` with absolute
+  minimality, is in full planar general position (no three collinear, no four
+  concyclic), has zero rotational energy (`rotationEnergy`, the
+  proper-rotation channel of the congruent-quadruple count), and has its
+  distances in bijection with the upstairs ±difference classes
+  (`#distances(T(G)) = #((G−G)∖{0}/±)`). Headline
+  `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`,
+  with a sphere-slice corollary and standalone byproducts (universal
+  zero-rotation-energy projection, isosceles-free sphere projection). Engine:
+  a generic-avoidance compiler — one master `MvPolynomial` product over five
+  constraint-polynomial families, `MvPolynomial.funext` used exactly once.
+  **Axiom-clean.** (Consumed by the erdős-98 research repo as the formal
+  no-go side of its enemy-profile analysis; the module itself is
+  self-contained mathematics.)
 
 ### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core
 
@@ -120,6 +142,9 @@ import LeanFormalizations
 #print axioms Finset.balog_szemeredi_gowers_asymmetric_explicit
 #print axioms EuclideanGeometry.twoPoint_isometry_ncard_le_two
 #print axioms EuclideanGeometry.twoPoint_isometry_set_finite
+#print axioms NearEnemy.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+#print axioms NearEnemy.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+#print axioms threeAPFree_of_forall_not_collinear
 #print axioms PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound
 #print axioms PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry
 #print axioms PachDeZeeuw.Algebraic.bezout
@@ -213,11 +238,11 @@ symmetries) are unproven classical inputs by design.
 ```
 LeanFormalizations.lean                    -- root aggregator (imports everything)
 LeanFormalizations/
-  Combinatorics/Additive/                  -- BSG ✅
+  Combinatorics/Additive/                  -- BSG + no-3-collinear ⟹ 3-AP-free ✅
   Combinatorics/CombinatorialMap/           -- combinatorial maps + planar edge bound ✅
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
-  Geometry/Euclidean/                       -- isometry classification ✅
+  Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
     Bezout.lean                             -- Bézout finite-intersection bound ✅
