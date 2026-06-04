@@ -17,9 +17,9 @@ import LeanFormalizations.Combinatorics.UnitDistance.Counting
 
 -- Euclidean geometry
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
--- Near Enemy Theorem for Bisector Energy: generic-projection algebra +
--- sphere-slice rigidity (complete, axiom-clean); canonical home of the
--- module also mirrored in the erdos-98 repo.
+-- Near Enemy Theorem for Bisector Energy: full chain from generic-projection
+-- algebra and sphere-slice rigidity to the unconditional existence theorem
+-- (complete, axiom-clean). Canonical home; consumed by erdos-98 as a lake dep.
 import LeanFormalizations.Geometry.Euclidean.NearEnemyTheorem
 
 -- Convex geometry: line-slices of convex sets + a simple convex polygon model

@@ -32,13 +32,17 @@ The public theorem name is:
 
 `Near Enemy Theorem for Bisector Energy`
 
-The headline Lean theorems (conditional on the `ProjectionGeneric`
-interface) are:
+The headline Lean theorem (unconditional, complete) is:
+
+* `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal` — every finite
+  sphere subset admits an injective planar projection realizing both the
+  exact count `2n(n−1)` and absolute minimality among planar sets of the
+  same size.
+
+Conditional forms (on the `ProjectionGeneric` interface):
 
 * `nearEnemy_genericProjection_bisectorEnergy_eq_pairCount` — exact count
-  `2n(n−1)`
 * `nearEnemy_genericProjection_bisectorEnergy_minimal` — absolute minimality
-  among planar sets of the same size
 
 Supporting chain (all complete):
 
@@ -49,6 +53,8 @@ Supporting chain (all complete):
 * `nearEnemy_bisectors_injective_on_unorderedPairs` — bisector injectivity
 * `two_mul_pairCount_le_bisectorEnergy` — universal floor
 * `bisectorEnergy_eq_of_bisectorInjective` — floor counting
+* `nearEnemy_exists_projectionGeneric` — existence of a generic projection
+  (`MvPolynomial` nonvanishing; `MvPolynomial.funext` used exactly once)
 
 Mathematical content currently in this module, in proof-pipeline order:
 
@@ -78,13 +84,9 @@ Mathematical content currently in this module, in proof-pipeline order:
      one sphere with the same midpoint and parallel differences are the same
      unordered pair: the upstairs geometric core of the theorem.
 
-The only remaining stage is the existence of a generic projection for a
-finite sphere subset (`∃ T, ProjectionGeneric T G`, via `MvPolynomial`
-nonvanishing): the per-quadruple certificate
-`nearEnemy_offPair_not_both_vanish` supplies, for each constraint, a witness
-polynomial that is not identically zero, and a point avoiding the finitely
-many hypersurfaces makes every conditional theorem above unconditional for
-sphere subsets.
+The chain is complete: no stage remains, no `sorry` anywhere, and every
+theorem depends only on the standard axioms
+`[propext, Classical.choice, Quot.sound]`.
 -/
 
 open scoped RealInnerProductSpace
@@ -667,5 +669,233 @@ theorem nearEnemy_genericProjection_bisectorEnergy_minimal
   exact two_mul_pairCount_le_bisectorEnergy P'
 
 end MainTheorem
+
+/-! ## Existence of a generic projection
+
+All polynomial content of the construction lives here.  Projections are
+parameterized by their `2 × d` entry assignments `f : Fin 2 × ι → ℝ`; each
+forbidden coincidence contributes a witness polynomial that is not
+identically zero (by the per-quadruple certificate), the product over the
+finitely many constraints is a nonzero polynomial over an infinite integral
+domain, and any point where the product does not vanish yields a generic
+projection.  `MvPolynomial.funext` is used exactly once, to produce that
+point. -/
+
+section Existence
+
+open MvPolynomial
+open scoped Classical
+
+variable {ι : Type*} [Fintype ι]
+
+/-- The linear form `Σ_i v_i · X_(k,i)` in the projection entries: the
+polynomial whose value at an entry assignment is `⟪row k, v⟫`. -/
+noncomputable def innerPoly (k : Fin 2) (v : EuclideanSpace ℝ ι) :
+    MvPolynomial (Fin 2 × ι) ℝ :=
+  ∑ i, C (v i) * X (k, i)
+
+/-- Row extraction from an entry assignment. -/
+def rowOf (f : Fin 2 × ι → ℝ) (k : Fin 2) : EuclideanSpace ℝ ι :=
+  WithLp.toLp 2 fun i ↦ f (k, i)
+
+/-- The projection with prescribed rows: `(rowMap r x) k = ⟪r k, x⟫`. -/
+noncomputable def rowMap (r : Fin 2 → EuclideanSpace ℝ ι) :
+    EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2) :=
+  (WithLp.linearEquiv 2 ℝ (Fin 2 → ℝ)).symm.toLinearMap.comp
+    (LinearMap.pi fun k ↦ innerₗ (EuclideanSpace ℝ ι) (r k))
+
+@[simp] theorem rowMap_apply (r : Fin 2 → EuclideanSpace ℝ ι)
+    (x : EuclideanSpace ℝ ι) (k : Fin 2) :
+    rowMap r x k = ⟪r k, x⟫ := rfl
+
+/-- Evaluation of the linear form recovers the row inner product. -/
+theorem eval_innerPoly (f : Fin 2 × ι → ℝ) (k : Fin 2)
+    (v : EuclideanSpace ℝ ι) :
+    eval f (innerPoly k v) = ⟪rowOf f k, v⟫ := by
+  simp [innerPoly, rowOf, PiLp.inner_apply, RCLike.inner_apply, mul_comm]
+
+/-- Evaluation at the assignment built from two explicit rows. -/
+theorem eval_innerPoly_rows (p q : EuclideanSpace ℝ ι) (k : Fin 2)
+    (v : EuclideanSpace ℝ ι) :
+    eval (fun ki ↦ ![p, q] ki.1 ki.2) (innerPoly k v) = ⟪![p, q] k, v⟫ :=
+  eval_innerPoly _ k v
+
+/-- Parallelism constraint polynomial of an off-pair quadruple: the projected
+`2×2` determinant of the difference vectors. -/
+noncomputable def detPoly (a b c e : EuclideanSpace ℝ ι) :
+    MvPolynomial (Fin 2 × ι) ℝ :=
+  innerPoly 0 (a - b) * innerPoly 1 (c - e) -
+    innerPoly 0 (c - e) * innerPoly 1 (a - b)
+
+/-- Orthogonality constraint polynomial of an off-pair quadruple: the inner
+product of the projected pair-sum difference with the projected direction. -/
+noncomputable def orthPoly (a b c e : EuclideanSpace ℝ ι) :
+    MvPolynomial (Fin 2 × ι) ℝ :=
+  innerPoly 0 (a + b - (c + e)) * innerPoly 0 (a - b) +
+    innerPoly 1 (a + b - (c + e)) * innerPoly 1 (a - b)
+
+/-- Constraint witness polynomial of a quadruple: the determinant polynomial
+when it is nonzero as a polynomial, the orthogonality polynomial otherwise. -/
+noncomputable def quadWitness
+    (pq : (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :
+    MvPolynomial (Fin 2 × ι) ℝ :=
+  if detPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2 ≠ 0 then
+    detPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2
+  else orthPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2
+
+/-- A nondegenerate difference vector has a nonzero linear form. -/
+theorem innerPoly_ne_zero {a b : EuclideanSpace ℝ ι} (hab : a ≠ b) :
+    innerPoly (ι := ι) 0 (a - b) ≠ 0 := by
+  intro h0
+  have heval := congrArg (eval fun ki ↦ ![a - b, 0] ki.1 ki.2) h0
+  rw [eval_innerPoly_rows, map_zero, Matrix.cons_val_zero] at heval
+  exact sub_ne_zero.mpr hab (inner_self_eq_zero.mp heval)
+
+/-- **Per-quadruple witness**: for an off-pair quadruple on a sphere, at
+least one of the two constraint polynomials is nonzero as a polynomial.
+This is the polynomial-side form of the per-quadruple certificate. -/
+theorem detPoly_ne_zero_or_orthPoly_ne_zero
+    {a b c e center : EuclideanSpace ℝ ι} {R : ℝ}
+    (ha : a ∈ Metric.sphere center R)
+    (hb : b ∈ Metric.sphere center R)
+    (hc : c ∈ Metric.sphere center R)
+    (he : e ∈ Metric.sphere center R)
+    (hab : a ≠ b)
+    (hne : ({a, b} : Set (EuclideanSpace ℝ ι)) ≠ {c, e}) :
+    detPoly a b c e ≠ 0 ∨ orthPoly a b c e ≠ 0 := by
+  by_contra h
+  push Not at h
+  obtain ⟨hd, ho⟩ := h
+  refine nearEnemy_offPair_not_both_vanish ha hb hc he hab hne ⟨?_, ?_⟩
+  · intro p q
+    have h0 := congrArg (eval fun ki ↦ ![p, q] ki.1 ki.2) hd
+    rw [map_zero] at h0
+    simpa [detPoly, eval_innerPoly_rows] using h0
+  · intro r
+    have h0 := congrArg (eval fun ki ↦ ![r, 0] ki.1 ki.2) ho
+    rw [map_zero] at h0
+    simpa [orthPoly, eval_innerPoly_rows] using h0
+
+/-- **Existence of a generic projection** for any finite sphere subset.  The
+master polynomial multiplies a witness polynomial per constraint; it is
+nonzero over the infinite integral domain `ℝ[X]`, so it has a nonvanishing
+point, and the rows read off that point give a generic projection. -/
+theorem nearEnemy_exists_projectionGeneric
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      ProjectionGeneric T G := by
+  -- Constraint index set for the quadruple constraints.
+  set Quads : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    (G.offDiag ×ˢ G.offDiag).filter
+      (fun pq ↦ ({pq.1.1, pq.1.2} : Set (EuclideanSpace ℝ ι)) ≠
+        {pq.2.1, pq.2.2}) with hQuads
+  -- Each quadruple witness is nonzero as a polynomial.
+  have hwq_ne : ∀ pq ∈ Quads, quadWitness pq ≠ 0 := by
+    intro pq hpq
+    rw [hQuads, Finset.mem_filter, Finset.mem_product] at hpq
+    obtain ⟨⟨h1, h2⟩, hne⟩ := hpq
+    rw [Finset.mem_offDiag] at h1 h2
+    rw [quadWitness]
+    by_cases hdet : detPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2 ≠ 0
+    · rwa [if_pos hdet]
+    · rw [if_neg hdet]
+      push Not at hdet
+      rcases detPoly_ne_zero_or_orthPoly_ne_zero (hG _ h1.1) (hG _ h1.2.1)
+        (hG _ h2.1) (hG _ h2.2.1) h1.2.2 hne with h | h
+      · exact absurd hdet h
+      · exact h
+  -- The master polynomial and its nonvanishing point.
+  set master : MvPolynomial (Fin 2 × ι) ℝ :=
+    (∏ ab ∈ G.offDiag, innerPoly 0 (ab.1 - ab.2)) * ∏ pq ∈ Quads, quadWitness pq
+      with hmaster
+  have hmaster_ne : master ≠ 0 := by
+    rw [hmaster]
+    exact mul_ne_zero
+      (Finset.prod_ne_zero_iff.mpr fun ab hab ↦
+        innerPoly_ne_zero (Finset.mem_offDiag.mp hab).2.2)
+      (Finset.prod_ne_zero_iff.mpr hwq_ne)
+  have hpoint : ∃ f : Fin 2 × ι → ℝ, eval f master ≠ 0 := by
+    by_contra h
+    push Not at h
+    exact hmaster_ne (MvPolynomial.funext fun f ↦ by simpa using h f)
+  obtain ⟨f, hf⟩ := hpoint
+  -- All factor evaluations are nonzero at `f`.
+  rw [hmaster, map_mul, map_prod, map_prod] at hf
+  have hpairs_eval : ∀ ab ∈ G.offDiag, eval f (innerPoly 0 (ab.1 - ab.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (left_ne_zero_of_mul hf)
+  have hquads_eval : ∀ pq ∈ Quads, eval f (quadWitness pq) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul hf)
+  -- The projection with rows read off `f` is generic.
+  refine ⟨rowMap (rowOf f), ?_, ?_⟩
+  · -- Injectivity / nondegeneracy.
+    intro a ha b hb hab hT0
+    have hmem : (a, b) ∈ G.offDiag := Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩
+    apply hpairs_eval (a, b) hmem
+    rw [eval_innerPoly]
+    have h0 : rowMap (rowOf f) (a - b) 0 = 0 := by rw [hT0]; rfl
+    rwa [rowMap_apply] at h0
+  · -- Coincidence-avoidance.
+    intro a ha b hb c hc e he hab hce hne hbad
+    obtain ⟨⟨t, hpar⟩, horth⟩ := hbad
+    have hmem : ((a, b), (c, e)) ∈ Quads := by
+      rw [hQuads, Finset.mem_filter, Finset.mem_product]
+      exact ⟨⟨Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩,
+        Finset.mem_offDiag.mpr ⟨hc, he, hce⟩⟩, hne⟩
+    apply hquads_eval _ hmem
+    rw [quadWitness]
+    -- Components of the projected vectors.
+    have hcomp : ∀ k : Fin 2, ⟪rowOf f k, c - e⟫ = t * ⟪rowOf f k, a - b⟫ := by
+      intro k
+      have h := congrArg (fun v : EuclideanSpace ℝ (Fin 2) ↦ v k) hpar
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul, inner_sub_right]
+        using h
+    by_cases hdet : detPoly a b c e ≠ 0
+    · rw [if_pos hdet]
+      simp only [detPoly, map_sub, map_mul, eval_innerPoly]
+      rw [hcomp 0, hcomp 1]
+      ring
+    · rw [if_neg hdet]
+      simp only [orthPoly, map_add, map_mul, eval_innerPoly]
+      have hexp : ⟪rowMap (rowOf f) (a + b - (c + e)),
+          rowMap (rowOf f) (a - b)⟫ =
+          ⟪rowOf f 0, a + b - (c + e)⟫ * ⟪rowOf f 0, a - b⟫ +
+            ⟪rowOf f 1, a + b - (c + e)⟫ * ⟪rowOf f 1, a - b⟫ := by
+        rw [PiLp.inner_apply]
+        simp only [Fin.sum_univ_two, RCLike.inner_apply, rowMap_apply,
+          starRingEnd_apply, star_trivial, inner_add_right, inner_sub_right]
+        ring
+      rw [← hexp, horth]
+
+end Existence
+
+/-! ## The Near Enemy Theorem for Bisector Energy (unconditional form) -/
+
+section Unconditional
+
+open scoped Classical
+
+variable {ι : Type*} [Fintype ι]
+
+/-- **Near Enemy Theorem for Bisector Energy**: every finite subset of a
+sphere in any Euclidean space admits a planar projection that is injective
+on it and realizes the absolute minimum bisector energy `2n(n−1)` — every
+unordered point-pair has a distinct perpendicular bisector. -/
+theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      ∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P' := by
+  obtain ⟨T, hT⟩ := nearEnemy_exists_projectionGeneric hG
+  exact ⟨T, injOn_of_projectionGeneric hT,
+    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
+    nearEnemy_genericProjection_bisectorEnergy_minimal hT⟩
+
+end Unconditional
 
 end NearEnemy
