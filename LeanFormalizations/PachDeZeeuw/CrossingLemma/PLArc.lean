@@ -5359,4 +5359,41 @@ theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numS
     ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
       hside⟩, hinf⟩⟩
 
+/-! ### P5 (clipped collar) — piece containment in the tube
+
+`Option A` (the chosen fix, 2026-06-03): instead of the unsatisfiable `hsub` (the *bare*
+end caps do not fit the tapered tube — they poke outside `R` at the frontier endpoints),
+P5 is reproved for `collarPlus`/`collarMinus` *as defined* (keeping the
+`(taperedTube∖carrier) ∩` prefix).  Bands and sectors do fit the tube — their containment
+is recorded here; the end caps stay clipped and are handled by a dedicated
+preconnectedness lemma. -/
+
+/-- **Sector containment.**  A positive vertex sector sits inside the tapered tube: every
+point is within `ρ (Fin.succ i)` of the interior vertex `verts (i+1) ∈ S`, and that radius
+is below the tube's per-point radius `min δ₀ (½·infDist · Rᶜ)` at that vertex. -/
+theorem sectorPlus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hvS : β.verts (Fin.succ i) ∈ S)
+    (hρδ : ρ (Fin.succ i) ≤ δ₀)
+    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
+    sectorPlus β ρ i hi1 ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  rw [taperedTube]
+  refine Set.mem_iUnion₂.mpr ⟨β.verts (Fin.succ i), hvS, ?_⟩
+  rw [Metric.mem_ball]
+  exact lt_of_lt_of_le (Metric.mem_ball.mp hz.2) (le_min hρδ hρR)
+
+/-- **Sector containment (negative side).** -/
+theorem sectorMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hvS : β.verts (Fin.succ i) ∈ S)
+    (hρδ : ρ (Fin.succ i) ≤ δ₀)
+    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
+    sectorMinus β ρ i hi1 ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  rw [taperedTube]
+  refine Set.mem_iUnion₂.mpr ⟨β.verts (Fin.succ i), hvS, ?_⟩
+  rw [Metric.mem_ball]
+  exact lt_of_lt_of_le (Metric.mem_ball.mp hz.2) (le_min hρδ hρR)
+
 end CrossingLemma.PlaneArcSeparation
