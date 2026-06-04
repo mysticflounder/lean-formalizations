@@ -764,6 +764,67 @@ tapered tube `T` with the four properties above).
 
 ---
 
+## 7. G-node implementation — the abstract ℤ/2 separation lemma (in progress, 2026-06-03)
+
+**Collar (L3) is COMPLETE** (`PLArc.lean`, `main` ≥ `19caa19`): `collarPlus`,
+`collarMinus` open, disjoint, union `= taperedTube ∖ carrier`, each nonempty.
+The G-nodes are now under construction in a **new file
+`LeanFormalizations/PachDeZeeuw/CrossingLemma/PLCover.lean`**.
+
+### Architecture refinement (supersedes the §6 piecewise-`g` and the §2 `Z1` framing)
+
+The R2-resolved covering route is kept, but two framings are corrected:
+
+- **Sides are connected COMPONENTS, not level sets `σ⁻¹{c}` (fixes a real gap).**
+  A locally constant `σ : ↥(R∖β) → ZMod 2` has only *clopen* level sets — NOT
+  obviously connected — so `IsTwoSidedPartition.preconnected_left/right` would
+  **not** follow from `U := σ⁻¹{0}`. Instead set
+  `U := connectedComponentIn (regionMinusArc) p⁺`,
+  `V := connectedComponentIn (regionMinusArc) p⁻` for `p⁺ ∈ collarPlus`,
+  `p⁻ ∈ collarMinus`. Preconnectedness is then **free**
+  (`isPreconnected_connectedComponentIn`). `σ` is used **only** to prove `U ≠ V` /
+  `Disjoint U V` (a path `p⁺ ⤳ p⁻` in `R∖β` would force `σ` constant —
+  contradiction).
+- **This ADDS one collar obligation the §6 design dropped: `collarPlus`,
+  `collarMinus` each `IsPreconnected` (new "P5").** Needed so that "`z` reaches
+  the collar by a path in `R∖β`" lands `z` in `U` or `V` exactly (not some third
+  component). Geometric, via band↔sector overlap budgets; **not yet proved**.
+  (The old §6 line "connectedness of `T⁺,T⁻` is NOT needed" applied only to the
+  superseded `σ⁻¹`-as-sides framing.)
+
+### The abstract lemma (all covering theory + simple connectivity isolated here)
+
+> `B` open with `SimplyConnectedSpace ↥B` (+ `LocPathConnectedSpace`, free on
+> `Plane`), `V₀ V₁ : Set B` open, `V₀ ∪ V₁ = univ`, `V₀ ∩ V₁ = Pp ⊔ Pm`
+> (disjoint opens) ⟹ ∃ continuous `σ : ↥V₀ → ZMod 2`, `σ = 0` on `Pp`, `= 1` on `Pm`.
+
+Proof = build the ℤ/2 double cover `E → B` by gluing the two trivial charts
+`↥V₀ × ZMod 2`, `↥V₁ × ZMod 2` with transition `g` (`1` on `Pm`, `0` else), as
+`E := Quotient (Setoid.ker key)`, `key (inl(x,s)) = (x,s)`,
+`key (inr(y,t)) = (y, t+g y)`. `key` is surjective (`E ≅ B × ZMod 2` as a set,
+with the coinduced cover topology); `p := fst ∘ key` is continuous (no `g`).
+Then: `IsCoveringMap p` via `IsOpen.trivializationDiscrete` (`Covering/Basic.lean`)
+on each chart + `IsFiberBundle.isCoveringMap`; lift `id : C(↥B,↥B)` with
+`IsCoveringMap.existsUnique_continuousMap_lifts` (`Lifting.lean:421`, needs
+`SimplyConnectedSpace`+`LocPathConnectedSpace`) ⇒ global section `F` ⇒ `σ` from the
+clopen-agreement lemma `IsCoveringMap.eqOn_of_comp_eqOn` (`Covering/Basic.lean:375`).
+
+**The `open_iff` (sheet-homeomorphism) condition works because a point forced into
+both `W ⊆ V₀` and `V₁` lands in the overlap `Pp ⊔ Pm`, turning the apparent (non-open)
+`W ∖ Pm` into the open `W ∩ Pp`.** This is the crux that makes the coinduced
+topology a genuine cover.
+
+**Status (2026-06-03):** `PLCover.lean` builds (8475 jobs, axiom-clean). DONE:
+`GlueData`, `g`, `key` (+`key_inl/inr`), `E`, `p`+`continuous_p`, `q`, `mk0`/`mk1`,
+`sheet0`/`sheet1`, coordinate lemmas (`p_mk*`,`q_mk*`), `mk_eq_iff`,
+`mk0_eq_mk0`/`mk1_eq_mk1`, the gluing bridge `mk1_eq_mk0`, `exists_rep`. NEXT:
+sheet openness → the two `Trivialization`s via `trivializationDiscrete` →
+`IsCoveringMap p` → lift `id` → `σ`. Then instantiate (needs the residual closure:
+PL representation of `β` + collar budget bundles + P5 connectedness) and assemble
+`IsTwoSidedPartition` to discharge `PlaneArcSeparation.lean:377`.
+
+---
+
 *Verification basis:* all PRESENT/ABSENT rows checked against
 `.lake/packages/mathlib/Mathlib` at `v4.30.0` on 2026-06-02 (`grep` over the source
 tree; declaration line numbers cited inline). Full route-(c) evaluation:
