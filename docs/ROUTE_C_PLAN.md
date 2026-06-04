@@ -814,14 +814,30 @@ both `W ⊆ V₀` and `V₁` lands in the overlap `Pp ⊔ Pm`, turning the appar
 `W ∖ Pm` into the open `W ∩ Pp`.** This is the crux that makes the coinduced
 topology a genuine cover.
 
-**Status (2026-06-03):** `PLCover.lean` builds (8475 jobs, axiom-clean). DONE:
-`GlueData`, `g`, `key` (+`key_inl/inr`), `E`, `p`+`continuous_p`, `q`, `mk0`/`mk1`,
-`sheet0`/`sheet1`, coordinate lemmas (`p_mk*`,`q_mk*`), `mk_eq_iff`,
-`mk0_eq_mk0`/`mk1_eq_mk1`, the gluing bridge `mk1_eq_mk0`, `exists_rep`. NEXT:
-sheet openness → the two `Trivialization`s via `trivializationDiscrete` →
-`IsCoveringMap p` → lift `id` → `σ`. Then instantiate (needs the residual closure:
-PL representation of `β` + collar budget bundles + P5 connectedness) and assemble
-`IsTwoSidedPartition` to discharge `PlaneArcSeparation.lean:377`.
+**Status (2026-06-03):** `PLCover.lean` builds (8475 jobs, axiom-clean
+`[propext, Classical.choice, Quot.sound]`). **The abstract separation lemma
+`GlueData.exists_separating_fun` is COMPLETE** — the entire covering-theory +
+simple-connectivity content (G1+G3) is done and geometry-free:
+
+> `[SimplyConnectedSpace ↥B] [LocPathConnectedSpace ↥B]`, `hV₁ : IsPreconnected V₁`
+> ⟹ `∃ σ : ↥V₀ → ZMod 2, Continuous σ ∧ ∀ x x', ↑x∈Pp → ↑x'∈Pm → σ x ≠ σ x'`.
+
+Built: `GlueData`, `g`/`key`/`E`/`p`/`q`/`q₁`, `mk0`/`mk1`/`sheet0`/`sheet1` + all
+coordinate & gluing lemmas; both charts' `trivializationDiscrete` conditions incl.
+the `open_iff` crux; `triv0`/`triv1`; `isCoveringMap_p : IsCoveringMap p`;
+`mem_sheet0_iff_q`/`mem_sheet1_iff_q1`; and `exists_separating_fun` (lift `id` via
+`existsUnique_continuousMap_lifts` ⇒ section `F`; `σ := q∘F` locally constant on
+`V₀` via open sheet-fibers; `q₁∘F` constant on connected `V₁`; the `g`-shift on the
+overlap forces `σ` to differ across `Pp`/`Pm`). Note the **`IsPreconnected V₁`
+hypothesis** (the collar `taperedTube` is connected — already proven in `PLArc`).
+
+NEXT (instantiation + assembly, the remaining work): set `B = ↥R`, `V₀ =`
+restriction of `regionMinusArc`, `V₁ =` collar, `Pp = collarPlus`,
+`Pm = collarMinus`; supply the residual closure (PL representation of `β` + collar
+budget bundles; `V₀ ∪ V₁ = univ`, `V₀ ∩ V₁ = Pp ⊔ Pm`), then assemble
+`IsTwoSidedPartition` via **components** (G4 path-cut + collar connectedness P5;
+`U = connectedComponentIn (regionMinusArc) p⁺`, etc.; disjoint via
+`exists_separating_fun`) and discharge `PlaneArcSeparation.lean:377`.
 
 ---
 

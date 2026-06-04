@@ -411,6 +411,108 @@ theorem isCoveringMap_p : IsCoveringMap D.p := by
   · have hb : x ∈ D.V₀ ∪ D.V₁ := by rw [D.cover]; exact Set.mem_univ x
     exact ⟨D.triv1, by rw [triv1_baseSet]; exact hb.resolve_left h⟩
 
+/-! ### Chart coordinates and the side function -/
+
+/-- The chart-`1` fiber coordinate, `= q + g∘p`. The `g`-discontinuities cancel
+over `V₁`, where it reads off the chart-`1` sheet index. -/
+noncomputable def q₁ (e : D.E) : ZMod 2 := D.q e + D.g (D.p e)
+
+@[simp] theorem q₁_mk0 (x : ↥D.V₀) (s : ZMod 2) : D.q₁ (D.mk0 x s) = s + D.g (x : B) := by
+  simp only [q₁, q_mk0, p_mk0]
+
+@[simp] theorem q₁_mk1 (y : ↥D.V₁) (t : ZMod 2) : D.q₁ (D.mk1 y t) = t := by
+  simp only [q₁, q_mk1, p_mk1, add_assoc]
+  have h2 : ∀ a : ZMod 2, a + a = 0 := by decide
+  rw [h2, add_zero]
+
+/-- Over `V₀`, the sheet-`0` index is exactly `q`. -/
+theorem mem_sheet0_iff_q {e : D.E} (he : D.p e ∈ D.V₀) {s : ZMod 2} :
+    e ∈ D.sheet0 s ↔ D.q e = s := by
+  rcases D.exists_rep e with ⟨x, s', rfl⟩ | ⟨y, t, rfl⟩
+  · rw [mk0_mem_sheet0, q_mk0]
+  · rw [p_mk1] at he
+    rw [D.mk1_mem_sheet0 he, q_mk1]
+
+/-- Over `V₁`, the sheet-`1` index is exactly `q₁`. -/
+theorem mem_sheet1_iff_q1 {e : D.E} (he : D.p e ∈ D.V₁) {t : ZMod 2} :
+    e ∈ D.sheet1 t ↔ D.q₁ e = t := by
+  rcases D.exists_rep e with ⟨x, s, rfl⟩ | ⟨y, t', rfl⟩
+  · rw [p_mk0] at he
+    rw [D.mk0_mem_sheet1 he, q₁_mk0]
+  · rw [mk1_mem_sheet1, q₁_mk1]
+
+/-- **The abstract ℤ/2 separation lemma.** If the base `B` is simply connected
+(and locally path connected) and the collar chart `V₁` is preconnected, then the
+chart-`0` side function `σ : ↥V₀ → ZMod 2` takes different values on `Pp` and `Pm`
+— so no path in `V₀` connects `Pp` to `Pm`. -/
+theorem exists_separating_fun [SimplyConnectedSpace B] [LocPathConnectedSpace B]
+    (hV₁ : IsPreconnected D.V₁) :
+    ∃ σ : ↥D.V₀ → ZMod 2, Continuous σ ∧
+      ∀ x x' : ↥D.V₀, (x : B) ∈ D.Pp → (x' : B) ∈ D.Pm → σ x ≠ σ x' := by
+  -- A basepoint and a lift of it.
+  haveI : Nonempty B := inferInstance
+  set a₀ : B := Classical.arbitrary B with ha₀
+  obtain ⟨e₀, he₀⟩ : ∃ e₀ : D.E, D.p e₀ = a₀ := by
+    by_cases h : a₀ ∈ D.V₀
+    · exact ⟨D.mk0 ⟨a₀, h⟩ 0, rfl⟩
+    · have hb : a₀ ∈ D.V₀ ∪ D.V₁ := by rw [D.cover]; exact mem_univ a₀
+      exact ⟨D.mk1 ⟨a₀, hb.resolve_left h⟩ 0, rfl⟩
+  -- Lift the identity (simple connectivity): a global section `F`.
+  obtain ⟨F, -, hpF⟩ := (D.isCoveringMap_p.existsUnique_continuousMap_lifts
+    (ContinuousMap.id B) a₀ e₀ (by simpa using he₀)).exists
+  have hpFx : ∀ x, D.p (F x) = x := fun x => by simpa using congrFun hpF x
+  have hFcont : Continuous (fun x : B => F x) := map_continuous F
+  -- `σ := q ∘ F` is locally constant on `V₀` (its fibers are sheet preimages).
+  have hσcont : Continuous (fun x : ↥D.V₀ => D.q (F ↑x)) := by
+    apply IsLocallyConstant.continuous
+    rw [IsLocallyConstant.iff_isOpen_fiber]
+    intro s
+    have hset : (fun x : ↥D.V₀ => D.q (F ↑x)) ⁻¹' {s}
+        = (fun x : ↥D.V₀ => F ↑x) ⁻¹' (D.p ⁻¹' D.V₀ ∩ D.sheet0 s) := by
+      ext x
+      have hpx : D.p (F ↑x) ∈ D.V₀ := by rw [hpFx]; exact x.2
+      simp only [mem_preimage, mem_singleton_iff, mem_inter_iff]
+      rw [D.mem_sheet0_iff_q hpx]
+      exact ⟨fun h => ⟨hpx, h⟩, fun h => h.2⟩
+    rw [hset]
+    exact (((D.open_iff_sheet0 s (subset_refl _)).mp D.isOpen_V₀)).preimage
+      (hFcont.comp continuous_subtype_val)
+  -- `q₁ ∘ F` is locally constant on the connected `V₁`, hence constant there.
+  have hσ1lc : IsLocallyConstant (fun y : ↥D.V₁ => D.q₁ (F ↑y)) := by
+    rw [IsLocallyConstant.iff_isOpen_fiber]
+    intro t
+    have hset : (fun y : ↥D.V₁ => D.q₁ (F ↑y)) ⁻¹' {t}
+        = (fun y : ↥D.V₁ => F ↑y) ⁻¹' (D.p ⁻¹' D.V₁ ∩ D.sheet1 t) := by
+      ext y
+      have hpy : D.p (F ↑y) ∈ D.V₁ := by rw [hpFx]; exact y.2
+      simp only [mem_preimage, mem_singleton_iff, mem_inter_iff]
+      rw [D.mem_sheet1_iff_q1 hpy]
+      exact ⟨fun h => ⟨hpy, h⟩, fun h => h.2⟩
+    rw [hset]
+    exact (((D.open_iff_sheet1 t (subset_refl _)).mp D.isOpen_V₁)).preimage
+      (hFcont.comp continuous_subtype_val)
+  haveI : PreconnectedSpace ↥D.V₁ := isPreconnected_iff_preconnectedSpace.mp hV₁
+  have hconst : ∀ y y' : ↥D.V₁, D.q₁ (F ↑y) = D.q₁ (F ↑y') := fun y y' =>
+    hσ1lc.apply_eq_of_isPreconnected isPreconnected_univ (mem_univ y) (mem_univ y')
+  -- Conclude.
+  refine ⟨fun x => D.q (F ↑x), hσcont, ?_⟩
+  intro x x' hxPp hx'Pm hEq
+  change D.q (F ↑x) = D.q (F ↑x') at hEq
+  have hxV1 : (x : B) ∈ D.V₁ := by
+    have hxI : (x : B) ∈ D.V₀ ∩ D.V₁ := by rw [D.overlap]; exact Or.inl hxPp
+    exact hxI.2
+  have hx'V1 : (x' : B) ∈ D.V₁ := by
+    have hx'I : (x' : B) ∈ D.V₀ ∩ D.V₁ := by rw [D.overlap]; exact Or.inr hx'Pm
+    exact hx'I.2
+  have hgx : D.g (x : B) = 0 := D.g_of_notMem_Pm (Set.disjoint_left.mp D.disjoint_Pp_Pm hxPp)
+  have hgx' : D.g (x' : B) = 1 := D.g_of_mem_Pm hx'Pm
+  have e1 : D.q₁ (F ↑x) = D.q (F ↑x) := by simp only [q₁, hpFx, hgx, add_zero]
+  have e2 : D.q₁ (F ↑x') = D.q (F ↑x') + 1 := by simp only [q₁, hpFx, hgx']
+  have key : D.q₁ (F ↑x) = D.q₁ (F ↑x') := hconst ⟨(x : B), hxV1⟩ ⟨(x' : B), hx'V1⟩
+  rw [e1, e2, hEq] at key
+  have hcancel : D.q (F ↑x') + 0 = D.q (F ↑x') + 1 := by rw [add_zero]; exact key
+  exact absurd (add_left_cancel hcancel) (by decide)
+
 end GlueData
 
 end CrossingLemma.PLCover
