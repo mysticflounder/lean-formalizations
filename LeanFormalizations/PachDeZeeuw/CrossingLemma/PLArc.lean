@@ -4338,4 +4338,224 @@ theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα 
     (fun i hi => by have := hsrcsep i hi; linarith)
     (fun i hi => by have := htgtsep i hi; linarith)
 
+/-! ### P5 (preconnected) — each collar piece is preconnected
+
+The collar is a linear chain of pieces (end caps, band strips, vertex sectors).  Each
+piece is preconnected: the band strips and end caps are **convex** (intersections of
+half-planes — `footParam` and `sideForm` are both affine in `z` — with a ball and/or
+the open `δ₀`-neighbourhood of a segment, which is convex by `Convex.thickening`); the
+vertex sectors are `convexSector ∩ ball` (convex) or `reflexSector ∩ ball` (a union of
+two convex half-plane∩ball pieces meeting at a scaled reflected point), hence
+preconnected either way. -/
+
+/-- `footParam s t` is affine in its evaluation point. -/
+theorem footParam_affineComb_pt (s t x y : Plane) {a b : ℝ} (hab : a + b = 1) :
+    footParam s t (a • x + b • y) = a * footParam s t x + b * footParam s t y := by
+  have hb : b = 1 - a := by linarith
+  subst hb
+  have hnum : dotp ((a • x + (1 - a) • y) - s) (t - s)
+      = a * dotp (x - s) (t - s) + (1 - a) * dotp (y - s) (t - s) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+      Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+  simp only [footParam]; rw [hnum, add_div, mul_div_assoc, mul_div_assoc]
+
+/-- A *strict upper* foot half-plane `{z | c < footParam s t z}` is convex. -/
+theorem convex_footParam_gt (s t : Plane) (c : ℝ) :
+    Convex ℝ {z : Plane | c < footParam s t z} := by
+  rintro x hx y hy a b ha hb hab
+  simp only [Set.mem_setOf_eq] at hx hy ⊢
+  rw [footParam_affineComb_pt s t x y hab]
+  rcases ha.eq_or_lt with rfl | ha'
+  · rw [zero_add] at hab; subst hab; simpa using hy
+  · rcases hb.eq_or_lt with rfl | hb'
+    · rw [add_zero] at hab; subst hab; simpa using hx
+    · nlinarith [mul_pos ha' (sub_pos.mpr hx), mul_pos hb' (sub_pos.mpr hy),
+        (by rw [← add_mul, hab, one_mul] : a * c + b * c = c)]
+
+/-- A *strict lower* foot half-plane `{z | footParam s t z < c}` is convex. -/
+theorem convex_footParam_lt (s t : Plane) (c : ℝ) :
+    Convex ℝ {z : Plane | footParam s t z < c} := by
+  rintro x hx y hy a b ha hb hab
+  simp only [Set.mem_setOf_eq] at hx hy ⊢
+  rw [footParam_affineComb_pt s t x y hab]
+  rcases ha.eq_or_lt with rfl | ha'
+  · rw [zero_add] at hab; subst hab; simpa using hy
+  · rcases hb.eq_or_lt with rfl | hb'
+    · rw [add_zero] at hab; subst hab; simpa using hx
+    · nlinarith [mul_pos ha' (sub_pos.mpr hx), mul_pos hb' (sub_pos.mpr hy),
+        (by rw [← add_mul, hab, one_mul] : a * c + b * c = c)]
+
+/-- The narrowed edge band is convex (intersection of two foot half-planes). -/
+theorem convex_edgeBandMid (s t : Plane) (α : ℝ) : Convex ℝ (edgeBandMid s t α) := by
+  have e : edgeBandMid s t α
+      = {z : Plane | α < footParam s t z} ∩ {z : Plane | footParam s t z < 1 - α} := by
+    ext z; simp only [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo, Set.mem_inter_iff]
+  rw [e]; exact (convex_footParam_gt s t α).inter (convex_footParam_lt s t (1 - α))
+
+/-- The positive narrowed band is convex. -/
+theorem convex_edgePlusMid (s t : Plane) (α : ℝ) : Convex ℝ (edgePlusMid s t α) := by
+  rw [edgePlusMid]
+  refine (convex_edgeBandMid s t α).inter ?_
+  have e : {z : Plane | 0 < sideForm s t z} = {z : Plane | (0:ℝ) < 1 * sideForm s t z} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_gt s t 1 0
+
+/-- The negative narrowed band is convex. -/
+theorem convex_edgeMinusMid (s t : Plane) (α : ℝ) : Convex ℝ (edgeMinusMid s t α) := by
+  rw [edgeMinusMid]
+  refine (convex_edgeBandMid s t α).inter ?_
+  have e : {z : Plane | sideForm s t z < 0} = {z : Plane | 1 * sideForm s t z < (0:ℝ)} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_lt s t 1 0
+
+/-- The positive band strip is convex (positive band ∩ the open `δ₀`-neighbourhood of the
+segment, which is the thickening of a convex set). -/
+theorem convex_bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    Convex ℝ (bandStripPlus β α δ₀ i) := by
+  rw [bandStripPlus]
+  refine (convex_edgePlusMid _ _ _).inter ?_
+  have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  have e : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
+         = Metric.thickening δ₀ (β.segCarrier i) := by
+    ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+  rw [e]
+  exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+
+/-- The negative band strip is convex. -/
+theorem convex_bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+    Convex ℝ (bandStripMinus β α δ₀ i) := by
+  rw [bandStripMinus]
+  refine (convex_edgeMinusMid _ _ _).inter ?_
+  have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+  have e : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
+         = Metric.thickening δ₀ (β.segCarrier i) := by
+    ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+  rw [e]
+  exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+
+/-- A convex sector intersected with any ball is preconnected (it is convex). -/
+theorem isPreconnected_convexSector_inter_ball (a v b : Plane) (ρ : ℝ) :
+    IsPreconnected (convexSector a v b ∩ Metric.ball v ρ) :=
+  ((convex_convexSector a v b).inter (convex_ball v ρ)).isPreconnected
+
+/-- A reflex sector intersected with a ball **centred at the apex** is preconnected: it is
+the union of two convex half-plane∩ball pieces, which meet at a point obtained by scaling
+the reflected point `3v − a − b` toward `v` (any positive scaling lands in both
+half-planes; small scaling lands in the ball). -/
+theorem isPreconnected_reflexSector_inter_ball (a v b : Plane) (hcorner : IsCorner a v b)
+    (ρ : ℝ) : IsPreconnected (reflexSector a v b ∩ Metric.ball v ρ) := by
+  rcases lt_or_ge 0 ρ with hρ | hρ
+  swap
+  · rw [Metric.ball_eq_empty.mpr hρ, Set.inter_empty]; exact isPreconnected_empty
+  · have hset : reflexSector a v b ∩ Metric.ball v ρ
+        = ({z | cornerTurn a v b * sideForm a v z < 0} ∩ Metric.ball v ρ)
+          ∪ ({z | cornerTurn a v b * sideForm v b z < 0} ∩ Metric.ball v ρ) := by
+      rw [reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+    rw [hset]
+    have hτ : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hcorner
+    have hτ' : sideForm v b a ≠ 0 := by rw [← sideForm_cyclic a v b]; exact hτ
+    set P : Plane := (3 : ℝ) • v - a - b with hPdef
+    set ε : ℝ := (ρ / 2) / (dist P v + 1) with hεdef
+    have hεpos : 0 < ε := by rw [hεdef]; positivity
+    set pt : Plane := (1 - ε) • v + ε • P with hptdef
+    have hptv : pt - v = ε • (P - v) := by rw [hptdef]; module
+    have hdist : dist pt v < ρ := by
+      have he : dist pt v = ε * dist P v := by
+        rw [dist_eq_norm, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+      rw [he, hεdef, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]
+      nlinarith [dist_nonneg (x := P) (y := v), hρ]
+    have hmemball : pt ∈ Metric.ball v ρ := Metric.mem_ball.mpr hdist
+    have hsfa : sideForm a v pt = - (ε * sideForm a v b) := by
+      rw [hptdef, sideForm_affineComb a v v P (by ring : (1 - ε) + ε = 1),
+        sideForm_right_endpoint]
+      have e : sideForm a v P = - sideForm a v b := by
+        rw [hPdef]; simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.smul_fst,
+          Prod.smul_snd, smul_eq_mul]; ring
+      rw [e]; ring
+    have hsfb : sideForm v b pt = - (ε * sideForm v b a) := by
+      rw [hptdef, sideForm_affineComb v b v P (by ring : (1 - ε) + ε = 1),
+        sideForm_left_endpoint]
+      have e : sideForm v b P = - sideForm v b a := by
+        rw [hPdef]; simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.smul_fst,
+          Prod.smul_snd, smul_eq_mul]; ring
+      rw [e]; ring
+    have hA : cornerTurn a v b * sideForm a v pt < 0 := by
+      rw [cornerTurn, hsfa]; nlinarith [mul_pos hεpos (mul_self_pos.mpr hτ)]
+    have hB : cornerTurn a v b * sideForm v b pt < 0 := by
+      rw [cornerTurn, hsfb, sideForm_cyclic a v b]
+      nlinarith [mul_pos hεpos (mul_self_pos.mpr hτ')]
+    exact IsPreconnected.union pt ⟨hA, hmemball⟩ ⟨hB, hmemball⟩
+      ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter (convex_ball v ρ)).isPreconnected
+      ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter (convex_ball v ρ)).isPreconnected
+
+/-- The τ-selected positive sector intersected with a ball centred at the apex is
+preconnected. -/
+theorem isPreconnected_vertexPlus_inter_ball (a v b : Plane) (hcorner : IsCorner a v b)
+    (ρ : ℝ) : IsPreconnected (vertexPlus a v b ∩ Metric.ball v ρ) := by
+  rw [vertexPlus]; split_ifs
+  · exact isPreconnected_convexSector_inter_ball a v b ρ
+  · exact isPreconnected_reflexSector_inter_ball a v b hcorner ρ
+
+/-- The τ-selected negative sector intersected with a ball centred at the apex is
+preconnected. -/
+theorem isPreconnected_vertexMinus_inter_ball (a v b : Plane) (hcorner : IsCorner a v b)
+    (ρ : ℝ) : IsPreconnected (vertexMinus a v b ∩ Metric.ball v ρ) := by
+  rw [vertexMinus]; split_ifs
+  · exact isPreconnected_reflexSector_inter_ball a v b hcorner ρ
+  · exact isPreconnected_convexSector_inter_ball a v b ρ
+
+/-- The positive vertex sector is preconnected. -/
+theorem isPreconnected_sectorPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
+    IsPreconnected (sectorPlus β ρ i hi1) :=
+  isPreconnected_vertexPlus_inter_ball _ _ _ hcorner (ρ (Fin.succ i))
+
+/-- The negative vertex sector is preconnected. -/
+theorem isPreconnected_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
+    IsPreconnected (sectorMinus β ρ i hi1) :=
+  isPreconnected_vertexMinus_inter_ball _ _ _ hcorner (ρ (Fin.succ i))
+
+/-- The positive source end cap is convex. -/
+theorem convex_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Convex ℝ (endCapSrcPlus β ρ) := by
+  rw [endCapSrcPlus]
+  refine ((convex_ball _ _).inter (convex_footParam_gt _ _ 0)).inter ?_
+  have e : {z : Plane | 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
+         = {z : Plane | (0:ℝ) < 1 * sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_gt _ _ 1 0
+
+/-- The negative source end cap is convex. -/
+theorem convex_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Convex ℝ (endCapSrcMinus β ρ) := by
+  rw [endCapSrcMinus]
+  refine ((convex_ball _ _).inter (convex_footParam_gt _ _ 0)).inter ?_
+  have e : {z : Plane | sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0}
+         = {z : Plane | 1 * sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < (0:ℝ)} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_lt _ _ 1 0
+
+/-- The positive target end cap is convex. -/
+theorem convex_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Convex ℝ (endCapTgtPlus β ρ) := by
+  rw [endCapTgtPlus]
+  refine ((convex_ball _ _).inter (convex_footParam_lt _ _ 1)).inter ?_
+  have e : {z : Plane | 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z}
+         = {z : Plane | (0:ℝ) < 1 * sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_gt _ _ 1 0
+
+/-- The negative target end cap is convex. -/
+theorem convex_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+    Convex ℝ (endCapTgtMinus β ρ) := by
+  rw [endCapTgtMinus]
+  refine ((convex_ball _ _).inter (convex_footParam_lt _ _ 1)).inter ?_
+  have e : {z : Plane | sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0}
+         = {z : Plane | 1 * sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < (0:ℝ)} := by
+    simp only [one_mul]
+  rw [e]; exact convex_mul_sideForm_lt _ _ 1 0
+
 end CrossingLemma.PlaneArcSeparation
