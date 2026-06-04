@@ -916,24 +916,27 @@ This **pins, with no slack, the only remaining geometric obligations**:
     * (1) **`sector ⊆ tube` — DONE** (`sectorPlus/Minus_subset_taperedTube`, PLArc.lean,
       sorry-free, axiom-clean). Witness = the interior vertex `verts(i+1) ∈ S`; needs
       `ρ(succ i) ≤ δ₀` and `ρ(succ i) ≤ ½·infDist(verts(i+1)) Rᶜ`.
-    * (2) **`band_i ⊆ tube` — TODO (the hard analytic lemma).** Witness = the attained
-      sup-nearest point `q* ∈ segCarrier i` (compact ⇒ `IsCompact.exists_infDist_eq_dist`);
-      `dist_sup(z,q*) = infDist_sup(z,seg) < δ₀`, so `z ∈ ball(q*, δ₀) ⊆ tube` once
-      `q* ∈ S` and `δ₀ ≤ ½·infDist(q*) Rᶜ`. **Crux:** the plane uses the *sup (L∞) metric*,
-      so `q*` is NOT the orthogonal foot, and for the first/last edges `q*` must be shown
-      `≠ v₀/vₗₐₛₜ` (the only `segCarrier` points outside `S = arcInterior`). True (verified:
-      for `foot ∈ (0,1)` the sup-nearest stays in the relative interior — checked on
-      `(0,0)→(4,2)`, `z=(0,2)`: `foot=0.2`, sup-nearest at `λ=1/3`), but needs a focused
-      sup-metric argmin-interior sub-lemma. *Interior edges (i≠first,last) are easy:* the
-      whole closed `segCarrier i ⊆ arcInterior = S`, and `½·infDist(·)Rᶜ` has a positive min
-      on it, so any `q*` works.
-    * (3) **`endCap ∩ (tube∖carrier)` preconnected — TODO (new core).** Path-connected via
-      "shrink toward the edge": for `z` in the clipped cap, scaling the normal component by
-      `t ∈ (0,1]` keeps it in the *same* covering ball (distance to every first-edge spine
-      point only decreases), in the wedge (`foot`,`sideForm` signs preserved), in the ball,
-      off-carrier — so `z` connects to points at small height `ε` over the edge; a horizontal
-      hop at fixed small `ε` between two such (over the compact `x`-range `[min,max] ⊆ (0,ℓ)`,
-      where `½·infDist Rᶜ ≥ ε`) connects any pair. `×2` (src/tgt) `×2` (plus/minus), mirror.
+    * (2) **`band_i ⊆ tube` — DONE** (`bandStripPlus/Minus_subset_taperedTube`, PLArc.lean,
+      commit `42fb8e0`, sorry-free, axiom-clean). **The hard analytic core — but the prior plan
+      over-feared it.** No sup-argmin-interior sub-lemma is needed. Clean route: the strip
+      certificate `infDist_sup(z,segCarrier i) < δ₀` gives, via `Metric.infDist_lt_iff`, *any*
+      carrier witness `y` with `dist_sup(z,y) < δ₀`; the **Lipschitz** bound on `footParam`
+      (`abs_footParam_sub_le`, constant `K = (|Δ₁|+|Δ₂|)/‖t−s‖₂²`) plus the smallness hypothesis
+      `hsmall : K·δ₀ ≤ α/2` pin `footParam(y) ∈ (α/2, 1−α/2)` — *strictly interior, even on the
+      end edges*. `hS` places `y ∈ S`; `hR` (only on the safe window `[α/2,1−α/2]`, where it is
+      satisfiable despite the endpoint tube-pinch) gives `δ₀ ≤ ½·infDist(y) Rᶜ`, so the tube ball
+      at `y` has radius `δ₀ > dist_sup(z,y)` and swallows `z`. (The earlier "attained sup-nearest
+      `q*`" plan would have worked too but needed the delicate argmin lemma; this is simpler.)
+    * (3) **`endCap ∩ (tube∖carrier)` preconnected — TODO (new core), paper proof RESOLVED.**
+      ⚠ The earlier "shrink toward the edge" idea (scale the normal component) is **WRONG in the
+      sup metric for tilted edges** — perpendicular motion is *not* sup-distance-monotone (same
+      Euclidean-vs-sup trap as the obstruction). **Correct argument:** every clipped-cap point `z`
+      sits in a *convex* sup-ball `ball(p, r_p) ⊆ tube` with spine point `p ∈ S` on the carrier
+      edge; the **straight segment `[z,p]`** stays in that ball (balls are convex), so `z`
+      connects within the tube to a point just shy of `p` (off-carrier, `sideForm > 0` for a small
+      step), at `foot ≈ foot(p)`. These edge-adjacent points connect *along the spine* through
+      consecutively-overlapping tube balls, reaching the band-overlap point (`hO3`). Uses only
+      convexity of sup-balls + spine continuity — no monotonicity. `×2` (src/tgt) `×2` (plus/minus).
     * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
       (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪
       (W∩endCap)(opt)`, reusing the `isPreconnected_union_opt` cascade with the clipped-cap
