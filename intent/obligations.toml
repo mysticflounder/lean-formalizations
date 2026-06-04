@@ -1,1 +1,188 @@
-obligation = []
+[[obligation]]
+slug = "bsg-asymmetric"
+layer = "additive"
+title = "BSG, asymmetric two-set form"
+created_at = "2026-06-04T22:04:29+00:00"
+updated_at = "2026-06-04T22:04:29+00:00"
+
+[[obligation]]
+slug = "bsg-asymmetric-explicit"
+layer = "additive"
+title = "BSG, explicit-constants form"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "bsg-symmetric"
+layer = "additive"
+title = "BSG, symmetric single-set form"
+created_at = "2026-06-04T22:04:29+00:00"
+updated_at = "2026-06-04T22:04:29+00:00"
+
+[[obligation]]
+slug = "cm-euler-bound"
+layer = "combinatorial-map"
+title = "Connected map has Euler characteristic <= 2"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "cm-planar-edge-bound"
+layer = "combinatorial-map"
+title = "Planar edge bound e <= 3v - 6"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "convex-boundary-no-three-collinear"
+layer = "convex"
+title = "Strictly convex boundary has no 3 collinear points"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "convex-line-slice"
+layer = "convex"
+title = "Line meets convex set in interval-shaped slice"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "convex-polygon-collinear-cyclic"
+layer = "convex"
+title = "Collinear polygon vertices are cyclically consecutive"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "es-l1-chord-endpoints"
+layer = "elekes-sharir"
+title = "L1: chord-curve endpoints on bounded-degree curve"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "es-l1-finite-fibers"
+layer = "elekes-sharir"
+title = "L1: bounded-degree rational map has finite fibers"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "es-l3-ruling-skewness"
+layer = "elekes-sharir"
+title = "L3: at most one line per skew ruling"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "es-l4-rank-collapse"
+layer = "elekes-sharir"
+title = "L4: omega rank collapse"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "es-l5-conic-normal-form"
+layer = "elekes-sharir"
+title = "L5: conic normal form dichotomy"
+created_at = "2026-06-04T22:04:31+00:00"
+updated_at = "2026-06-04T22:04:31+00:00"
+
+[[obligation]]
+slug = "isometry-two-point-finite"
+layer = "euclidean"
+title = "Two-point isometry set is finite"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "isometry-two-point-ncard"
+layer = "euclidean"
+title = "Two-point isometry set has ncard <= 2"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "near-enemy-main"
+layer = "euclidean"
+title = "Near Enemy Theorem, headline"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "near-enemy-sphere-slice"
+layer = "euclidean"
+title = "Near Enemy Theorem, sphere-slice corollary"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "pdz-algebraic-prelim"
+layer = "pach-de-zeeuw"
+title = "Algebraic prelim: point-pair intersection bounds"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "pdz-bezout"
+layer = "pach-de-zeeuw"
+title = "Bezout finite-intersection bound"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "pdz-component-count"
+layer = "pach-de-zeeuw"
+title = "L2: component count <= total degree"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "pdz-component-rich"
+layer = "pach-de-zeeuw"
+title = "L2: rich genuine component exists"
+created_at = "2026-06-04T22:04:33+00:00"
+updated_at = "2026-06-04T22:04:33+00:00"
+
+[[obligation]]
+slug = "pdz-crossing-arc-partition"
+layer = "pach-de-zeeuw"
+title = "Crossing lemma: two-sided arc partition residual"
+created_at = "2026-06-04T22:04:33+00:00"
+updated_at = "2026-06-04T22:04:33+00:00"
+
+[[obligation]]
+slug = "pdz-crossing-lemma"
+layer = "pach-de-zeeuw"
+title = "Simple crossing lemma from multigraph form"
+created_at = "2026-06-04T22:04:33+00:00"
+updated_at = "2026-06-04T22:04:33+00:00"
+
+[[obligation]]
+slug = "pdz-line-circle-components"
+layer = "pach-de-zeeuw"
+title = "L2: line/circle components meet no-3/no-4 set finitely"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"
+
+[[obligation]]
+slug = "pdz-szemeredi-trotter"
+layer = "pach-de-zeeuw"
+title = "Szemeredi-Trotter from crossing lemma"
+created_at = "2026-06-04T22:04:33+00:00"
+updated_at = "2026-06-04T22:04:33+00:00"
+
+[[obligation]]
+slug = "three-ap-free-no-collinear"
+layer = "additive"
+title = "No-3-collinear implies ThreeAPFree"
+created_at = "2026-06-04T22:04:30+00:00"
+updated_at = "2026-06-04T22:04:30+00:00"
+
+[[obligation]]
+slug = "unit-distance-elimination-count"
+layer = "unit-distance"
+title = "Elimination-order unit-distance count n*k"
+created_at = "2026-06-04T22:04:32+00:00"
+updated_at = "2026-06-04T22:04:32+00:00"

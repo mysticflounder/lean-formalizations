@@ -1,1 +1,134 @@
-backing = []
+[[backing]]
+obligation = "bsg-asymmetric"
+symbol = "Finset.balog_szemeredi_gowers_asymmetric"
+created_at = "2026-06-04T22:04:29+00:00"
+
+[[backing]]
+obligation = "bsg-asymmetric-explicit"
+symbol = "Finset.balog_szemeredi_gowers_asymmetric_explicit"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "bsg-symmetric"
+symbol = "Finset.balog_szemeredi_gowers_symmetric"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "cm-euler-bound"
+symbol = "CombinatorialMap.eulerCharacteristic_le_two"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "cm-planar-edge-bound"
+symbol = "CombinatorialMap.card_edge_le_three_card_vertex_sub_six"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "convex-boundary-no-three-collinear"
+symbol = "strictlyConvex_boundary_no_three_collinear"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "convex-line-slice"
+symbol = "convex_line_intersection_isPreconnected"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "convex-polygon-collinear-cyclic"
+symbol = "SimpleConvexPolygon.collinear_vertices_cyclicInterval"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "es-l1-chord-endpoints"
+symbol = "ElekesSharir.endpoints_on_boundedDegreeCurve"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "es-l1-finite-fibers"
+symbol = "ElekesSharir.boundedDegreeRationalMap_finiteFibers"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "es-l3-ruling-skewness"
+symbol = "ElekesSharir.atMostOneLine_of_skewRuling_isometryGraph"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "es-l4-rank-collapse"
+symbol = "ElekesSharir.finrank_ker_ge_two_of_finrank_eq_three"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "es-l5-conic-normal-form"
+symbol = "ElekesSharir.quadraticPart_vanishes_iff"
+created_at = "2026-06-04T22:04:31+00:00"
+
+[[backing]]
+obligation = "isometry-two-point-finite"
+symbol = "EuclideanGeometry.twoPoint_isometry_set_finite"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "isometry-two-point-ncard"
+symbol = "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "near-enemy-main"
+symbol = "NearEnemy.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "near-enemy-sphere-slice"
+symbol = "NearEnemy.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "pdz-algebraic-prelim"
+symbol = "PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "pdz-bezout"
+symbol = "PachDeZeeuw.Algebraic.bezout"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "pdz-component-count"
+symbol = "PlaneCurve.componentCount_le_totalDegree"
+created_at = "2026-06-04T22:04:32+00:00"
+
+[[backing]]
+obligation = "pdz-component-rich"
+symbol = "PlaneCurve.exists_genuine_component_rich"
+created_at = "2026-06-04T22:04:33+00:00"
+
+[[backing]]
+obligation = "pdz-crossing-arc-partition"
+symbol = "CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_arc"
+created_at = "2026-06-04T22:04:33+00:00"
+
+[[backing]]
+obligation = "pdz-crossing-lemma"
+symbol = "CrossingLemma.simpleCrossingLemma_of_multigraphCrossingLemma"
+created_at = "2026-06-04T22:04:33+00:00"
+
+[[backing]]
+obligation = "pdz-line-circle-components"
+symbol = "PlaneCurve.lineCircle_components_meet_finite"
+created_at = "2026-06-04T22:04:33+00:00"
+
+[[backing]]
+obligation = "pdz-szemeredi-trotter"
+symbol = "PachSharir.SzemerediTrotter.szemerediTrotter_of_crossingLemma"
+created_at = "2026-06-04T22:04:33+00:00"
+
+[[backing]]
+obligation = "three-ap-free-no-collinear"
+symbol = "threeAPFree_of_forall_not_collinear"
+created_at = "2026-06-04T22:04:30+00:00"
+
+[[backing]]
+obligation = "unit-distance-elimination-count"
+symbol = "unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le"
+created_at = "2026-06-04T22:04:32+00:00"
