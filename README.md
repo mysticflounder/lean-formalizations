@@ -220,9 +220,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
 - **`Geometry/ElekesSharir/ChordCurve.lean` (L1)** — two-pinned chord curve.
   `twoPinnedDet_affine` / `twoPinnedDet_eq_const_add_linear` are **axiom-clean**
   (the step-3 `w×w`-cancellation: the two-pinned determinant is affine-linear in
-  `w`). The curve/finite-fiber steps `endpoints_on_boundedDegreeCurve` and
-  `boundedDegreeRationalMap_finiteFibers` are **stated with `sorry`** (the
-  Cramer/rationality + `O(1)`-to-1 algebraic-geometry content).
+  `w`). The curve/finite-fiber steps (Cramer/rationality + `O(1)`-to-1) are
+  **not formalized**: the original `sorry`-stated placeholders were removed
+  2026-06-04 as mis-stated (false as written — one had a `True` placeholder
+  hypothesis, the other omitted its rationality hypothesis); a faithful
+  statement needs the rational-parametrization set-up first.
 
 ### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
 
