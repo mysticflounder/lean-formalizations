@@ -4558,12 +4558,172 @@ theorem convex_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     simp only [one_mul]
   rw [e]; exact convex_mul_sideForm_lt _ _ 1 0
 
+/-! ### End caps are off-carrier
+
+Each end cap is disjoint from the whole carrier.  Its `sideForm`-strict side excludes the
+*incident* edge (whose points are collinear, `sideForm = 0`); a small-enough cap radius `ρ`
+at the endpoint — bounded by the endpoint's distance to every *non-incident* edge — excludes
+all other edges.  This turns the clipped end cap `(taperedTube ∖ carrier) ∩ endCap` into the
+plain intersection `taperedTube ∩ endCap`, removing the carrier from the connectivity proof. -/
+
+/-- The positive source end cap lies off the carrier, provided `ρ 0` is at most the distance
+from `verts 0` to every non-incident edge. -/
+theorem endCapSrcPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
+    endCapSrcPlus β ρ ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨i, hzi⟩
+  by_cases hi0 : (i : ℕ) = 0
+  · have hif : i = β.firstSeg := Fin.ext (by simp [PolyArc.firstSeg, hi0])
+    have hz0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z = 0 := by
+      have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
+      rw [PolyArc.segCarrier] at hzi'
+      exact sideForm_eq_zero_of_mem_segment _ _ hzi'
+    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+  · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
+      Metric.infDist_le_dist_of_mem hzi
+    have hb : dist z (β.verts 0) < ρ 0 := Metric.mem_ball.mp hzball
+    have hsp := hsep i hi0
+    rw [dist_comm] at hb; linarith
+
+/-- The negative source end cap lies off the carrier. -/
+theorem endCapSrcMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
+    endCapSrcMinus β ρ ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨i, hzi⟩
+  by_cases hi0 : (i : ℕ) = 0
+  · have hif : i = β.firstSeg := Fin.ext (by simp [PolyArc.firstSeg, hi0])
+    have hz0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z = 0 := by
+      have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
+      rw [PolyArc.segCarrier] at hzi'
+      exact sideForm_eq_zero_of_mem_segment _ _ hzi'
+    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+  · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
+      Metric.infDist_le_dist_of_mem hzi
+    have hb : dist z (β.verts 0) < ρ 0 := Metric.mem_ball.mp hzball
+    have hsp := hsep i hi0
+    rw [dist_comm] at hb; linarith
+
+/-- The positive target end cap lies off the carrier, provided `ρ (last)` is at most the
+distance from `verts last` to every non-incident edge. -/
+theorem endCapTgtPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      ρ (Fin.last β.numSegs) ≤
+        Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
+    endCapTgtPlus β ρ ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨i, hzi⟩
+  by_cases hil : (i : ℕ) = β.numSegs - 1
+  · have hif : i = β.lastSeg := Fin.ext (by simp [PolyArc.lastSeg, hil])
+    have hz0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z = 0 := by
+      have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
+      rw [PolyArc.segCarrier] at hzi'
+      exact sideForm_eq_zero_of_mem_segment _ _ hzi'
+    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+  · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
+        ≤ dist (β.verts (Fin.last β.numSegs)) z :=
+      Metric.infDist_le_dist_of_mem hzi
+    have hb : dist z (β.verts (Fin.last β.numSegs)) < ρ (Fin.last β.numSegs) :=
+      Metric.mem_ball.mp hzball
+    have hsp := hsep i hil
+    rw [dist_comm] at hb; linarith
+
+/-- The negative target end cap lies off the carrier. -/
+theorem endCapTgtMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      ρ (Fin.last β.numSegs) ≤
+        Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
+    endCapTgtMinus β ρ ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨i, hzi⟩
+  by_cases hil : (i : ℕ) = β.numSegs - 1
+  · have hif : i = β.lastSeg := Fin.ext (by simp [PolyArc.lastSeg, hil])
+    have hz0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z = 0 := by
+      have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
+      rw [PolyArc.segCarrier] at hzi'
+      exact sideForm_eq_zero_of_mem_segment _ _ hzi'
+    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+  · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
+        ≤ dist (β.verts (Fin.last β.numSegs)) z :=
+      Metric.infDist_le_dist_of_mem hzi
+    have hb : dist z (β.verts (Fin.last β.numSegs)) < ρ (Fin.last β.numSegs) :=
+      Metric.mem_ball.mp hzball
+    have hsp := hsep i hil
+    rw [dist_comm] at hb; linarith
+
 /-! ### P5 (preconnected) — the linear-chain assembly
 
 A finite family of preconnected sets indexed by `Fin n`, in which each set meets its
 successor, has a preconnected union: reachability in the "meets" graph is a linear chain,
 so any two indices are joined by a reflexive-transitive path (everything is reachable from
 `0`, and the relation is symmetric). -/
+
+/-- **Local overlap over a connected real index ⇒ global meets-graph connectivity.**
+
+If `s : ℝ → Set α` is indexed by a preconnected set `t ⊆ ℝ` and each point of `t` has a
+neighborhood (radius `ε`) within which its fibre meets every other fibre, then the "meets"
+graph (`(s x ∩ s y).Nonempty ∧ x ∈ t`) is reflexive-transitively connected across all of `t`.
+
+This is the geometry-free engine behind the clipped end-cap connectivity: the cap-tube
+intersection is a union of convex slices indexed by the edge foot-parameter, and consecutive
+slices overlap, so the union is preconnected via `IsPreconnected.biUnion_of_reflTransGen`.
+The proof is the standard clopen argument: the reachable set `D` and its complement in `t`
+are both relatively open (local overlap propagates reachability to neighbors, using symmetry
+of fibre intersection), so connectedness of `t` forces `D = t`. -/
+theorem reflTransGen_meets_of_local_overlap {α : Type*} [TopologicalSpace α]
+    {t : Set ℝ} (ht : IsPreconnected t) (s : ℝ → Set α)
+    (hov : ∀ c ∈ t, ∃ ε > 0, ∀ c' ∈ t, |c' - c| < ε → (s c ∩ s c').Nonempty)
+    {c₀ c₁ : ℝ} (h0 : c₀ ∈ t) (h1 : c₁ ∈ t) :
+    Relation.ReflTransGen (fun x y => (s x ∩ s y).Nonempty ∧ x ∈ t) c₀ c₁ := by
+  classical
+  set R : ℝ → ℝ → Prop := fun x y => (s x ∩ s y).Nonempty ∧ x ∈ t with hRdef
+  set ε : ℝ → ℝ := fun x => if hx : x ∈ t then (hov x hx).choose else 1 with hεdef
+  have hεpos : ∀ x ∈ t, 0 < ε x := by
+    intro x hx; rw [hεdef]; simp only [dif_pos hx]; exact (hov x hx).choose_spec.1
+  have hεov : ∀ x ∈ t, ∀ c' ∈ t, |c' - x| < ε x → (s x ∩ s c').Nonempty := by
+    intro x hx c' hc' hlt
+    rw [hεdef] at hlt; simp only [dif_pos hx] at hlt
+    exact (hov x hx).choose_spec.2 c' hc' hlt
+  set D : Set ℝ := {x | x ∈ t ∧ Relation.ReflTransGen R c₀ x} with hDdef
+  have hc0D : c₀ ∈ D := ⟨h0, Relation.ReflTransGen.refl⟩
+  suffices hDt : t ⊆ {x | Relation.ReflTransGen R c₀ x} by exact hDt h1
+  intro x hx
+  by_contra hxn
+  have hxE : x ∈ t \ D := ⟨hx, fun hxD => hxn hxD.2⟩
+  set U : Set ℝ := ⋃ y ∈ D, Metric.ball y (ε y) with hUdef
+  set V : Set ℝ := ⋃ y ∈ (t \ D), Metric.ball y (ε y) with hVdef
+  have hUopen : IsOpen U := isOpen_biUnion fun _ _ => Metric.isOpen_ball
+  have hVopen : IsOpen V := isOpen_biUnion fun _ _ => Metric.isOpen_ball
+  have hcover : t ⊆ U ∪ V := by
+    intro y hy
+    by_cases hyD : y ∈ D
+    · exact Or.inl (Set.mem_biUnion hyD (Metric.mem_ball_self (hεpos y hy)))
+    · exact Or.inr (Set.mem_biUnion ⟨hy, hyD⟩ (Metric.mem_ball_self (hεpos y hy)))
+  have hTU : (t ∩ U).Nonempty :=
+    ⟨c₀, h0, Set.mem_biUnion hc0D (Metric.mem_ball_self (hεpos c₀ h0))⟩
+  have hTV : (t ∩ V).Nonempty :=
+    ⟨x, hx, Set.mem_biUnion hxE (Metric.mem_ball_self (hεpos x hx))⟩
+  obtain ⟨w, hwt, hwU, hwV⟩ := ht U V hUopen hVopen hcover hTU hTV
+  obtain ⟨a, haD, hwa⟩ := Set.mem_iUnion₂.mp hwU
+  obtain ⟨a', ha'E, hwa'⟩ := Set.mem_iUnion₂.mp hwV
+  have hRaw : R a w :=
+    ⟨hεov a haD.1 w hwt (by rw [← Real.dist_eq]; exact Metric.mem_ball.mp hwa), haD.1⟩
+  have hreach_w : Relation.ReflTransGen R c₀ w := haD.2.tail hRaw
+  have hRwa' : R w a' :=
+    ⟨by rw [Set.inter_comm]
+        exact hεov a' ha'E.1 w hwt (by rw [← Real.dist_eq]; exact Metric.mem_ball.mp hwa'), hwt⟩
+  exact ha'E.2 ⟨ha'E.1, hreach_w.tail hRwa'⟩
 
 /-- **Linear-chain union.** If `s : Fin n → Set α` has each `s i` preconnected and each
 consecutive pair `s i, s (i+1)` meeting, then `⋃ i, s i` is preconnected. -/
