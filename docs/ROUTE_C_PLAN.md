@@ -871,14 +871,32 @@ back along the continuous lift `↥(R∖C) → ↥V₀`.
 
 This **pins, with no slack, the only remaining geometric obligations**:
 
-* **P5** — `IsPreconnected (collarPlus …)`, `IsPreconnected (collarMinus …)`
-  (the hardest node; band/sector/end-cap overlap-chain in `PLArc.lean`).
+* **P5 — DONE (2026-06-03, `PLArc.lean`, sorry-free, axiom-clean `[propext,
+  Classical.choice, Quot.sound]`).** `isPreconnected_collarPlus` /
+  `isPreconnected_collarMinus`: each collar side is preconnected. Method (the "no-taper"
+  regime): the geometric pieces are convex (bands = `edge±Mid ∩ Metric.thickening δ₀
+  (segment)` via `Convex.thickening`; end caps = ball ∩ half-planes) or preconnected
+  (sectors = `vertex± ∩ ball`, reflex case = two convex half-plane∩ball pieces meeting at
+  the scaled reflected point); the pieces form a **linear chain** assembled by
+  `isPreconnected_iUnion_fin_chain` over `collarChain±` (each band grouped with its
+  successor connector). The four consecutive **overlaps** are explicit witnesses
+  `liftPlus` (the foot-`c` point of an edge lifted ±ε along the normal): end-cap↔band
+  (`overlap_endCap{Src,Tgt}{Plus,Minus}_bandStrip*`, foot `2α`/`1−2α`) and sector↔band
+  (`overlap_sector*_bandStrip*_{src,tgt}` via the `mem_vertex*_of_{incoming,outgoing}`
+  glue, ε chosen small enough for the glue's thin condition). Each side reduces to the
+  hypothesis **`hsub`** (pieces ⊆ `taperedTube∖carrier` — the no-taper containment,
+  `δ₀ ≤ ½·infDist over S`) plus the overlap budgets `ρ(succ i) > δ₀ + 2α·‖edge‖` and
+  `α < 1/3`. `hsub` is discharged at instantiation (next bullet).
 * **G4** — every `z ∈ R∖carrier` has its relative component meet `taperedTube∖carrier`
   (component-boundary-in-carrier topology; tractable, not Jordan-strength).
 * **Collar instantiation** — produce one parameter bundle `(δ₀, α, ρ, S=arcInterior)`
   simultaneously satisfying P2 (`union_collarPlus_collarMinus`), P3
-  (`exists_collar_disjoint`), and P4 (`collar±_nonempty`), feeding
-  `exists_twoSidedPartition_of_collar` with `C = β.carrier`.
+  (`exists_collar_disjoint`), P4 (`collar±_nonempty`), the **P5 side-conditions**
+  (`hsub` no-taper containment `δ₀ ≤ ½·infDist over S`; overlap budgets
+  `ρ(succ i) > δ₀+2α·‖edge‖`, which coincide with the existing P2 `hsrc`/`htgt`; `α<1/3`),
+  and **G4**, feeding `exists_twoSidedPartition_of_collar` with `C = β.carrier`. Regime
+  consistency checked on paper: pick `ρ` from P3, then `α` small (`< ρ/maxedge` and
+  `< 1/3`), then `δ₀` small (no-taper + separation).
 * **Residual closure (separate, NOT-attempted NO-GO)** — representing an arbitrary
   `SimpleArc` satisfying `ArcInRegion` as a `PolyArc` is Schoenflies-strength. The
   PL route discharges `exists_twoSidedPartition_of_polyArc`; wiring it to the
