@@ -70,6 +70,36 @@ reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
   no-go side of its enemy-profile analysis; the module itself is
   self-contained mathematics.)
 
+### `LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5)
+
+Generic linear-algebra / line-geometry lemmas extracted from the Elekes–Sharir
+distance-geometry program (statements faithful to the prose source
+`erdos-98/docs/problem-98-klow-certificate-fires-lemmas-2026-06-04.md`). These
+are standalone — no Erdős-98-specific content. The linear-algebra and
+quadratic-form cores below are **axiom-clean** (`#print axioms` =
+`[propext, Classical.choice, Quot.sound]`):
+
+- **`OmegaRankCollapse.lean` (L4)** — rank–nullity collapse for a functional:
+  `finrank_ker_functional_ge` (`dim ker ω ≥ dim W − 1`) and its main corollary
+  `finrank_ker_ge_two_of_finrank_eq_three` (`dim W = 3 ⟹ dim ker ω ≥ 2`), plus
+  the abstract pullback-non-degeneracy consequence `pullback_nondegenerate`.
+  **Axiom-clean.**
+- **`ConicNormalForm.lean` (L5)** — affine-graph conic normal form. The
+  substituted quadratic part of `|q|² − |p|²` under `q = A·p + b` equals
+  `p ⬝ ((AᵀA − 1) *ᵥ p)` (`quadraticPart_eq`); a symmetric `2×2` form vanishes
+  identically iff its matrix is `0` (`dotProduct_mulVec_self_eq_zero_iff`); hence
+  the conic part vanishes iff `AᵀA = 1` (`quadraticPart_vanishes_iff`, the
+  orthogonal/non-orthogonal dichotomy). **Axiom-clean.**
+- **`RulingSkewness.lean` (L3)** — ES line `t ↦ ((p+q)/2 + (t/2)·J(q−p), t)` with
+  `J(x,y) = (−y,x)`. Provable half: equal squared distances `‖p−p'‖² = ‖q−q'‖²`
+  imply the two ES lines intersect-or-are-parallel
+  (`intersect_or_parallel_of_dist2_eq`), so the graph of one distance-preserving
+  map gives intersecting-or-parallel lines (`intersect_or_parallel_of_isometryGraph`);
+  combined with a **hypothesis-level** pairwise-skew-ruling predicate
+  (`PairwiseSkewRuling`, the genuine ℝ³ regulus fact, taken as input) this yields
+  at most one such line per ruling (`atMostOneLine_of_skewRuling_isometryGraph`).
+  **Axiom-clean.**
+
 ### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core
 
 A ~1600-line plane-algebraic-geometry development (namespace
@@ -178,6 +208,21 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
 - **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
   `IncidenceAssembly`, `Basic`, `CurveInterface`** — the reduction chain to
   Theorem 1.1; conditional on the statement-surfaces, some `sorry`.
+- **`ComponentSplit.lean` (L2)** — component split for bounded-degree plane
+  curves (faithful to
+  `erdos-98/docs/problem-98-klow-certificate-fires-lemmas-2026-06-04.md`,
+  Lemma A step 5). Definitions `zeroSet` / `irreducibleFactors` are `sorry`-free;
+  the three results are **stated with `sorry`**: `componentCount_le_totalDegree`
+  (`≤ d` irreducible factors), `lineCircle_components_meet_finite` (line/circle
+  components meet a no-3/no-4 set in `O_d(1)` points), and
+  `exists_genuine_component_rich` (pigeonhole feeding PdZ). Precise
+  statement-surfaces for the algebraic-geometry steps.
+- **`Geometry/ElekesSharir/ChordCurve.lean` (L1)** — two-pinned chord curve.
+  `twoPinnedDet_affine` / `twoPinnedDet_eq_const_add_linear` are **axiom-clean**
+  (the step-3 `w×w`-cancellation: the two-pinned determinant is affine-linear in
+  `w`). The curve/finite-fiber steps `endpoints_on_boundedDegreeCurve` and
+  `boundedDegreeRationalMap_finiteFibers` are **stated with `sorry`** (the
+  Cramer/rationality + `O(1)`-to-1 algebraic-geometry content).
 
 ### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
 
