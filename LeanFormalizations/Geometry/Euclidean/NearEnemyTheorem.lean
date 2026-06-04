@@ -34,10 +34,14 @@ The public theorem name is:
 
 The headline Lean theorems (unconditional, complete) are:
 
-* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal` — **the
+* `nearEnemy_exists_bisectorEnergy_minimal_image_noThreeCollinear` — **the
   strongest form**: every finite set with no three collinear points admits
   an injective planar projection realizing both the exact count `2n(n−1)`
-  and absolute minimality among planar sets of the same size.
+  and absolute minimality among planar sets of the same size, AND whose
+  image again has no three collinear points — the floor witness is itself a
+  general-position planar set.
+* `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal` — the same
+  without the image-general-position clause.
 * `nearEnemy_sphereSlice_exists_bisectorEnergy_minimal` — the sphere-slice
   form, a corollary: a line meets a sphere in at most two points
   (`not_collinear_of_mem_sphere`), so sphere subsets have no three
@@ -69,6 +73,12 @@ Supporting chain (all complete):
   nonvanishing; `MvPolynomial.funext` used exactly once); instantiations
   `nearEnemy_noThreeCollinear_exists_projectionGeneric` and
   `nearEnemy_exists_projectionGeneric`
+* `collinear_of_detPoly_eq_zero` — per-triple witness: an identically
+  vanishing triple-determinant polynomial forces upstairs collinearity
+* `nearEnemy_exists_projectionGeneric_preserving_noThreeCollinear` —
+  existence with one more master-product factor family (a collinearity
+  constraint polynomial per distinct triple): the generic projection also
+  keeps every distinct triple non-collinear downstairs
 
 Mathematical content currently in this module, in proof-pipeline order:
 
@@ -927,6 +937,38 @@ theorem detPoly_ne_zero_or_orthPoly_ne_zero
   detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
     (nearEnemy_offPair_not_both_vanish ha hb hc he hab hne)
 
+/-- **Per-triple witness**: if the collinearity constraint polynomial of a
+triple — the determinant polynomial of the difference vectors `b - a` and
+`c - a` — vanishes as a polynomial, the triple is collinear upstairs.
+Polynomial-side form of the parallelism lemma for triples; contrapositively,
+a non-collinear triple has a nonzero constraint polynomial. -/
+theorem collinear_of_detPoly_eq_zero
+    {a b c : EuclideanSpace ℝ ι}
+    (hd : detPoly b a c a = 0) :
+    Collinear ℝ ({a, b, c} : Set (EuclideanSpace ℝ ι)) := by
+  have hvan : ∀ p q : EuclideanSpace ℝ ι,
+      ⟪p, b - a⟫ * ⟪q, c - a⟫ - ⟪p, c - a⟫ * ⟪q, b - a⟫ = 0 := by
+    intro p q
+    have h0 := congrArg (eval fun ki ↦ ![p, q] ki.1 ki.2) hd
+    rw [map_zero] at h0
+    simpa [detPoly, eval_innerPoly_rows] using h0
+  rw [collinear_iff_of_mem (Set.mem_insert a {b, c})]
+  rcases exists_smul_eq_of_forall_inner_det_eq_zero hvan with ⟨t, ht⟩ | ⟨t, ht⟩
+  · -- `c - a = t • (b - a)`: the line through `a` with direction `b - a`.
+    refine ⟨b - a, fun p hp => ?_⟩
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
+    rcases hp with rfl | rfl | rfl
+    · exact ⟨0, by simp⟩
+    · exact ⟨1, by rw [vadd_eq_add]; module⟩
+    · exact ⟨t, by rw [vadd_eq_add]; linear_combination (norm := module) ht⟩
+  · -- `b - a = t • (c - a)`: the line through `a` with direction `c - a`.
+    refine ⟨c - a, fun p hp => ?_⟩
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
+    rcases hp with rfl | rfl | rfl
+    · exact ⟨0, by simp⟩
+    · exact ⟨t, by rw [vadd_eq_add]; linear_combination (norm := module) ht⟩
+    · exact ⟨1, by rw [vadd_eq_add]; module⟩
+
 /-- **Existence of a generic projection, witness-parameterized core**: for
 any finite set whose off-pair quadruples each carry a nonzero constraint
 polynomial, a generic projection exists.  The master polynomial multiplies a
@@ -1037,6 +1079,156 @@ theorem nearEnemy_noThreeCollinear_exists_projectionGeneric
           (fun hab' hca hcb => hG a ha b hb c hc hab' hca.symm hcb.symm)
           hab hne)
 
+/-- **Existence of a generic projection preserving general position**: for a
+finite set with no three collinear points, there is a generic projection
+whose images of distinct triples are again non-collinear — the planar image
+is itself in general position.  Same master-product argument with one more
+factor family: a collinearity constraint polynomial per distinct triple,
+nonzero by the per-triple witness. -/
+theorem nearEnemy_exists_projectionGeneric_preserving_noThreeCollinear
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      ProjectionGeneric T G ∧
+      ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+        ¬ Collinear ℝ ({T p₁, T p₂, T p₃} : Set (EuclideanSpace ℝ (Fin 2))) := by
+  -- Constraint index sets for the quadruple and triple constraints.
+  set Quads : Finset ((EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) ×
+      (EuclideanSpace ℝ ι × EuclideanSpace ℝ ι)) :=
+    (G.offDiag ×ˢ G.offDiag).filter
+      (fun pq ↦ ({pq.1.1, pq.1.2} : Set (EuclideanSpace ℝ ι)) ≠
+        {pq.2.1, pq.2.2}) with hQuads
+  set Triples : Finset (EuclideanSpace ℝ ι ×
+      EuclideanSpace ℝ ι × EuclideanSpace ℝ ι) :=
+    (G ×ˢ G ×ˢ G).filter
+      (fun p ↦ p.1 ≠ p.2.1 ∧ p.1 ≠ p.2.2 ∧ p.2.1 ≠ p.2.2) with hTriples
+  -- Each quadruple witness is nonzero as a polynomial.
+  have hwq_ne : ∀ pq ∈ Quads, quadWitness pq ≠ 0 := by
+    intro pq hpq
+    rw [hQuads, Finset.mem_filter, Finset.mem_product] at hpq
+    obtain ⟨⟨h1, h2⟩, hne⟩ := hpq
+    rw [Finset.mem_offDiag] at h1 h2
+    rw [quadWitness]
+    by_cases hdet : detPoly pq.1.1 pq.1.2 pq.2.1 pq.2.2 ≠ 0
+    · rwa [if_pos hdet]
+    · rw [if_neg hdet]
+      push Not at hdet
+      rcases detPoly_ne_zero_or_orthPoly_ne_zero_of_not_both_vanish
+        (nearEnemy_noThreeCollinear_offPair_not_both_vanish
+          (fun hab' hca hcb =>
+            hG _ h1.1 _ h1.2.1 _ h2.1 hab' hca.symm hcb.symm)
+          h1.2.2 hne) with h | h
+      · exact absurd hdet h
+      · exact h
+  -- Each triple constraint polynomial is nonzero as a polynomial.
+  have htr_ne : ∀ tr ∈ Triples, detPoly tr.2.1 tr.1 tr.2.2 tr.1 ≠ 0 := by
+    intro tr htr hd
+    rw [hTriples, Finset.mem_filter, Finset.mem_product,
+      Finset.mem_product] at htr
+    obtain ⟨⟨h1, h2, h3⟩, h12, h13, h23⟩ := htr
+    exact hG _ h1 _ h2 _ h3 h12 h13 h23 (collinear_of_detPoly_eq_zero hd)
+  -- The master polynomial and its nonvanishing point.
+  set master : MvPolynomial (Fin 2 × ι) ℝ :=
+    ((∏ ab ∈ G.offDiag, innerPoly 0 (ab.1 - ab.2)) *
+        ∏ pq ∈ Quads, quadWitness pq) *
+      ∏ tr ∈ Triples, detPoly tr.2.1 tr.1 tr.2.2 tr.1 with hmaster
+  have hmaster_ne : master ≠ 0 := by
+    rw [hmaster]
+    exact mul_ne_zero
+      (mul_ne_zero
+        (Finset.prod_ne_zero_iff.mpr fun ab hab ↦
+          innerPoly_ne_zero (Finset.mem_offDiag.mp hab).2.2)
+        (Finset.prod_ne_zero_iff.mpr hwq_ne))
+      (Finset.prod_ne_zero_iff.mpr htr_ne)
+  have hpoint : ∃ f : Fin 2 × ι → ℝ, eval f master ≠ 0 := by
+    by_contra h
+    push Not at h
+    exact hmaster_ne (MvPolynomial.funext fun f ↦ by simpa using h f)
+  obtain ⟨f, hf⟩ := hpoint
+  -- All factor evaluations are nonzero at `f`.
+  rw [hmaster, map_mul, map_mul, map_prod, map_prod, map_prod] at hf
+  have hpairs_eval : ∀ ab ∈ G.offDiag, eval f (innerPoly 0 (ab.1 - ab.2)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (left_ne_zero_of_mul (left_ne_zero_of_mul hf))
+  have hquads_eval : ∀ pq ∈ Quads, eval f (quadWitness pq) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul (left_ne_zero_of_mul hf))
+  have htriples_eval : ∀ tr ∈ Triples,
+      eval f (detPoly tr.2.1 tr.1 tr.2.2 tr.1) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mp (right_ne_zero_of_mul hf)
+  -- The projection with rows read off `f` is generic and preserves
+  -- non-collinearity of triples.
+  refine ⟨rowMap (rowOf f), ⟨?_, ?_⟩, ?_⟩
+  · -- Injectivity / nondegeneracy.
+    intro a ha b hb hab hT0
+    have hmem : (a, b) ∈ G.offDiag := Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩
+    apply hpairs_eval (a, b) hmem
+    rw [eval_innerPoly]
+    have h0 : rowMap (rowOf f) (a - b) 0 = 0 := by rw [hT0]; rfl
+    rwa [rowMap_apply] at h0
+  · -- Coincidence-avoidance.
+    intro a ha b hb c hc e he hab hce hne hbad
+    obtain ⟨⟨t, hpar⟩, horth⟩ := hbad
+    have hmem : ((a, b), (c, e)) ∈ Quads := by
+      rw [hQuads, Finset.mem_filter, Finset.mem_product]
+      exact ⟨⟨Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩,
+        Finset.mem_offDiag.mpr ⟨hc, he, hce⟩⟩, hne⟩
+    apply hquads_eval _ hmem
+    rw [quadWitness]
+    -- Components of the projected vectors.
+    have hcomp : ∀ k : Fin 2, ⟪rowOf f k, c - e⟫ = t * ⟪rowOf f k, a - b⟫ := by
+      intro k
+      have h := congrArg (fun v : EuclideanSpace ℝ (Fin 2) ↦ v k) hpar
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul, inner_sub_right]
+        using h
+    by_cases hdet : detPoly a b c e ≠ 0
+    · rw [if_pos hdet]
+      simp only [detPoly, map_sub, map_mul, eval_innerPoly]
+      rw [hcomp 0, hcomp 1]
+      ring
+    · rw [if_neg hdet]
+      simp only [orthPoly, map_add, map_mul, eval_innerPoly]
+      have hexp : ⟪rowMap (rowOf f) (a + b - (c + e)),
+          rowMap (rowOf f) (a - b)⟫ =
+          ⟪rowOf f 0, a + b - (c + e)⟫ * ⟪rowOf f 0, a - b⟫ +
+            ⟪rowOf f 1, a + b - (c + e)⟫ * ⟪rowOf f 1, a - b⟫ := by
+        rw [PiLp.inner_apply]
+        simp only [Fin.sum_univ_two, RCLike.inner_apply, rowMap_apply,
+          starRingEnd_apply, star_trivial, inner_add_right, inner_sub_right]
+        ring
+      rw [← hexp, horth]
+  · -- Triple non-collinearity downstairs.
+    intro p₁ h₁ p₂ h₂ p₃ h₃ h₁₂ h₁₃ h₂₃ hcol
+    have hmem : (p₁, p₂, p₃) ∈ Triples := by
+      rw [hTriples, Finset.mem_filter, Finset.mem_product, Finset.mem_product]
+      exact ⟨⟨h₁, h₂, h₃⟩, h₁₂, h₁₃, h₂₃⟩
+    apply htriples_eval _ hmem
+    -- Collinear images give a common direction; both projected difference
+    -- vectors are multiples of it, so the projected determinant vanishes.
+    rw [collinear_iff_of_mem (Set.mem_insert _ _)] at hcol
+    obtain ⟨v, hv⟩ := hcol
+    obtain ⟨r₂, hr₂⟩ := hv _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _))
+    obtain ⟨r₃, hr₃⟩ := hv _
+      (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ rfl))
+    have hcomp₂ : ∀ k : Fin 2,
+        ⟪rowOf f k, p₂⟫ - ⟪rowOf f k, p₁⟫ = r₂ * v k := by
+      intro k
+      have hT : rowMap (rowOf f) (p₂ - p₁) = r₂ • v := by
+        rw [map_sub, hr₂, vadd_eq_add]
+        abel
+      have hk := congrArg (fun u : EuclideanSpace ℝ (Fin 2) ↦ u k) hT
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul] using hk
+    have hcomp₃ : ∀ k : Fin 2,
+        ⟪rowOf f k, p₃⟫ - ⟪rowOf f k, p₁⟫ = r₃ * v k := by
+      intro k
+      have hT : rowMap (rowOf f) (p₃ - p₁) = r₃ • v := by
+        rw [map_sub, hr₃, vadd_eq_add]
+        abel
+      have hk := congrArg (fun u : EuclideanSpace ℝ (Fin 2) ↦ u k) hT
+      simpa [rowMap_apply, PiLp.smul_apply, smul_eq_mul] using hk
+    simp only [detPoly, map_sub, map_mul, eval_innerPoly, inner_sub_right]
+    rw [hcomp₂ 0, hcomp₂ 1, hcomp₃ 0, hcomp₃ 1]
+    ring
+
 /-- **Existence of a generic projection** for any finite sphere subset.
 Derived from the general-position form: a line meets a sphere in at most
 two points, so sphere subsets have no three collinear points. -/
@@ -1095,6 +1287,37 @@ theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal
   nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal
     fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
       not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
+
+/-- **Near Enemy Theorem for Bisector Energy, general-position-preserving
+form**: every finite set with no three collinear points admits an injective
+planar projection that realizes the absolute minimum bisector energy
+`2n(n−1)` AND whose image again has no three collinear points.  The floor
+witness is itself a general-position planar set: bisector-floor attainment
+is compatible with general position at every cardinality. -/
+theorem nearEnemy_exists_bisectorEnergy_minimal_image_noThreeCollinear
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      bisectorEnergy (G.image fun x ↦ T x) = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        bisectorEnergy (G.image fun x ↦ T x) ≤ bisectorEnergy P') ∧
+      ∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2))) := by
+  obtain ⟨T, hT, htriple⟩ :=
+    nearEnemy_exists_projectionGeneric_preserving_noThreeCollinear hG
+  refine ⟨T, injOn_of_projectionGeneric hT,
+    nearEnemy_genericProjection_bisectorEnergy_eq_pairCount hT,
+    nearEnemy_genericProjection_bisectorEnergy_minimal hT, ?_⟩
+  intro q₁ hq₁ q₂ hq₂ q₃ hq₃ h₁₂ h₁₃ h₂₃
+  obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+  obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+  obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+  exact htriple p₁ hp₁ p₂ hp₂ p₃ hp₃
+    (fun h => h₁₂ (congrArg _ h)) (fun h => h₁₃ (congrArg _ h))
+    (fun h => h₂₃ (congrArg _ h))
 
 end Unconditional
 
