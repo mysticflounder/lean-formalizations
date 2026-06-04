@@ -4728,4 +4728,192 @@ theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : �
   · rw [collarChainPlus]
     exact Or.inl (Or.inl (Or.inl hy.2))
 
+/-! ### P5 (preconnected) — overlap witnesses
+
+Each consecutive pair of collar pieces overlaps in a point on the `+` side of an edge near
+the shared vertex.  The witness is the foot-parameter-`c` point of the edge lifted by a tiny
+`ε` along the edge normal (`liftPlus`); choosing `c = 1 − 2α` (near the target) or `c = 2α`
+(near the source) places it in the band's middle while keeping it within the budgeted disk
+radius `ρ > δ₀ + 2α·‖edge‖`. -/
+
+theorem abs_sub_fst_le_dist (s t : Plane) : |t.1 - s.1| ≤ dist s t := by
+  rw [abs_sub_comm, Prod.dist_eq]; simp only [Real.dist_eq]; exact le_max_left _ _
+
+theorem abs_sub_snd_le_dist (s t : Plane) : |t.2 - s.2| ≤ dist s t := by
+  rw [abs_sub_comm, Prod.dist_eq]; simp only [Real.dist_eq]; exact le_max_right _ _
+
+/-- The foot-parameter-`c` point of edge `s→t`, lifted by `ε` along the edge normal. -/
+noncomputable def liftPlus (s t : Plane) (c ε : ℝ) : Plane :=
+  ((1 - c) * s.1 + c * t.1 - ε * (t.2 - s.2), (1 - c) * s.2 + c * t.2 + ε * (t.1 - s.1))
+
+theorem liftPlus_fst (s t : Plane) (c ε : ℝ) :
+    (liftPlus s t c ε).1 = (1 - c) * s.1 + c * t.1 - ε * (t.2 - s.2) := rfl
+
+theorem liftPlus_snd (s t : Plane) (c ε : ℝ) :
+    (liftPlus s t c ε).2 = (1 - c) * s.2 + c * t.2 + ε * (t.1 - s.1) := rfl
+
+theorem footParam_liftPlus {s t : Plane} (h : t ≠ s) (c ε : ℝ) :
+    footParam s t (liftPlus s t c ε) = c := by
+  have hP := dotp_self_pos h
+  rw [footParam]
+  have hnum : dotp (liftPlus s t c ε - s) (t - s) = c * dotp (t - s) (t - s) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub, liftPlus_fst, liftPlus_snd]; ring
+  rw [hnum, mul_div_assoc, div_self hP.ne', mul_one]
+
+theorem sideForm_liftPlus (s t : Plane) (c ε : ℝ) :
+    sideForm s t (liftPlus s t c ε) = ε * dotp (t - s) (t - s) := by
+  simp only [sideForm, dotp, Prod.fst_sub, Prod.snd_sub, liftPlus_fst, liftPlus_snd]; ring
+
+theorem infDist_liftPlus_le_segment (s t : Plane) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c ≤ 1) (ε : ℝ) :
+    Metric.infDist (liftPlus s t c ε) (segment ℝ s t) ≤ |ε| * dist s t := by
+  have hmem : (1 - c) • s + c • t ∈ segment ℝ s t :=
+    ⟨1 - c, c, by linarith, hc0, by ring, rfl⟩
+  refine le_trans (Metric.infDist_le_dist_of_mem hmem) ?_
+  rw [Prod.dist_eq]
+  apply max_le
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).1 - ((1 - c) • s + c • t).1 = -(ε * (t.2 - s.2)) := by
+      simp only [liftPlus_fst, Prod.fst_add, Prod.smul_fst, smul_eq_mul]; ring
+    rw [e, abs_neg, abs_mul]
+    exact mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg ε)
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).2 - ((1 - c) • s + c • t).2 = ε * (t.1 - s.1) := by
+      simp only [liftPlus_snd, Prod.snd_add, Prod.smul_snd, smul_eq_mul]; ring
+    rw [e, abs_mul]
+    exact mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg ε)
+
+theorem dist_liftPlus_src_le (s t : Plane) (c ε : ℝ) :
+    dist (liftPlus s t c ε) s ≤ (|c| + |ε|) * dist s t := by
+  rw [Prod.dist_eq]; apply max_le
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).1 - s.1 = c * (t.1 - s.1) - ε * (t.2 - s.2) := by
+      rw [liftPlus_fst]; ring
+    rw [e]
+    calc |c * (t.1 - s.1) - ε * (t.2 - s.2)| ≤ |c * (t.1 - s.1)| + |ε * (t.2 - s.2)| :=
+          abs_sub _ _
+      _ = |c| * |t.1 - s.1| + |ε| * |t.2 - s.2| := by rw [abs_mul, abs_mul]
+      _ ≤ |c| * dist s t + |ε| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg c))
+            (mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg ε))
+      _ = (|c| + |ε|) * dist s t := by ring
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).2 - s.2 = c * (t.2 - s.2) + ε * (t.1 - s.1) := by
+      rw [liftPlus_snd]; ring
+    rw [e]
+    calc |c * (t.2 - s.2) + ε * (t.1 - s.1)| ≤ |c * (t.2 - s.2)| + |ε * (t.1 - s.1)| :=
+          abs_add_le _ _
+      _ = |c| * |t.2 - s.2| + |ε| * |t.1 - s.1| := by rw [abs_mul, abs_mul]
+      _ ≤ |c| * dist s t + |ε| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg c))
+            (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg ε))
+      _ = (|c| + |ε|) * dist s t := by ring
+
+theorem dist_liftPlus_tgt_le (s t : Plane) (c ε : ℝ) :
+    dist (liftPlus s t c ε) t ≤ (|1 - c| + |ε|) * dist s t := by
+  rw [Prod.dist_eq]; apply max_le
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).1 - t.1 = (1 - c) * (s.1 - t.1) - ε * (t.2 - s.2) := by
+      rw [liftPlus_fst]; ring
+    rw [e]
+    calc |(1 - c) * (s.1 - t.1) - ε * (t.2 - s.2)|
+          ≤ |(1 - c) * (s.1 - t.1)| + |ε * (t.2 - s.2)| := abs_sub _ _
+      _ = |1 - c| * |s.1 - t.1| + |ε| * |t.2 - s.2| := by rw [abs_mul, abs_mul]
+      _ ≤ |1 - c| * dist s t + |ε| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left
+              (by rw [abs_sub_comm s.1 t.1]; exact abs_sub_fst_le_dist s t) (abs_nonneg _))
+            (mul_le_mul_of_nonneg_left (abs_sub_snd_le_dist s t) (abs_nonneg ε))
+      _ = (|1 - c| + |ε|) * dist s t := by ring
+  · rw [Real.dist_eq]
+    have e : (liftPlus s t c ε).2 - t.2 = (1 - c) * (s.2 - t.2) + ε * (t.1 - s.1) := by
+      rw [liftPlus_snd]; ring
+    rw [e]
+    calc |(1 - c) * (s.2 - t.2) + ε * (t.1 - s.1)|
+          ≤ |(1 - c) * (s.2 - t.2)| + |ε * (t.1 - s.1)| := abs_add_le _ _
+      _ = |1 - c| * |s.2 - t.2| + |ε| * |t.1 - s.1| := by rw [abs_mul, abs_mul]
+      _ ≤ |1 - c| * dist s t + |ε| * dist s t :=
+          add_le_add (mul_le_mul_of_nonneg_left
+              (by rw [abs_sub_comm s.2 t.2]; exact abs_sub_snd_le_dist s t) (abs_nonneg _))
+            (mul_le_mul_of_nonneg_left (abs_sub_fst_le_dist s t) (abs_nonneg ε))
+      _ = (|1 - c| + |ε|) * dist s t := by ring
+
+/-- **hO3.** The source end cap meets band `firstSeg`. -/
+theorem overlap_endCapSrcPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hbud : δ₀ + 2 * α * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0) :
+    (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty := by
+  set s := β.segSrc β.firstSeg with hs
+  set t := β.segTgt β.firstSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
+  have hP := dotp_self_pos hts
+  have hLpos : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
+  set ε := δ₀ / (2 * (dist s t + 1)) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have hεL : ε * dist s t < δ₀ := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]; nlinarith [hLpos, hδ₀]
+  set z := liftPlus s t (2 * α) ε with hz
+  have hfoot : footParam s t z = 2 * α := by rw [hz]; exact footParam_liftPlus hts (2 * α) ε
+  have hside : 0 < sideForm s t z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hP
+  have hv0 : β.verts 0 = s := by
+    have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
+      apply Fin.ext; simp [PolyArc.firstSeg]
+    rw [hs, PolyArc.segSrc, hcast]
+  have hball : z ∈ Metric.ball (β.verts 0) (ρ 0) := by
+    rw [Metric.mem_ball, hv0]
+    have hd : dist z s ≤ (2 * α + ε) * dist s t := by
+      have h := dist_liftPlus_src_le s t (2 * α) ε
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier β.firstSeg) < δ₀ := by
+    have h := infDist_liftPlus_le_segment s t (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier β.firstSeg = segment ℝ s t from rfl]
+    linarith [h, hεL]
+  refine ⟨z, ⟨⟨hball, ?_⟩, hside⟩, ⟨⟨?_, hside⟩, hinf⟩⟩
+  · show 0 < footParam s t z; rw [hfoot]; linarith
+  · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
+
+/-- **hO4.** The target end cap meets band `lastSeg`. -/
+theorem overlap_endCapTgtPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hbud : δ₀ + 2 * α * dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)
+      < ρ (Fin.last β.numSegs)) :
+    (endCapTgtPlus β ρ ∩ bandStripPlus β α δ₀ β.lastSeg).Nonempty := by
+  set s := β.segSrc β.lastSeg with hs
+  set t := β.segTgt β.lastSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.lastSeg
+  have hP := dotp_self_pos hts
+  have hLpos : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
+  set ε := δ₀ / (2 * (dist s t + 1)) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have hεL : ε * dist s t < δ₀ := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]; nlinarith [hLpos, hδ₀]
+  set z := liftPlus s t (1 - 2 * α) ε with hz
+  have hfoot : footParam s t z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hts (1 - 2 * α) ε
+  have hside : 0 < sideForm s t z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hP
+  have hvL : β.verts (Fin.last β.numSegs) = t := by
+    rw [ht, PolyArc.segTgt]; congr 1
+    apply Fin.ext; have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]
+    omega
+  have hball : z ∈ Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)) := by
+    rw [Metric.mem_ball, hvL]
+    have hd : dist z t ≤ (2 * α + ε) * dist s t := by
+      have h := dist_liftPlus_tgt_le s t (1 - 2 * α) ε
+      have he : |1 - (1 - 2 * α)| = 2 * α := by rw [show 1 - (1 - 2 * α) = 2 * α from by ring,
+        abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α)]
+      rw [he, abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier β.lastSeg) < δ₀ := by
+    have h := infDist_liftPlus_le_segment s t (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier β.lastSeg = segment ℝ s t from rfl]
+    linarith [h, hεL]
+  refine ⟨z, ⟨⟨hball, ?_⟩, hside⟩, ⟨⟨?_, hside⟩, hinf⟩⟩
+  · show footParam s t z < 1; rw [hfoot]; linarith
+  · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
+
 end CrossingLemma.PlaneArcSeparation
