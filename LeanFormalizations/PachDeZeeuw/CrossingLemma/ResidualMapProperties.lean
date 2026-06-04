@@ -343,7 +343,7 @@ theorem residualMap_isSimple (hARR : ArcsRotationRegular G)
           exact ⟨1, by simp [zpow_one, residualMap_edgePerm_apply]⟩
     change ¬ (Edge.ends ((residualMap G hARR).Edge_mk (e, b))).IsDiag
     rw [hedge, residualMap_edge_ends]
-    rw [Sym2.isDiag_iff_proj_eq]
+    rw [Sym2.mk_isDiag_iff]
     exact hne
   · -- No parallel edges: `Edge.ends` injective.
     intro edge edge' hends

@@ -34,7 +34,7 @@ noncomputable instance instFintypeFaceSameCycle [Fintype D] {w : D} :
 /-- The length of a face is the number of darts in its `facePerm` orbit. -/
 noncomputable def Face.length [Fintype D] [DecidableEq D] (f : M.Face) : ℕ :=
   Quotient.lift (fun w ↦ Fintype.card {u | M.facePerm.SameCycle w u}) (fun w u h ↦ by
-    simp [Set.coe_setOf, Set.mem_setOf_eq]
+    simp [Set.coe_setOf]
     suffices M.facePerm.SameCycle w = M.facePerm.SameCycle u by
       classical
       simp_all only
@@ -246,7 +246,7 @@ theorem three_le_faceLength [Fintype D] [DecidableEq D]
   obtain ⟨w, rfl⟩ := Quotient.exists_rep f
   change 3 ≤ Face.length (M.Face_mk w)
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   have hL1 : 1 ≤ Face.length (M.Face_mk w) := by
     change 1 ≤ Fintype.card {u | M.facePerm.SameCycle w u}
     have : Nonempty {u | M.facePerm.SameCycle w u} := ⟨⟨w, Equiv.Perm.SameCycle.refl _ _⟩⟩

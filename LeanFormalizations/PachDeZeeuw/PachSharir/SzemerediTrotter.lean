@@ -51,7 +51,7 @@ lemma affineLine_eq_of_parallel
   -- Extract a nonzero scalar `λ` with `(a₂, b₂) = λ • (a₁, b₁)`.
   have hne₁ : a₁ ≠ 0 ∨ b₁ ≠ 0 := by
     by_contra h
-    push_neg at h
+    push Not at h
     exact hℓ₁ (Prod.ext h.1 h.2)
   obtain ⟨lam, hlam_a, hlam_b⟩ : ∃ lam : ℝ, a₂ = lam * a₁ ∧ b₂ = lam * b₁ := by
     rcases hne₁ with ha | hb
@@ -100,7 +100,7 @@ lemma encard_inter_le_one_of_lines {ℓ₁ ℓ₂ : Set (ℝ × ℝ)}
   set v := p.2 - q.2 with hv
   have huv : u ≠ 0 ∨ v ≠ 0 := by
     by_contra h
-    push_neg at h
+    push Not at h
     apply hpq
     have h1 : p.1 = q.1 := by simpa [hu, sub_eq_zero] using h.1
     have h2 : p.2 = q.2 := by simpa [hv, sub_eq_zero] using h.2
@@ -212,7 +212,7 @@ lemma incidence_bound_of_crossingLemma
     rw [hB] at heB
     nlinarith [heI, heB, hprod, hmr, hnr, hm0, hn0]
   · -- Low-edge regime: `e < 4m`, so `I < 4m + n ≤ 64·(m + n)`.
-    push_neg at hthr
+    push Not at hthr
     rw [hv] at hthr
     -- `hthr : G.numEdges < 4 * 1 * m`, hence `I ≤ 4·m + n - 1 < 4·m + n`.
     have heINat : I ≤ 4 * m + n := by omega
@@ -381,7 +381,7 @@ noncomputable def segmentArc (p q : ℝ × ℝ) (h : p ≠ q) : SimpleCurveArc w
     apply Subtype.ext
     by_contra hne
     have hq1 : q.1 ≠ p.1 ∨ q.2 ≠ p.2 := by
-      by_contra hh; push_neg at hh; exact h (Prod.ext hh.1.symm hh.2.symm)
+      by_contra hh; push Not at hh; exact h (Prod.ext hh.1.symm hh.2.symm)
     rcases hq1 with hq | hq
     · have hz : ((s : ℝ) - t) * (q.1 - p.1) = 0 := by nlinarith [h1]
       rcases mul_eq_zero.mp hz with hh | hh
@@ -484,7 +484,7 @@ lemma filter_card_le_edges (P : Finset (ℝ × ℝ)) (ℓ : Set (ℝ × ℝ)) :
   · rw [h, List.length_nil, Nat.zero_add]
     have hle : (pointsOnLine P ℓ).length ≤ 1 := by
       by_contra hc
-      push_neg at hc
+      push Not at hc
       unfold edgesOnLine at h
       rw [List.eq_nil_iff_length_eq_zero, List.length_zip, List.length_tail] at h
       omega
@@ -1269,7 +1269,7 @@ def GridRichLineStatement : Prop :=
 the geometric cap `X ≤ N²`, derive `k³·X ≤ (64C³+4C)·(N² + k²N)`.  Pure real
 arithmetic; the only nonlinear input is the cube `s³ = N²X²`. -/
 lemma richline_arith {N X k C s : ℝ} (hN : 0 ≤ N) (hX : 0 ≤ X) (hk2 : 2 ≤ k)
-    (hC1 : 1 ≤ C) (hs0 : 0 ≤ s) (hs3 : s ^ 3 = N ^ 2 * X ^ 2) (hXN : X ≤ N ^ 2)
+    (hC1 : 1 ≤ C) (_hs0 : 0 ≤ s) (hs3 : s ^ 3 = N ^ 2 * X ^ 2) (hXN : X ≤ N ^ 2)
     (hST : k * X ≤ C * (s + N + X)) :
     k ^ 3 * X ≤ (64 * C ^ 3 + 4 * C) * (N ^ 2 + k ^ 2 * N) := by
   have hCpos : 0 < C := lt_of_lt_of_le zero_lt_one hC1
@@ -1315,7 +1315,7 @@ lemma richline_arith {N X k C s : ℝ} (hN : 0 ≤ N) (hX : 0 ≤ X) (hk2 : 2 �
           mul_nonneg (le_of_lt hCpos) (sq_nonneg N),
           mul_nonneg (le_of_lt (pow_pos hCpos 3)) (sq_nonneg N)]
     · -- small `k`: `k < 2C`, fall back to the geometric cap `X ≤ N²`
-      push_neg at hkb
+      push Not at hkb
       have hk3 : k ^ 3 ≤ 8 * C ^ 3 := by
         have h := mul_nonneg (by linarith : (0:ℝ) ≤ 2 * C - k)
           (by positivity : (0:ℝ) ≤ 4 * C ^ 2 + 2 * C * k + k ^ 2)

@@ -549,7 +549,8 @@ private theorem cyclic_walk_witness_of_flat_chord
     have hget' :
         (P.vertices.rotate k).get ⟨0, hlen⟩ =
           P.vertices.get ⟨k % P.vertices.length, Nat.mod_lt _ hpos⟩ := by
-      simpa [Nat.zero_add] using hget
+      rw [Nat.zero_add] at hget
+      exact hget
     have hval : P.vertices.get ⟨k % P.vertices.length, Nat.mod_lt _ hpos⟩ =
         P.vertices.get ⟨k, hklen⟩ := by
       have hfi : (⟨k % P.vertices.length, Nat.mod_lt _ hpos⟩ : Fin P.vertices.length) =
@@ -566,7 +567,7 @@ private theorem cyclic_walk_witness_of_flat_chord
     have hget' :
         (P.vertices.rotate k).get ⟨1, hlen⟩ =
           P.vertices.get ⟨(1 + k) % P.vertices.length, Nat.mod_lt _ hpos⟩ := by
-      simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using hget
+      convert hget using 2
     by_cases hi0 : i = 0
     · have hk : k = n - 1 := by
         dsimp [k]
@@ -618,7 +619,7 @@ private theorem cyclic_walk_witness_of_flat_chord
     have hget' :
         (P.vertices.rotate k).get ⟨2, hlen⟩ =
           P.vertices.get ⟨(2 + k) % P.vertices.length, Nat.mod_lt _ hpos⟩ := by
-      simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using hget
+      convert hget using 2
     by_cases hi0 : i = 0
     · have hk : k = n - 1 := by
         dsimp [k]

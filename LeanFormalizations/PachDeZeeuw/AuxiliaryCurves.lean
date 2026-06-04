@@ -84,11 +84,13 @@ private noncomputable def auxSecondPair (z : Point4) : Point2 :=
 
 private lemma auxFirstPair_of_auxPointOfPair (pq : Point2 × Point2) :
     auxFirstPair (auxPointOfPair pq) = pq.1 := by
-  ext i <;> fin_cases i <;> simp [auxFirstPair, auxPointOfPair]
+  ext i
+  fin_cases i <;> simp [auxFirstPair, auxPointOfPair]
 
 private lemma auxSecondPair_of_auxPointOfPair (pq : Point2 × Point2) :
     auxSecondPair (auxPointOfPair pq) = pq.2 := by
-  ext i <;> fin_cases i <;> simp [auxSecondPair, auxPointOfPair]
+  ext i
+  fin_cases i <;> simp [auxSecondPair, auxPointOfPair]
 
 /-- The point set for the auxiliary curves, obtained from the `P₂ × P₂` image. -/
 noncomputable def auxPointSet {d : ℕ} (X : PreparedBipartiteInput d) :
@@ -189,13 +191,13 @@ theorem auxIncidenceBridge : AuxIncidenceBridgeStatement := by
             simpa using (show q1.1.1 = q2.1.1 ∧ q1.2.1 = q2.2.1 from by simpa using hidx).1
           have h12 : q1.1.2 = q2.1.2 := by
             simpa using (show q1.1.2 = q2.1.2 ∧ q1.2.2 = q2.2.2 from by simpa using htarget).1
-          ext i <;> fin_cases i <;> simpa [h11, h12]
+          ext i <;> fin_cases i <;> simp [h11, h12]
         have hright : q1.2 = q2.2 := by
           have h21 : q1.2.1 = q2.2.1 := by
             simpa using (show q1.1.1 = q2.1.1 ∧ q1.2.1 = q2.2.1 from by simpa using hidx).2
           have h22 : q1.2.2 = q2.2.2 := by
             simpa using (show q1.1.2 = q2.1.2 ∧ q1.2.2 = q2.2.2 from by simpa using htarget).2
-          ext i <;> fin_cases i <;> simpa [h21, h22]
+          ext i <;> fin_cases i <;> simp [h21, h22]
         apply Subtype.ext
         apply Prod.ext <;> assumption
   have hsubset : Finset.image f S.attach ⊆ auxIncidences X := by
@@ -222,7 +224,7 @@ theorem auxIncidenceBridge : AuxIncidenceBridgeStatement := by
     · simpa [f] using hcurve
   calc
     (equalDistanceQuadruples X).card = S.attach.card := by
-      simpa [S] using (Finset.card_attach (s := S))
+      simp [S]
     _ = (Finset.image f S.attach).card := by
       rw [Finset.card_image_of_injective _ hf]
     _ ≤ (auxIncidences X).card := Finset.card_le_card hsubset

@@ -139,7 +139,7 @@ lemma PlaneCurveZeroSet_subset_of_dvd {p q : MvPolynomial (Fin 2) ℝ}
   intro x hx
   rcases hpq with ⟨r, rfl⟩
   rw [mem_PlaneCurveZeroSet] at hx ⊢
-  simpa [MvPolynomial.eval_mul, hx]
+  simp [MvPolynomial.eval_mul, hx]
 
 /--
 An infinite common irreducible factor gives a forbidden common curve
@@ -147,7 +147,7 @@ component.
 -/
 lemma noCommonCurveComponent_of_no_common_infinite_factor
     {C₁ C₂ : Set Point2} {p q : MvPolynomial (Fin 2) ℝ}
-    (hp0 : p ≠ 0) (hq0 : q ≠ 0)
+    (_hp0 : p ≠ 0) (_hq0 : q ≠ 0)
     (hC₁ : C₁ = PlaneCurveZeroSet p)
     (hC₂ : C₂ = PlaneCurveZeroSet q)
     (hno : NoCommonCurveComponent C₁ C₂) :
@@ -289,7 +289,10 @@ lemma eval_eq_specialized_eval
       Polynomial.eval (elimCoord z) (Specialized0 (coeffCoord z) p) := by
   have hcons :
       Fin.cons (elimCoord z) (fun _ : Fin 1 => coeffCoord z) = fun i => z i := by
-    ext i <;> fin_cases i <;> simp [elimCoord, coeffCoord]
+    ext i
+    fin_cases i
+    · simp [elimCoord, coeffCoord]
+    · simp [elimCoord, coeffCoord]
   calc
     MvPolynomial.eval (fun i => z i) p =
         MvPolynomial.eval (Fin.cons (elimCoord z) (fun _ : Fin 1 => coeffCoord z)) p := by
@@ -305,15 +308,15 @@ lemma specialized_resultant_eq_coeff_eval
     Polynomial.resultant (Specialized0 x p) (Specialized0 x q)
       (Curry0 p).natDegree (Curry0 q).natDegree =
     MvPolynomial.eval (fun _ : Fin 1 => x) (ResultantCoeff p q) := by
-  simpa [Specialized0, ResultantCoeff, coeffEval] using
-    (Polynomial.resultant_map_map (Curry0 p) (Curry0 q)
-      (Curry0 p).natDegree (Curry0 q).natDegree (coeffEval x))
+  rw [Specialized0, ResultantCoeff, coeffEval]
+  exact Polynomial.resultant_map_map (Curry0 p) (Curry0 q)
+    (Curry0 p).natDegree (Curry0 q).natDegree (MvPolynomial.eval fun _ => x)
 
 /-- A common zero gives a root of the coefficient resultant. -/
 lemma resultant_vanishes_at_common_zero
     (p q : MvPolynomial (Fin 2) ℝ) {z : Point2}
     (hp0deg : 0 < (Curry0 p).natDegree)
-    (hq0deg : 0 < (Curry0 q).natDegree)
+    (_hq0deg : 0 < (Curry0 q).natDegree)
     (hz : z ∈ PlaneCurveZeroSet p ∩ PlaneCurveZeroSet q) :
     coeffCoord z ∈ CoeffRootSet (ResultantCoeff p q) := by
   rw [CoeffRootSet]
@@ -400,8 +403,8 @@ theorem isRelPrime_fraction_map_of_isPrimitive
     have hzero : P.map (algebraMap XCoeff XFrac) = 0 := by
       simpa [hD] using hDP
     exact (hmapP0 hzero).elim
-  · rcases IsLocalization.integerNormalization_map_to_map (nonZeroDivisors XCoeff) D with
-      ⟨⟨b, hb⟩, hnorm⟩
+  · rcases IsLocalization.integerNormalization_spec (nonZeroDivisors XCoeff) D with
+      ⟨b, hb, hnorm⟩
     have hb0 : b ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hb
     have hb0' : (algebraMap XCoeff XFrac b) ≠ 0 := by
       intro hb'
@@ -649,7 +652,7 @@ lemma coeffLineFactor_dvd_of_specialized_zero
       XCoeffEquiv (MvPolynomial.X (0 : Fin 1) - MvPolynomial.C x) =
         Polynomial.X - Polynomial.C x := by
     rw [map_sub]
-    simp [XCoeffEquiv, MvPolynomial.finSuccEquiv_X_zero, MvPolynomial.finSuccEquiv_apply]
+    simp [XCoeffEquiv, MvPolynomial.finSuccEquiv_apply]
   have hcoeff_div :
       ∀ n : ℕ, MvPolynomial.X (0 : Fin 1) - MvPolynomial.C x ∣ (Curry0 p).coeff n := by
     intro n
@@ -670,8 +673,7 @@ lemma coeffLineFactor_dvd_of_specialized_zero
       simpa [hX] using hdiv
     have hsymm : XCoeffEquiv.symm (XCoeffEquiv ((Curry0 p).coeff n)) =
         (Curry0 p).coeff n := by
-      simpa using
-        (Equiv.symm_apply_apply (e := XCoeffEquiv) ((Curry0 p).coeff n))
+      exact XCoeffEquiv.symm_apply_apply ((Curry0 p).coeff n)
     simpa [hsymm] using (map_dvd_iff_dvd_symm XCoeffEquiv).1 hdiv'
   have hpoly :
       Polynomial.C (MvPolynomial.X (0 : Fin 1) - MvPolynomial.C x) ∣ Curry0 p := by
@@ -689,8 +691,8 @@ lemma coeffLineFactor_dvd_of_specialized_zero
   have hdiv_curry : Curry0 (CoeffLineFactor x) ∣ Curry0 p := by
     simpa [hCurry0] using hpoly
   have hsymm_curve : (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 p) = p := by
-    simpa [Curry0] using
-      (Equiv.symm_apply_apply (e := MvPolynomial.finSuccEquiv ℝ 1) p)
+    rw [Curry0]
+    exact (MvPolynomial.finSuccEquiv ℝ 1).symm_apply_apply p
   have hdiv_symm : CoeffLineFactor x ∣ (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 p) :=
     (map_dvd_iff_dvd_symm (MvPolynomial.finSuccEquiv ℝ 1)).1 hdiv_curry
   simpa [hsymm_curve] using hdiv_symm
@@ -698,8 +700,8 @@ lemma coeffLineFactor_dvd_of_specialized_zero
 /-- If both specializations vanish, the coefficient-line factor would be a common divisor. -/
 theorem not_both_specializations_zero_of_isRelPrime
     (p q : MvPolynomial (Fin 2) ℝ) (x : ℝ)
-    (hpprim : (Curry0 p).IsPrimitive)
-    (hqprim : (Curry0 q).IsPrimitive)
+    (_hpprim : (Curry0 p).IsPrimitive)
+    (_hqprim : (Curry0 q).IsPrimitive)
     (hrel : IsRelPrime (Curry0 p) (Curry0 q)) :
     Specialized0 x p ≠ 0 ∨ Specialized0 x q ≠ 0 := by
   by_cases hp : Specialized0 x p = 0
@@ -709,11 +711,11 @@ theorem not_both_specializations_zero_of_isRelPrime
       have hqdvd : CoeffLineFactor x ∣ q :=
         coeffLineFactor_dvd_of_specialized_zero q x hq
       have hsymm_p : (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 p) = p := by
-        simpa [Curry0] using
-          (Equiv.symm_apply_apply (e := MvPolynomial.finSuccEquiv ℝ 1) p)
+        rw [Curry0]
+        exact (MvPolynomial.finSuccEquiv ℝ 1).symm_apply_apply p
       have hsymm_q : (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 q) = q := by
-        simpa [Curry0] using
-          (Equiv.symm_apply_apply (e := MvPolynomial.finSuccEquiv ℝ 1) q)
+        rw [Curry0]
+        exact (MvPolynomial.finSuccEquiv ℝ 1).symm_apply_apply q
       have hpdvd_symm : CoeffLineFactor x ∣ (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 p) :=
         by simpa [hsymm_p] using hpdvd
       have hqdvd_symm : CoeffLineFactor x ∣ (MvPolynomial.finSuccEquiv ℝ 1).symm (Curry0 q) :=
@@ -727,9 +729,8 @@ theorem not_both_specializations_zero_of_isRelPrime
       have hunit : IsUnit (CoeffLineFactor x) := by
         have hsymm_factor : (MvPolynomial.finSuccEquiv ℝ 1).symm
             (Curry0 (CoeffLineFactor x)) = CoeffLineFactor x := by
-          simpa [Curry0] using
-            (Equiv.symm_apply_apply (e := MvPolynomial.finSuccEquiv ℝ 1)
-              (CoeffLineFactor x))
+          rw [Curry0]
+          exact (MvPolynomial.finSuccEquiv ℝ 1).symm_apply_apply (CoeffLineFactor x)
         simpa [hsymm_factor] using
           IsUnit.map (MvPolynomial.finSuccEquiv ℝ 1).symm hunit0
       have hneq : (fun₀ | (1 : Fin 2) => 1) ≠ (0 : (Fin 2 →₀ ℕ)) := by
@@ -738,10 +739,6 @@ theorem not_both_specializations_zero_of_isRelPrime
         simp at this
       have hcoeff :
           MvPolynomial.coeff (fun₀ | (1 : Fin 2) => 1) (CoeffLineFactor x) = 1 := by
-        have hXcoeff :
-            MvPolynomial.coeff (fun₀ | (1 : Fin 2) => 1)
-              (MvPolynomial.X (1 : Fin 2)) = 1 := by
-          simp [MvPolynomial.coeff_X]
         have hCcoeff :
             MvPolynomial.coeff (fun₀ | (1 : Fin 2) => 1)
               (MvPolynomial.C x) = 0 := by
@@ -751,7 +748,7 @@ theorem not_both_specializations_zero_of_isRelPrime
             exact hneq h0.symm
           · rfl
         rw [CoeffLineFactor, MvPolynomial.coeff_sub]
-        simp [hXcoeff, hCcoeff]
+        simp [hCcoeff]
       have hnil :
           IsNilpotent (MvPolynomial.coeff (fun₀ | (1 : Fin 2) => 1) (CoeffLineFactor x)) := by
         have hunit' := (MvPolynomial.isUnit_iff.mp hunit).2
@@ -759,7 +756,7 @@ theorem not_both_specializations_zero_of_isRelPrime
       have hcontr : False := by
         have hnot : ¬ IsNilpotent
             (MvPolynomial.coeff (fun₀ | (1 : Fin 2) => 1) (CoeffLineFactor x)) := by
-          simpa [hcoeff] using (not_isNilpotent_one (R := ℝ))
+          simp [hcoeff]
         exact hnot hnil
       exact False.elim hcontr
     · exact Or.inr hq
@@ -898,10 +895,10 @@ lemma univariate_coeff_common_roots_ncard_le
 /-- The coefficient-line branch of the pair-intersection bound. -/
 theorem coeffline_nonvertical_pair_intersection_bound
     (a : XCoeff) (q : MvPolynomial (Fin 2) ℝ)
-    (ha0 : a ≠ 0) (hq0 : q ≠ 0)
+    (ha0 : a ≠ 0) (_hq0 : q ≠ 0)
     (hadeg : a.totalDegree ≤ d₁)
     (hqdeg : q.totalDegree ≤ d₂)
-    (hq0deg : 0 < (Curry0 q).natDegree)
+    (_hq0deg : 0 < (Curry0 q).natDegree)
     (hnotDiv :
       ∀ x : ℝ,
         MvPolynomial.eval (fun _ : Fin 1 => x) a = 0 →
@@ -966,7 +963,8 @@ theorem coeffline_nonvertical_pair_intersection_bound
         simpa [hcoeff] using hzspec
     have hinj : Set.InjOn elimCoord (fiberSet x) := by
       intro z₁ hz₁ z₂ hz₂ h
-      ext i <;> fin_cases i
+      ext i
+      fin_cases i
       · exact h
       · exact by
           simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
@@ -1000,7 +998,8 @@ theorem coeffline_nonvertical_pair_intersection_bound
         simpa [hcoeff] using hzspec
     have hinj : Set.InjOn elimCoord (fiberSet x) := by
       intro z₁ hz₁ z₂ hz₂ h
-      ext i <;> fin_cases i
+      ext i
+      fin_cases i
       · exact h
       · exact by
           simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
@@ -1060,10 +1059,10 @@ theorem coeffline_coeffline_pair_intersection_empty_of_no_common_real_root
     have hx : coeffCoord z ∈ CoeffRootSet a ∩ CoeffRootSet b := by
       simpa [CoeffLineZeroSet, CoeffRootSet, coeffCoord] using hz
     have hfalse : False := by
-      simpa [hnoRoot] using hx
+      simp [hnoRoot] at hx
     exact False.elim hfalse
   · intro hz
-    exact False.elim (by simpa using hz)
+    cases hz
 
 /-- An irreducible plane polynomial with positive eliminated-coordinate degree has primitive curry. -/
 lemma curry_isPrimitive_of_irreducible_positive_natDegree
@@ -1168,10 +1167,6 @@ lemma coeffLineFactor_not_isUnit
     simp
   have hcoeff :
       MvPolynomial.coeff (Finsupp.single (1 : Fin 2) 1) (CoeffLineFactor x) = 1 := by
-    have hXcoeff :
-        MvPolynomial.coeff (Finsupp.single (1 : Fin 2) 1)
-          (MvPolynomial.X (1 : Fin 2)) = 1 := by
-      simp [MvPolynomial.coeff_X]
     have hCcoeff :
         MvPolynomial.coeff (Finsupp.single (1 : Fin 2) 1) (MvPolynomial.C x) = 0 := by
       rw [MvPolynomial.coeff_C]
@@ -1180,7 +1175,7 @@ lemma coeffLineFactor_not_isUnit
         exact hne h0.symm
       · rfl
     rw [CoeffLineFactor, MvPolynomial.coeff_sub]
-    simp [hXcoeff, hCcoeff]
+    simp [hCcoeff]
   rcases (MvPolynomial.isUnit_iff.mp h) with ⟨_, hnil⟩
   have hnil1 :
       IsNilpotent
@@ -1267,7 +1262,7 @@ lemma no_common_coeff_root_of_zero_curry_nonassociated
       coeffLineFactor_dvd_of_curry_natDegree_zero_root k kdeg0 hx.2
     exact False.elim (hdivk hdivk')
   · intro hx
-    exact False.elim (by simpa using hx)
+    cases hx
 
 /-- The zero-degree / zero-degree plane intersection is empty. -/
 lemma zeroCurry_zeroCurry_pair_intersection_empty
@@ -1296,8 +1291,8 @@ lemma zeroCurry_zeroCurry_pair_intersection_bound
       (PlaneCurveZeroSet h ∩ PlaneCurveZeroSet k).ncard ≤ B := by
   have hempty : PlaneCurveZeroSet h ∩ PlaneCurveZeroSet k = ∅ :=
     zeroCurry_zeroCurry_pair_intersection_empty h k hh hk hnot hdeg0 kdeg0
-  refine ⟨by simpa [hempty], ?_⟩
-  simpa [hempty]
+  refine ⟨by simp [hempty], ?_⟩
+  simp [hempty]
 
 /-- The multivariate polynomial ring over `ℝ` is normalized. -/
 noncomputable instance : NormalizationMonoid (MvPolynomial (Fin 2) ℝ) :=
@@ -1336,7 +1331,7 @@ lemma helper_sum_sub_single_le (v : Fin 2 →₀ ℕ) (i : Fin 2) (hvi : v i ≠
 /-- A partial derivative drops the total degree by at most one when the curve has positive degree. -/
 lemma totalDegree_pderiv_le_sub_one
     (h : MvPolynomial (Fin 2) ℝ) (i : Fin 2)
-    (hpos : 0 < h.totalDegree) :
+    (_hpos : 0 < h.totalDegree) :
     (MvPolynomial.pderiv i h).totalDegree ≤ h.totalDegree - 1 := by
   classical
   let s : Finset (Fin 2 →₀ ℕ) := h.support
@@ -1352,7 +1347,7 @@ lemma totalDegree_pderiv_le_sub_one
       h.totalDegree - 1 := by
     intro v hv
     by_cases hvi : v i = 0
-    · simp [hvi, hpos]
+    · simp [hvi]
     · have hcoeff : (c v) * (v i : ℝ) ≠ 0 := by
         exact mul_ne_zero
           (by simpa [c] using (MvPolynomial.mem_support_iff.mp hv))
@@ -1385,7 +1380,7 @@ lemma totalDegree_pderiv_le
 lemma totalDegree_pderiv_lt_of_nonzero
     (h : MvPolynomial (Fin 2) ℝ) {i : Fin 2}
     (hpos : 0 < h.totalDegree)
-    (hpi : MvPolynomial.pderiv i h ≠ 0) :
+    (_hpi : MvPolynomial.pderiv i h ≠ 0) :
     (MvPolynomial.pderiv i h).totalDegree < h.totalDegree := by
   have hle := totalDegree_pderiv_le_sub_one h i hpos
   omega
@@ -1429,7 +1424,7 @@ lemma helper_card_le_sum_of_pos
         intro h hh
         exact hs h (by simp [hh])
       have ih' := ih hs'
-      simp [Multiset.card_cons, Multiset.map_cons, Multiset.sum_cons, ha] at ih' ⊢
+      simp [Multiset.card_cons, Multiset.map_cons, Multiset.sum_cons] at ih' ⊢
       omega
 
 /-- A normalized factor multiset has total degree equal to the total degree of its product. -/
@@ -1518,7 +1513,7 @@ abbrev PlanePoly := MvPolynomial (Fin 2) ℝ
 /-- A finite cover of a real plane curve by irreducible components coming from its normalized factors. -/
 structure RealPlaneCurveComponentCover
     (d : ℕ) (C : Set Point2)
-    (components : Finset (Sigma fun e : ℕ => Set Point2)) : Prop where
+    (components : Finset (Sigma fun _e : ℕ => Set Point2)) : Prop where
   cover :
     C = ⋃ component ∈ components, component.2
   each_irreducible :
@@ -1535,12 +1530,12 @@ structure RealPlaneCurveComponentCover
 theorem boundedDegreeCurve_real_component_cover
     {d : ℕ} {C : Set Point2}
     (hC : PlaneCurve.IsBoundedDegreeCurve d C) :
-    ∃ components : Finset (Sigma fun e : ℕ => Set Point2),
+    ∃ components : Finset (Sigma fun _e : ℕ => Set Point2),
       RealPlaneCurveComponentCover d C components := by
   classical
   rcases hC with ⟨p, hp0, hpdeg, hC⟩
   let factors : Finset PlanePoly := (UniqueFactorizationMonoid.normalizedFactors p).toFinset
-  let components : Finset (Sigma fun e : ℕ => Set Point2) :=
+  let components : Finset (Sigma fun _e : ℕ => Set Point2) :=
     factors.image (fun f : PlanePoly => ⟨f.totalDegree, PlaneCurveZeroSet f⟩)
   refine ⟨components, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
@@ -1596,7 +1591,7 @@ theorem boundedDegreeCurve_real_component_cover
 
 /-- A real degree-four curve together with its finite irreducible component cover. -/
 structure DegreeFourIrreducibleComponentCover (C : Set Point2) where
-  components : Finset (Sigma fun e : ℕ => Set Point2)
+  components : Finset (Sigma fun _e : ℕ => Set Point2)
   cover : RealPlaneCurveComponentCover 4 C components
 
 /-- Extract the degree-four real component cover from a bounded-degree curve. -/

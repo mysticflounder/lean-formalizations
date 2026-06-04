@@ -188,7 +188,7 @@ private noncomputable instance [Fintype D] [DecidableEq D] {w : D} :
 /-- The degree of a vertex is the number of incident darts. -/
 noncomputable def Vertex.deg [Fintype D] [DecidableEq D] (v : M.Vertex) : ℕ :=
   Quotient.lift (fun w ↦ Fintype.card {u | M.vertexPerm.SameCycle w u}) (fun w u h ↦ by
-    simp [Set.coe_setOf, Set.mem_setOf_eq]
+    simp [Set.coe_setOf]
     suffices M.vertexPerm.SameCycle w = M.vertexPerm.SameCycle u by
       classical
       simp_all only

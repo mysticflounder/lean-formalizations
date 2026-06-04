@@ -263,7 +263,7 @@ lemma lemma37_equalDistanceQuadruple_lower {d : ℕ}
   let qfibers : ℝ → Finset ((Point2 × Point2) × (Point2 × Point2)) := fun r ↦
     fibers r ×ˢ fibers r
   have hS : S.card = X.P₁.card * X.P₂.card := by
-    simpa [S] using (Finset.card_product X.P₁ X.P₂)
+    simp [S]
   have hsum : ∑ r ∈ S.image f, (fibers r).card = S.card := by
     have hsum0 :
         ∑ r ∈ S.image f, (fibers r).card =
@@ -283,7 +283,7 @@ lemma lemma37_equalDistanceQuadruple_lower {d : ℕ}
     rw [Finset.card_biUnion]
     · refine Finset.sum_congr rfl ?_
       intro r hr
-      simpa [qfibers, pow_two, Finset.card_product]
+      simp [qfibers, pow_two, Finset.card_product]
     · intro r₁ _hr₁ r₂ _hr₂ hne
       change Disjoint (qfibers r₁) (qfibers r₂)
       rw [Finset.disjoint_left]

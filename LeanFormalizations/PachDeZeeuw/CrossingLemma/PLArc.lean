@@ -571,7 +571,7 @@ theorem segTgt_ne_segSrc (i : Fin β.numSegs) : β.segTgt i ≠ β.segSrc i := b
   have h2 : Fin.succ i = Fin.castSucc i := β.distinct h
   have h3 : (i : ℕ) + 1 = (i : ℕ) := by
     have := congrArg Fin.val h2
-    rwa [Fin.val_succ, Fin.coe_castSucc] at this
+    rwa [Fin.val_succ, Fin.val_castSucc] at this
   omega
 
 /-- The full carrier of the polygonal arc: the union of its closed segments. -/
@@ -613,12 +613,15 @@ theorem src_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ 0) :
     exact (Set.disjoint_left.mp hdisj) hf' hi'
   · have hi1 : (i : ℕ) = 1 := by omega
     have hlt : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1 < β.numSegs := by
-      have := i.isLt; simp only [Fin.val_mk]; omega
+      have hzero : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val = 0 := rfl
+      have := i.isLt; omega
     have hcast : (Fin.castSucc ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩
         : Fin (β.numSegs + 1)) = Fin.succ ⟨0, β.numSegs_pos⟩ :=
-      Fin.ext (by simp [Fin.val_succ])
+      Fin.ext (by simp)
     have hieq : i = ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩ :=
-      Fin.ext (by simp only [Fin.val_mk]; omega)
+      Fin.ext (by
+        have hzero : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val = 0 := rfl
+        omega)
     have hi' : β.verts 0 ∈ segment ℝ (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩))
         (β.verts (Fin.succ ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩)) := by
       have hseg : β.segCarrier ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩
@@ -632,7 +635,7 @@ theorem src_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ 0) :
     rw [Set.mem_singleton_iff] at hsingle
     have heq0 : (0 : Fin (β.numSegs + 1)) = Fin.succ ⟨0, β.numSegs_pos⟩ := β.distinct hsingle
     have hval := congrArg Fin.val heq0
-    simp [Fin.val_succ] at hval
+    simp at hval
 
 /-- Index of the first segment (`0`). -/
 def firstSeg : Fin β.numSegs := ⟨0, β.numSegs_pos⟩
@@ -647,7 +650,7 @@ theorem tgt_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ β.numSeg
   intro hmem
   have hpos := β.numSegs_pos
   have hsl : (Fin.succ β.lastSeg : Fin (β.numSegs + 1)) = Fin.last β.numSegs := by
-    apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last, Fin.val_mk]; omega
+    apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
   have hvL : β.verts (Fin.last β.numSegs) ∈ β.segCarrier β.lastSeg := by
     rw [PolyArc.segCarrier, PolyArc.segTgt, hsl]; exact right_mem_segment ℝ _ _
   have hfL : β.verts (Fin.last β.numSegs) ∈ segment ℝ (β.verts (Fin.castSucc β.lastSeg))
@@ -781,7 +784,7 @@ theorem vertAt_eq_of_le {m : ℕ} (hm : m ≤ β.numSegs) (k : Fin (β.numSegs +
   unfold vertAt
   congr 1
   apply Fin.ext
-  simp only [Fin.val_mk, hk, min_eq_left hm]
+  simp only [hk, min_eq_left hm]
 
 theorem vertAt_zero : β.vertAt 0 = β.verts 0 :=
   β.vertAt_eq_of_le (by omega) 0 (by simp)
@@ -797,7 +800,7 @@ theorem diff_eq_vertAt_sub {k : ℕ} (hk : k < β.numSegs) :
 
 /-- Telescoping the difference vectors over an initial range:
 `∑_{k<j} (verts (k+1) − verts k) = verts j − verts 0` for `j ≤ numSegs`. -/
-theorem sum_range_diff {j : ℕ} (hj : j ≤ β.numSegs) :
+theorem sum_range_diff {j : ℕ} (_hj : j ≤ β.numSegs) :
     ∑ k ∈ Finset.range j,
         (β.vertAt (k + 1) - β.vertAt k) = β.vertAt j - β.vertAt 0 := by
   exact Finset.sum_range_sub β.vertAt j
@@ -947,7 +950,7 @@ theorem locCoord_mem (t : Set.Icc (0 : ℝ) 1) :
   · -- m = ⌊nx⌋.toNat, so nx - m < 1 by lt_floor_add_one
     have hmeq : (m : ℝ) = (⌊(β.numSegs : ℝ) * (t : ℝ)⌋ : ℝ) := by
       have : m = (⌊(β.numSegs : ℝ) * (t : ℝ)⌋).toNat := by
-        rw [hm]; unfold idx; simp only [Fin.val_mk]; exact min_eq_left hcase
+        rw [hm]; unfold idx; exact min_eq_left hcase
       rw [this]
       have := Int.toNat_of_nonneg hfloor_nonneg
       exact_mod_cast congrArg (fun z : ℤ => (z : ℝ)) this
@@ -956,7 +959,7 @@ theorem locCoord_mem (t : Set.Icc (0 : ℝ) 1) :
     rw [hmeq]; linarith
   · -- m = n-1; then nx ≤ n and m = n-1 ⇒ nx - m ≤ n - (n-1) = 1
     have hmeqn : m = β.numSegs - 1 := by
-      rw [hm]; unfold idx; simp only [Fin.val_mk]; exact min_eq_right (le_of_lt hcase)
+      rw [hm]; unfold idx; exact min_eq_right (le_of_lt hcase)
     have hnxle : (β.numSegs : ℝ) * (t : ℝ) ≤ (β.numSegs : ℝ) := by
       calc (β.numSegs : ℝ) * (t : ℝ) ≤ (β.numSegs : ℝ) * 1 := by
             apply mul_le_mul_of_nonneg_left ht1 (le_of_lt hnpos)
@@ -983,7 +986,6 @@ theorem param_mem_segCarrier (t : Set.Icc (0 : ℝ) 1) :
 theorem idx_mono {t t' : Set.Icc (0 : ℝ) 1} (h : (t : ℝ) ≤ (t' : ℝ)) :
     (β.idx t : ℕ) ≤ (β.idx t' : ℕ) := by
   unfold idx
-  simp only [Fin.val_mk]
   have hnpos : (0 : ℝ) ≤ (β.numSegs : ℝ) := by positivity
   have hflle : ⌊(β.numSegs : ℝ) * (t : ℝ)⌋ ≤ ⌊(β.numSegs : ℝ) * (t' : ℝ)⌋ :=
     Int.floor_le_floor (by nlinarith [h, hnpos])
@@ -1921,7 +1923,7 @@ enough (the tube radius times the edge's ℓ¹ size beats `α·‖t−s‖²`), 
 parameter only moves by `< α`, so `z` is still strictly between the endpoints:
 `z ∈ edgeBand s t`.  The complementary case (`p` near a vertex) is handled by the
 vertex disk. -/
-theorem mem_edgeBand_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (hα : 0 < α)
+theorem mem_edgeBand_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (_hα : 0 < α)
     {p z : Plane} (hp : footParam s t p ∈ Set.Icc α (1 - α))
     (hclose : (|t.1 - s.1| + |t.2 - s.2|) * dist p z < α * dotp (t - s) (t - s)) :
     z ∈ edgeBand s t := by
@@ -2319,7 +2321,7 @@ infDist p Rᶜ / 2 ≤ dist p (endpoint) / 2`. -/
 
 /-- Mid-band membership from a spine foot in `[α,1−α]` and an `α/2` closeness budget:
 the evaluation point's foot stays in `(α/2, 1−α/2)`, i.e. `z ∈ edgeBandMid s t (α/2)`. -/
-theorem mem_edgeBandMid_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (hα : 0 < α)
+theorem mem_edgeBandMid_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (_hα : 0 < α)
     {p z : Plane} (hp : footParam s t p ∈ Set.Icc α (1 - α))
     (hclose : (|t.1 - s.1| + |t.2 - s.2|) * dist p z < α / 2 * dotp (t - s) (t - s)) :
     z ∈ edgeBandMid s t (α / 2) := by
@@ -2414,7 +2416,7 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
       · rw [hie] at hpinch; exact hpinch
     · -- interior source vertex
       right; left
-      exact ⟨Fin.castSucc i, by simpa using hipos, by simpa using i.isLt,
+      exact ⟨Fin.castSucc i, by exact hipos, by exact i.isLt,
         Metric.mem_ball.mpr hzs⟩
   · rcases le_or_gt b (1 - α) with hmid | hhi
     · -- middle of the edge: narrowed band
@@ -4063,7 +4065,7 @@ theorem collarPlus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   set L := |t.1 - s.1| + |t.2 - s.2| with hLdef
   have hLpos : 0 < L := by
-    rw [hLdef]; by_contra h; push_neg at h
+    rw [hLdef]; by_contra h; push Not at h
     have ha1 := abs_nonneg (t.1 - s.1); have ha2 := abs_nonneg (t.2 - s.2)
     exact hts (Prod.ext (by have := abs_eq_zero.mp (by linarith : |t.1 - s.1| = 0); linarith)
       (by have := abs_eq_zero.mp (by linarith : |t.2 - s.2| = 0); linarith))
@@ -4121,7 +4123,7 @@ theorem collarMinus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   set L := |t.1 - s.1| + |t.2 - s.2| with hLdef
   have hLpos : 0 < L := by
-    rw [hLdef]; by_contra h; push_neg at h
+    rw [hLdef]; by_contra h; push Not at h
     have ha1 := abs_nonneg (t.1 - s.1); have ha2 := abs_nonneg (t.2 - s.2)
     exact hts (Prod.ext (by have := abs_eq_zero.mp (by linarith : |t.1 - s.1| = 0); linarith)
       (by have := abs_eq_zero.mp (by linarith : |t.2 - s.2| = 0); linarith))
@@ -4205,7 +4207,7 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
     have htt : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segTgt c := by
       rw [PolyArc.segTgt, PolyArc.segTgt]; intro h
       have hval := congrArg Fin.val (β.distinct h)
-      simp only [Fin.val_succ, Fin.val_mk] at hval; omega
+      simp only [Fin.val_succ] at hval; omega
     set Lc := (|(β.segTgt c).1 - (β.segSrc c).1| + |(β.segTgt c).2 - (β.segSrc c).2|)
         / dotp (β.segTgt c - β.segSrc c) (β.segTgt c - β.segSrc c) with hLcdef
     set Lc1 := (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segSrc ⟨(c : ℕ) + 1, hc1⟩).1|
@@ -4790,7 +4792,7 @@ theorem iUnion_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ
         ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
         ∪ endCapSrcPlus β ρ ∪ endCapTgtPlus β ρ := by
   ext z
-  simp only [collarChainPlus, Set.mem_union, Set.mem_iUnion, exists_prop, Set.mem_setOf_eq]
+  simp only [collarChainPlus, Set.mem_union, Set.mem_iUnion, exists_prop]
   constructor
   · rintro ⟨i, (((hb | hs) | ht) | he)⟩
     · exact Or.inl (Or.inl (Or.inl ⟨i, hb⟩))
@@ -5371,7 +5373,7 @@ theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → �
         ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
         ∪ endCapSrcMinus β ρ ∪ endCapTgtMinus β ρ := by
   ext z
-  simp only [collarChainMinus, Set.mem_union, Set.mem_iUnion, exists_prop, Set.mem_setOf_eq]
+  simp only [collarChainMinus, Set.mem_union, Set.mem_iUnion, exists_prop]
   constructor
   · rintro ⟨i, (((hb | hs) | ht) | he)⟩
     · exact Or.inl (Or.inl (Or.inl ⟨i, hb⟩))

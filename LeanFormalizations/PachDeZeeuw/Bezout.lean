@@ -38,10 +38,8 @@ open scoped Topology
 The v4.27 mathlib used `IsContDiffImplicitAt.implicitFunction` /
 `IsContDiffImplicitAt.apply_implicitFunction` as projections of the
 `IsContDiffImplicitAt` predicate. In v4.30 the implicit-function API moved to the
-`ContDiffAt` namespace and these projections were turned into deprecated aliases
-with an incompatible signature. The two adapters below restore the original
-projection-style API on top of the current `ContDiffAt.implicitFunction`
-machinery, so the geometric argument below ports unchanged. -/
+`ContDiffAt` namespace. The adapters below use the current API directly while
+keeping the geometric argument below in the same projection style. -/
 section ImplicitAdapter
 
 variable {𝕜 E₁ E₂ F : Type*} [RCLike 𝕜]
@@ -50,12 +48,13 @@ variable {𝕜 E₁ E₂ F : Type*} [RCLike 𝕜]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] [CompleteSpace F]
   {f : E₁ × E₂ → F} {f' : E₁ × E₂ →L[𝕜] F} {a : E₁ × E₂} {n : WithTop ℕ∞}
 
+omit [CompleteSpace E₁] in
 /-- The second-variable partial derivative `f' ∘ inr` is invertible (as a
-continuous linear map) given the bijectivity recorded in the predicate. -/
-theorem isContDiffImplicitAt_isInvertible_partial (hf : IsContDiffImplicitAt n f f' a) :
+continuous linear map) given the derivative identity and bijectivity input. -/
+theorem hasFDerivAt_isInvertible_partial (hf : HasFDerivAt f f' a)
+    (hbij : Function.Bijective (f'.comp (ContinuousLinearMap.inr 𝕜 E₁ E₂))) :
     ((fderiv 𝕜 f a) ∘L (ContinuousLinearMap.inr 𝕜 E₁ E₂)).IsInvertible := by
-  have hfderiv : fderiv 𝕜 f a = f' := hf.hasFDerivAt.fderiv
-  have hbij : Function.Bijective (f'.comp (ContinuousLinearMap.inr 𝕜 E₁ E₂)) := hf.bijective
+  have hfderiv : fderiv 𝕜 f a = f' := hf.fderiv
   have hker : (f'.comp (ContinuousLinearMap.inr 𝕜 E₁ E₂)).ker = ⊥ := by
     rw [LinearMap.ker_eq_bot]; exact hbij.1
   have hrange : (f'.comp (ContinuousLinearMap.inr 𝕜 E₁ E₂)).range = ⊤ := by
@@ -65,17 +64,18 @@ theorem isContDiffImplicitAt_isInvertible_partial (hf : IsContDiffImplicitAt n f
       ContinuousLinearEquiv.coe_ofBijective _ hker hrange⟩
   rwa [hfderiv]
 
-/-- The implicit function attached to an `IsContDiffImplicitAt` predicate,
-defined via the current `ContDiffAt.implicitFunction` API. (Named to avoid the
-deprecated `IsContDiffImplicitAt.implicitFunction` alias.) -/
-noncomputable def icdImplicitFunction (hf : IsContDiffImplicitAt n f f' a) : E₁ → E₂ :=
-  hf.contDiffAt.implicitFunction hf.ne_zero (isContDiffImplicitAt_isInvertible_partial hf)
+/-- The implicit function attached to a `ContDiffAt` proof and an invertible
+second-variable derivative. -/
+noncomputable def cdImplicitFunction (hf : ContDiffAt 𝕜 n f a) (hn : n ≠ 0)
+    (hinv : ((fderiv 𝕜 f a) ∘L (ContinuousLinearMap.inr 𝕜 E₁ E₂)).IsInvertible) :
+    E₁ → E₂ :=
+  hf.implicitFunction hn hinv
 
 /-- Near the base point the implicit function satisfies the implicit equation. -/
-theorem icdApplyImplicitFunction (hf : IsContDiffImplicitAt n f f' a) :
-    ∀ᶠ x in 𝓝 a.1, f (x, icdImplicitFunction hf x) = f a :=
-  hf.contDiffAt.eventually_apply_implicitFunction hf.ne_zero
-    (isContDiffImplicitAt_isInvertible_partial hf)
+theorem cdApplyImplicitFunction (hf : ContDiffAt 𝕜 n f a) (hn : n ≠ 0)
+    (hinv : ((fderiv 𝕜 f a) ∘L (ContinuousLinearMap.inr 𝕜 E₁ E₂)).IsInvertible) :
+    ∀ᶠ x in 𝓝 a.1, f (x, cdImplicitFunction hf hn hinv x) = f a :=
+  hf.eventually_apply_implicitFunction hn hinv
 
 end ImplicitAdapter
 
@@ -117,12 +117,12 @@ lemma degreeOf_sylvester_entry_bound
     rw [Polynomial.sylvester, Matrix.of_apply, Fin.addCases_left]
     by_cases hmem : (i : ℕ) ∈ Set.Icc (jl : ℕ) ((jl : ℕ) + (Curry0 q).natDegree)
     · rw [if_pos hmem]; exact hqbound _
-    · rw [if_neg hmem]; simpa using Nat.zero_le _
+    · rw [if_neg hmem]; exact Nat.zero_le _
   · intro jr
     rw [Polynomial.sylvester, Matrix.of_apply, Fin.addCases_right]
     by_cases hmem : (i : ℕ) ∈ Set.Icc (jr : ℕ) ((jr : ℕ) + (Curry0 p).natDegree)
     · rw [if_pos hmem]; exact hpbound _
-    · rw [if_neg hmem]; simpa using Nat.zero_le _
+    · rw [if_neg hmem]; exact Nat.zero_le _
 
 /-- The resultant coefficient polynomial has `degreeOf 0` bounded by `(d₁ + d₂) ^ 2`.
 
@@ -244,12 +244,14 @@ theorem primitive_nonvertical_pair_intersection_bound
       intro hp0
       have hp0' : (Curry0 p).natDegree = 0 := by
         simp [hp0, Curry0]
-      exact (Nat.lt_irrefl 0) (by simpa [hp0'] using hp0deg)
+      rw [hp0'] at hp0deg
+      exact (Nat.lt_irrefl 0) hp0deg
     have hq0 : q ≠ 0 := by
       intro hq0
       have hq0' : (Curry0 q).natDegree = 0 := by
         simp [hq0, Curry0]
-      exact (Nat.lt_irrefl 0) (by simpa [hq0'] using hq0deg)
+      rw [hq0'] at hq0deg
+      exact (Nat.lt_irrefl 0) hq0deg
     simpa [ResultantCoeff] using
       (resultant_ne_zero_of_isRelPrime_primitive_curry p q hpprim hqprim hrel)
   have hrootFinite : rootSet.Finite := by
@@ -277,7 +279,8 @@ theorem primitive_nonvertical_pair_intersection_bound
       · simpa [FiberCommonZeros, hcoeff, eval_eq_specialized_eval] using hzq
     have hinj : Set.InjOn elimCoord (fiberSet x) := by
       intro z₁ hz₁ z₂ hz₂ h
-      ext i <;> fin_cases i
+      ext i
+      fin_cases i
       · exact h
       · exact by
           simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
@@ -300,7 +303,8 @@ theorem primitive_nonvertical_pair_intersection_bound
         · simpa [FiberCommonZeros, hcoeff, eval_eq_specialized_eval] using hzq
       have hinj : Set.InjOn elimCoord (fiberSet x) := by
         intro z₁ hz₁ z₂ hz₂ h
-        ext i <;> fin_cases i
+        ext i
+        fin_cases i
         · exact h
         · exact by
             simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
@@ -379,14 +383,14 @@ theorem irreducible_pair_intersection_bound
       calc
         d₁ * d₂ ≤ (d₁ + d₂ + 1) * d₂ := Nat.mul_le_mul_right _ hd1
         _ ≤ (d₁ + d₂ + 1) * (d₁ + d₂ + 1) := Nat.mul_le_mul_left _ hd2
-        _ = (d₁ + d₂ + 1) ^ 2 := by simp [pow_two, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
+        _ = (d₁ + d₂ + 1) ^ 2 := by simp [pow_two]
     have hpos : 0 < (d₁ + d₂ + 1) ^ 2 := by
       have hbase : 0 < d₁ + d₂ + 1 := by omega
       exact Nat.pow_pos hbase
     have hsq : (d₁ + d₂ + 1) ^ 2 ≤ (d₁ + d₂ + 1) ^ 4 := by
       have hle2 : (d₁ + d₂ + 1) ^ 2 ≤ (d₁ + d₂ + 1) ^ 2 * (d₁ + d₂ + 1) ^ 2 := by
         exact Nat.le_mul_of_pos_right _ hpos
-      simpa [pow_two, pow_succ] using hle2
+      simp [pow_succ] at hle2 ⊢
     exact le_trans hle hsq
   have htarget_prim :
       ((d₁ + d₂) ^ 2 + 1) * max d₁ d₂ ≤ (d₁ + d₂ + 1) ^ 4 := by
@@ -517,11 +521,11 @@ lemma curry0_pderiv0 (p : PlanePoly) :
       simpa [Curry0, MvPolynomial.finSuccEquiv_apply] using hp
     fin_cases i
     · simp [Curry0, MvPolynomial.finSuccEquiv_apply, map_add, map_mul,
-        MvPolynomial.pderiv_mul, MvPolynomial.pderiv_X, Polynomial.derivative_mul]
+        MvPolynomial.pderiv_X, Polynomial.derivative_mul]
       rw [hp']
       ring
-    · simp [Curry0, MvPolynomial.finSuccEquiv_apply, map_add, map_mul,
-        MvPolynomial.pderiv_mul, MvPolynomial.pderiv_X, Polynomial.derivative_mul]
+    · simp [Curry0, MvPolynomial.finSuccEquiv_apply, map_mul,
+        MvPolynomial.pderiv_X, Polynomial.derivative_mul]
       rw [hp']
       change Polynomial.C (MvPolynomial.X 0) *
             Polynomial.derivative
@@ -618,18 +622,21 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
     simpa [hcomp_eq] using
       toSpanSingleton_bijective_of_ne_zero
         (Polynomial.eval a.2 (Polynomial.derivative q)) hscalar_ne
-  have himp : IsContDiffImplicitAt ⊤ (evalPlane h) f' a :=
-    IsContDiffImplicitAt.mk hfd hcont hcomp (by simp)
+  have hn : (⊤ : WithTop ℕ∞) ≠ 0 := by simp
+  have hinv :
+      ((fderiv ℝ (evalPlane h) a) ∘L (ContinuousLinearMap.inr ℝ ℝ ℝ)).IsInvertible :=
+    hasFDerivAt_isInvertible_partial hfd hcomp
+  let ψ : ℝ → ℝ := cdImplicitFunction hcont hn hinv
   have ha : evalPlane h a = 0 := by
     simpa [PlaneCurveZeroSet, evalPlane, hcoords] using hz
-  have hevent : ∀ᶠ x in 𝓝 a.1, evalPlane h (x, icdImplicitFunction himp x) = 0 := by
-    simpa [ha] using icdApplyImplicitFunction himp
-  have hnhds : {x | evalPlane h (x, icdImplicitFunction himp x) = 0} ∈ 𝓝 a.1 := by
+  have hevent : ∀ᶠ x in 𝓝 a.1, evalPlane h (x, ψ x) = 0 := by
+    simpa [ha, ψ] using cdApplyImplicitFunction hcont hn hinv
+  have hnhds : {x | evalPlane h (x, ψ x) = 0} ∈ 𝓝 a.1 := by
     simpa [Filter.Eventually] using hevent
   rcases Metric.mem_nhds_iff.mp hnhds with ⟨ε, hε, hball⟩
   have hball_infinite : (Metric.ball a.1 ε).Infinite := by
     simpa [Real.ball_eq_Ioo] using Set.Ioo_infinite (show a.1 - ε < a.1 + ε by linarith)
-  let g : ℝ → Point2 := fun x => mkPoint2 x (icdImplicitFunction himp x)
+  let g : ℝ → Point2 := fun x => mkPoint2 x (ψ x)
   have hg_inj : Set.InjOn g (Metric.ball a.1 ε) := by
     intro x hx y hy hxy
     have h0 := congrArg (fun p : Point2 => p 0) hxy
@@ -638,12 +645,12 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
   have hsubset : g '' Metric.ball a.1 ε ⊆ PlaneCurveZeroSet h := by
     intro z' hz'
     rcases hz' with ⟨x, hx, rfl⟩
-    have hx' : evalPlane h (x, icdImplicitFunction himp x) = 0 := hball hx
+    have hx' : evalPlane h (x, ψ x) = 0 := hball hx
     change MvPolynomial.eval (fun i => g x i) h = 0
     dsimp [g]
     convert hx' using 1
-    show MvPolynomial.eval (fun i => mkPoint2 x (icdImplicitFunction himp x) i) h =
-      MvPolynomial.eval (fun i : Fin 2 => if i = 0 then x else icdImplicitFunction himp x) h
+    show MvPolynomial.eval (fun i => mkPoint2 x (ψ x) i) h =
+      MvPolynomial.eval (fun i : Fin 2 => if i = 0 then x else ψ x) h
     apply congrArg (fun f => MvPolynomial.eval f h)
     funext i
     fin_cases i <;> simp [mkPoint2]
@@ -752,8 +759,7 @@ lemma singularPointSet_prod_subset
   refine Finset.induction_on s ?base ?step
   · intro z hz
     simp [SingularPointSet] at hz
-  · intro a s ha ih
-    intro z hz
+  · intro a s ha ih z hz
     set r : PlanePoly := ∏ h ∈ s, h
     have hz' : z ∈ SingularPointSet (a * r) := by
       simpa [SingularPointSet, r, Finset.prod_insert ha] using hz
@@ -1275,7 +1281,7 @@ theorem factorized_bezout_bound
           calc
             d₁ * d₂ ≤ (d₁ + d₂ + 1) * d₂ := Nat.mul_le_mul_right _ hd1
             _ ≤ (d₁ + d₂ + 1) * (d₁ + d₂ + 1) := Nat.mul_le_mul_left _ hd2
-        _ = (d₁ + d₂ + 1) ^ 2 := by simp [pow_two, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
+        _ = (d₁ + d₂ + 1) ^ 2 := by simp [pow_two]
     simpa [pairs, Finset.card_product] using hle
   have hspos : 0 < d₁ + d₂ + 1 := by omega
   have hfinal :

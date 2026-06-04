@@ -141,7 +141,7 @@ theorem succAbove_add_one_fire {m : ℕ} (k : Fin (m + 1 + 1)) (i : Fin (m + 1))
 requires the carrier to be syntactically a successor (the `OfNat (Fin _) 1` instance).
 Downstream (`rotationOfOrder_splice`) the small carrier is `Fin (Fintype.card β)`, not in
 `m+1` form, so we repackage using the **rotation successor `finRotate N`** in place of
-`(· + 1)` (these coincide on `Fin (m+1)` by `finRotate_succ_apply`, but `finRotate N` is
+`(· + 1)` (these coincide on `Fin (m+1)` by `finRotate_apply`, but `finRotate N` is
 well-typed for every `N`, needing no `OfNat`). The empty case `N = 0` is dispatched by
 `Fin.elim0`. This lets the identities apply at `Fin (card β + 1)` / `Fin (card β)` with no
 manual size casts — and `finRotate N i` is exactly the index that `rotationOfOrder`
@@ -154,7 +154,7 @@ theorem succAbove_finRotate {N : ℕ} (k : Fin (N + 1)) (i : Fin N)
     (k.succAbove i) + 1 = k.succAbove (finRotate N i) := by
   cases N with
   | zero => exact i.elim0
-  | succ m => rw [finRotate_succ_apply]; exact succAbove_add_one k i h
+  | succ m => rw [finRotate_apply]; exact succAbove_add_one k i h
 
 /-- Generic-`N` form of `succAbove_add_one_fire`, with the small-fin successor written as
 `finRotate N`. -/
@@ -163,7 +163,7 @@ theorem succAbove_finRotate_fire {N : ℕ} (k : Fin (N + 1)) (i : Fin N)
     k.succAbove (finRotate N i) = k + 1 := by
   cases N with
   | zero => exact i.elim0
-  | succ m => rw [finRotate_succ_apply]; exact succAbove_add_one_fire k i h
+  | succ m => rw [finRotate_apply]; exact succAbove_add_one_fire k i h
 
 /-! ### `finRotate` is natural under the size cast `finCongr` -/
 
@@ -338,7 +338,7 @@ theorem rotationOfOrder_splice (c : β)
   have hfire : (newRank L').succAbove ic + 1 = newRank L' := by
     have h := hpred
     rw [rotationOfOrder_apply_enumSucc, hsymm_c,
-      finRotate_succ_apply, ← enumSucc_newRank L'] at h
+      finRotate_apply, ← enumSucc_newRank L'] at h
     exact (enumSucc L').injective h
   -- Assemble by `Equiv.ext`, casing on the argument.
   ext y
@@ -347,7 +347,7 @@ theorem rotationOfOrder_splice (c : β)
   | inr u =>
     -- The new element `x = Sum.inr u`. LHS rotates `newRank` forward; RHS is `Sum.inl (σ c)`.
     obtain rfl : u = () := rfl
-    rw [show (enumSucc L').symm (Sum.inr ()) = newRank L' from rfl, finRotate_succ_apply,
+    rw [show (enumSucc L').symm (Sum.inr ()) = newRank L' from rfl, finRotate_apply,
       ← succAbove_finRotate_fire (newRank L') ic hfire, enumInl L L' hmono,
       Sum.map_inr, Equiv.Perm.coe_one, id_eq, Equiv.swap_apply_right, hσc]
   | inl a =>
@@ -360,7 +360,7 @@ theorem rotationOfOrder_splice (c : β)
     -- `σ a = isoFin L (finRotate (card β) i)`.
     have hσa : σ a = isoFin L (finRotate (Fintype.card β) i) := by
       rw [hσ, ← haeq, rotationOfOrder_apply_isoFin]
-    rw [hsymm_a, finRotate_succ_apply, Sum.map_inl, hσa]
+    rw [hsymm_a, finRotate_apply, Sum.map_inl, hσa]
     by_cases hfi : (newRank L').succAbove i + 1 = newRank L'
     · -- Fire slot: forced `i = ic`, hence `a = c`; the swap sends `Sum.inl (σ c)` to `x`.
       have hii : i = ic := by

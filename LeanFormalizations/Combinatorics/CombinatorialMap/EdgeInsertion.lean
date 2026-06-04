@@ -313,6 +313,7 @@ orbitCount f| ≤ 1`. Let `J := SameCycle.setoid f ⊔ ⟨pair p q⟩`, the part
 Together: both counts lie in `{orbitCount J, orbitCount J + 1}`, so they differ by
 at most 1. With the parity flip (they are unequal) this pins `|Δ| = 1`. -/
 
+omit [DecidableEq α] in
 /-- **Monotonicity of class count.** If `s` refines `t` (`s.r x y → t.r x y`),
 then `t` has at most as many classes as `s`. Stated with `Nat.card` to avoid
 `Fintype (Quotient _)` instance plumbing in the statement. -/
@@ -328,12 +329,14 @@ lemma card_quotient_mono_of_le {s t : Setoid α} (h : s ≤ t) :
   induction q using Quotient.ind with
   | _ x => exact ⟨Quotient.mk s x, rfl⟩
 
+omit [DecidableEq α] in
 /-- `orbitCount` as a `Nat.card`. -/
 lemma orbitCount_eq_natCard (f : Perm α) :
     orbitCount f = Nat.card (Quotient (Equiv.Perm.SameCycle.setoid f)) := by
   rw [orbitCount, Nat.card_eq_fintype_card]
 
 open Relation in
+omit [DecidableEq α] [Fintype α] in
 /-- If an equivalence relation `E` links every point to its `g`-image, it links any
 two points in the same `g`-cycle. -/
 private lemma sameCycle_le_of_step {g : Perm α} {E : Setoid α}
@@ -343,7 +346,7 @@ private lemma sameCycle_le_of_step {g : Perm α} {E : Setoid α}
   suffices hall : ∀ j : ℤ, E x ((g ^ j) x) by exact hall i
   intro j
   induction j using Int.induction_on with
-  | zero => simpa using E.refl' x
+  | zero => simp
   | succ n ih =>
       have hstepn : (g ^ (n + 1 : ℤ)) x = g ((g ^ (n : ℤ)) x) := by
         rw [add_comm, zpow_add, zpow_one, Equiv.Perm.mul_apply]
@@ -370,12 +373,14 @@ private def joinSetoid (f : Perm α) (p q : α) : Setoid α :=
   EqvGen.setoid (fun x y => f.SameCycle x y ∨ (x = p ∧ y = q) ∨ (x = q ∧ y = p))
 
 open Relation in
+omit [DecidableEq α] [Fintype α] in
 /-- The link generator sits in `joinSetoid`. -/
 private lemma link_le_join (f : Perm α) (p q : α) :
     (joinSetoid f p q).r p q :=
   EqvGen.rel _ _ (Or.inr (Or.inl ⟨rfl, rfl⟩))
 
 open Relation in
+omit [DecidableEq α] [Fintype α] in
 /-- `SameCycle f` refines `joinSetoid`. -/
 private lemma sameCycle_le_join (f : Perm α) (p q : α) :
     Equiv.Perm.SameCycle.setoid f ≤ joinSetoid f p q := by
@@ -383,6 +388,7 @@ private lemma sameCycle_le_join (f : Perm α) (p q : α) :
   exact EqvGen.rel _ _ (Or.inl h)
 
 open Relation in
+omit [Fintype α] in
 /-- `SameCycle (swap p q * f)` refines `joinSetoid f p q`: a `g`-step is an
 `f`-step possibly composed with the `p ~ q` link. -/
 private lemma sameCycle_swap_mul_le_join (f : Perm α) (p q : α) :
@@ -410,6 +416,7 @@ private lemma sameCycle_swap_mul_le_join (f : Perm α) (p q : α) :
       exact hzf
 
 open Relation in
+omit [DecidableEq α] [Fintype α] in
 /-- **Characterization of `joinSetoid`.** Two points are joined iff they are
 `f`-same-cycle, or one is `f`-same-cycle with `p` and the other with `q`. The only
 new identification beyond `SameCycle f` is the merge of the `p`- and `q`-classes. -/
@@ -514,6 +521,7 @@ private lemma orbitCount_le_join_succ (f : Perm α) (p q : α) :
     = Fintype.card (Quotient (joinSetoid f p q)) from Nat.card_eq_fintype_card]
   exact hcard
 
+omit [DecidableEq α] in
 /-- `Nat.card (Quotient (joinSetoid f p q)) ≤ orbitCount f` (the join is coarser
 than `f`'s cycle partition). -/
 private lemma natCard_join_le_orbitCount (f : Perm α) (p q : α) :
@@ -561,6 +569,7 @@ When `p, q` already lie in the same `f`-cycle, the link `p ~ q` is redundant, so
 to `orbitCount f + 1` (split). -/
 
 open Relation in
+omit [DecidableEq α] [Fintype α] in
 /-- If `p, q` are in the same `f`-cycle, adjoining the link `p ~ q` changes
 nothing: `joinSetoid f p q = SameCycle.setoid f`. -/
 private lemma join_eq_of_sameCycle {f : Perm α} {p q : α} (h : f.SameCycle p q) :
@@ -573,6 +582,7 @@ private lemma join_eq_of_sameCycle {f : Perm α} {p q : α} (h : f.SameCycle p q
   · exact h
   · exact h.symm
 
+omit [Fintype α] in
 /-- In the split case, multiplying by `swap p q` only subdivides an existing
 cycle: every `(swap p q * f)`-cycle is contained in an `f`-cycle. -/
 theorem sameCycle_swap_mul_le_of_sameCycle {f : Perm α} {p q : α}
@@ -697,6 +707,7 @@ theorem splitCycleQuotMap_surjective (f : Perm α) {p q : α}
               simp [splitCycleQuotMap, splitCycleQuotToFun, hqp, hnot]
           | succ j => exact Fin.elim0 j
 
+omit [DecidableEq α] in
 /-- The split-cycle target pool has one more element than the old orbit quotient. -/
 theorem card_splitCyclePool (f : Perm α) (p : α) :
     Fintype.card (SplitCyclePool f p) = orbitCount f + 1 := by
@@ -738,12 +749,14 @@ noncomputable def splitCycleQuotEquiv (f : Perm α) {p q : α}
       ⟨splitCycleQuotMap_surjective f hpq h,
         card_splitCycleQuotMap_domain f hpq h⟩)
 
+omit [DecidableEq α] in
 /-- The minimal `f`-period of `p` is positive (every point of a `Fintype` perm is
 periodic). -/
 private lemma minimalPeriod_pos (f : Perm α) (x : α) : 0 < Function.minimalPeriod f x := by
   rw [Function.minimalPeriod_pos_iff_mem_periodicPts]
   exact ⟨orderOf f, orderOf_pos f, by show (f ^ orderOf f) x = x; rw [pow_orderOf_eq_one]; rfl⟩
 
+omit [DecidableEq α] [Fintype α] in
 /-- `(f ^ j) p = p` only at `j = 0` below the minimal period. -/
 private lemma pow_ne_self_of_lt_minimalPeriod (f : Perm α) (p : α) {j : ℕ}
     (hj0 : j ≠ 0) (hjk : j < Function.minimalPeriod f p) : (f ^ j) p ≠ p := by
@@ -951,22 +964,26 @@ section SumCongr
 
 variable {β : Type*} [DecidableEq β] [Fintype β]
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- `(g.sumCongr h) ^ n` distributes over the sum for `n : ℤ`. -/
 private lemma sumCongr_zpow (g : Perm α) (h : Perm β) (n : ℤ) :
     (g.sumCongr h) ^ n = (g ^ n).sumCongr (h ^ n) := by
   have := map_zpow (Equiv.Perm.sumCongrHom α β) (g, h) n
   simpa [Equiv.Perm.sumCongrHom] using this.symm
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- `(g.sumCongr h)^n` on a left dart is `g^n` on that dart. -/
 private lemma sumCongr_zpow_inl (g : Perm α) (h : Perm β) (x : α) (n : ℤ) :
     ((g.sumCongr h) ^ n) (Sum.inl x) = Sum.inl ((g ^ n) x) := by
   rw [sumCongr_zpow]; simp
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- `(g.sumCongr h)^n` on a right dart is `h^n` on that dart. -/
 private lemma sumCongr_zpow_inr (g : Perm α) (h : Perm β) (y : β) (n : ℤ) :
     ((g.sumCongr h) ^ n) (Sum.inr y) = Sum.inr ((h ^ n) y) := by
   rw [sumCongr_zpow]; simp
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- Left darts are `sumCongr`-same-cycle iff their `g`-images are `g`-same-cycle. -/
 private lemma sumCongr_sameCycle_inl (g : Perm α) (h : Perm β) {x y : α} :
     (g.sumCongr h).SameCycle (Sum.inl x) (Sum.inl y) ↔ g.SameCycle x y := by
@@ -977,6 +994,7 @@ private lemma sumCongr_sameCycle_inl (g : Perm α) (h : Perm β) {x y : α} :
   · rintro ⟨n, hn⟩
     exact ⟨n, by rw [sumCongr_zpow_inl, hn]⟩
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- Right darts are `sumCongr`-same-cycle iff their `h`-images are `h`-same-cycle. -/
 private lemma sumCongr_sameCycle_inr (g : Perm α) (h : Perm β) {x y : β} :
     (g.sumCongr h).SameCycle (Sum.inr x) (Sum.inr y) ↔ h.SameCycle x y := by
@@ -987,6 +1005,7 @@ private lemma sumCongr_sameCycle_inr (g : Perm α) (h : Perm β) {x y : β} :
   · rintro ⟨n, hn⟩
     exact ⟨n, by rw [sumCongr_zpow_inr, hn]⟩
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 /-- A left dart and a right dart are never `sumCongr`-same-cycle. -/
 private lemma sumCongr_not_sameCycle_inl_inr (g : Perm α) (h : Perm β) (x : α) (y : β) :
     ¬ (g.sumCongr h).SameCycle (Sum.inl x) (Sum.inr y) := by
@@ -1000,6 +1019,7 @@ private def sumCongrQuotToFun (g : Perm α) (h : Perm β) (s : α ⊕ β) :
     Quotient (Equiv.Perm.SameCycle.setoid g) ⊕ Quotient (Equiv.Perm.SameCycle.setoid h) :=
   s.elim (fun x => Sum.inl (Quotient.mk _ x)) (fun y => Sum.inr (Quotient.mk _ y))
 
+omit [DecidableEq α] [Fintype α] [DecidableEq β] [Fintype β] in
 private lemma sumCongrQuotToFun_respects (g : Perm α) (h : Perm β) {s t : α ⊕ β}
     (hst : (g.sumCongr h).SameCycle s t) :
     sumCongrQuotToFun g h s = sumCongrQuotToFun g h t := by
@@ -1040,6 +1060,7 @@ private def sumCongrQuotEquiv (g : Perm α) (h : Perm β) :
     | inl q => induction q using Quotient.ind with | _ x => rfl
     | inr q => induction q using Quotient.ind with | _ y => rfl
 
+omit [DecidableEq α] [DecidableEq β] in
 /-- **`orbitCount` is additive over `sumCongr`.** -/
 theorem orbitCount_sumCongr (g : Perm α) (h : Perm β) :
     orbitCount (g.sumCongr h) = orbitCount g + orbitCount h := by
@@ -1093,6 +1114,7 @@ def insVertexPerm : Equiv.Perm (D ⊕ Fin 2) :=
 def insFacePerm : Equiv.Perm (D ⊕ Fin 2) :=
   (insVertexPerm M c₁ c₂)⁻¹ * insEdgePerm M
 
+omit [Fintype D] [DecidableEq D] in
 /-- `insEdgePerm` is an involution. -/
 lemma insEdgePerm_involutive : Function.Involutive (insEdgePerm M) := by
   intro x
@@ -1105,6 +1127,7 @@ lemma insEdgePerm_involutive : Function.Involutive (insEdgePerm M) := by
   rw [he, show Equiv.swap (0 : Fin 2) 1 * Equiv.swap 0 1 = 1 from Equiv.swap_mul_self _ _,
     Equiv.Perm.sumCongr_one, Equiv.Perm.one_apply]
 
+omit [Fintype D] [DecidableEq D] in
 /-- `insEdgePerm` is fixed-point-free. -/
 lemma insEdgePerm_fixedPointFree (x : D ⊕ Fin 2) : (insEdgePerm M) x ≠ x := by
   unfold insEdgePerm
@@ -1139,12 +1162,15 @@ def insertedEdgeMap : CombinatorialMap (D ⊕ Fin 2) where
   isEmpty_fixedPoints_edgePerm :=
     ⟨fun x => insEdgePerm_fixedPointFree M x.1 x.2⟩
 
+omit [Fintype D] in
 @[simp] lemma insertedEdgeMap_vertexPerm :
     (insertedEdgeMap M c₁ c₂).vertexPerm = insVertexPerm M c₁ c₂ := rfl
 
+omit [Fintype D] in
 @[simp] lemma insertedEdgeMap_edgePerm :
     (insertedEdgeMap M c₁ c₂).edgePerm = insEdgePerm M := rfl
 
+omit [Fintype D] in
 @[simp] lemma insertedEdgeMap_facePerm :
     (insertedEdgeMap M c₁ c₂).facePerm = insFacePerm M c₁ c₂ := rfl
 
@@ -1165,19 +1191,23 @@ swap (inl σc₂) b · (σ ⊕ 1)`. The base `σ ⊕ 1` has `orbitCount = V + 2`
 singleton orbits `a`, `b`). Each of the two transpositions joins a singleton orbit
 (`b`, then `a`) to an `inl`-orbit — both *merges* — dropping the count back to `V`. -/
 
+omit [Fintype D] [DecidableEq D] in
 /-- `dartA ≠ dartB`. -/
 private lemma dartA_ne_dartB : (dartA : D ⊕ Fin 2) ≠ dartB := by
   show (Sum.inr 0 : D ⊕ Fin 2) ≠ Sum.inr 1
   simp only [ne_eq, Sum.inr.injEq]; decide
 
+omit [Fintype D] [DecidableEq D] in
 /-- An `inl` dart is never `dartA`. -/
 private lemma inl_ne_dartA (d : D) : (Sum.inl d : D ⊕ Fin 2) ≠ dartA := by
   simp [dartA]
 
+omit [Fintype D] [DecidableEq D] in
 /-- An `inl` dart is never `dartB`. -/
 private lemma inl_ne_dartB (d : D) : (Sum.inl d : D ⊕ Fin 2) ≠ dartB := by
   simp [dartB]
 
+omit [Fintype D] [DecidableEq D] in
 /-- `σ ⊕ 1` fixes the new dart `dartA`. -/
 private lemma sumCongr_one_fix_dartA (σ : Perm D) :
     σ.sumCongr 1 (dartA) = dartA := by
@@ -1188,6 +1218,7 @@ private lemma sumCongr_one_fix_dartA (σ : Perm D) :
 private def insVertexPermStep1 (σ : Perm D) (c₂ : D) : Perm (D ⊕ Fin 2) :=
   Equiv.swap (Sum.inl (σ c₂)) (dartB) * σ.sumCongr 1
 
+omit [Fintype D] in
 /-- `dartA` is fixed by the first-step vertex permutation. -/
 private lemma insVertexPermStep1_fix_dartA (σ : Perm D) (c₂ : D) :
     insVertexPermStep1 σ c₂ (dartA) = dartA := by
@@ -1248,21 +1279,25 @@ or `F' = F − 1` (different faces). -/
 private def baseFacePerm (φ : Perm D) : Perm (D ⊕ Fin 2) :=
   φ.sumCongr (Equiv.swap 0 1)
 
+omit [Fintype D] [DecidableEq D] in
 /-- `baseFacePerm` sends `dartA ↦ dartB` and `dartB ↦ dartA`. -/
 private lemma baseFacePerm_dartA (φ : Perm D) : baseFacePerm φ (dartA) = dartB := by
   show φ.sumCongr (Equiv.swap 0 1) (Sum.inr 0) = Sum.inr 1
   rw [Equiv.Perm.sumCongr_apply]; simp [Equiv.swap_apply_left]
 
+omit [Fintype D] [DecidableEq D] in
 private lemma baseFacePerm_dartB (φ : Perm D) : baseFacePerm φ (dartB) = dartA := by
   show φ.sumCongr (Equiv.swap 0 1) (Sum.inr 1) = Sum.inr 0
   rw [Equiv.Perm.sumCongr_apply]; simp [Equiv.swap_apply_right]
 
+omit [Fintype D] [DecidableEq D] in
 /-- On `inl` darts, `baseFacePerm φ` is `φ`. -/
 private lemma baseFacePerm_inl (φ : Perm D) (d : D) :
     baseFacePerm φ (Sum.inl d) = Sum.inl (φ d) := by
   show φ.sumCongr (Equiv.swap 0 1) (Sum.inl d) = Sum.inl (φ d)
   rw [Equiv.Perm.sumCongr_apply]; rfl
 
+omit [Fintype D] in
 /-- The two corner transpositions `swap (inl c₁) a` and `swap (inl c₂) b` are
 disjoint (given `c₁ ≠ c₂`), hence commute. -/
 private lemma swap_disjoint_commute (hc : c₁ ≠ c₂) :
@@ -1273,6 +1308,7 @@ private lemma swap_disjoint_commute (hc : c₁ ≠ c₂) :
   simp only [Equiv.Perm.mul_apply, Equiv.swap_apply_def]
   split_ifs <;> simp_all [inl_ne_dartA, inl_ne_dartB]
 
+omit [Fintype D] in
 /-- **The forced face permutation in product form.** Requires `c₁ ≠ c₂` (tail and
 head are distinct darts), used to commute the two disjoint corner transpositions.
 Proven by group algebra: invert the vertex splice, conjugate the two corner
@@ -1325,12 +1361,14 @@ private lemma insFacePerm_eq_product (hc : c₁ ≠ c₂) :
     _ = t1 * t2 * baseFacePerm M.facePerm := by
           rw [ht1, ht2, swap_disjoint_commute c₁ c₂ hc]
 
+omit [Fintype D] [DecidableEq D] in
 /-- The new darts are same-cycle in `baseFacePerm` (they form the new 2-cycle). -/
 private lemma baseFacePerm_sameCycle_darts (φ : Perm D) :
     (baseFacePerm φ).SameCycle (dartA) (dartB) := by
   refine (sumCongr_sameCycle_inr φ (Equiv.swap 0 1)).mpr ?_
   exact ⟨1, by rw [zpow_one, Equiv.swap_apply_left]⟩
 
+omit [DecidableEq D] in
 /-- `orbitCount (baseFacePerm φ) = orbitCount φ + 1`. -/
 private lemma orbitCount_baseFacePerm (φ : Perm D) :
     orbitCount (baseFacePerm φ) = orbitCount φ + 1 := by
@@ -1383,6 +1421,7 @@ private noncomputable def insFacePermStep1QuotToFun (φ : Perm D) (c₂ : D) :
   | Sum.inl d => Quotient.mk (Equiv.Perm.SameCycle.setoid φ) d
   | Sum.inr _ => Quotient.mk (Equiv.Perm.SameCycle.setoid φ) c₂
 
+omit [Fintype D] [DecidableEq D] in
 private lemma insFacePermStep1QuotToFun_eq_of_base_same_c2
     (φ : Perm D) (c₂ : D) {s : D ⊕ Fin 2}
     (h : (baseFacePerm φ).SameCycle s (Sum.inl c₂)) :
@@ -1399,6 +1438,7 @@ private lemma insFacePermStep1QuotToFun_eq_of_base_same_c2
       exact (sumCongr_sameCycle_inl φ (Equiv.swap (0 : Fin 2) 1)).mp h'
   | inr _ => rfl
 
+omit [Fintype D] [DecidableEq D] in
 private lemma insFacePermStep1QuotToFun_eq_of_base_same_dartB
     (φ : Perm D) (c₂ : D) {s : D ⊕ Fin 2}
     (h : (baseFacePerm φ).SameCycle s (dartB)) :

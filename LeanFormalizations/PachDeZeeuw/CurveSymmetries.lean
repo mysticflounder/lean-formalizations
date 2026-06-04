@@ -86,8 +86,8 @@ private noncomputable def point2DiagLinearMap (a b : ℝ) : Point2 →ₗ[ℝ] P
     intro c x
     ext i
     fin_cases i
-    · simp [mul_comm, mul_left_comm, mul_assoc]
-    · simp [mul_comm, mul_left_comm, mul_assoc] }
+    · simp [mul_left_comm]
+    · simp [mul_left_comm] }
 
 private noncomputable def point2SwapLinearMap : Point2 →ₗ[ℝ] Point2 :=
 { toFun := fun x => (!₂[(x 1), (x 0)] : Point2)
@@ -130,13 +130,13 @@ private noncomputable def point2DiagLinearEquiv
     (by
       ext x i
       fin_cases i
-      · simp [point2DiagLinearMap, ha, hb, mul_comm, mul_left_comm, mul_assoc]
-      · simp [point2DiagLinearMap, ha, hb, mul_comm, mul_left_comm, mul_assoc])
+      · simp [point2DiagLinearMap, ha, hb]
+      · simp [point2DiagLinearMap, ha, hb])
     (by
       ext x i
       fin_cases i
-      · simp [point2DiagLinearMap, ha, hb, mul_comm, mul_left_comm, mul_assoc]
-      · simp [point2DiagLinearMap, ha, hb, mul_comm, mul_left_comm, mul_assoc])
+      · simp [point2DiagLinearMap, ha, hb]
+      · simp [point2DiagLinearMap, ha, hb])
 
 /-- Swap the two coordinates of the plane. -/
 private noncomputable def point2SwapLinearEquiv : Point2 ≃ₗ[ℝ] Point2 :=
