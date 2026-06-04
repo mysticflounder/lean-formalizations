@@ -5039,4 +5039,324 @@ theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSeg
     ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
       hside⟩, hinf⟩⟩
 
+/-! ### P5⁻ — the negative collar (mirror of the positive side) -/
+
+/-- The `i`-th chain link of the negative collar. -/
+noncomputable def collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
+  bandStripMinus β α δ₀ i
+    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
+    ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtMinus β ρ)
+    ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcMinus β ρ)
+
+theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
+    (⋃ i, collarChainMinus β ρ δ₀ α i)
+      = (⋃ i, bandStripMinus β α δ₀ i)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
+        ∪ endCapSrcMinus β ρ ∪ endCapTgtMinus β ρ := by
+  ext z
+  simp only [collarChainMinus, Set.mem_union, Set.mem_iUnion, exists_prop, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨i, (((hb | hs) | ht) | he)⟩
+    · exact Or.inl (Or.inl (Or.inl ⟨i, hb⟩))
+    · obtain ⟨hi1, hsec⟩ := hs; exact Or.inl (Or.inl (Or.inr ⟨i, hi1, hsec⟩))
+    · exact Or.inr ht.2
+    · exact Or.inl (Or.inr he.2)
+  · rintro (((⟨i, hb⟩ | ⟨i, hi1, hs⟩) | hsrc) | htgt)
+    · exact ⟨i, Or.inl (Or.inl (Or.inl hb))⟩
+    · exact ⟨i, Or.inl (Or.inl (Or.inr ⟨hi1, hs⟩))⟩
+    · exact ⟨β.firstSeg, Or.inr ⟨rfl, hsrc⟩⟩
+    · refine ⟨β.lastSeg, Or.inl (Or.inr ⟨?_, htgt⟩)⟩
+      have h := β.numSegs_pos
+      have hl : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+      omega
+
+theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+    (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorMinus β ρ i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
+    (hO3 : (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty)
+    (hO4 : (endCapTgtMinus β ρ ∩ bandStripMinus β α δ₀ β.lastSeg).Nonempty)
+    (i : Fin β.numSegs) : IsPreconnected (collarChainMinus β ρ δ₀ α i) := by
+  rw [collarChainMinus]
+  have hband : IsPreconnected (bandStripMinus β α δ₀ i) :=
+    (convex_bandStripMinus β α δ₀ i).isPreconnected
+  have hS : IsPreconnected (bandStripMinus β α δ₀ i
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1) := by
+    refine isPreconnected_union_opt hband ?_ ?_
+    · intro hne
+      obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hi1]
+      exact isPreconnected_sectorMinus β ρ i hi1 (hturn i hi1)
+    · intro hne
+      obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hi1]
+      obtain ⟨y, hy⟩ := hO1 i hi1
+      exact ⟨y, hy.2, hy.1⟩
+  have hST : IsPreconnected ((bandStripMinus β α δ₀ i
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
+      ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtMinus β ρ) := by
+    refine isPreconnected_union_opt hS ?_ ?_
+    · intro hne
+      obtain ⟨hnl, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hnl]
+      exact (convex_endCapTgtMinus β ρ).isPreconnected
+    · intro hne
+      obtain ⟨hnl, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hnl]
+      have hil : i = β.lastSeg := by
+        apply Fin.ext
+        have h := β.numSegs_pos
+        have hl : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+        have hi := i.isLt
+        omega
+      obtain ⟨y, hy⟩ := hO4
+      exact ⟨y, Or.inl (by rw [hil]; exact hy.2), hy.1⟩
+  refine isPreconnected_union_opt hST ?_ ?_
+  · intro hne
+    obtain ⟨h0, -⟩ := Set.nonempty_iUnion.mp hne
+    rw [iUnion_prop_pos h0]
+    exact (convex_endCapSrcMinus β ρ).isPreconnected
+  · intro hne
+    obtain ⟨h0, -⟩ := Set.nonempty_iUnion.mp hne
+    rw [iUnion_prop_pos h0]
+    have hif : i = β.firstSeg := by
+      apply Fin.ext
+      have hf : (β.firstSeg : ℕ) = 0 := rfl
+      omega
+    obtain ⟨y, hy⟩ := hO3
+    exact ⟨y, Or.inl (Or.inl (by rw [hif]; exact hy.2)), hy.1⟩
+
+/-- **P5⁻ skeleton.** -/
+theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+    (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hsub : ((⋃ i, bandStripMinus β α δ₀ i)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β ρ i hi1)
+        ∪ endCapSrcMinus β ρ ∪ endCapTgtMinus β ρ) ⊆ taperedTube R S δ₀ \ β.carrier)
+    (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorMinus β ρ i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
+    (hO2 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorMinus β ρ i hi1 ∩ bandStripMinus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
+    (hO3 : (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty)
+    (hO4 : (endCapTgtMinus β ρ ∩ bandStripMinus β α δ₀ β.lastSeg).Nonempty) :
+    IsPreconnected (collarMinus β R S δ₀ α ρ) := by
+  have hcollar : collarMinus β R S δ₀ α ρ = ⋃ i, collarChainMinus β ρ δ₀ α i := by
+    rw [collarMinus, iUnion_collarChainMinus, Set.inter_eq_right.mpr hsub]
+  rw [hcollar]
+  refine isPreconnected_iUnion_fin_chain _
+    (isPreconnected_collarChainMinus β ρ δ₀ α hturn hO1 hO3 hO4) ?_
+  intro i hi
+  obtain ⟨y, hy⟩ := hO2 ⟨i, Nat.lt_of_succ_lt hi⟩ hi
+  refine ⟨y, ?_, ?_⟩
+  · rw [collarChainMinus]
+    exact Or.inl (Or.inl (Or.inr (Set.mem_iUnion.mpr ⟨hi, hy.1⟩)))
+  · rw [collarChainMinus]
+    exact Or.inl (Or.inl (Or.inl hy.2))
+
+/-- **hO3⁻.** The negative source end cap meets band `firstSeg`. -/
+theorem overlap_endCapSrcMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hbud : δ₀ + 2 * α * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0) :
+    (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty := by
+  set s := β.segSrc β.firstSeg with hs
+  set t := β.segTgt β.firstSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
+  have hP := dotp_self_pos hts
+  have hLpos : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
+  set ε := δ₀ / (2 * (dist s t + 1)) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hεL : ε * dist s t < δ₀ := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]; nlinarith [hLpos, hδ₀]
+  set z := liftPlus s t (2 * α) (-ε) with hz
+  have hfoot : footParam s t z = 2 * α := by rw [hz]; exact footParam_liftPlus hts (2 * α) (-ε)
+  have hside : sideForm s t z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hP; nlinarith
+  have hv0 : β.verts 0 = s := by
+    have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
+      apply Fin.ext; simp [PolyArc.firstSeg]
+    rw [hs, PolyArc.segSrc, hcast]
+  have hball : z ∈ Metric.ball (β.verts 0) (ρ 0) := by
+    rw [Metric.mem_ball, hv0]
+    have hd : dist z s ≤ (2 * α + ε) * dist s t := by
+      have h := dist_liftPlus_src_le s t (2 * α) (-ε)
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier β.firstSeg) < δ₀ := by
+    have h := infDist_liftPlus_le_segment s t (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier β.firstSeg = segment ℝ s t from rfl]
+    linarith [h, hεL]
+  refine ⟨z, ⟨⟨hball, ?_⟩, hside⟩, ⟨⟨?_, hside⟩, hinf⟩⟩
+  · show 0 < footParam s t z; rw [hfoot]; linarith
+  · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
+
+/-- **hO4⁻.** The negative target end cap meets band `lastSeg`. -/
+theorem overlap_endCapTgtMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hbud : δ₀ + 2 * α * dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)
+      < ρ (Fin.last β.numSegs)) :
+    (endCapTgtMinus β ρ ∩ bandStripMinus β α δ₀ β.lastSeg).Nonempty := by
+  set s := β.segSrc β.lastSeg with hs
+  set t := β.segTgt β.lastSeg with ht
+  have hts : t ≠ s := β.segTgt_ne_segSrc β.lastSeg
+  have hP := dotp_self_pos hts
+  have hLpos : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
+  set ε := δ₀ / (2 * (dist s t + 1)) with hε
+  have hεpos : 0 < ε := by rw [hε]; positivity
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hεL : ε * dist s t < δ₀ := by
+    rw [hε, div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]; nlinarith [hLpos, hδ₀]
+  set z := liftPlus s t (1 - 2 * α) (-ε) with hz
+  have hfoot : footParam s t z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hts (1 - 2 * α) (-ε)
+  have hside : sideForm s t z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hP; nlinarith
+  have hvL : β.verts (Fin.last β.numSegs) = t := by
+    rw [ht, PolyArc.segTgt]; congr 1
+    apply Fin.ext; have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]
+    omega
+  have hball : z ∈ Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)) := by
+    rw [Metric.mem_ball, hvL]
+    have hd : dist z t ≤ (2 * α + ε) * dist s t := by
+      have h := dist_liftPlus_tgt_le s t (1 - 2 * α) (-ε)
+      have he : |1 - (1 - 2 * α)| = 2 * α := by rw [show 1 - (1 - 2 * α) = 2 * α from by ring,
+        abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α)]
+      rw [he, haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier β.lastSeg) < δ₀ := by
+    have h := infDist_liftPlus_le_segment s t (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier β.lastSeg = segment ℝ s t from rfl]
+    linarith [h, hεL]
+  refine ⟨z, ⟨⟨hball, ?_⟩, hside⟩, ⟨⟨?_, hside⟩, hinf⟩⟩
+  · show footParam s t z < 1; rw [hfoot]; linarith
+  · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
+
+/-- **hO1⁻.** The vertex sector at `verts (i+1)` meets band `i` (incoming, minus side). -/
+theorem overlap_sectorMinus_bandStripMinus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    (sectorMinus β ρ i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hav : v ≠ a := β.segTgt_ne_segSrc i
+  have hDpos : 0 < dotp (v - a) (v - a) := dotp_self_pos hav
+  have heq : dotp (a - v) (a - v) = dotp (v - a) (v - a) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  have hbva : sideForm b v a ≠ 0 := by
+    have he : sideForm b v a = - sideForm a v b := by simp only [sideForm]; ring
+    rw [he]; simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm b v a| := abs_pos.mpr hbva
+  set ε := min (δ₀ / (dist a v + 1)) (2 * α * |sideForm b v a| / (|dotp (v - b) (a - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hb1 : ε * (dist a v + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - b) (a - v)| + 1) ≤ 2 * α * |sideForm b v a| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist a v < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus a v (1 - 2 * α) (-ε) with hz
+  have hfoot : footParam a v z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hav (1 - 2 * α) (-ε)
+  have hside : sideForm a v z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hDpos; nlinarith
+  have hGval : dotp (z - v) (a - v) = 2 * α * dotp (a - v) (a - v) := by
+    rw [hz, dotp_liftPlus_sub_tgt, show (1 : ℝ) - (1 - 2 * α) = 2 * α from by ring]
+  have hG : 0 < dotp (z - v) (a - v) := by rw [hGval, heq]; positivity
+  have hmemV : z ∈ vertexMinus a v b := by
+    refine mem_vertexMinus_of_incoming hturn hG ?_ hside
+    have hsva : |sideForm v a z| = ε * dotp (v - a) (v - a) := by
+      rw [sideForm_swap a v z, abs_neg, hz, sideForm_liftPlus, abs_mul, abs_neg,
+        abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsva, hGval, heq]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist a v := by
+      have h := dist_liftPlus_tgt_le a v (1 - 2 * α) (-ε)
+      have he : |1 - (1 - 2 * α)| = 2 * α := by
+        rw [show 1 - (1 - 2 * α) = 2 * α from by ring, abs_of_nonneg (by linarith)]
+      rw [he, haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier i) < δ₀ := by
+    have h := infDist_liftPlus_le_segment a v (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier i = segment ℝ a v from rfl]
+    linarith [h, hεL]
+  exact ⟨z, ⟨hmemV, hball⟩,
+    ⟨⟨by show footParam a v z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
+/-- **hO2⁻.** The vertex sector at `verts (i+1)` meets band `i+1` (outgoing, minus side). -/
+theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+      < ρ (Fin.succ i)) :
+    (sectorMinus β ρ i hi1 ∩ bandStripMinus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hsvb : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = v := rfl
+  rw [hsvb] at hbud
+  have hbv : b ≠ v := β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+  have hDpos : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  have havb : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm a v b| := abs_pos.mpr havb
+  set ε := min (δ₀ / (dist v b + 1)) (2 * α * |sideForm a v b| / (|dotp (v - a) (b - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hb1 : ε * (dist v b + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - a) (b - v)| + 1) ≤ 2 * α * |sideForm a v b| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist v b < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus v b (2 * α) (-ε) with hz
+  have hfoot : footParam v b z = 2 * α := by rw [hz]; exact footParam_liftPlus hbv (2 * α) (-ε)
+  have hside : sideForm v b z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hDpos; nlinarith
+  have hGval : dotp (z - v) (b - v) = 2 * α * dotp (b - v) (b - v) := by
+    rw [hz, dotp_liftPlus_sub_src]
+  have hG : 0 < dotp (z - v) (b - v) := by rw [hGval]; positivity
+  have hmemV : z ∈ vertexMinus a v b := by
+    refine mem_vertexMinus_of_outgoing hturn hG ?_ hside
+    have hsvb' : |sideForm v b z| = ε * dotp (b - v) (b - v) := by
+      rw [hz, sideForm_liftPlus, abs_mul, abs_neg, abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsvb', hGval]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist v b := by
+      have h := dist_liftPlus_src_le v b (2 * α) (-ε)
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+    have h := infDist_liftPlus_le_segment v b (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ = segment ℝ v b from rfl]
+    linarith [h, hεL]
+  exact ⟨z, ⟨hmemV, hball⟩,
+    ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
 end CrossingLemma.PlaneArcSeparation
