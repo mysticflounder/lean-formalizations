@@ -4558,4 +4558,174 @@ theorem convex_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     simp only [one_mul]
   rw [e]; exact convex_mul_sideForm_lt _ _ 1 0
 
+/-! ### P5 (preconnected) — the linear-chain assembly
+
+A finite family of preconnected sets indexed by `Fin n`, in which each set meets its
+successor, has a preconnected union: reachability in the "meets" graph is a linear chain,
+so any two indices are joined by a reflexive-transitive path (everything is reachable from
+`0`, and the relation is symmetric). -/
+
+/-- **Linear-chain union.** If `s : Fin n → Set α` has each `s i` preconnected and each
+consecutive pair `s i, s (i+1)` meeting, then `⋃ i, s i` is preconnected. -/
+theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : ℕ}
+    (s : Fin n → Set α) (hpre : ∀ i, IsPreconnected (s i))
+    (hchain : ∀ (i : ℕ) (hi : i + 1 < n),
+        (s ⟨i, Nat.lt_of_succ_lt hi⟩ ∩ s ⟨i + 1, hi⟩).Nonempty) :
+    IsPreconnected (⋃ i, s i) := by
+  refine IsPreconnected.iUnion_of_reflTransGen hpre ?_
+  intro i j
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · subst hn; exact i.elim0
+  set R := fun a b : Fin n => (s a ∩ s b).Nonempty with hRdef
+  have hsymm : Symmetric R := by
+    intro a b h; rw [hRdef]; simp only; rw [Set.inter_comm]; exact h
+  have hzero : ∀ (kv : ℕ) (hk : kv < n), Relation.ReflTransGen R ⟨0, hn⟩ ⟨kv, hk⟩ := by
+    intro kv
+    induction kv with
+    | zero => intro hk; exact Relation.ReflTransGen.refl
+    | succ m ih =>
+      intro hk
+      exact (ih (Nat.lt_of_succ_lt hk)).tail (hchain m hk)
+  have hi0 : Relation.ReflTransGen R ⟨0, hn⟩ i := by simpa using hzero i.1 i.2
+  have hj0 : Relation.ReflTransGen R ⟨0, hn⟩ j := by simpa using hzero j.1 j.2
+  exact (Relation.ReflTransGen.symmetric hsymm hi0).trans hj0
+
+/-- The `i`-th **chain link** of the positive collar: band `i` together with the connector
+that follows it — the vertex sector at `i+1` (when `i` is not the last segment) or the
+target end cap (when it is) — and, at `i = 0`, the source end cap.  Grouping each band with
+its *successor* connector makes the links overlap consecutively. -/
+noncomputable def collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
+  bandStripPlus β α δ₀ i
+    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
+    ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtPlus β ρ)
+    ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcPlus β ρ)
+
+/-- The union of the chain links is exactly the geometric part of the positive collar. -/
+theorem iUnion_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
+    (⋃ i, collarChainPlus β ρ δ₀ α i)
+      = (⋃ i, bandStripPlus β α δ₀ i)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
+        ∪ endCapSrcPlus β ρ ∪ endCapTgtPlus β ρ := by
+  ext z
+  simp only [collarChainPlus, Set.mem_union, Set.mem_iUnion, exists_prop, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨i, (((hb | hs) | ht) | he)⟩
+    · exact Or.inl (Or.inl (Or.inl ⟨i, hb⟩))
+    · obtain ⟨hi1, hsec⟩ := hs; exact Or.inl (Or.inl (Or.inr ⟨i, hi1, hsec⟩))
+    · exact Or.inr ht.2
+    · exact Or.inl (Or.inr he.2)
+  · rintro (((⟨i, hb⟩ | ⟨i, hi1, hs⟩) | hsrc) | htgt)
+    · exact ⟨i, Or.inl (Or.inl (Or.inl hb))⟩
+    · exact ⟨i, Or.inl (Or.inl (Or.inr ⟨hi1, hs⟩))⟩
+    · exact ⟨β.firstSeg, Or.inr ⟨rfl, hsrc⟩⟩
+    · refine ⟨β.lastSeg, Or.inl (Or.inr ⟨?_, htgt⟩)⟩
+      have h := β.numSegs_pos
+      have hl : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+      omega
+
+/-- Adding an *optional* set: `A ∪ B` is preconnected when `A` is, and `B`, *if nonempty*,
+is preconnected and meets `A`. -/
+theorem isPreconnected_union_opt {α : Type*} [TopologicalSpace α] {A B : Set α}
+    (hA : IsPreconnected A) (hBpre : B.Nonempty → IsPreconnected B)
+    (hAB : B.Nonempty → (A ∩ B).Nonempty) : IsPreconnected (A ∪ B) := by
+  rcases B.eq_empty_or_nonempty with hBe | hBne
+  · rw [hBe, Set.union_empty]; exact hA
+  · exact IsPreconnected.union' (hAB hBne) hA (hBpre hBne)
+
+/-- A `Set`-union over a true proposition collapses to the single fibre. -/
+theorem iUnion_prop_pos {α : Type*} {P : Prop} (hP : P) (s : P → Set α) :
+    (⋃ h, s h) = s hP := by
+  ext x; simp only [Set.mem_iUnion]
+  exact ⟨fun ⟨h, hx⟩ => by rwa [proof_irrel h hP] at hx, fun hx => ⟨hP, hx⟩⟩
+
+/-- Each positive chain link is preconnected: band `i` together with its (nonempty) connector
+and (nonempty) source cap, each of which meets band `i`. -/
+theorem isPreconnected_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+    (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorPlus β ρ i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
+    (hO3 : (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty)
+    (hO4 : (endCapTgtPlus β ρ ∩ bandStripPlus β α δ₀ β.lastSeg).Nonempty)
+    (i : Fin β.numSegs) : IsPreconnected (collarChainPlus β ρ δ₀ α i) := by
+  rw [collarChainPlus]
+  have hband : IsPreconnected (bandStripPlus β α δ₀ i) :=
+    (convex_bandStripPlus β α δ₀ i).isPreconnected
+  have hS : IsPreconnected (bandStripPlus β α δ₀ i
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1) := by
+    refine isPreconnected_union_opt hband ?_ ?_
+    · intro hne
+      obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hi1]
+      exact isPreconnected_sectorPlus β ρ i hi1 (hturn i hi1)
+    · intro hne
+      obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hi1]
+      obtain ⟨y, hy⟩ := hO1 i hi1
+      exact ⟨y, hy.2, hy.1⟩
+  have hST : IsPreconnected ((bandStripPlus β α δ₀ i
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
+      ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtPlus β ρ) := by
+    refine isPreconnected_union_opt hS ?_ ?_
+    · intro hne
+      obtain ⟨hnl, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hnl]
+      exact (convex_endCapTgtPlus β ρ).isPreconnected
+    · intro hne
+      obtain ⟨hnl, -⟩ := Set.nonempty_iUnion.mp hne
+      rw [iUnion_prop_pos hnl]
+      have hil : i = β.lastSeg := by
+        apply Fin.ext
+        have h := β.numSegs_pos
+        have hl : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+        have hi := i.isLt
+        omega
+      obtain ⟨y, hy⟩ := hO4
+      exact ⟨y, Or.inl (by rw [hil]; exact hy.2), hy.1⟩
+  refine isPreconnected_union_opt hST ?_ ?_
+  · intro hne
+    obtain ⟨h0, -⟩ := Set.nonempty_iUnion.mp hne
+    rw [iUnion_prop_pos h0]
+    exact (convex_endCapSrcPlus β ρ).isPreconnected
+  · intro hne
+    obtain ⟨h0, -⟩ := Set.nonempty_iUnion.mp hne
+    rw [iUnion_prop_pos h0]
+    have hif : i = β.firstSeg := by
+      apply Fin.ext
+      have hf : (β.firstSeg : ℕ) = 0 := rfl
+      omega
+    obtain ⟨y, hy⟩ := hO3
+    exact ⟨y, Or.inl (Or.inl (by rw [hif]; exact hy.2)), hy.1⟩
+
+/-- **P5⁺ skeleton.** Given the no-taper containment `hsub` (each geometric piece lies in the
+ground set, so `collarPlus` equals the bare union of pieces) and the four overlap facts, the
+positive collar is preconnected — it is a linear chain of preconnected links. -/
+theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+    (ρ : Fin (β.numSegs + 1) → ℝ)
+    (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hsub : ((⋃ i, bandStripPlus β α δ₀ i)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β ρ i hi1)
+        ∪ endCapSrcPlus β ρ ∪ endCapTgtPlus β ρ) ⊆ taperedTube R S δ₀ \ β.carrier)
+    (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorPlus β ρ i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
+    (hO2 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      (sectorPlus β ρ i hi1 ∩ bandStripPlus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
+    (hO3 : (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty)
+    (hO4 : (endCapTgtPlus β ρ ∩ bandStripPlus β α δ₀ β.lastSeg).Nonempty) :
+    IsPreconnected (collarPlus β R S δ₀ α ρ) := by
+  have hcollar : collarPlus β R S δ₀ α ρ = ⋃ i, collarChainPlus β ρ δ₀ α i := by
+    rw [collarPlus, iUnion_collarChainPlus, Set.inter_eq_right.mpr hsub]
+  rw [hcollar]
+  refine isPreconnected_iUnion_fin_chain _
+    (isPreconnected_collarChainPlus β ρ δ₀ α hturn hO1 hO3 hO4) ?_
+  intro i hi
+  obtain ⟨y, hy⟩ := hO2 ⟨i, Nat.lt_of_succ_lt hi⟩ hi
+  refine ⟨y, ?_, ?_⟩
+  · rw [collarChainPlus]
+    exact Or.inl (Or.inl (Or.inr (Set.mem_iUnion.mpr ⟨hi, hy.1⟩)))
+  · rw [collarChainPlus]
+    exact Or.inl (Or.inl (Or.inl hy.2))
+
 end CrossingLemma.PlaneArcSeparation
