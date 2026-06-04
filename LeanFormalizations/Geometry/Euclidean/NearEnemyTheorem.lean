@@ -71,6 +71,12 @@ The headline Lean theorems (unconditional, complete) are:
   rotation-channel companion standalone, with NO hypothesis at all: every
   finite set in any Euclidean space admits an injective planar projection
   whose image has zero rotational energy.
+* `nearEnemy_sphereSlice_exists_projection_image_isoscelesFree` — isosceles
+  byproduct: every finite sphere subset admits an injective planar
+  projection whose image sees pairwise distinct distances from every point
+  (no isosceles triple, no equilateral triangle); a sphere contains no
+  chord midpoint, so distance-class separation covers every apex/pair
+  configuration.
 
 Conditional forms (on the `ProjectionGeneric` interface):
 
@@ -3066,6 +3072,56 @@ theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPositio
   nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_rotationFree
     fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
       not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃
+
+/-- A sphere contains no chord midpoint: three points of one sphere with
+`p - q = r - p` (i.e. `p` the midpoint of `q` and `r`) force `q = r`.
+Parallelogram law. -/
+private theorem eq_of_sub_eq_sub_of_mem_sphere
+    {p q r center : EuclideanSpace ℝ ι} {R : ℝ}
+    (hp : p ∈ Metric.sphere center R) (hq : q ∈ Metric.sphere center R)
+    (hr : r ∈ Metric.sphere center R)
+    (h : p - q = r - p) : q = r := by
+  rw [mem_sphere_iff_norm] at hp hq hr
+  have hsum : (q - center) + (r - center) = (2 : ℝ) • (p - center) := by
+    linear_combination (norm := module) -h
+  have hpar := parallelogram_law_with_norm ℝ (q - center) (r - center)
+  rw [hsum, norm_smul, Real.norm_ofNat, hp, hq, hr] at hpar
+  have hdiff : (q - center) - (r - center) = q - r := by abel
+  rw [hdiff] at hpar
+  have h0 : ‖q - r‖ * ‖q - r‖ = 0 := by nlinarith
+  have := norm_eq_zero.mp (mul_self_eq_zero.mp h0)
+  exact sub_eq_zero.mp this
+
+/-- **Isosceles-free byproduct**: every finite sphere subset admits an
+injective planar projection whose image sees pairwise distinct distances
+from every point — in particular the image contains no isosceles triple and
+no equilateral triangle.  A sphere contains no chord midpoint, so the
+distance-class separation of the rotation-free projection applies to every
+apex/pair configuration. -/
+theorem nearEnemy_sphereSlice_exists_projection_image_isoscelesFree
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      ∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₂ ≠ q₃ →
+          dist q₁ q₂ ≠ dist q₁ q₃ := by
+  obtain ⟨T, hT, _, hsep⟩ :=
+    nearEnemy_exists_projectionGeneric_image_noThreeCollinear_rotationFree
+      (fun _p₁ h₁ _p₂ h₂ _p₃ h₃ h₁₂ h₁₃ h₂₃ =>
+        not_collinear_of_mem_sphere (hG _ h₁) (hG _ h₂) (hG _ h₃) h₁₂ h₁₃ h₂₃)
+  refine ⟨T, injOn_of_projectionGeneric hT, ?_⟩
+  intro q₁ hq₁ q₂ hq₂ q₃ hq₃ h₂₃
+  obtain ⟨p₁, hp₁, rfl⟩ := Finset.mem_image.mp hq₁
+  obtain ⟨p₂, hp₂, rfl⟩ := Finset.mem_image.mp hq₂
+  obtain ⟨p₃, hp₃, rfl⟩ := Finset.mem_image.mp hq₃
+  have hp23 : p₂ ≠ p₃ := fun h => h₂₃ (congrArg _ h)
+  refine hsep p₁ hp₁ p₂ hp₂ p₁ hp₁ p₃ hp₃ ?_ ?_
+  · intro h
+    exact hp23 (by linear_combination (norm := module) -h)
+  · intro h
+    exact hp23 (eq_of_sub_eq_sub_of_mem_sphere (hG _ hp₁) (hG _ hp₂)
+      (hG _ hp₃) (by linear_combination (norm := module) h))
 
 end Unconditional
 
