@@ -839,6 +839,53 @@ budget bundles; `V₀ ∪ V₁ = univ`, `V₀ ∩ V₁ = Pp ⊔ Pm`), then assem
 `U = connectedComponentIn (regionMinusArc) p⁺`, etc.; disjoint via
 `exists_separating_fun`) and discharge `PlaneArcSeparation.lean:377`.
 
+## 8. Assembly — the abstract collar ⇒ partition reduction (DONE, 2026-06-03)
+
+`LeanFormalizations/PachDeZeeuw/CrossingLemma/PLAssembly.lean` is sorry-free,
+axiom-clean `[propext, Classical.choice, Quot.sound]`. It contains the single
+theorem
+
+```
+exists_twoSidedPartition_of_collar
+  {R C T Tp Tm : Set Plane}
+  (hR : IsOpen R) (hRsc : IsSimplyConnected R) (hC : IsClosed C)
+  (hT_open : IsOpen T) (hTR : T ⊆ R) (hT_pre : IsPreconnected T)
+  (hTp_open …) (hTm_open …) (hdisj : Disjoint Tp Tm)
+  (hpart : Tp ∪ Tm = T \ C)
+  (hTp_pre : IsPreconnected Tp) (hTm_pre : IsPreconnected Tm)   -- P5
+  (hTp_ne …) (hTm_ne …)
+  (hcover : R ∩ C ⊆ T)
+  (hG4 : ∀ z ∈ R \ C, (connectedComponentIn (R \ C) z ∩ (T \ C)).Nonempty)  -- G4
+  : ∃ U V, IsTwoSidedPartition (R \ C) U V
+```
+
+It is **geometry-free** (no `PolyArc` dependency): it takes the collar sides `Tp`,
+`Tm`, the tube `T`, and their topological facts as hypotheses, builds the
+`PLCover.GlueData` over `B = ↥R` (`V₀ = R∖C`, `V₁ = T`, `Pp = Tp`, `Pm = Tm`),
+runs `exists_separating_fun` to get `σ`, and assembles the partition as the two
+**connected components** of `R∖C` through a `Tp`-point and a `Tm`-point — `σ` forces
+them disjoint, `P5 + G4` force them to cover. `IsPreconnected ↥V₁` is transported
+from `IsPreconnected T` via `IsInducing.subtypeVal.isPreconnected_image`; the
+`σ`-on-the-shared-component contradiction goes through `IsLocallyConstant` pulled
+back along the continuous lift `↥(R∖C) → ↥V₀`.
+
+This **pins, with no slack, the only remaining geometric obligations**:
+
+* **P5** — `IsPreconnected (collarPlus …)`, `IsPreconnected (collarMinus …)`
+  (the hardest node; band/sector/end-cap overlap-chain in `PLArc.lean`).
+* **G4** — every `z ∈ R∖carrier` has its relative component meet `taperedTube∖carrier`
+  (component-boundary-in-carrier topology; tractable, not Jordan-strength).
+* **Collar instantiation** — produce one parameter bundle `(δ₀, α, ρ, S=arcInterior)`
+  simultaneously satisfying P2 (`union_collarPlus_collarMinus`), P3
+  (`exists_collar_disjoint`), and P4 (`collar±_nonempty`), feeding
+  `exists_twoSidedPartition_of_collar` with `C = β.carrier`.
+* **Residual closure (separate, NOT-attempted NO-GO)** — representing an arbitrary
+  `SimpleArc` satisfying `ArcInRegion` as a `PolyArc` is Schoenflies-strength. The
+  PL route discharges `exists_twoSidedPartition_of_polyArc`; wiring it to the
+  arbitrary-arc `exists_twoSidedPartition_of_arc` at line 377 needs either that
+  bridge or a signature change restricting the consumer to PL arcs (an Adam-level
+  decision; see §0).
+
 ---
 
 *Verification basis:* all PRESENT/ABSENT rows checked against
