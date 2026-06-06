@@ -511,6 +511,33 @@ theorem residualMap_isPlanar_prefixStep_sameFace_of_vertexPerm
       (M := residualMap (G.prefixEdges m hm) hARR) (c₁ := c₁) (c₂ := c₂)
       hc hplanar hsame)
 
+/-- If both the predecessor residual map and the successor residual map are
+planar, then the successor edge really was a same-face insertion at the
+predecessor. This is the converse of
+`residualMap_isPlanar_prefixStep_sameFace_of_vertexPerm`, and packages the
+inserted-edge converse theorem at the residual-map level. -/
+theorem sameFace_of_planar_prefixStep_of_vertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar)
+    (hplanar' : (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂ := by
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  have hplanarInserted :
+      (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).IsPlanar := by
+    exact (isPlanar_iff_of_iso iso).mp hplanar'
+  exact CombinatorialMap.EdgeInsertion.sameCycle_of_isPlanar_insertedEdgeMap
+    (M := residualMap (G.prefixEdges m hm) hARR) (c₁ := c₁) (c₂ := c₂) hc
+    hplanarInserted hplanar
+
 /-- The two residual-map insertion alternatives for one ordered prefix step.
 
 The `leaf` case is the tree-growth operation: one endpoint of the new edge is a

@@ -1660,6 +1660,21 @@ theorem isPlanar_insertedEdgeMap_of_sameCycle (hc : c₁ ≠ c₂)
   rw [eulerCharacteristic_insertedEdgeMap_of_sameCycle M c₁ c₂ hc h]
   exact hplanar
 
+/-- **Converse of facial edge insertion.** If both the original map and the
+edge-inserted map are planar, then the two splice corners must already lie on a
+common face. -/
+theorem sameCycle_of_isPlanar_insertedEdgeMap (hc : c₁ ≠ c₂)
+    (hplanar : (insertedEdgeMap M c₁ c₂).IsPlanar) (hMplanar : M.IsPlanar) :
+    M.facePerm.SameCycle c₁ c₂ := by
+  by_cases h : M.facePerm.SameCycle c₁ c₂
+  · exact h
+  · exfalso
+    have hchi := eulerCharacteristic_insertedEdgeMap_of_not_sameCycle
+      (M := M) (c₁ := c₁) (c₂ := c₂) hc h
+    unfold CombinatorialMap.IsPlanar at hplanar hMplanar
+    rw [hplanar, hMplanar] at hchi
+    norm_num at hchi
+
 end Construction
 
 /-
