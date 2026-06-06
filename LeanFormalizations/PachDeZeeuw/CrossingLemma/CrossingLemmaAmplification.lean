@@ -548,12 +548,12 @@ theorem abstractizeEdgeSet_edge_card
   simp only [abstractizeEdgeSet]
   exact Fintype.card_coe E
 
-/-- Multiplicity `≤ 1` transfers from the drawing to any surviving edge-set
+/-- Multiplicity `≤ M` transfers from the drawing to any surviving edge-set
 carrier. -/
 theorem abstractizeEdgeSet_pairMultiplicityBound
-    (S : Finset (ℝ × ℝ)) (E : Finset (Fin G.numEdges))
-    (hE : E ⊆ edgeSetOn G S) (hmult : ∀ p q, G.multiplicity p q ≤ 1) :
-    PairMultiplicityBound (abstractizeEdgeSet G S E hE) 1 := by
+    (S : Finset (ℝ × ℝ)) (E : Finset (Fin G.numEdges)) (M : ℕ)
+    (hE : E ⊆ edgeSetOn G S) (hmult : ∀ p q, G.multiplicity p q ≤ M) :
+    PairMultiplicityBound (abstractizeEdgeSet G S E hE) M := by
   classical
   refine fun uv => ?_
   refine Sym2.ind (fun a b => ?_) uv
@@ -631,6 +631,47 @@ theorem edgeSetOn_card_le_sq_of_multiplicity_one
   calc
     (edgeSetOn G S).card ≤ (S ×ˢ S).card := Finset.card_le_card_of_injOn f hmaps hinj
     _ = S.card ^ 2 := by rw [Finset.card_product]; ring
+
+/-- With multiplicity `≤ M`, surviving edges are bounded by `M` times the
+number of ordered endpoint pairs in `S`. This is the multiplicity-general
+small-vertex estimate used by the multigraph crossing-lemma bridge. -/
+theorem edgeSetOn_card_le_mul_sq_of_multiplicity
+    (S : Finset (ℝ × ℝ)) (M : ℕ) (hmult : ∀ p q, G.multiplicity p q ≤ M) :
+    (edgeSetOn G S).card ≤ M * S.card ^ 2 := by
+  classical
+  let f : Fin G.numEdges → (ℝ × ℝ) × (ℝ × ℝ) := fun e => G.endpoints e
+  have hmaps : Set.MapsTo f (↑(edgeSetOn G S)) (↑(S ×ˢ S)) := by
+    intro e he
+    have he' : e ∈ edgeSetOn G S := he
+    rw [edgeSetOn, Finset.mem_filter] at he'
+    exact Finset.mem_product.mpr he'.2
+  have hfiber_bound : ∀ uv ∈ (S ×ˢ S),
+      ((edgeSetOn G S).filter fun e : Fin G.numEdges => f e = uv).card ≤ M := by
+    intro uv huv
+    have hsubset :
+        (edgeSetOn G S).filter fun e : Fin G.numEdges => f e = uv
+          ⊆ Finset.univ.filter fun i : Fin G.numEdges =>
+            G.endpoints i = uv ∨ G.endpoints i = (uv.2, uv.1) := by
+      intro i hi
+      rw [Finset.mem_filter] at hi ⊢
+      exact ⟨Finset.mem_univ _, Or.inl (by simpa [f] using hi.2)⟩
+    have hle :
+        ((edgeSetOn G S).filter fun e : Fin G.numEdges => f e = uv).card ≤
+          (Finset.univ.filter fun i : Fin G.numEdges =>
+            G.endpoints i = uv ∨ G.endpoints i = (uv.2, uv.1)).card :=
+      Finset.card_le_card hsubset
+    simpa [DrawnMultigraph.multiplicity] using hle.trans (hmult uv.1 uv.2)
+  have hcard : (S ×ˢ S).card = S.card ^ 2 := by
+    rw [Finset.card_product]
+    ring
+  calc
+    (edgeSetOn G S).card =
+        ∑ uv ∈ (S ×ˢ S), ((edgeSetOn G S).filter fun e : Fin G.numEdges => f e = uv).card := by
+          simpa [f] using (Finset.card_eq_sum_card_fiberwise hmaps)
+    _ ≤ ∑ uv ∈ (S ×ˢ S), M := Finset.sum_le_sum hfiber_bound
+    _ = M * (S ×ˢ S).card := by
+        rw [Finset.sum_const, smul_eq_mul, Nat.mul_comm]
+    _ = M * S.card ^ 2 := by rw [hcard]
 
 /-! ### Weighted powerset count for Bernoulli vertex sampling -/
 
@@ -1150,7 +1191,7 @@ theorem edge_card_le_three_mul_vertices_of_componentwise_planarization
     · let A := abstractizeEdgeSet G (Vc i) (Ec i) hEc
       have hplanar : HasGenusZeroSimplePlanarization A := hpl hv
       have hmultA : PairMultiplicityBound A 1 :=
-        abstractizeEdgeSet_pairMultiplicityBound G (Vc i) (Ec i) hEc hmult
+        abstractizeEdgeSet_pairMultiplicityBound G (Vc i) (Ec i) 1 hEc hmult
       have hvA : 3 ≤ Fintype.card A.Vertex := by
         rw [show Fintype.card A.Vertex = (Vc i).card from
           abstractizeEdgeSet_vertex_card G (Vc i) (Ec i) hEc]
@@ -1211,7 +1252,7 @@ theorem independentSimpleCrossingFreeEdgeBound_of_planarization
     have hplanar : HasGenusZeroSimplePlanarization A :=
       hpl G hmult hjoin hcross hwd S hS E hE hfree
     have hmultA : PairMultiplicityBound A 1 :=
-      abstractizeEdgeSet_pairMultiplicityBound G S E hE hmult
+      abstractizeEdgeSet_pairMultiplicityBound G S E 1 hE hmult
     have hvA : 3 ≤ Fintype.card A.Vertex := by
       rw [show Fintype.card A.Vertex = S.card from
         abstractizeEdgeSet_vertex_card G S E hE]
@@ -1247,7 +1288,7 @@ theorem independentSimpleCrossingFreeEdgeBound_of_planarizationLarge
     have hplanar : HasGenusZeroSimplePlanarization A :=
       hpl G hmult hjoin hcross hwd S hS hv E hE hfree
     have hmultA : PairMultiplicityBound A 1 :=
-      abstractizeEdgeSet_pairMultiplicityBound G S E hE hmult
+      abstractizeEdgeSet_pairMultiplicityBound G S E 1 hE hmult
     have hvA : 3 ≤ Fintype.card A.Vertex := by
       rw [show Fintype.card A.Vertex = S.card from
         abstractizeEdgeSet_vertex_card G S E hE]

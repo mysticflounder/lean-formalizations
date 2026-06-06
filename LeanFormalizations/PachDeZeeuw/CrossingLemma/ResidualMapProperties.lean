@@ -1110,6 +1110,50 @@ def DrawnMultigraph.GraphConnected (G : DrawnMultigraph) : Prop :=
       ((G.endpoints e).1 = (a : ℝ × ℝ) ∧ (G.endpoints e).2 = (b : ℝ × ℝ)) ∨
       ((G.endpoints e).1 = (b : ℝ × ℝ) ∧ (G.endpoints e).2 = (a : ℝ × ℝ))) p q
 
+/-- The vertex adjacency graph of a drawing: two listed vertices are adjacent if
+some drawn edge joins them as its declared endpoint pair. This is the simple
+graph underlying the drawing's endpoint relation. -/
+def DrawnMultigraph.vertexGraph (G : DrawnMultigraph)
+    (hjoin : G.ArcsJoinEndpoints) : SimpleGraph ↥G.V where
+  Adj p q :=
+    ∃ e : Fin G.numEdges,
+      ((G.endpoints e).1 = (p : ℝ × ℝ) ∧ (G.endpoints e).2 = (q : ℝ × ℝ)) ∨
+      ((G.endpoints e).1 = (q : ℝ × ℝ) ∧ (G.endpoints e).2 = (p : ℝ × ℝ))
+  symm := by
+    intro p q hpq
+    rcases hpq with ⟨e, h⟩
+    rcases h with h | h
+    · exact ⟨e, Or.inr h⟩
+    · exact ⟨e, Or.inl h⟩
+  loopless := ⟨fun p hp => by
+    rcases hp with ⟨e, h⟩
+    rcases h with h | h
+    · have hloop : (G.endpoints e).1 = (G.endpoints e).2 := by
+        simpa using h.1.trans h.2.symm
+      exact (DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints hjoin e) hloop
+    · have hloop : (G.endpoints e).1 = (G.endpoints e).2 := by
+        simpa using h.1.trans h.2.symm
+      exact (DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints hjoin e) hloop⟩
+
+/-- The drawing's vertex adjacency graph is connected exactly when the drawing
+is connected in the `GraphConnected` sense. -/
+theorem DrawnMultigraph.vertexGraph_connected
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints) (hconn : G.GraphConnected)
+    [Nonempty ↥G.V] :
+    (G.vertexGraph hjoin).Connected := by
+  refine { preconnected := fun p q => ?_, nonempty := ‹Nonempty ↥G.V› }
+  rw [SimpleGraph.reachable_iff_reflTransGen]
+  simpa [DrawnMultigraph.vertexGraph] using hconn p q
+
+/-- Every connected drawing determines a spanning tree on its listed vertices.
+This is the combinatorial bridge needed for tree-first edge-order arguments. -/
+theorem DrawnMultigraph.exists_vertexGraph_spanningTree
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints) (hconn : G.GraphConnected)
+    [Nonempty ↥G.V] :
+    ∃ T ≤ G.vertexGraph hjoin, T.IsTree := by
+  exact SimpleGraph.Connected.exists_isTree_le
+    (G := G.vertexGraph hjoin) (G.vertexGraph_connected hjoin hconn)
+
 /-- A connected drawing with at least two listed vertices has no isolated listed
 vertex: every `p : G.V` has an incident dart. -/
 theorem incidentCoverage_of_graphConnected_of_two_le
