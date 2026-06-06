@@ -10,13 +10,11 @@ componentology of `PlaneArcSeparation`, producing an `IsTwoSidedPartition` of
 
 It is deliberately decoupled from the PL collar construction (`PLArc.lean`): it
 takes the collar sides `Tp, Tm`, the tube `T`, and their topological properties as
-*hypotheses*.  This pins down, with no slack, exactly the two remaining geometric
-obligations the PL collar must discharge:
+*hypotheses*. With the internal component-boundary argument below, this leaves
+exactly one geometric obligation for the concrete PL collar:
 
 * **P5** — each collar side `Tp`, `Tm` is preconnected
-  (`hTp_pre`, `hTm_pre`);
-* **G4** — every point of `R ∖ C` reaches the tube within `R ∖ C`
-  (`hG4`: the relative component meets `T ∖ C`).
+  (`hTp_pre`, `hTm_pre`).
 
 Everything else (openness, the union `Tp ∪ Tm = T ∖ C`, disjointness, nonemptiness,
 the cover `R ∩ C ⊆ T`) is already supplied by the collar's proved `P1`–`P4` and the
@@ -28,7 +26,8 @@ crosscut hypotheses.
 overlapping in `V₀ ∩ V₁ = T ∖ C = Tp ⊔ Tm`.  `PLCover.exists_separating_fun`
 yields a continuous `σ : ↥V₀ → ZMod 2` differing on `Tp` versus `Tm`.  The two
 sides are then the *connected components* of `R ∖ C` through a `Tp`-point and a
-`Tm`-point; `σ` forces them disjoint, while `P5 + G4` force them to cover.
+`Tm`-point; `σ` forces them disjoint, while `P5` plus the derived neighborhood
+reachability of `T ∖ C` force them to cover.
 -/
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
@@ -38,6 +37,90 @@ namespace CrossingLemma.PlaneArcSeparation
 
 open Set Topology
 
+/-- **Neighborhood reachability is automatic from connectedness.**
+
+Let `W = R \ C` with `R` simply connected and `C` closed, and let `T` be an
+open neighborhood of `R ∩ C` inside `R`. Then every connected component of `W`
+meets `T \ C`, provided `T \ C` is nonempty.
+
+The point is that a component `K` of `W` disjoint from `T \ C` is disjoint from
+the open set `T`, so `closure K` misses `R ∩ C`. Since `K` is open in `R` and
+closed in `W`, it follows that `K` is clopen in the connected space `R`; hence
+`K = R`, forcing it to meet the given nonempty set `T \ C` after all. -/
+theorem connectedComponentIn_meets_neighborhood_of_cut
+    {R C T : Set Plane}
+    (hR : IsOpen R) (hRsc : IsSimplyConnected R) (hC : IsClosed C)
+    (hT_open : IsOpen T) (hTR : T ⊆ R)
+    (hTC_ne : (T \ C).Nonempty)
+    (hcover : R ∩ C ⊆ T) :
+    ∀ z ∈ R \ C, (connectedComponentIn (R \ C) z ∩ (T \ C)).Nonempty := by
+  classical
+  intro z hzW
+  set W : Set Plane := R \ C with hWdef
+  set K : Set Plane := connectedComponentIn W z with hKdef
+  by_cases hKT : (K ∩ (T \ C)).Nonempty
+  · exact hKT
+  have hWopen : IsOpen W := hR.sdiff hC
+  have hKsubW : K ⊆ W := connectedComponentIn_subset W z
+  have hKopen : IsOpen K := hWopen.connectedComponentIn
+  have hKsubTc : K ⊆ Tᶜ := by
+    intro x hxK hxT
+    exact hKT ⟨x, hxK, ⟨hxT, (hKsubW hxK).2⟩⟩
+  have hclosureTc : closure K ⊆ Tᶜ := closure_minimal hKsubTc hT_open.isClosed_compl
+  have hKimage :
+      K = ((↑) : W → Plane) '' connectedComponent (⟨z, hzW⟩ : W) := by
+    simpa [K, W, hKdef, hWdef] using
+      (connectedComponentIn_eq_image (F := W) (x := z) hzW)
+  obtain ⟨F, hFclosed, hFimg⟩ :=
+    IsClosed.image_val (s := W) (t := connectedComponent (⟨z, hzW⟩ : W))
+      isClosed_connectedComponent
+  have hFrep : K = F ∩ W := by
+    rw [hKimage]
+    exact hFimg
+  have hKF : K ⊆ F := by
+    intro x hxK
+    rw [hFrep] at hxK
+    exact hxK.1
+  have hclosureF : closure K ⊆ F := closure_minimal hKF hFclosed
+  have hclosureR_subsetK : closure K ∩ R ⊆ K := by
+    intro x hx
+    have hxnotC : x ∉ C := by
+      intro hxC
+      have hxT : x ∈ T := hcover ⟨hx.2, hxC⟩
+      exact hclosureTc hx.1 hxT
+    have hxF : x ∈ F := hclosureF hx.1
+    rw [hFrep]
+    exact ⟨hxF, ⟨hx.2, hxnotC⟩⟩
+  set KR : Set ↥R := Subtype.val ⁻¹' K with hKRdef
+  have hKR_open : IsOpen KR := hKopen.preimage continuous_subtype_val
+  have hKR_image : ((↑) : ↥R → Plane) '' KR = K := by
+    rw [hKRdef, Subtype.image_preimage_coe]
+    exact inter_eq_right.mpr fun x hx => (hKsubW hx).1
+  have hKR_closed : IsClosed KR := by
+    rw [← closure_subset_iff_isClosed]
+    intro x hxcl
+    rw [closure_subtype, hKR_image] at hxcl
+    exact hclosureR_subsetK ⟨hxcl, x.2⟩
+  have hKR_clopen : IsClopen KR := ⟨hKR_closed, hKR_open⟩
+  haveI : ConnectedSpace ↥R :=
+    Subtype.connectedSpace hRsc.isPathConnected.isConnected
+  have hKR_eq : KR = univ := by
+    rcases ((connectedSpace_iff_clopen (α := ↥R)).mp inferInstance).2 KR hKR_clopen with
+      hKR_empty | hKR_univ
+    · exfalso
+      have hzKR : (⟨z, hzW.1⟩ : ↥R) ∈ KR := by
+        exact mem_connectedComponentIn hzW
+      rw [hKR_empty] at hzKR
+      exact hzKR
+    · exact hKR_univ
+  obtain ⟨w, hwTC⟩ := hTC_ne
+  have hwKR : (⟨w, hTR hwTC.1⟩ : ↥R) ∈ KR := by
+    rw [hKR_eq]
+    simp
+  have hwK : w ∈ K := by
+    simpa [hKRdef] using hwKR
+  exact ⟨w, hwK, hwTC⟩
+
 /-- **The abstract collar ⇒ two-sided partition reduction.**
 
 Given a simply connected open region `R ⊆ ℝ²`, a closed cut `C`, and a *collar*
@@ -45,9 +128,9 @@ Given a simply connected open region `R ⊆ ℝ²`, a closed cut `C`, and a *col
 the region-minus-cut `R ∖ C` admits a two-sided open partition.
 
 The two collar sides must each be preconnected (`hTp_pre`, `hTm_pre` — the
-geometric obligation **P5**) and the tube must be reachable from every point of
-`R ∖ C` within `R ∖ C` (`hG4` — the obligation **G4**).  All other inputs are the
-collar's already-proved structural facts. -/
+geometric obligation **P5**). All other inputs are the collar's already-proved
+structural facts; the former `G4` reachability condition is derived internally
+from connectedness of `R` and the neighborhood cover `R ∩ C ⊆ T`. -/
 theorem exists_twoSidedPartition_of_collar
     {R C T Tp Tm : Set Plane}
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
@@ -58,8 +141,7 @@ theorem exists_twoSidedPartition_of_collar
     (hpart : Tp ∪ Tm = T \ C)
     (hTp_pre : IsPreconnected Tp) (hTm_pre : IsPreconnected Tm)
     (hTp_ne : Tp.Nonempty) (hTm_ne : Tm.Nonempty)
-    (hcover : R ∩ C ⊆ T)
-    (hG4 : ∀ z ∈ R \ C, (connectedComponentIn (R \ C) z ∩ (T \ C)).Nonempty) :
+    (hcover : R ∩ C ⊆ T) :
     ∃ U V, IsTwoSidedPartition (R \ C) U V := by
   classical
   -- Abbreviation for the region-minus-cut.
@@ -119,6 +201,10 @@ theorem exists_twoSidedPartition_of_collar
   -- A `Tp`-point and a `Tm`-point, both in `W`.
   obtain ⟨p, hpTp⟩ := hTp_ne
   obtain ⟨m, hmTm⟩ := hTm_ne
+  have hTC_ne : (T \ C).Nonempty := by
+    exact ⟨p, hpart ▸ Or.inl hpTp⟩
+  have hG4 : ∀ z ∈ R \ C, (connectedComponentIn (R \ C) z ∩ (T \ C)).Nonempty :=
+    connectedComponentIn_meets_neighborhood_of_cut hR hRsc hC hT_open hTR hTC_ne hcover
   have hpW : p ∈ W := hTpW hpTp
   have hmW : m ∈ W := hTmW hmTm
   -- The two sides: connected components of `W` through `p` and `m`.

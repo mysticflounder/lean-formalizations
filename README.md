@@ -126,6 +126,9 @@ it was confirmed complete). All headlines axiom-clean:
 
 - **`Basic.lean`** — the combinatorial-map carrier (vertex/edge/face
   permutations, Euler characteristic, planarity).
+- **`DualProperties.lean`** — duality and planarity transport for
+  combinatorial maps (`dual_connected_iff`, `connected_dual_iff`,
+  `dual_isPlanar_iff`).
 - **`PlanarEdgeBound.lean`** — the simple-graph edge bound `e ≤ 3v − 6` from
   Euler's formula (`card_edge_le_three_card_vertex_sub_six`) and its
   multiplicity lift `e ≤ M·(3v − 6)` (`planar_multigraph_edge_bound`).
@@ -133,6 +136,12 @@ it was confirmed complete). All headlines axiom-clean:
   `≤ 2` (`CombinatorialMap.eulerCharacteristic_le_two`).
 - **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
   (`CombinatorialMap.EdgeInsertion.*`).
+
+### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅
+
+- **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
+  trees, plus explicit parent-edge enumeration via `parentEdgeEquiv`.
+  **Axiom-clean.**
 
 ### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
 
@@ -180,9 +189,12 @@ import LeanFormalizations
 #print axioms PachDeZeeuw.Algebraic.bezout
 #print axioms CombinatorialMap.card_edge_le_three_card_vertex_sub_six
 #print axioms CombinatorialMap.eulerCharacteristic_le_two
+#print axioms CombinatorialMap.dual_isPlanar_iff
 #print axioms convex_line_intersection_isPreconnected
 #print axioms strictlyConvex_boundary_no_three_collinear
 #print axioms SimpleConvexPolygon.collinear_vertices_cyclicInterval
+#print axioms SimpleGraph.IsTree.exists_leaf_insertion_order
+#print axioms SimpleGraph.IsTree.parentEdgeEquiv
 #print axioms unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
 EOF
 ```
@@ -198,11 +210,15 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
 
 - **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
   combinatorial-map / Euler-bound / edge-insertion substrate has been promoted to
-  the standalone `Combinatorics/CombinatorialMap/` library above; what remains
-  here is the still-unfinished drawing→map bridge — the full crossing lemma
-  bottoms out in a labelled conjectured geometric residual
-  (`exists_twoSidedPartition_of_arc`, `sorry`). A separate `subsetAveraging_master`
-  (`sorry`) is a documented dead-end, not used downstream.
+  the standalone `Combinatorics/CombinatorialMap/` and `Combinatorics/SimpleGraph/`
+  libraries above; what remains here is the still-unfinished drawing→map bridge
+  and its residual-map/topological helpers (`ResidualMapProperties.lean`,
+  `ResidualMapPermuteEdges.lean`, `ResidualPlanarization.lean`,
+  `EdgeSetDrawing.lean`, `PLArc.lean`, `PLAssembly.lean`,
+  `PLCollarSeparation.lean`). The full crossing lemma still bottoms out in a
+  labelled conjectured geometric residual (`exists_twoSidedPartition_of_arc`,
+  `sorry`). A separate `subsetAveraging_master` (`sorry`) is a documented
+  dead-end, not used downstream.
 - **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`
   contain `sorry`).
 - **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
@@ -287,6 +303,7 @@ LeanFormalizations.lean                    -- root aggregator (imports everythin
 LeanFormalizations/
   Combinatorics/Additive/                  -- BSG + no-3-collinear ⟹ 3-AP-free ✅
   Combinatorics/CombinatorialMap/           -- combinatorial maps + planar edge bound ✅
+  Combinatorics/SimpleGraph/                -- tree-order helpers ✅
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem ✅

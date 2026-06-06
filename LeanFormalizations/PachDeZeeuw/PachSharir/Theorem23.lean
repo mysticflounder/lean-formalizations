@@ -17,14 +17,14 @@ the constant `C_{d,M}` (resp. `C_{D,e,d,M}`) depending only on the stated
 parameters, algebraic curves of the degrees the paper specifies, and the paper's
 own definition of a *system with two degrees of freedom and multiplicity `M`*
 (two curves meet in at most `M` points of the ambient space; any two points lie
-on at most `M` curves). No reformulation is folded in here — the cubed-integer
-restatement, the `D = 4` instantiation, and the reduction to the `pdz`-internal
-incidence-card statement are project wiring that lives in the `pdz` adapter, not
-in this paper-faithful module.
+on at most `M` curves). No reformulation is folded in here: the cubed-integer
+restatement, the `D = 4` instantiation, and the reduction to the internal
+incidence-card statement belong in project-specific adapter modules, never in
+this paper-faithful surface.
 
-Both statements are currently supplied with a `sorry` (**Gap A**): the
-crossing-lemma → Szemerédi–Trotter → Pach–Sharir chain is not yet formalized. The
-holes are isolated to `theorem23` and `corollary24`.
+This file intentionally exports only statement surfaces. The exact paper
+theorems are not yet formalized axiom-free in this repository, so we do not
+package them as `theorem`s here.
 -/
 
 set_option linter.style.longLine false
@@ -97,15 +97,5 @@ def Corollary24Statement : Prop :=
       (∀ γ ∈ Γ, IsAlgebraicCurveDefinedBy D e d γ) →
       TwoDegreesOfFreedom P Γ M →
         (incidenceCount P Γ : ℝ) ≤ C * incidenceBoundTerm P Γ
-
-/-- **Theorem 2.3.** Gap A — supplied by `sorry` pending the crossing-lemma →
-Szemerédi–Trotter → Pach–Sharir formalization. -/
-theorem theorem23 : Theorem23Statement :=
-  sorry
-
-/-- **Corollary 2.4.** Gap A — the `ℝ^D` generic-projection consequence of
-`theorem23`, also pending formalization. -/
-theorem corollary24 : Corollary24Statement :=
-  sorry
 
 end PachSharir

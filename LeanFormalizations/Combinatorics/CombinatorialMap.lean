@@ -6,6 +6,7 @@ Authors: Adam McKenna
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
+import LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 
 /-!
@@ -19,5 +20,6 @@ axiom-clean (`[propext, Classical.choice, Quot.sound]`):
 * `PlanarEdgeBound` — the simple-graph edge bound `e ≤ 3v − 6` from Euler's
   formula, and its multiplicity lift `e ≤ M·(3v − 6)`.
 * `EulerBound` — a connected combinatorial map has Euler characteristic `≤ 2`.
+* `DualProperties` — connectedness and planarity are preserved by duality.
 * `EdgeInsertion` — the orbit-count engine for edge insertion.
 -/

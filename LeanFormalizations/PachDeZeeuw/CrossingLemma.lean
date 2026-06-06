@@ -13,11 +13,17 @@ import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCover
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLAssembly
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCollarSeparation
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 -- Drawing -> abstract bridge + residual map:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.Abstractize
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMapProperties
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMapPermuteEdges
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualPlanarization
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeSetDrawing
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.RotationCoherence
 
 /-!

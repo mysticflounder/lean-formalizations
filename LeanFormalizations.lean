@@ -11,6 +11,7 @@ import LeanFormalizations.Combinatorics.Additive.ThreeAPFreeOfNoThreeCollinear
 
 -- Combinatorics / combinatorial maps + planar edge bound (complete, axiom-clean)
 import LeanFormalizations.Combinatorics.CombinatorialMap
+import LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder
 
 -- Combinatorics / unit-distance elimination-order counting (complete, axiom-clean)
 import LeanFormalizations.Combinatorics.UnitDistance.Counting
@@ -30,8 +31,9 @@ import LeanFormalizations.Geometry.Convex.SimpleConvexPolygon
 -- Elekes–Sharir / Pach–de Zeeuw adjacent generic lemmas (L1–L5): two-pinned
 -- chord curve, component split, ruling skewness exclusion, ω-rank collapse,
 -- affine-graph conic normal form. Linear-algebra/quadratic-form cores are
--- proven; the algebraic-geometry-heavy statements (L1 curve step, L2) carry
--- explicitly-listed `sorry`s. See README for the per-lemma triage.
+-- proven; the algebraic-geometry-heavy statement L2 carries explicitly-listed
+-- `sorry`s. The L1 file now only contains the determinant identities. See
+-- README for the per-lemma triage.
 import LeanFormalizations.Geometry.ElekesSharir.OmegaRankCollapse
 import LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm
 import LeanFormalizations.Geometry.ElekesSharir.RulingSkewness

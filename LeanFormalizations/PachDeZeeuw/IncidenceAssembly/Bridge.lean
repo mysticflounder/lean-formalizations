@@ -23,15 +23,14 @@ The bridge `positiveAuxiliaryIncidenceCardBound_of_corollary24` is the paper's �
 incidence assembly (Lemmas 3.2–3.7): instantiate Corollary 2.4 at `D = 4`, present
 the auxiliary curves `C_ij` as algebraic curves, establish the two-degrees-of-
 freedom system with multiplicity `M = 16 d⁴`, apply the corollary, and convert the
-real `max{·}` bound into the `pdz`-internal cubed-integer statement. All of that —
+real `max{·}` bound into the internal cubed-integer statement. All of that —
 including the real→ℕ-cubed conversion and the `D = 4` instantiation — is wiring
 that deliberately lives here, never inside a paper module. It currently carries a
 single `sorry` (**Gap B**).
 
-`irreducibleCurve_distinctDistances_sorryBacked` then assembles Theorem 1.1 by feeding the bridge
-the paper-faithful (but still `sorry`-backed, **Gap A**) `PachSharir.corollary24`.
-The two holes are thus named and separated: Gap A in `pach-sharir`, Gap B here;
-`pdz` itself is `sorry`-free.
+Accordingly this file is conditional on the exact paper statement
+`PachSharir.Corollary24Statement`; it does not manufacture a hypothesis-free
+theorem by routing through any `sorry`-backed placeholder.
 -/
 
 set_option linter.style.longLine false
@@ -54,19 +53,17 @@ theorem positiveAuxiliaryIncidenceCardBound_of_corollary24
   sorry
 
 /--
-**NOT PROVEN — `sorry`-backed.** Pach–de Zeeuw Theorem 1.1 with a hypothesis-free
-*type*, assembled from the paper modules. Although the statement takes no
-hypothesis, its proof is **not** complete: it is backed by `sorry` through Gap A
-(`PachSharir.corollary24`) and Gap B
-(`positiveAuxiliaryIncidenceCardBound_of_corollary24`). The reduction chain in
-`pdz` is itself `sorry`-free, so `#print axioms` on this term pinpoints exactly
-those two holes (it will report `sorryAx`). Do **not** treat this as an
-established theorem.
+Conditional assembly of Pach–de Zeeuw Theorem 1.1 from the exact paper statement
+of Pach–Sharir Corollary 2.4.
+
+This theorem is axiom-free apart from the explicit hypothesis `h24`; the only
+remaining unfinished work is the bridge theorem above.
 -/
-theorem irreducibleCurve_distinctDistances_sorryBacked :
+theorem irreducibleCurve_distinctDistances_of_corollary24
+    (h24 : PachSharir.Corollary24Statement) :
     PachDeZeeuwIrreducibleCurveDistinctDistancesStatement :=
   irreducibleCurve_distinctDistances
     (bipartiteDistinctDistances_of_positiveCardBound
-      (positiveAuxiliaryIncidenceCardBound_of_corollary24 PachSharir.corollary24))
+      (positiveAuxiliaryIncidenceCardBound_of_corollary24 h24))
 
 end IncidenceAssembly

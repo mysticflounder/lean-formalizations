@@ -6,6 +6,8 @@ Authors: Adam McKenna
 
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.RotationCoherence
+import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 /-!
@@ -34,6 +36,7 @@ set_option linter.style.longLine false
 namespace CrossingLemma
 
 open CombinatorialMap
+open CombinatorialMap.EdgeInsertion
 
 variable (G : DrawnMultigraph)
 
@@ -57,6 +60,157 @@ theorem permCongr_sameCycle {α β : Type*} (e : α ≃ β) (σ : Equiv.Perm α)
     have hzp : (e.permCongr σ) ^ i = e.permCongr (σ ^ i) :=
       (map_zpow e.permCongrHom σ i).symm
     rw [hzp, Equiv.permCongr_apply, hi, Equiv.apply_symm_apply]
+
+/-- Conjugating a permutation transports its `SameCycle` quotient along the
+conjugating equivalence. -/
+noncomputable def quotientSameCycleEquivOfPermCongr {α β : Type*}
+    (e : α ≃ β) (σ : Equiv.Perm α) :
+    Quotient (Equiv.Perm.SameCycle.setoid (e.permCongr σ)) ≃
+      Quotient (Equiv.Perm.SameCycle.setoid σ) where
+  toFun := Quotient.map' e.symm (by
+    intro x y hxy
+    exact (permCongr_sameCycle e σ x y).mp hxy)
+  invFun := Quotient.map' e (by
+    intro x y hxy
+    exact (permCongr_sameCycle e σ (e x) (e y)).mpr (by simpa))
+  left_inv := by
+    intro q
+    induction q using Quotient.ind with
+    | _ x => simp
+  right_inv := by
+    intro q
+    induction q using Quotient.ind with
+    | _ x => simp
+
+/-- A combinatorial map's Euler-form planarity is invariant under simultaneous
+conjugacy of its vertex, edge, and face permutations, even when the dart types
+are identified by an arbitrary equivalence. -/
+theorem isPlanar_iff_of_permCongr_eq {D D' : Type*} [Fintype D] [Fintype D']
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (e : D ≃ D')
+    (hvertex : e.permCongr M.vertexPerm = M'.vertexPerm)
+    (hedge : e.permCongr M.edgePerm = M'.edgePerm)
+    (hface : e.permCongr M.facePerm = M'.facePerm) :
+    M'.IsPlanar ↔ M.IsPlanar := by
+  letI : Fintype (Quotient (Equiv.Perm.SameCycle.setoid (e.permCongr M.vertexPerm))) :=
+    Fintype.ofFinite _
+  letI : Fintype (Quotient (Equiv.Perm.SameCycle.setoid (e.permCongr M.edgePerm))) :=
+    Fintype.ofFinite _
+  letI : Fintype (Quotient (Equiv.Perm.SameCycle.setoid (e.permCongr M.facePerm))) :=
+    Fintype.ofFinite _
+  have hV :
+      Fintype.card M'.Vertex = Fintype.card M.Vertex := by
+    simpa [CombinatorialMap.Vertex, hvertex] using
+      Fintype.card_congr (quotientSameCycleEquivOfPermCongr e M.vertexPerm)
+  have hE :
+      Fintype.card M'.Edge = Fintype.card M.Edge := by
+    simpa [CombinatorialMap.Edge, hedge] using
+      Fintype.card_congr (quotientSameCycleEquivOfPermCongr e M.edgePerm)
+  have hF :
+      Fintype.card M'.Face = Fintype.card M.Face := by
+    simpa [CombinatorialMap.Face, hface] using
+      Fintype.card_congr (quotientSameCycleEquivOfPermCongr e M.facePerm)
+  unfold CombinatorialMap.IsPlanar CombinatorialMap.eulerCharacteristic
+  omega
+
+/-- Once the vertex and edge permutations are conjugate along `e`, the face
+permutation is forced to be conjugate as well. -/
+theorem facePerm_permCongr_eq_of_vertex_edge {D D' : Type*}
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (e : D ≃ D')
+    (hvertex : e.permCongr M.vertexPerm = M'.vertexPerm)
+    (hedge : e.permCongr M.edgePerm = M'.edgePerm) :
+    e.permCongr M.facePerm = M'.facePerm := by
+  let f := Equiv.permCongrHom e
+  calc
+    e.permCongr M.facePerm = f (M.vertexPerm⁻¹ * M.edgePerm) := by
+      rw [M.facePerm_eq]
+      rfl
+    _ = f M.vertexPerm⁻¹ * f M.edgePerm := by
+      exact map_mul f _ _
+    _ = (f M.vertexPerm)⁻¹ * f M.edgePerm := by
+      rw [map_inv]
+    _ = M'.vertexPerm⁻¹ * M'.edgePerm := by
+      have hvertex' : f M.vertexPerm = M'.vertexPerm := by
+        simpa [f] using hvertex
+      have hedge' : f M.edgePerm = M'.edgePerm := by
+        simpa [f] using hedge
+      rw [hvertex', hedge']
+    _ = M'.facePerm := by
+      rw [M'.facePerm_eq]
+
+/-- A combinatorial-map isomorphism is determined by an underlying dart
+equivalence together with conjugacy of the vertex and edge permutations. The
+face permutation is then forced by the combinatorial-map axioms. -/
+def isoOfPermCongrOfVertexEdge {D D' : Type*}
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (e : D ≃ D')
+    (hvertex : e.permCongr M.vertexPerm = M'.vertexPerm)
+    (hedge : e.permCongr M.edgePerm = M'.edgePerm) :
+    CombinatorialMap.Iso M M' where
+  toEquiv := e
+  vertex_comm := by
+    funext x
+    have h := congrArg (fun σ => σ (e x)) hvertex
+    simpa [Equiv.permCongr_apply] using h
+  edge_comm := by
+    funext x
+    have h := congrArg (fun σ => σ (e x)) hedge
+    simpa [Equiv.permCongr_apply] using h
+  face_comm := by
+    let hface := facePerm_permCongr_eq_of_vertex_edge e hvertex hedge
+    funext x
+    have h := congrArg (fun σ => σ (e x)) hface
+    simpa [Equiv.permCongr_apply] using h
+
+/-- Under a combinatorial-map isomorphism, the target face permutation is the
+conjugate of the source face permutation. -/
+theorem facePerm_permCongr_of_iso {D D' : Type*}
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (f : CombinatorialMap.Iso M M') :
+    f.toEquiv.permCongr M.facePerm = M'.facePerm := by
+  apply Equiv.ext
+  intro x
+  change f.toEquiv (M.facePerm (f.toEquiv.symm x)) = M'.facePerm x
+  have h := congrArg (fun g => g (f.toEquiv.symm x)) f.face_comm
+  simpa using h
+
+/-- Face-cycle membership is preserved under a combinatorial-map isomorphism. -/
+theorem facePerm_sameCycle_iff_of_iso {D D' : Type*}
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (f : CombinatorialMap.Iso M M') (x y : D') :
+    M'.facePerm.SameCycle x y ↔ M.facePerm.SameCycle (f.symm x) (f.symm y) := by
+  rw [← facePerm_permCongr_of_iso f]
+  exact permCongr_sameCycle f.toEquiv M.facePerm x y
+
+/-- Face-cycle membership is preserved after mapping darts forward by a
+combinatorial-map isomorphism. -/
+theorem facePerm_sameCycle_map_iff_of_iso {D D' : Type*}
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (f : CombinatorialMap.Iso M M') (x y : D) :
+    M'.facePerm.SameCycle (f.toEquiv x) (f.toEquiv y) ↔ M.facePerm.SameCycle x y := by
+  simpa using facePerm_sameCycle_iff_of_iso f (f.toEquiv x) (f.toEquiv y)
+
+/-- A combinatorial-map isomorphism preserves Euler-form planarity. -/
+theorem isPlanar_iff_of_iso {D D' : Type*} [Fintype D] [Fintype D']
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (f : CombinatorialMap.Iso M M') :
+    M'.IsPlanar ↔ M.IsPlanar := by
+  have hvertex : f.toEquiv.permCongr M.vertexPerm = M'.vertexPerm := by
+    apply Equiv.ext
+    intro x
+    change f.toEquiv (M.vertexPerm (f.toEquiv.symm x)) = M'.vertexPerm x
+    have h := congrArg (fun g => g (f.toEquiv.symm x)) f.vertex_comm
+    simpa using h
+  have hedge : f.toEquiv.permCongr M.edgePerm = M'.edgePerm := by
+    apply Equiv.ext
+    intro x
+    change f.toEquiv (M.edgePerm (f.toEquiv.symm x)) = M'.edgePerm x
+    have h := congrArg (fun g => g (f.toEquiv.symm x)) f.edge_comm
+    simpa using h
+  have hface : f.toEquiv.permCongr M.facePerm = M'.facePerm := by
+    exact facePerm_permCongr_of_iso f
+  exact isPlanar_iff_of_permCongr_eq f.toEquiv hvertex hedge hface
 
 /-- The `i`-th power of `Equiv.sigmaCongrRight F` acts fiberwise. -/
 theorem sigmaCongrRight_zpow {α : Type*} {β : α → Type*} (F : ∀ a, Equiv.Perm (β a))
@@ -126,6 +280,278 @@ theorem residualMap_edgePerm_apply (hARR : ArcsRotationRegular G)
     (residualMap G hARR).edgePerm d = (d.1, !d.2) := by
   rcases d with ⟨e, b⟩
   rfl
+
+/-! ## Prefix-step dart relabeling -/
+
+private def prefixStepDartToFun (m : ℕ) :
+    (Fin m × Bool ⊕ Fin 2) → (Fin (m + 1) × Bool)
+  | Sum.inl ⟨i, b⟩ => (Fin.castSucc i, b)
+  | Sum.inr j => (Fin.last m, j = 1)
+
+private def prefixStepDartInvFun (m : ℕ) :
+    (Fin (m + 1) × Bool) → (Fin m × Bool ⊕ Fin 2)
+  | (i, b) =>
+      if h : i.val < m then
+        Sum.inl (⟨⟨i.val, h⟩, b⟩)
+      else
+        Sum.inr (if b then 1 else 0)
+
+/-- The successor-prefix dart carrier `Fin (m+1) × Bool` is the old prefix dart
+carrier `Fin m × Bool` plus the two darts of the new last edge. -/
+def prefixStepDartEquiv (m : ℕ) :
+    (Fin m × Bool ⊕ Fin 2) ≃ (Fin (m + 1) × Bool) where
+  toFun := prefixStepDartToFun m
+  invFun := prefixStepDartInvFun m
+  left_inv := by
+    intro x
+    rcases x with x | j
+    · rcases x with ⟨i, b⟩
+      simp [prefixStepDartToFun, prefixStepDartInvFun, Fin.val_castSucc, i.isLt]
+    · fin_cases j <;> simp [prefixStepDartToFun, prefixStepDartInvFun, Fin.val_last]
+  right_inv := by
+    intro d
+    rcases d with ⟨i, b⟩
+    by_cases h : i.val < m
+    · simp [prefixStepDartToFun, prefixStepDartInvFun, h]
+    · have hm : i.val = m := by omega
+      have hi : i = Fin.last m := by
+        apply Fin.ext
+        simp [Fin.val_last, hm]
+      subst hi
+      cases b <;> simp [prefixStepDartToFun, prefixStepDartInvFun, Fin.val_last]
+
+@[simp] theorem prefixStepDartEquiv_apply_inl (m : ℕ) (i : Fin m) (b : Bool) :
+    prefixStepDartEquiv m (Sum.inl (i, b)) = (Fin.castSucc i, b) := rfl
+
+@[simp] theorem prefixStepDartEquiv_apply_inr_zero (m : ℕ) :
+    prefixStepDartEquiv m (Sum.inr (0 : Fin 2)) = (Fin.last m, false) := by
+  rfl
+
+@[simp] theorem prefixStepDartEquiv_apply_inr_one (m : ℕ) :
+    prefixStepDartEquiv m (Sum.inr (1 : Fin 2)) = (Fin.last m, true) := by
+  rfl
+
+@[simp] theorem prefixStepDartEquiv_symm_apply_castSucc (m : ℕ) (i : Fin m) (b : Bool) :
+    (prefixStepDartEquiv m).symm (Fin.castSucc i, b) = Sum.inl (i, b) := by
+  simp [prefixStepDartEquiv, prefixStepDartInvFun, Fin.val_castSucc, i.isLt]
+
+@[simp] theorem prefixStepDartEquiv_symm_apply_last_false (m : ℕ) :
+    (prefixStepDartEquiv m).symm (Fin.last m, false) = Sum.inr (0 : Fin 2) := by
+  simp [prefixStepDartEquiv, prefixStepDartInvFun, Fin.val_last]
+
+@[simp] theorem prefixStepDartEquiv_symm_apply_last_true (m : ℕ) :
+    (prefixStepDartEquiv m).symm (Fin.last m, true) = Sum.inr (1 : Fin 2) := by
+  simp [prefixStepDartEquiv, prefixStepDartInvFun, Fin.val_last]
+
+/-- The residual-map edge permutation is the product of the identity on the edge
+index with the Boolean swap. -/
+theorem residualMap_edgePerm_eq_boolSwap (hARR : ArcsRotationRegular G) :
+    (residualMap G hARR).edgePerm =
+      Equiv.prodCongr (Equiv.refl (Fin G.numEdges)) (Equiv.swap false true) := by
+  apply Equiv.ext
+  rintro ⟨e, b⟩
+  cases b <;> rfl
+
+/-- After relabeling the enlarged dart carrier by `prefixStepDartEquiv`, the
+inserted-edge involution becomes the standard residual end-swap on
+`Fin (m+1) × Bool`, provided the old edge involution already had that form. -/
+theorem prefixStepDartEquiv_permCongr_insEdgePerm_of_edgePerm_apply
+    {m : ℕ} {M : CombinatorialMap (Fin m × Bool)}
+    (hedge : ∀ d : Fin m × Bool, M.edgePerm d = (d.1, !d.2)) :
+    (prefixStepDartEquiv m).permCongr (insEdgePerm M) =
+      Equiv.prodCongr (Equiv.refl (Fin (m + 1))) (Equiv.swap false true) := by
+  apply Equiv.ext
+  intro x
+  rcases (prefixStepDartEquiv m).surjective x with ⟨z, rfl⟩
+  rw [Equiv.permCongr_apply]
+  cases z with
+  | inl old =>
+      rcases old with ⟨i, b⟩
+      cases b <;> simp [prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun,
+        insEdgePerm, hedge]
+  | inr j =>
+      fin_cases j <;> simp [prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun,
+        insEdgePerm, Fin.val_last]
+
+/-- The same relabeling statement for leaf-edge insertion. The leaf and
+same-face insertion maps share the same enlarged edge involution. -/
+theorem prefixStepDartEquiv_permCongr_insertedLeafEdgePerm_of_edgePerm_apply
+    {m : ℕ} {M : CombinatorialMap (Fin m × Bool)}
+    (hedge : ∀ d : Fin m × Bool, M.edgePerm d = (d.1, !d.2)) :
+    (prefixStepDartEquiv m).permCongr (insertedLeafEdgePerm M) =
+      Equiv.prodCongr (Equiv.refl (Fin (m + 1))) (Equiv.swap false true) := by
+  simpa [insertedLeafEdgePerm, insEdgePerm] using
+    (prefixStepDartEquiv_permCongr_insEdgePerm_of_edgePerm_apply (m := m) (M := M) hedge)
+
+/-- For residual maps of ordered prefixes, the leaf-insertion edge involution on
+the `m`-prefix matches the residual end-swap on the `(m+1)`-prefix after
+transport along `prefixStepDartEquiv`. -/
+theorem prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    (prefixStepDartEquiv m).permCongr
+      (insertedLeafEdgePerm (residualMap (G.prefixEdges m hm) hARR)) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').edgePerm := by
+  trans Equiv.prodCongr (Equiv.refl (Fin (m + 1))) (Equiv.swap false true)
+  · exact prefixStepDartEquiv_permCongr_insertedLeafEdgePerm_of_edgePerm_apply
+      (M := residualMap (G.prefixEdges m hm) hARR)
+      (hedge := residualMap_edgePerm_apply (G := G.prefixEdges m hm) hARR)
+  · symm
+    exact residualMap_edgePerm_eq_boolSwap (G := G.prefixEdges (m + 1) hm') hARR'
+
+/-- For residual maps of ordered prefixes, the same-face insertion edge
+involution on the `m`-prefix matches the residual end-swap on the `(m+1)`-prefix
+after transport along `prefixStepDartEquiv`. -/
+theorem prefixStepDartEquiv_permCongr_residualMap_insEdgePerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    (prefixStepDartEquiv m).permCongr
+      (insEdgePerm (residualMap (G.prefixEdges m hm) hARR)) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').edgePerm := by
+  trans Equiv.prodCongr (Equiv.refl (Fin (m + 1))) (Equiv.swap false true)
+  · exact prefixStepDartEquiv_permCongr_insEdgePerm_of_edgePerm_apply
+      (M := residualMap (G.prefixEdges m hm) hARR)
+      (hedge := residualMap_edgePerm_apply (G := G.prefixEdges m hm) hARR)
+  · symm
+    exact residualMap_edgePerm_eq_boolSwap (G := G.prefixEdges (m + 1) hm') hARR'
+
+/-- To identify a successor-prefix residual map with a leaf insertion on the
+previous prefix, it is enough to prove the vertex-permutation splice statement.
+The edge permutation is already handled by
+`prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm`, and the face
+permutation then follows formally from the combinatorial-map axioms. -/
+noncomputable def insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c : Fin m × Bool)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    CombinatorialMap.Iso
+      (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c)
+      (residualMap (G.prefixEdges (m + 1) hm') hARR') :=
+  isoOfPermCongrOfVertexEdge (prefixStepDartEquiv m) hvertex
+    (prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
+      (G := G) m hm hm' hARR hARR')
+
+/-- To identify a successor-prefix residual map with a same-face insertion on
+the previous prefix, it is enough to prove the vertex-permutation splice
+statement. The edge permutation is already handled by
+`prefixStepDartEquiv_permCongr_residualMap_insEdgePerm`, and the face
+permutation then follows formally from the combinatorial-map axioms. -/
+noncomputable def insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    CombinatorialMap.Iso
+      (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂)
+      (residualMap (G.prefixEdges (m + 1) hm') hARR') :=
+  isoOfPermCongrOfVertexEdge (prefixStepDartEquiv m) hvertex
+    (prefixStepDartEquiv_permCongr_residualMap_insEdgePerm
+      (G := G) m hm hm' hARR hARR')
+
+/-- At an endpoint of the new last edge, the incident-end type of the
+successor prefix is the old incident-end type plus one new dart. -/
+noncomputable def incident_ends_prefix_step_endpoint_equiv
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p) :
+    ↥(incidentEnds (G.prefixEdges m hm) p) ⊕ Unit ≃
+      ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+  adjoin_point_equiv
+    (incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew)
+    (incident_ends_prefix_step_endpoint_old_equiv (G := G) m hm hm' b hpnew hpother)
+
+@[simp] theorem incident_ends_prefix_step_endpoint_equiv_apply_inl
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    (a : ↥(incidentEnds (G.prefixEdges m hm) p)) :
+    incident_ends_prefix_step_endpoint_equiv (G := G) m hm hm' b hpnew hpother (Sum.inl a) =
+      (incident_ends_prefix_step_endpoint_old_equiv (G := G) m hm hm' b hpnew hpother a).1 := by
+  simp [incident_ends_prefix_step_endpoint_equiv]
+
+@[simp] theorem incident_ends_prefix_step_endpoint_equiv_apply_inr
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p) :
+    incident_ends_prefix_step_endpoint_equiv (G := G) m hm hm' b hpnew hpother (Sum.inr ()) =
+      incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew := by
+  simp [incident_ends_prefix_step_endpoint_equiv]
+
+/-- Local splice form of the successor-prefix vertex rotation at an endpoint of
+the new last edge. Once the new angular order is known to restrict to the old
+angular order on the carried-over darts and to place the new dart immediately
+after `c`, the new rotation is exactly the single-corner splice of the old one. -/
+theorem vertexRotationAtRadius_prefix_step_endpoint_splice
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    {α : (Fin m × Bool) → ℝ → ℝ}
+    {β : (Fin (m + 1) × Bool) → ℝ → ℝ}
+    {r : ℝ} {r' : ℝ}
+    (hinj :
+      Function.Injective (endAngleKey (G.prefixEdges m hm) p α r))
+    (hinj' :
+      Function.Injective (endAngleKey (G.prefixEdges (m + 1) hm') p β r'))
+    (c : ↥(incidentEnds (G.prefixEdges m hm) p))
+    (hmono :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
+        endAngleKey (G.prefixEdges (m + 1) hm') p β r'
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p β r'
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p α r a₁ <
+          endAngleKey (G.prefixEdges m hm) p α r a₂)
+    (hpred :
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p β r' hinj'
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother c).1) =
+        incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew) :
+    (incident_ends_prefix_step_endpoint_equiv (G := G) m hm hm' b hpnew hpother).permCongr
+      (Equiv.swap
+          (Sum.inl ((vertexRotationAtRadius (G.prefixEdges m hm) p α r hinj) c))
+          (Sum.inr ()) *
+        (vertexRotationAtRadius (G.prefixEdges m hm) p α r hinj).sumCongr 1)
+      = vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p β r' hinj' := by
+  unfold vertexRotationAtRadius
+  change (adjoin_point_equiv
+      (incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew)
+      (incident_ends_prefix_step_endpoint_old_equiv (G := G) m hm hm' b hpnew hpother)).permCongr
+      (Equiv.swap
+          (Sum.inl ((rotationOfOrder (LinearOrder.lift' (endAngleKey (G.prefixEdges m hm) p α r) hinj)) c))
+          (Sum.inr ()) *
+        (rotationOfOrder (LinearOrder.lift' (endAngleKey (G.prefixEdges m hm) p α r) hinj)).sumCongr 1)
+      = rotationOfOrder (LinearOrder.lift' (endAngleKey (G.prefixEdges (m + 1) hm') p β r') hinj')
+  exact rotationOfOrder_splice_of_adjoin_point_equiv
+    (incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew)
+    (incident_ends_prefix_step_endpoint_old_equiv (G := G) m hm hm' b hpnew hpother)
+    (LinearOrder.lift' (endAngleKey (G.prefixEdges m hm) p α r) hinj)
+    (LinearOrder.lift' (endAngleKey (G.prefixEdges (m + 1) hm') p β r') hinj')
+    c hmono hpred
 
 /-- Every power of the residual edge permutation preserves the edge index. -/
 theorem residualMap_edgePerm_zpow_fst (hARR : ArcsRotationRegular G)

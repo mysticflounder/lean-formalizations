@@ -165,13 +165,6 @@ theorem succAbove_finRotate_fire {N : ℕ} (k : Fin (N + 1)) (i : Fin N)
   | zero => exact i.elim0
   | succ m => rw [finRotate_apply]; exact succAbove_add_one_fire k i h
 
-/-! ### `finRotate` is natural under the size cast `finCongr` -/
-
-/-- `finRotate` commutes with the size-cast equivalence `finCongr`. -/
-theorem finRotate_finCongr {a b : ℕ} (h : a = b) (i : Fin a) :
-    finRotate b (finCongr h i) = finCongr h (finRotate a i) := by
-  subst h; simp [finCongr]
-
 /-- `permOfEquiv` is invariant under precomposing the index equivalence with a
 size-cast `finCongr`. Hence the rotation may be computed through any
 `Fin (card + 1)`-indexed increasing enumeration. -/
@@ -383,6 +376,110 @@ theorem rotationOfOrder_splice (c : β)
           ≠ Sum.inr () :=
         Sum.inl_ne_inr
       exact (Equiv.swap_apply_of_ne_of_ne hne1 hne2).symm
+
+private noncomputable def subtype_eq_equiv_unit {α : Type*} (x : α) :
+    {y : α // y = x} ≃ Unit where
+  toFun := fun _ => ()
+  invFun := fun _ => ⟨x, rfl⟩
+  left_inv := by
+    intro y
+    apply Subtype.ext
+    simpa using y.property.symm
+  right_inv := by
+    intro u
+    cases u
+    rfl
+
+private theorem swap_eq_swap_of_decidableEq {α : Type*}
+    (dec₁ dec₂ : DecidableEq α) (a b : α) :
+    @Equiv.swap α dec₁ a b = @Equiv.swap α dec₂ a b := by
+  ext x
+  by_cases hxa : x = a
+  · subst hxa
+    simp [Equiv.swap, Equiv.swapCore]
+  · by_cases hxb : x = b
+    · subst hxb
+      simp [Equiv.swap, Equiv.swapCore, hxa]
+    · simp [Equiv.swap, Equiv.swapCore, hxa, hxb]
+
+/-- If `e : β ≃ {y : α // y ≠ x}` identifies `β` with the complement of a
+distinguished point `x : α`, then adjoining one new `Unit` point gives an
+equivalence `β ⊕ Unit ≃ α`. The left summand tracks the old points; the right
+summand is the distinguished new point. -/
+noncomputable def adjoin_point_equiv {α β : Type*}
+    (x : α) (e : β ≃ {y : α // y ≠ x}) : β ⊕ Unit ≃ α := by
+  classical
+  exact ((e.sumCongr (subtype_eq_equiv_unit x).symm).trans (Equiv.sumComm _ _)).trans
+    (Equiv.sumCompl (fun y : α => y = x))
+
+@[simp] theorem adjoin_point_equiv_apply_inl {α β : Type*}
+    (x : α) (e : β ≃ {y : α // y ≠ x}) (a : β) :
+    adjoin_point_equiv x e (Sum.inl a) = (e a).1 := by
+  classical
+  simp [adjoin_point_equiv, subtype_eq_equiv_unit]
+
+@[simp] theorem adjoin_point_equiv_apply_inr {α β : Type*}
+    (x : α) (e : β ≃ {y : α // y ≠ x}) :
+    adjoin_point_equiv x e (Sum.inr ()) = x := by
+  classical
+  simp [adjoin_point_equiv, subtype_eq_equiv_unit]
+
+/-- Transport form of `rotationOfOrder_splice`: if the complement of a
+distinguished point `x : α` is identified with `β`, and the `α`-order restricts
+to the given `β`-order on that complement, then the cyclic successor on `α` is
+the conjugate of the single-corner splice on `β ⊕ Unit`. -/
+theorem rotationOfOrder_splice_of_adjoin_point_equiv
+    {α β : Type*} [Fintype α] [Fintype β] [DecidableEq β]
+    (x : α) (e : β ≃ {y : α // y ≠ x})
+    (Lβ : LinearOrder β) (Lα : LinearOrder α)
+    (c : β)
+    (hmono : ∀ a b : β, Lα.lt ((e a).1) ((e b).1) ↔ Lβ.lt a b)
+    (hpred : rotationOfOrder Lα ((e c).1) = x) :
+    (adjoin_point_equiv x e).permCongr
+      (Equiv.swap (Sum.inl ((rotationOfOrder Lβ) c)) (Sum.inr ()) *
+        (rotationOfOrder Lβ).sumCongr 1)
+      = rotationOfOrder Lα := by
+  classical
+  let f : β ⊕ Unit ≃ α := adjoin_point_equiv x e
+  let Lsum : LinearOrder (β ⊕ Unit) := LinearOrder.lift' f f.injective
+  have hperm : f.permCongr (rotationOfOrder Lsum) = rotationOfOrder Lα := by
+    exact rotationOfOrder_permCongr Lsum Lα f (fun a b => Iff.rfl)
+  have hmono' : ∀ a b : β, Lsum.lt (Sum.inl a) (Sum.inl b) ↔ Lβ.lt a b := by
+    intro a b
+    change Lα.lt (f (Sum.inl a)) (f (Sum.inl b)) ↔ Lβ.lt a b
+    simpa [f] using hmono a b
+  have hpred' : rotationOfOrder Lsum (Sum.inl c) = Sum.inr () := by
+    have hmap :
+        f (rotationOfOrder Lsum (Sum.inl c)) = rotationOfOrder Lα (f (Sum.inl c)) := by
+      simpa [Equiv.permCongr_apply] using congrArg (fun σ => σ (f (Sum.inl c))) hperm
+    apply f.injective
+    calc
+      f (rotationOfOrder Lsum (Sum.inl c)) = rotationOfOrder Lα (f (Sum.inl c)) := hmap
+      _ = x := by simpa [f] using hpred
+      _ = f (Sum.inr ()) := by simp [f]
+  calc
+    f.permCongr
+        (Equiv.swap (Sum.inl ((rotationOfOrder Lβ) c)) (Sum.inr ()) *
+          (rotationOfOrder Lβ).sumCongr 1)
+      = f.permCongr (rotationOfOrder Lsum) := by
+          rw [rotationOfOrder_splice (L := Lβ) (L' := Lsum) c hmono' hpred']
+          ext y
+          rw [Equiv.permCongr_apply, Equiv.permCongr_apply]
+          have hswap :
+              @Equiv.swap (β ⊕ Unit)
+                  (@instDecidableEqSum β Unit (inferInstance : DecidableEq β) instDecidableEqPUnit)
+                  (Sum.inl ((rotationOfOrder Lβ) c)) (Sum.inr ()) =
+                @Equiv.swap (β ⊕ Unit)
+                  (@instDecidableEqSum β Unit
+                    (fun a b ↦ LinearOrder.toDecidableEq a b) instDecidableEqPUnit)
+                  (Sum.inl ((rotationOfOrder Lβ) c)) (Sum.inr ()) :=
+            swap_eq_swap_of_decidableEq
+              (@instDecidableEqSum β Unit (inferInstance : DecidableEq β) instDecidableEqPUnit)
+              (@instDecidableEqSum β Unit
+                (fun a b ↦ LinearOrder.toDecidableEq a b) instDecidableEqPUnit)
+              (Sum.inl ((rotationOfOrder Lβ) c)) (Sum.inr ())
+          rw [hswap]
+    _ = rotationOfOrder Lα := hperm
 
 end Augmented
 
