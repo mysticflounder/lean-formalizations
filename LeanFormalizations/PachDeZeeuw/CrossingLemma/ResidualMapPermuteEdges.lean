@@ -260,4 +260,18 @@ theorem DrawnMultigraph.permuteEdges_graphConnected_iff
   · intro h p q
     simpa [DrawnMultigraph.GraphConnected, Rπ, R, hstep] using h p q
 
+/-- Permuting the edge family and then permuting by the inverse recovers the
+original drawing. -/
+theorem DrawnMultigraph.permuteEdges_symm
+    (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges)) :
+    (G.permuteEdges π).permuteEdges π.symm = G := by
+  cases G with
+  | mk V n endpoints endpoints_mem arc crossings =>
+      simp [DrawnMultigraph.permuteEdges]
+      constructor
+      · funext i
+        exact congrArg endpoints (Equiv.apply_symm_apply π i)
+      · funext i
+        exact congrArg arc (Equiv.apply_symm_apply π i)
+
 end CrossingLemma

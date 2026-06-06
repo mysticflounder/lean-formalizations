@@ -459,6 +459,128 @@ noncomputable def insertedEdgeMapIsoOfPrefixStepVertexPerm
     (prefixStepDartEquiv_permCongr_residualMap_insEdgePerm
       (G := G) m hm hm' hARR hARR')
 
+/-- **Leaf insertion, residual-map form.** If the successor prefix is identified
+with the leaf-edge insertion of the previous residual map by the vertex-rotation
+splice equation, then planarity of the previous residual map implies planarity
+of the successor residual map.
+
+This is the combinatorial-map layer corresponding to the usual planar-embedding
+operation of adding a leaf edge: the new edge is inserted at one old corner and
+the other new dart is a singleton vertex. -/
+theorem residualMap_isPlanar_prefixStep_leaf_of_vertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c : Fin m × Bool)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar := by
+  let iso := insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c hvertex
+  exact (isPlanar_iff_of_iso iso).mpr
+    (isPlanar_insertedLeafEdgeMap (M := residualMap (G.prefixEdges m hm) hARR)
+      (c := c) hplanar)
+
+/-- **Same-face insertion, residual-map form.** If the successor prefix is
+identified with the facial insertion of a new edge into the previous residual map
+by the vertex-rotation splice equation, then planarity is preserved provided the
+two insertion corners lie on the same face of the previous residual map.
+
+This is the residual-map version of the standard planar-embedding operation of
+drawing an edge inside a face between two existing corners. -/
+theorem residualMap_isPlanar_prefixStep_sameFace_of_vertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar := by
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  exact (isPlanar_iff_of_iso iso).mpr
+    (isPlanar_insertedEdgeMap_of_sameCycle
+      (M := residualMap (G.prefixEdges m hm) hARR) (c₁ := c₁) (c₂ := c₂)
+      hc hplanar hsame)
+
+/-- The two residual-map insertion alternatives for one ordered prefix step.
+
+The `leaf` case is the tree-growth operation: one endpoint of the new edge is a
+new leaf vertex and the old endpoint rotation is a single-corner splice.  The
+`sameFace` case is the cotree-growth operation: both endpoints are already in
+the previous prefix, the two splice corners lie on the same face, and the
+successor rotation is the two-corner splice. -/
+inductive ResidualMapPrefixStepInsertion
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) : Prop
+  | leaf (c : Fin m × Bool)
+      (hvertex :
+        (prefixStepDartEquiv m).permCongr
+          (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+  | sameFace (c₁ c₂ : Fin m × Bool)
+      (hc : c₁ ≠ c₂)
+      (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+      (hvertex :
+        (prefixStepDartEquiv m).permCongr
+          (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+
+/-- A `ResidualMapPrefixStepInsertion` witness turns planarity of the previous
+prefix residual map into planarity of the successor prefix residual map. -/
+theorem residualMap_isPlanar_prefixStep_of_insertion
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hstep : ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR')
+    (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar := by
+  cases hstep with
+  | leaf c hvertex =>
+      exact residualMap_isPlanar_prefixStep_leaf_of_vertexPerm
+        (G := G) m hm hm' hARR hARR' c hvertex hplanar
+  | sameFace c₁ c₂ hc hsame hvertex =>
+      exact residualMap_isPlanar_prefixStep_sameFace_of_vertexPerm
+        (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex hplanar
+
+/-- Ordered-prefix planarity induction for residual maps.
+
+Starting from a planar base prefix, if every later prefix step is either a
+leaf insertion or a same-face insertion in the sense of
+`ResidualMapPrefixStepInsertion`, then every later prefix residual map is
+planar. This is the formal insertion-order skeleton used by tree-cotree proofs:
+the geometric content is exactly the construction of the step witnesses. -/
+theorem residualMap_isPlanar_prefix_of_insertions_from
+    (start : ℕ)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hbase : ∀ hstart : start ≤ G.numEdges,
+      (residualMap (G.prefixEdges start hstart) (hARR start hstart)).IsPlanar)
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), start ≤ m →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm'))
+    (n : ℕ) (hstartn : start ≤ n) (hn : n ≤ G.numEdges) :
+    (residualMap (G.prefixEdges n hn) (hARR n hn)).IsPlanar := by
+  revert hn
+  refine Nat.le_induction ?base ?step n hstartn
+  · intro hstartG
+    exact hbase hstartG
+  · intro m hstartm ih hm'
+    exact residualMap_isPlanar_prefixStep_of_insertion
+      (G := G) m (Nat.le_of_succ_le hm') hm'
+      (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')
+      (hstep m hm' hstartm)
+      (ih (Nat.le_of_succ_le hm'))
+
 /-- At an endpoint of the new last edge, the incident-end type of the
 successor prefix is the old incident-end type plus one new dart. -/
 noncomputable def incident_ends_prefix_step_endpoint_equiv
@@ -677,6 +799,136 @@ theorem residualMap_vertexMk_eq_iff (hARR : ArcsRotationRegular G)
     have := htrans (dartSigmaEquiv G d).2 (hbase ▸ (dartSigmaEquiv G d').2)
     convert this using 2
 
+/-- For a one-edge non-loop drawing, every residual vertex cycle is a singleton:
+the two darts are anchored at distinct endpoints, so the residual vertex
+permutation fixes both darts. -/
+theorem residualMap_vertexPerm_eq_one_of_one_edge
+    (hARR : ArcsRotationRegular G) (hone : G.numEdges = 1)
+    (hloop : ∀ e : Fin G.numEdges, (G.endpoints e).1 ≠ (G.endpoints e).2) :
+    (residualMap G hARR).vertexPerm = 1 := by
+  apply Equiv.ext
+  intro d
+  have hclass : (residualMap G hARR).Vertex_mk ((residualMap G hARR).vertexPerm d) =
+      (residualMap G hARR).Vertex_mk d := by
+    rw [CombinatorialMap.Vertex_mk, CombinatorialMap.Vertex_mk, Quotient.eq'']
+    exact (Equiv.Perm.sameCycle_apply_right.mpr (Equiv.Perm.SameCycle.refl _ _)).symm
+  have hanchor := (residualMap_vertexMk_eq_iff G hARR
+    ((residualMap G hARR).vertexPerm d) d).mp hclass
+  haveI : Subsingleton (Fin G.numEdges) := by
+    rw [hone]
+    infer_instance
+  rcases d with ⟨e, b⟩
+  have hfirst : ((residualMap G hARR).vertexPerm (e, b)).1 = e := by
+    apply Subsingleton.elim
+  rcases hv : (residualMap G hARR).vertexPerm (e, b) with ⟨e', b'⟩
+  change (e', b') = (e, b)
+  have he' : e' = e := by simpa [hv] using hfirst
+  subst e'
+  cases b <;> cases b'
+  · rfl
+  · exfalso
+    exact hloop e (by simpa [dartAnchor, hv] using hanchor.symm)
+  · exfalso
+    exact hloop e (by simpa [dartAnchor, hv] using hanchor)
+  · rfl
+
+/-- A one-edge non-loop drawing has two residual vertex classes. -/
+theorem residualMap_vertex_card_one_edge
+    (hARR : ArcsRotationRegular G) (hone : G.numEdges = 1)
+    (hloop : ∀ e : Fin G.numEdges, (G.endpoints e).1 ≠ (G.endpoints e).2) :
+    Fintype.card (residualMap G hARR).Vertex = 2 := by
+  have hv := residualMap_vertexPerm_eq_one_of_one_edge G hARR hone hloop
+  rw [card_vertex_eq_orbitCount, hv, orbitCount_eq, Equiv.Perm.support_one,
+    Equiv.Perm.cycleFactorsFinset_one]
+  simp [Fintype.card_prod, hone]
+
+/-- A one-edge non-loop drawing has one residual face class. With the residual
+vertex permutation trivial, the face permutation is the residual end-swap, whose
+single orbit is the unique edge. -/
+theorem residualMap_face_card_one_edge
+    (hARR : ArcsRotationRegular G) (hone : G.numEdges = 1)
+    (hloop : ∀ e : Fin G.numEdges, (G.endpoints e).1 ≠ (G.endpoints e).2) :
+    Fintype.card (residualMap G hARR).Face = 1 := by
+  let M := residualMap G hARR
+  have hv : M.vertexPerm = 1 := residualMap_vertexPerm_eq_one_of_one_edge G hARR hone hloop
+  have hf : M.facePerm = M.edgePerm := by
+    calc
+      M.facePerm = M.vertexPerm⁻¹ * M.edgePerm := by rw [M.facePerm_eq]
+      _ = M.edgePerm := by rw [hv]; simp
+  rw [card_face_eq_orbitCount, hf, ← card_edge_eq_orbitCount M]
+  simpa [M, hone] using residualMap_edge_card G hARR
+
+/-- The residual map of a one-edge non-loop drawing is planar. This is the
+one-edge base case for the ordered leaf/same-face insertion induction. -/
+theorem residualMap_isPlanar_one_edge
+    (hARR : ArcsRotationRegular G) (hone : G.numEdges = 1)
+    (hloop : ∀ e : Fin G.numEdges, (G.endpoints e).1 ≠ (G.endpoints e).2) :
+    (residualMap G hARR).IsPlanar := by
+  unfold CombinatorialMap.IsPlanar CombinatorialMap.eulerCharacteristic
+  rw [residualMap_vertex_card_one_edge G hARR hone hloop,
+    residualMap_edge_card G hARR,
+    residualMap_face_card_one_edge G hARR hone hloop,
+    hone]
+  norm_num
+
+/-- The residual map of a one-edge drawing whose arc joins its declared
+endpoints is planar. The non-loop condition follows from injectivity of the
+drawn simple arc. -/
+theorem residualMap_isPlanar_one_edge_of_arcsJoinEndpoints
+    (hARR : ArcsRotationRegular G) (hone : G.numEdges = 1)
+    (hjoin : G.ArcsJoinEndpoints) :
+    (residualMap G hARR).IsPlanar :=
+  residualMap_isPlanar_one_edge G hARR hone
+    (fun e => DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints hjoin e)
+
+/-- The first ordered prefix has a planar residual map, provided the ambient
+drawing's arcs join their declared endpoints. -/
+theorem residualMap_prefix_one_isPlanar
+    (h1 : 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges 1 h1))
+    (hjoin : G.ArcsJoinEndpoints) :
+    (residualMap (G.prefixEdges 1 h1) hARR).IsPlanar :=
+  residualMap_isPlanar_one_edge_of_arcsJoinEndpoints (G := G.prefixEdges 1 h1)
+    hARR rfl (prefixEdges_arcsJoinEndpoints (G := G) 1 h1 hjoin)
+
+/-- Ordered-prefix planarity induction started at the first edge. The base case
+is the one-edge residual map, and every later step is supplied by a
+`ResidualMapPrefixStepInsertion` witness. -/
+theorem residualMap_isPlanar_prefix_of_insertions
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), 1 ≤ m →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm'))
+    (n : ℕ) (h1n : 1 ≤ n) (hn : n ≤ G.numEdges) :
+    (residualMap (G.prefixEdges n hn) (hARR n hn)).IsPlanar :=
+  residualMap_isPlanar_prefix_of_insertions_from (G := G) 1 hARR
+    (fun h1 => residualMap_prefix_one_isPlanar (G := G) h1 (hARR 1 h1) hjoin)
+    hstep n h1n hn
+
+/-- If a nonempty ordered drawing admits leaf/same-face insertion witnesses for
+every prefix step after the first edge, then the full drawing has a planar
+residual map for the induced full-prefix ARR witness. -/
+theorem exists_residualMap_isPlanar_of_prefix_insertions
+    (hpos : 1 ≤ G.numEdges)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), 1 ≤ m →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')) :
+    ∃ hARRG : ArcsRotationRegular G, (residualMap G hARRG).IsPlanar := by
+  have hprefix := residualMap_isPlanar_prefix_of_insertions (G := G) hjoin hARR hstep
+    G.numEdges hpos (Nat.le_refl G.numEdges)
+  have hfull : G.prefixEdges G.numEdges (Nat.le_refl G.numEdges) = G := by
+    cases G
+    rfl
+  let hARRG : ArcsRotationRegular G := by
+    simpa [hfull] using hARR G.numEdges (Nat.le_refl G.numEdges)
+  refine ⟨hARRG, ?_⟩
+  simpa [hfull, hARRG] using hprefix
+
 /-- If every listed drawing vertex has an incident dart, residual vertex classes
 are canonically equivalent to the listed drawing vertices. -/
 noncomputable def residualMapVertexEquivOfIncident
@@ -854,6 +1106,37 @@ theorem incidentCoverage_of_graphConnected_of_two_le
   · refine ⟨(e, true), ?_⟩
     rw [incidentEnds, Finset.mem_filter]
     exact ⟨Finset.mem_univ _, by simpa using hbackward.2⟩
+
+/-- A connected drawing with at least two listed vertices has at least one edge. -/
+theorem one_le_numEdges_of_graphConnected_of_two_le
+    (hconn : G.GraphConnected) (hcard : 2 ≤ Fintype.card ↥G.V) :
+    1 ≤ G.numEdges := by
+  have hnonempty : Nonempty ↥G.V := by
+    rw [← Fintype.card_pos_iff]
+    omega
+  let p : ↥G.V := Classical.choice hnonempty
+  obtain ⟨d, _hd⟩ := incidentCoverage_of_graphConnected_of_two_le G hconn hcard p
+  exact Nat.succ_le_of_lt (Nat.lt_of_le_of_lt (Nat.zero_le d.1.val) d.1.isLt)
+
+/-- Connected drawings with at least three listed vertices satisfy the
+nonempty-edge hypothesis needed by the ordered insertion induction. Thus
+prefix-step insertion witnesses for every step after the first edge produce a
+planar residual map for the full drawing. -/
+theorem exists_residualMap_isPlanar_of_prefix_insertions_connected
+    (hjoin : G.ArcsJoinEndpoints)
+    (hconn : G.GraphConnected)
+    (hv : 3 ≤ G.V.card)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), 1 ≤ m →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')) :
+    ∃ hARRG : ArcsRotationRegular G, (residualMap G hARRG).IsPlanar :=
+  exists_residualMap_isPlanar_of_prefix_insertions (G := G)
+    (one_le_numEdges_of_graphConnected_of_two_le (G := G) hconn (by
+      rw [Fintype.card_coe]
+      omega))
+    hjoin hARR hstep
 
 /-- The residual one-step reachability relation. -/
 private def resStep (hARR : ArcsRotationRegular G) :

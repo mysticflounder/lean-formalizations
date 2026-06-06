@@ -788,6 +788,74 @@ theorem crossingFreeResidualMapPlanarity_of_arr_planarity
   let hARR : ArcsRotationRegular G := hrot G hmult hjoin hcross hconn hv
   exact ⟨hARR, hplanar G hmult hjoin hcross hconn hv hARR⟩
 
+/-- The ordered-insertion route implies crossing-free residual-map planarity.
+
+This is the formal tree/cotree skeleton for the planar-map part of the
+crossing-free endpoint: choose an edge order, provide ARR witnesses for all
+ordered prefixes, and prove every step after the first edge is either a
+leaf insertion or a same-face insertion of residual maps. -/
+theorem crossingFreeResidualMapPlanarity_of_prefix_insertions
+    (hinsert : ∀ (G : DrawnMultigraph),
+      (∀ p q, G.multiplicity p q ≤ 1) →
+      G.ArcsJoinEndpoints →
+      CrossingFree G →
+      G.GraphConnected →
+      3 ≤ G.V.card →
+        ∃ hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+          ArcsRotationRegular (G.prefixEdges m hm),
+          ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), 1 ≤ m →
+            ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+              (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')) :
+    CrossingFreeResidualMapPlanarity := by
+  intro G hmult hjoin hcross hconn hv
+  obtain ⟨hARR, hstep⟩ := hinsert G hmult hjoin hcross hconn hv
+  exact exists_residualMap_isPlanar_of_prefix_insertions_connected
+    (G := G) hjoin hconn hv hARR hstep
+
+set_option maxHeartbeats 800000 in
+/-- The ordered-insertion route may be proved after reindexing the edges by a
+convenient permutation.
+
+This is the form closest to the usual literature proof: choose an edge order,
+verify each prefix step is a leaf insertion or a same-face insertion in that
+order, and then transport the resulting residual-map planarity back to the
+original edge enumeration. -/
+theorem crossingFreeResidualMapPlanarity_of_permuted_prefix_insertions
+    (hinsert : ∀ (G : DrawnMultigraph),
+      (∀ p q, G.multiplicity p q ≤ 1) →
+      G.ArcsJoinEndpoints →
+      CrossingFree G →
+      G.GraphConnected →
+      3 ≤ G.V.card →
+        ∃ π : Equiv.Perm (Fin G.numEdges),
+          ∃ hARR : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+            ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm),
+            ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), 1 ≤ m →
+              ResidualMapPrefixStepInsertion (G := G.permuteEdges π)
+                m (Nat.le_of_succ_le hm') hm'
+                (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')) :
+    CrossingFreeResidualMapPlanarity := by
+  intro G hmult hjoin hcross hconn hv
+  obtain ⟨π, hARRprefix, hstep⟩ := hinsert G hmult hjoin hcross hconn hv
+  have hjoinπ : (G.permuteEdges π).ArcsJoinEndpoints :=
+    permuteEdges_arcsJoinEndpoints (G := G) π hjoin
+  have hconnπ : (G.permuteEdges π).GraphConnected :=
+    (DrawnMultigraph.permuteEdges_graphConnected_iff G π).2 hconn
+  have hvπ : 3 ≤ (G.permuteEdges π).V.card := by
+    simpa [DrawnMultigraph.permuteEdges] using hv
+  obtain ⟨hARRπ, hplanarπ⟩ :=
+    exists_residualMap_isPlanar_of_prefix_insertions_connected
+      (G := G.permuteEdges π) hjoinπ hconnπ hvπ hARRprefix hstep
+  let H := (G.permuteEdges π).permuteEdges π.symm
+  have hH : H = G := DrawnMultigraph.permuteEdges_symm G π
+  let hARRH : ArcsRotationRegular H :=
+    permuteEdges_arrRotationRegular (G.permuteEdges π) π.symm hARRπ
+  have hplanarH : (residualMap H hARRH).IsPlanar := by
+    exact (residualMap_isPlanar_permuteEdges_iff
+      (G := G.permuteEdges π) π.symm hjoinπ hARRπ).2 hplanarπ
+  refine ⟨hH ▸ hARRH, ?_⟩
+  exact hH.rec hplanarH
+
 /-- The clean crossing-free residual-map endpoint supplies the canonical
 component planarity endpoint used by the deletion/amplification layer. -/
 theorem edgeSetDrawingResidualMapCanonicalComponentPlanarity_of_crossingFree
