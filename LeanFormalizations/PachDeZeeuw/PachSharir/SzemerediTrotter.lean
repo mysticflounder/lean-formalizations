@@ -2200,6 +2200,108 @@ theorem straightLineCrossingFreeComponentwisePlanarization_of_crossingFreeResidu
       abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
         (G := G) hplD
 
+/-- The restricted straight-line drawing attached to one canonical connected
+component of a crossing-free surviving edge set. This packages the component
+bookkeeping so the remaining planar-map hypothesis can be stated directly for
+the component drawing. -/
+noncomputable def stComponentDrawing
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (S : Finset (ℝ × ℝ)) (E : Finset (Fin (stMultigraph P L).numEdges))
+    (hE : E ⊆ edgeSetOn (stMultigraph P L) S)
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent) :
+    DrawnMultigraph :=
+  edgeSetDrawing (stMultigraph P L) (edgeSetComponentVertexSet (stMultigraph P L) C)
+    (edgeSetComponentEdgeSet (stMultigraph P L) hE C)
+    (edgeSetComponentEdgeSet_subset_edgeSetOn (stMultigraph P L) hE
+      (stMultigraph_arcsJoinEndpoints P L) C)
+
+/-- Canonical straight-line component drawings inherit the ambient straight-line
+local rotation witness. This removes the arbitrary-drawing ARR obligation from
+the Szemerédi--Trotter/grid-rich path: only genus-zero residual-map planarity
+remains for the component map. -/
+theorem stComponentDrawing_arcsRotationRegular
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent) :
+    ArcsRotationRegular (stComponentDrawing P L S E hE C) := by
+  let G := stMultigraph P L
+  let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+    (stMultigraph_arcsJoinEndpoints P L) C
+  have hDsub : edgeSetComponentVertexSet G C ⊆ G.V := by
+    intro p hp
+    exact hS (edgeSetComponentVertexSet_subset G C hp)
+  simpa [stComponentDrawing, G, hEc] using
+    edgeSetDrawing_arcsRotationRegular (G := G) (hE := hEc) hDsub
+      (stMultigraph_arcsRotationRegular P L hL)
+
+/-- **Straight-line canonical-component residual-map planarity, with ARR already
+inherited from the straight-line drawing.**
+
+This is the exact remaining genus-zero part of Pach--Tóth,
+*A crossing lemma for multigraphs*, Lemma 2.1, specialized to the
+Szemerédi--Trotter incidence graph: after the one-edge-per-crossing deletion,
+each canonical connected component of the surviving straight-line drawing has
+planar residual map for its inherited local rotation system. -/
+def StraightLineCanonicalComponentResidualMapPlanarityOfARR : Prop :=
+  ∀ (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ))),
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ) →
+    ∀ (S : Finset (ℝ × ℝ)), (hS : S ⊆ (stMultigraph P L).V) →
+      ∀ (E : Finset (Fin (stMultigraph P L).numEdges)),
+        ∀ hE : E ⊆ edgeSetOn (stMultigraph P L) S,
+          NoCrossingPairsInEdgeSet (stMultigraph P L) E →
+            ∀ C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent,
+              3 ≤ (edgeSetComponentVertexSet (stMultigraph P L) C).card →
+                (residualMap (stComponentDrawing P L S E hE C)
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).IsPlanar
+
+/-- The straight-line canonical-component residual-map endpoint gives the
+componentwise genus-zero planarization required by the ACNS/Leighton deletion
+step. This is the ST-specific form of Pach--Tóth Lemma 2.1: the component is
+already connected by construction, ARR is inherited from straight segments, and
+the only hypothesis is residual-map genus zero. -/
+theorem straightLineCrossingFreeComponentwisePlanarization_of_canonical_component_residualMapPlanarityOfARR
+    (hres : StraightLineCanonicalComponentResidualMapPlanarityOfARR) :
+    StraightLineCrossingFreeComponentwisePlanarization := by
+  intro P L hL S hS E hE hfree
+  let G := stMultigraph P L
+  refine ⟨(edgeSetSimpleGraph G S E).ConnectedComponent,
+    (show Fintype (edgeSetSimpleGraph G S E).ConnectedComponent from
+      SetLike.instFintype),
+    edgeSetComponentVertexSet G, edgeSetComponentEdgeSet G hE, ?_, ?_, ?_, ?_⟩
+  · exact edgeSetComponentEdgeSet_card_sum G hE
+  · exact (edgeSetComponentVertexSet_card_sum (G := G) (S := S) (E := E)).le
+  · intro C
+    exact edgeSetComponentVertexSet_subset G C
+  · intro C
+    let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+      (stMultigraph_arcsJoinEndpoints P L) C
+    refine ⟨hEc, ?_⟩
+    intro hv
+    let D := stComponentDrawing P L S E hE C
+    let hDarr := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+    have hDmult : ∀ p q, D.multiplicity p q ≤ 1 := by
+      simpa [D, stComponentDrawing, G, hEc] using edgeSetDrawing_multiplicity_le
+        (G := G) (hE := hEc) (stMultigraph_multiplicity_le_one P L hL)
+    have hDjoin : D.ArcsJoinEndpoints := by
+      simpa [D, stComponentDrawing, G, hEc] using edgeSetDrawing_arcsJoinEndpoints
+        (G := G) (hE := hEc) (stMultigraph_arcsJoinEndpoints P L)
+    have hDconn : D.GraphConnected := by
+      simpa [D, stComponentDrawing, G, hEc] using edgeSetComponentDrawing_graphConnected
+        (G := G) hE (stMultigraph_arcsJoinEndpoints P L) C
+    have hDverts : 3 ≤ D.V.card := by
+      simpa [D, stComponentDrawing, edgeSetDrawing, G] using hv
+    have hDplanar : (residualMap D hDarr).IsPlanar := by
+      simpa [D, hDarr] using hres P L hL S hS E hE hfree C hv
+    have hplD : HasGenusZeroSimplePlanarization (abstractize D) := by
+      exact has_genus_zero_simple_planarization_of_residual_map D hDarr hDjoin
+        hDmult hDconn hDverts hDplanar
+    simpa [D, stComponentDrawing, G, hEc] using
+      abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
+        (G := G) hplD
+
 /-- Componentwise genus-zero planarization for crossing-free straight-line
 survivors gives the numerical straight-line crossing-free edge bound. -/
 theorem straightLineCrossingFreeEdgeBound_of_componentwise_planarization
