@@ -7,6 +7,7 @@ import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
 import LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties
+import LeanFormalizations.Combinatorics.CombinatorialMap.VertexGraph
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 
 /-!
@@ -21,5 +22,6 @@ axiom-clean (`[propext, Classical.choice, Quot.sound]`):
   formula, and its multiplicity lift `e ≤ M·(3v − 6)`.
 * `EulerBound` — a connected combinatorial map has Euler characteristic `≤ 2`.
 * `DualProperties` — connectedness and planarity are preserved by duality.
+* `VertexGraph` — vertex/face adjacency graphs and their spanning trees.
 * `EdgeInsertion` — the orbit-count engine for edge insertion.
 -/
