@@ -663,6 +663,26 @@ theorem vertexRotation_eq_of_witness
           (endAngleKey_injective G p _ _ (arrAngle_injOn G hARR hp hs0 hs_arr)) := hrot_s
     _ = vertexRotation G hARR hp := rotation_wellDefined G hARR hp hs0 hs_arr
 
+/-- A vertex with at most one incident end has trivial rotation. -/
+theorem vertexRotation_eq_one_of_card_le_one (G : DrawnMultigraph)
+    (hARR : ArcsRotationRegular G) {p : ℝ × ℝ} (hp : p ∈ G.V)
+    (hcard : Fintype.card ↥(incidentEnds G p) ≤ 1) :
+    vertexRotation G hARR hp = 1 := by
+  unfold vertexRotation
+  letI : Subsingleton ↥(incidentEnds G p) := Fintype.card_le_one_iff_subsingleton.mp hcard
+  exact Equiv.ext (fun _ => Subsingleton.elim _ _)
+
+/-- The radius-parametrized rotation is also trivial when the incident-end set
+has at most one element. -/
+theorem vertexRotationAtRadius_eq_one_of_card_le_one (G : DrawnMultigraph)
+    (p : ℝ × ℝ) (α : (Fin G.numEdges × Bool) → ℝ → ℝ) (r : ℝ)
+    (hinj : Function.Injective (endAngleKey G p α r))
+    (hcard : Fintype.card ↥(incidentEnds G p) ≤ 1) :
+    vertexRotationAtRadius G p α r hinj = 1 := by
+  unfold vertexRotationAtRadius
+  letI : Subsingleton ↥(incidentEnds G p) := Fintype.card_le_one_iff_subsingleton.mp hcard
+  exact Equiv.ext (fun _ => Subsingleton.elim _ _)
+
 /-! ### Edge-permutation invariance -/
 
 section EdgePermutation
@@ -1212,6 +1232,22 @@ theorem rotationOfOrder_eq_one_of_card_le_one {β : Type*} [Fintype β]
     (L : LinearOrder β) (hcard : Fintype.card β ≤ 1) : rotationOfOrder L = 1 := by
   have : Subsingleton β := Fintype.card_le_one_iff_subsingleton.mp hcard
   exact Equiv.ext (fun _ => Subsingleton.elim _ _)
+
+/-- A nontrivial cyclic order has no fixed points. -/
+theorem rotationOfOrder_apply_ne_self_of_two_le {β : Type*} [Fintype β]
+    (L : LinearOrder β) (hcard : 2 ≤ Fintype.card β) (b : β) :
+    rotationOfOrder L b ≠ b := by
+  intro hb
+  obtain ⟨i, rfl⟩ := (isoFin L).surjective b
+  have hfix : finRotate (Fintype.card β) i = i := by
+    apply (isoFin L).injective
+    simpa [rotationOfOrder_apply_isoFin] using hb
+  have hne : finRotate (Fintype.card β) i ≠ i := by
+    have hsupport : i ∈ (finRotate (Fintype.card β)).support := by
+      rw [support_finRotate_of_le hcard]
+      simp
+    exact (Equiv.Perm.mem_support.mp hsupport)
+  exact hne hfix
 
 #check @CrossingLemmaMultigraphStatement
 #check DrawnMultigraph

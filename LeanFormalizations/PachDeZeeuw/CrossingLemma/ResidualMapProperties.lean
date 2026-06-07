@@ -8,6 +8,7 @@ import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ResidualMap
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.RotationCoherence
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
+import LeanFormalizations.Combinatorics.CombinatorialMap.VertexGraph
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 /-!
@@ -416,6 +417,56 @@ theorem prefixStepDartEquiv_permCongr_residualMap_insEdgePerm
       (hedge := residualMap_edgePerm_apply (G := G.prefixEdges m hm) hARR)
   · symm
     exact residualMap_edgePerm_eq_boolSwap (G := G.prefixEdges (m + 1) hm') hARR'
+
+private theorem castLE_castSucc_eq_castLE {m n : ℕ}
+    (hm : m ≤ n) (hm' : m + 1 ≤ n) (i : Fin m) :
+    Fin.castLE hm' i.castSucc = Fin.castLE hm i := by
+  apply Fin.ext
+  rfl
+
+/-- On an old dart, the ARR angle is unchanged when passing from a prefix to
+its successor prefix. The underlying arc is the same, and the first-crossing
+parameter is unique, so the two witness families read off the same angle. -/
+theorem arrAngle_prefixStep_inl_eq
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    {p : ℝ × ℝ} (hp : p ∈ G.V)
+    (e : Fin m × Bool) (he : e ∈ incidentEnds (G.prefixEdges m hm) p)
+    {r : ℝ} (hr0 : 0 < r)
+    (hr : r ≤ arrRadius (G.prefixEdges m hm) hARR hp)
+    (hr' : r ≤ arrRadius (G.prefixEdges (m + 1) hm') hARR' hp) :
+    arrAngle (G.prefixEdges m hm) hARR hp e r =
+      arrAngle (G.prefixEdges (m + 1) hm') hARR' hp (prefixStepDartEquiv m (Sum.inl e)) r := by
+  obtain ⟨t, ht, hα⟩ := arrAngle_firstCrossing (G := G.prefixEdges m hm) hARR hp he hr0 hr
+  have hsuccmem :
+      prefixStepDartEquiv m (Sum.inl e) ∈ incidentEnds (G.prefixEdges (m + 1) hm') p := by
+    simpa [prefixStepDartEquiv_apply_inl] using
+      (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm) (hm' := hm')).2 he
+  obtain ⟨t', ht', hα'⟩ :=
+    arrAngle_firstCrossing (G := G.prefixEdges (m + 1) hm') hARR' hp hsuccmem hr0 hr'
+  have heG : (Fin.castLE hm e.1, e.2) ∈ incidentEnds G p :=
+    (mem_incidentEnds_prefixEdges_iff (G := G) (m := m) (hm := hm)).mp he
+  have htG : IsFirstCrossing G p (Fin.castLE hm e.1, e.2) r t := by
+    exact (prefixEdges_isFirstCrossing_iff (G := G) (m := m) (hm := hm)).mp ht
+  have htG' : IsFirstCrossing G p (Fin.castLE hm e.1, e.2) r t' := by
+    have htemp :
+        IsFirstCrossing (G.prefixEdges (m + 1) hm') p
+          (prefixStepDartEquiv m (Sum.inl e)) r t' := ht'
+    have htmp := (prefixEdges_isFirstCrossing_iff (G := G) (m := m + 1) (hm := hm')).mp htemp
+    simpa [prefixStepDartEquiv_apply_inl, castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] using
+      htmp
+  have ht_eq : t = t' :=
+    isFirstCrossing_unique_of_arcsJoinEndpoints G hjoin heG hr0 htG htG'
+  calc
+    arrAngle (G.prefixEdges m hm) hARR hp e r = angleAt p ((G.arc (Fin.castLE hm e.1)).param t) := by
+      simpa [DrawnMultigraph.prefixEdges] using hα
+    _ = angleAt p ((G.arc (Fin.castLE hm e.1)).param t') := by rw [ht_eq]
+    _ = arrAngle (G.prefixEdges (m + 1) hm') hARR' hp (prefixStepDartEquiv m (Sum.inl e)) r := by
+      symm
+      simpa [prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges,
+        castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] using hα'
 
 /-- To identify a successor-prefix residual map with a leaf insertion on the
 previous prefix, it is enough to prove the vertex-permutation splice statement.
@@ -1154,6 +1205,178 @@ theorem DrawnMultigraph.exists_vertexGraph_spanningTree
   exact SimpleGraph.Connected.exists_isTree_le
     (G := G.vertexGraph hjoin) (G.vertexGraph_connected hjoin hconn)
 
+/-- Under multiplicity `≤ 1`, a vertex-graph adjacency determines a unique
+actual drawing edge. This is the edge-level bridge needed to turn a spanning
+tree on the drawing's vertex graph into a concrete edge order. -/
+theorem DrawnMultigraph.vertexGraph_adj_unique_edge
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    {p q : ↥G.V} (h : (G.vertexGraph hjoin).Adj p q) :
+    ∃! e : Fin G.numEdges,
+      ((G.endpoints e).1 = (p : ℝ × ℝ) ∧ (G.endpoints e).2 = (q : ℝ × ℝ)) ∨
+      ((G.endpoints e).1 = (q : ℝ × ℝ) ∧ (G.endpoints e).2 = (p : ℝ × ℝ)) := by
+  classical
+  change ∃ e : Fin G.numEdges,
+      ((G.endpoints e).1 = (p : ℝ × ℝ) ∧ (G.endpoints e).2 = (q : ℝ × ℝ)) ∨
+      ((G.endpoints e).1 = (q : ℝ × ℝ) ∧ (G.endpoints e).2 = (p : ℝ × ℝ)) at h
+  rcases h with ⟨e, he⟩
+  refine ⟨e, he, ?_⟩
+  intro e' he'
+  by_contra hne
+  let s : Finset (Fin G.numEdges) :=
+    Finset.univ.filter
+      (fun i : Fin G.numEdges =>
+        G.endpoints i = ((p : ℝ × ℝ), (q : ℝ × ℝ)) ∨
+          G.endpoints i = ((q : ℝ × ℝ), (p : ℝ × ℝ)))
+  have he_mem : e ∈ s := by
+    rw [Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, by simpa [s, Prod.ext_iff] using he⟩
+  have he'_mem : e' ∈ s := by
+    rw [Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, by simpa [s, Prod.ext_iff] using he'⟩
+  have hlt : 1 < s.card := by
+    rw [Finset.one_lt_card]
+    exact ⟨e, he_mem, e', he'_mem, fun hEq => hne hEq.symm⟩
+  have hm : s.card ≤ 1 := by
+    simpa [s, DrawnMultigraph.multiplicity] using hmult p q
+  omega
+
+/-- The chosen drawing edge witnessing a vertex-graph adjacency. -/
+noncomputable def DrawnMultigraph.vertexGraphEdge
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    {p q : ↥G.V} (h : (G.vertexGraph hjoin).Adj p q) : Fin G.numEdges :=
+  Classical.choose (ExistsUnique.exists
+    (DrawnMultigraph.vertexGraph_adj_unique_edge G hjoin hmult h))
+
+/-- The chosen edge really witnesses the adjacency. -/
+@[simp] theorem DrawnMultigraph.vertexGraphEdge_spec
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    {p q : ↥G.V} (h : (G.vertexGraph hjoin).Adj p q) :
+    ((G.endpoints (G.vertexGraphEdge hjoin hmult h)).1 = (p : ℝ × ℝ) ∧
+        (G.endpoints (G.vertexGraphEdge hjoin hmult h)).2 = (q : ℝ × ℝ)) ∨
+      ((G.endpoints (G.vertexGraphEdge hjoin hmult h)).1 = (q : ℝ × ℝ) ∧
+        (G.endpoints (G.vertexGraphEdge hjoin hmult h)).2 = (p : ℝ × ℝ)) := by
+  exact Classical.choose_spec
+    (ExistsUnique.exists (DrawnMultigraph.vertexGraph_adj_unique_edge G hjoin hmult h))
+
+/-- Any edge witnessing the adjacency is equal to the chosen one. -/
+theorem DrawnMultigraph.vertexGraphEdge_eq
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    {p q : ↥G.V} {e : Fin G.numEdges}
+    (h : (G.vertexGraph hjoin).Adj p q)
+    (he :
+      ((G.endpoints e).1 = (p : ℝ × ℝ) ∧ (G.endpoints e).2 = (q : ℝ × ℝ)) ∨
+      ((G.endpoints e).1 = (q : ℝ × ℝ) ∧ (G.endpoints e).2 = (p : ℝ × ℝ))) :
+    e = G.vertexGraphEdge hjoin hmult h := by
+  exact (DrawnMultigraph.vertexGraph_adj_unique_edge G hjoin hmult h).unique he
+    (G.vertexGraphEdge_spec hjoin hmult h)
+
+theorem DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin) (_hT : T.IsTree)
+    {l : List ↥G.V}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card ↥G.V)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ f : Fin (l.length - 1) → Fin G.numEdges, Function.Injective f := by
+  classical
+  refine ⟨fun i =>
+    G.vertexGraphEdge hjoin hmult
+      (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2), ?_⟩
+  intro i j hij
+  let a_i : ↥G.V := l[i.1 + 1]'(by omega)
+  let b_i : ↥G.V := parent (i.1 + 1) (by omega) (by omega)
+  let a_j : ↥G.V := l[j.1 + 1]'(by omega)
+  let b_j : ↥G.V := parent (j.1 + 1) (by omega) (by omega)
+  have hAdj_i : (G.vertexGraph hjoin).Adj a_i b_i := by
+    exact hTsub (by simpa [a_i, b_i] using (hparent (i.1 + 1) (by omega) (by omega)).2)
+  have hAdj_j : (G.vertexGraph hjoin).Adj a_j b_j := by
+    exact hTsub (by simpa [a_j, b_j] using (hparent (j.1 + 1) (by omega) (by omega)).2)
+  have hspec_i := G.vertexGraphEdge_spec hjoin hmult hAdj_i
+  have hspec_j := G.vertexGraphEdge_spec hjoin hmult hAdj_j
+  have hEq : G.vertexGraphEdge hjoin hmult hAdj_i =
+      G.vertexGraphEdge hjoin hmult hAdj_j := by
+    simpa [a_i, b_i, a_j, b_j] using hij
+  rw [hEq] at hspec_i
+  have hpair :
+      (a_i, b_i) = (a_j, b_j) ∨ (a_i, b_i) = (b_j, a_j) := by
+    cases hspec_i with
+    | inl hspec_i =>
+        cases hspec_j with
+        | inl hspec_j =>
+            left
+            have h1 : a_i = a_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.left) hspec_j.left)
+            have h2 : b_i = b_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.right) hspec_j.right)
+            exact Prod.ext h1 h2
+        | inr hspec_j =>
+            right
+            have h1 : a_i = b_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.left) hspec_j.left)
+            have h2 : b_i = a_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.right) hspec_j.right)
+            exact Prod.ext h1 h2
+    | inr hspec_i =>
+        cases hspec_j with
+        | inl hspec_j =>
+            right
+            have h1 : a_i = b_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.right) hspec_j.right)
+            have h2 : b_i = a_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.left) hspec_j.left)
+            exact Prod.ext h1 h2
+        | inr hspec_j =>
+            left
+            have h1 : a_i = a_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.right) hspec_j.right)
+            have h2 : b_i = b_j := by
+              simpa using (Eq.trans (Eq.symm hspec_i.left) hspec_j.left)
+            exact Prod.ext h1 h2
+  have hsym2 : s(a_i, b_i) = s(a_j, b_j) := by
+    rcases hpair with hpair | hpair
+    · exact congrArg (fun x : ↥G.V × ↥G.V => s(x.1, x.2)) hpair
+    · calc
+        s(a_i, b_i) = s(b_j, a_j) := congrArg (fun x : ↥G.V × ↥G.V => s(x.1, x.2)) hpair
+        _ = s(a_j, b_j) := Sym2.eq_swap
+  exact SimpleGraph.IsTree.parentEdgeMap_injective (G := T) (l := l) hl_nodup parent
+    hparent hsym2
+
+/-- A leaf-insertion order on a spanning tree of the vertex graph determines an
+edge permutation that moves those tree edges into the initial segment of the
+ambient edge order. This is the permutation-level bridge used by the ordered
+prefix insertion route. -/
+theorem DrawnMultigraph.exists_treeEdgePermutation_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin) (hT : T.IsTree)
+    {l : List ↥G.V}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card ↥G.V)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ hk : l.length - 1 ≤ G.numEdges,
+      ∃ f : Fin (l.length - 1) → Fin G.numEdges,
+        Function.Injective f ∧
+          ∃ π : Equiv.Perm (Fin G.numEdges),
+            ∀ i : Fin (l.length - 1), π (f i) = Fin.castLE hk i := by
+  classical
+  rcases
+      DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
+        (G := G) hjoin hmult T hTsub hT hl_nodup hl_len parent hparent with
+    ⟨f, hf⟩
+  have hk : l.length - 1 ≤ G.numEdges := by
+    simpa using Fintype.card_le_of_injective f hf
+  obtain ⟨π, hπ⟩ := SimpleGraph.Equiv.Perm.exists_map_fin_castLE hk f hf
+  exact ⟨hk, f, hf, π, hπ⟩
+
 /-- A connected drawing with at least two listed vertices has no isolated listed
 vertex: every `p : G.V` has an incident dart. -/
 theorem incidentCoverage_of_graphConnected_of_two_le
@@ -1341,5 +1564,27 @@ theorem residualMap_connected (hARR : ArcsRotationRegular G)
             reflTransGen_of_same_anchor G hARR (e, false) y (by rw [hf, hy])
           exact (step1.trans step2).trans step3
   exact lift pa pb (hconn pa pb) d rfl d' rfl
+
+/-- A connected drawing with at least one edge determines a spanning tree on the
+vertices of its residual map. -/
+theorem residualMap_exists_vertexGraph_spanningTree
+    (hARR : ArcsRotationRegular G) (hconn : G.GraphConnected) (hnum : 0 < G.numEdges) :
+    ∃ T ≤ (residualMap G hARR).vertexGraph, T.IsTree := by
+  letI : Nonempty (residualMap G hARR).Vertex := by
+    refine ⟨(residualMap G hARR).Vertex_mk (⟨0, hnum⟩, false)⟩
+  exact CombinatorialMap.exists_vertexGraph_spanningTree
+    (M := residualMap G hARR)
+    (by simpa using residualMap_connected G hARR hconn)
+
+/-- A connected drawing with at least one edge determines a spanning tree on the
+faces of its residual map. -/
+theorem residualMap_exists_faceGraph_spanningTree
+    (hARR : ArcsRotationRegular G) (hconn : G.GraphConnected) (hnum : 0 < G.numEdges) :
+    ∃ T ≤ (residualMap G hARR).faceGraph, T.IsTree := by
+  letI : Nonempty (residualMap G hARR).Vertex := by
+    refine ⟨(residualMap G hARR).Vertex_mk (⟨0, hnum⟩, false)⟩
+  exact CombinatorialMap.exists_faceGraph_spanningTree
+    (M := residualMap G hARR)
+    (by simpa using residualMap_connected G hARR hconn)
 
 end CrossingLemma

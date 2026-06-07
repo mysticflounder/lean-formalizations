@@ -213,4 +213,27 @@ noncomputable def eulerCharacteristic [Fintype D] : ℤ :=
 def IsPlanar [Fintype D] : Prop :=
   M.eulerCharacteristic = 2
 
+/-- A combinatorial map with exactly one face has all darts in the same face
+cycle. This is the one-face bridge used by the tree-first / same-face insertion
+layer. -/
+theorem facePerm_sameCycle_of_card_face_eq_one [Fintype D]
+    (h : Fintype.card M.Face = 1) (x y : D) :
+    M.facePerm.SameCycle x y := by
+  have hsub : Subsingleton M.Face := by
+    exact Fintype.card_le_one_iff_subsingleton.mp (by omega)
+  have hq : M.Face_mk x = M.Face_mk y := Subsingleton.elim _ _
+  simpa [CombinatorialMap.Face_mk] using (Quotient.eq.mp hq)
+
+/-- A planar combinatorial map with at least one vertex and `|E| = |V| - 1`
+has exactly one face. This is the Euler-counting bridge used after the tree
+prefix has been inserted. -/
+theorem card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one [Fintype D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hplanar : M.IsPlanar)
+    (h : Fintype.card M.Edge = Fintype.card M.Vertex - 1) :
+    Fintype.card M.Face = 1 := by
+  have hplanar' : (Fintype.card M.Vertex : ℤ) - (Fintype.card M.Edge : ℤ) +
+      (Fintype.card M.Face : ℤ) = 2 := hplanar
+  rw [h] at hplanar'
+  omega
+
 end CombinatorialMap

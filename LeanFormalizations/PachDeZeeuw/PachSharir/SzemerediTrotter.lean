@@ -3023,9 +3023,9 @@ theorem gridRichLine_of_crossingFreeResidualMapPlanarityOfARR_of_permuted_planar
 proof for the crossing-free residual-map endpoint.
 
 This is the current sharp endpoint for discharging `GridRichLineStatement`
-through Pach--Tóth Lemma 2.1: construct a convenient edge order for each
-connected simple crossing-free drawing and verify the leaf/same-face residual-map
-insertion witnesses for all prefixes. -/
+through the planar-map/Euler argument in Pach--Tóth: construct a convenient
+edge order for each connected simple crossing-free drawing and verify the
+leaf/same-face residual-map insertion witnesses for all prefixes. -/
 theorem gridRichLine_of_crossingFreeResidualMapPlanarity_of_permuted_prefix_insertions
     (hinsert : ∀ (G : DrawnMultigraph),
       (∀ p q, G.multiplicity p q ≤ 1) →

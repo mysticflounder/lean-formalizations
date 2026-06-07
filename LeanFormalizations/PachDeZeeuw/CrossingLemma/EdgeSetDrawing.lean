@@ -708,11 +708,11 @@ def EdgeSetDrawingResidualMapCanonicalComponentPlanarity : Prop :=
 
 /-- **Crossing-free residual-map planarity.**
 
-This is the clean topological endpoint behind Pach--Tóth,
-*A crossing lemma for multigraphs*, Lemma 2.1: a connected simple topological
-graph drawn without crossings determines a genus-zero residual combinatorial map.
-The formal statement packages the remaining drawing-to-map work as ARR plus the
-Euler-form planarity assertion `M.eulerCharacteristic = 2`. -/
+This is the clean topological endpoint behind the planar-map/Euler step in
+Pach--Tóth, *A crossing lemma for multigraphs*: a connected simple topological
+graph drawn without crossings determines a genus-zero residual combinatorial
+map. The formal statement packages the remaining drawing-to-map work as ARR
+plus the Euler-form planarity assertion `M.eulerCharacteristic = 2`. -/
 def CrossingFreeResidualMapPlanarity : Prop :=
   ∀ (G : DrawnMultigraph),
     (∀ p q, G.multiplicity p q ≤ 1) →

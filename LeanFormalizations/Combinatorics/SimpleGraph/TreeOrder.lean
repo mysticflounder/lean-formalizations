@@ -77,6 +77,26 @@ theorem IsTree.exists_leaf_and_induce_card_edgeFinset_pred {V : Type*} (G : Simp
       simpa using (SimpleGraph.card_edgeFinset_deleteIncidenceSet G v)
     _ = G.edgeFinset.card - 1 := by rw [hvdeg]
 
+/-- A finite connected graph that is not a tree has a non-bridge edge whose
+deletion preserves connectedness. This is the edge-choice point for the
+non-tree phase of a recursive tree/cotree decomposition. -/
+theorem Connected.exists_nonbridge_edge_delete_connected {V : Type*} (G : SimpleGraph V)
+    [Fintype V] [DecidableEq V] [DecidableRel G.Adj] [Nonempty V]
+    (hconn : G.Connected) (hnot : ¬ G.IsTree) :
+    ∃ x y : V, G.Adj x y ∧ ¬ G.IsBridge s(x, y) ∧ (G.deleteEdges {s(x, y)}).Connected := by
+  have hnotacyc : ¬ G.IsAcyclic := by
+    intro hacyc
+    exact hnot ⟨hconn, hacyc⟩
+  have hne : ∃ x y : V, G.Adj x y ∧ ¬ G.IsBridge s(x, y) := by
+    by_contra hcontra
+    have hall : ∀ ⦃x y : V⦄, G.Adj x y → G.IsBridge s(x, y) := by
+      intro x y hxy
+      by_contra hbridge
+      exact hcontra ⟨x, y, hxy, hbridge⟩
+    exact hnotacyc ((isAcyclic_iff_forall_adj_isBridge).2 hall)
+  rcases hne with ⟨x, y, hxy, hbridge⟩
+  exact ⟨x, y, hxy, hbridge, hconn.connected_delete_edge_of_not_isBridge hbridge⟩
+
 /-- The finite set underlying a mapped list is the image of the underlying
 finite set. -/
 theorem List.toFinset_map {α β : Type*} [DecidableEq α] [DecidableEq β]
@@ -650,5 +670,15 @@ noncomputable def IsTree.parentEdgeEquiv {V : Type*} (G : SimpleGraph V)
           simpa [SimpleGraph.mem_edgeSet] using
             (hparent (i.1 + 1) h0 hlt).2⟩ : ↥G.edgeFinset))
     (IsTree.parentEdgeMap_bijective (G := G) (h := h) (l := l) hl_nodup hl_len parent hparent)
+
+/-- Any injective map `Fin k → Fin n` can be extended to a permutation of
+`Fin n` that sends its image to the initial segment `Fin.castLE hk`. -/
+theorem Equiv.Perm.exists_map_fin_castLE {k n : ℕ} (hk : k ≤ n)
+    (f : Fin k → Fin n) (hf : Function.Injective f) :
+    ∃ σ : Equiv.Perm (Fin n), ∀ i : Fin k, σ (f i) = Fin.castLE hk i := by
+  classical
+  obtain ⟨σ, hσ⟩ := Equiv.Perm.exists_extending_pair f (Fin.castLE hk) hf
+    (Fin.castLE_injective hk)
+  exact ⟨σ, hσ⟩
 
 end SimpleGraph
