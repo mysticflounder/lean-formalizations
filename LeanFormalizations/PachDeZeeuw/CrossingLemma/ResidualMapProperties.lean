@@ -697,6 +697,77 @@ noncomputable def incident_ends_prefix_step_endpoint_equiv
       incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew := by
   simp [incident_ends_prefix_step_endpoint_equiv]
 
+/-- At a vertex not touched by the new last edge, the carried-over incident ends
+of the predecessor and successor prefixes are canonically equivalent.
+
+This is the transport equivalence needed for the unchanged-vertex part of the
+ordered-prefix insertion witnesses. -/
+noncomputable def incident_ends_prefix_step_unchanged_equiv
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p : ℝ × ℝ}
+    (hp1 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hp2 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p) :
+    ↥(incidentEnds (G.prefixEdges m hm) p) ≃
+      ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) := by
+  refine Equiv.ofBijective
+    (fun a =>
+      ⟨prefixStepDartEquiv m (Sum.inl a.1),
+        by
+          simpa [prefixStepDartEquiv_apply_inl] using
+            (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
+              (hm' := hm')).2 a.2⟩)
+    ?_
+  constructor
+  · intro a1 a2 h
+    rcases a1 with ⟨⟨i1, b1⟩, ha1⟩
+    rcases a2 with ⟨⟨i2, b2⟩, ha2⟩
+    apply Subtype.ext
+    apply Prod.ext
+    · have hpair := congrArg Subtype.val h
+      have hfst : Fin.castSucc i1 = Fin.castSucc i2 := by
+        simpa only [prefixStepDartEquiv_apply_inl] using congrArg Prod.fst hpair
+      exact Fin.castSucc_injective _ hfst
+    · have hpair := congrArg Subtype.val h
+      simpa only [prefixStepDartEquiv_apply_inl] using congrArg Prod.snd hpair
+  · intro e
+    rcases e with ⟨⟨i, b⟩, he⟩
+    by_cases hlast : i = Fin.last m
+    · subst hlast
+      cases b <;> exfalso
+      · have hnot : (Fin.last m, false) ∉ incidentEnds (G.prefixEdges (m + 1) hm') p := by
+          intro hmem
+          unfold incidentEnds at hmem
+          change (Fin.last m, false) ∈
+            Finset.univ.filter
+              (fun e : Fin (m + 1) × Bool =>
+                if e.2 then ((G.prefixEdges (m + 1) hm').endpoints e.1).2 = p
+                else ((G.prefixEdges (m + 1) hm').endpoints e.1).1 = p) at hmem
+          rw [Finset.mem_filter] at hmem
+          exact hp1 hmem.2
+        exact hnot he
+      · have hnot : (Fin.last m, true) ∉ incidentEnds (G.prefixEdges (m + 1) hm') p := by
+          intro hmem
+          unfold incidentEnds at hmem
+          change (Fin.last m, true) ∈
+            Finset.univ.filter
+              (fun e : Fin (m + 1) × Bool =>
+                if e.2 then ((G.prefixEdges (m + 1) hm').endpoints e.1).2 = p
+                else ((G.prefixEdges (m + 1) hm').endpoints e.1).1 = p) at hmem
+          rw [Finset.mem_filter] at hmem
+          exact hp2 hmem.2
+        exact hnot he
+    · have hpair : (Fin.castSucc (i.castPred hlast), b) = (i, b) := by
+        ext <;> simp [Fin.castSucc_castPred]
+      have hsucc : (Fin.castSucc (i.castPred hlast), b) ∈
+          incidentEnds (G.prefixEdges (m + 1) hm') p := by
+        simpa [hpair] using he
+      have hsrc : (i.castPred hlast, b) ∈ incidentEnds (G.prefixEdges m hm) p := by
+        exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
+          (hm' := hm') (p := p) (e := ⟨i.castPred hlast, b⟩)).mp hsucc
+      refine ⟨⟨(i.castPred hlast, b), hsrc⟩, ?_⟩
+      apply Subtype.ext
+      simpa only [prefixStepDartEquiv_apply_inl, Fin.castSucc_castPred]
+
 /-- Local splice form of the successor-prefix vertex rotation at an endpoint of
 the new last edge. Once the new angular order is known to restrict to the old
 angular order on the carried-over darts and to place the new dart immediately
