@@ -768,6 +768,115 @@ noncomputable def incident_ends_prefix_step_unchanged_equiv
       apply Subtype.ext
       simpa only [prefixStepDartEquiv_apply_inl, Fin.castSucc_castPred]
 
+/-- At a vertex untouched by the new last edge, the carried-over angular order
+is preserved by the canonical transport equivalence. This is the unchanged-vertex
+transport theorem needed for the tree-first prefix witness construction. -/
+theorem vertexRotationAtRadius_prefix_step_unchanged
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    {p : ℝ × ℝ} (hp : p ∈ G.V)
+    (hp1 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hp2 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    {r : ℝ}
+    (hr0 : 0 < r)
+    (hr : r ≤ arrRadius (G.prefixEdges m hm) hARR hp)
+    (hr' : r ≤ arrRadius (G.prefixEdges (m + 1) hm') hARR' hp) :
+    (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
+      (vertexRotationAtRadius (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r
+        (endAngleKey_injective (G.prefixEdges m hm) p _ _
+          (arrAngle_injOn (G.prefixEdges m hm) hARR hp hr0 hr))) =
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        (endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+          (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp hr0 hr')) := by
+  unfold vertexRotationAtRadius
+  refine rotationOfOrder_permCongr _ _ _ ?_
+  intro a b
+  have ha :
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) a) =
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r a := by
+    rcases a with ⟨⟨i, bi⟩, hai⟩
+    simpa [endAngleKey, incident_ends_prefix_step_unchanged_equiv,
+      prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges] using
+      (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+        (e := ⟨i, bi⟩) hai hr0 hr hr').symm
+  have hb :
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) b) =
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r b := by
+    rcases b with ⟨⟨i, bi⟩, hbi⟩
+    simpa [endAngleKey, incident_ends_prefix_step_unchanged_equiv,
+      prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges] using
+      (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+        (e := ⟨i, bi⟩) hbi hr0 hr hr').symm
+  change
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) a) <
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) b) ↔
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r a <
+        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r b
+  rw [ha, hb]
+
+/-- At a vertex untouched by the new last edge, the canonical vertex rotation is
+also transported unchanged. -/
+theorem vertexRotation_prefix_step_unchanged
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    {p : ℝ × ℝ} (hp : p ∈ G.V)
+    (hp1 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hp2 : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    :
+    (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
+      (vertexRotation (G.prefixEdges m hm) hARR hp) =
+      vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := by
+  let r : ℝ :=
+    min (arrRadius (G.prefixEdges m hm) hARR hp)
+      (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+  have hr0 : 0 < r :=
+    lt_min (arrRadius_pos (G := G.prefixEdges m hm) hARR hp)
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp)
+  have hr : r ≤ arrRadius (G.prefixEdges m hm) hARR hp := min_le_left _ _
+  have hr' : r ≤ arrRadius (G.prefixEdges (m + 1) hm') hARR' hp := min_le_right _ _
+  have htmp := vertexRotationAtRadius_prefix_step_unchanged
+    (G := G) m hm hm' hjoin hARR hARR' hp hp1 hp2
+    (r := r) hr0 hr hr'
+  have hold :
+      vertexRotationAtRadius (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r
+        (endAngleKey_injective (G.prefixEdges m hm) p _ _
+          (arrAngle_injOn (G.prefixEdges m hm) hARR hp hr0 hr)) =
+      vertexRotation (G.prefixEdges m hm) hARR hp :=
+    rotation_wellDefined (G := G.prefixEdges m hm) hARR hp hr0 hr
+  have hnew :
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p
+        (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+        (endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+          (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp hr0 hr')) =
+      vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp :=
+    rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp hr0 hr'
+  calc
+    (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
+        (vertexRotation (G.prefixEdges m hm) hARR hp)
+      = (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
+          (vertexRotationAtRadius (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r
+            (endAngleKey_injective (G.prefixEdges m hm) p _ _
+              (arrAngle_injOn (G.prefixEdges m hm) hARR hp hr0 hr))) := by
+        rw [← hold]
+    _ = vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
+          (endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+            (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp hr0 hr')) := htmp
+    _ = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := hnew
+
 /-- Local splice form of the successor-prefix vertex rotation at an endpoint of
 the new last edge. Once the new angular order is known to restrict to the old
 angular order on the carried-over darts and to place the new dart immediately
