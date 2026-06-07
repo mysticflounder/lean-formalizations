@@ -863,19 +863,80 @@ theorem vertexRotation_prefix_step_unchanged
           (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp hr0 hr')) =
       vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp :=
     rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp hr0 hr'
-  calc
-    (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
-        (vertexRotation (G.prefixEdges m hm) hARR hp)
-      = (incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2).permCongr
-          (vertexRotationAtRadius (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r
-            (endAngleKey_injective (G.prefixEdges m hm) p _ _
-              (arrAngle_injOn (G.prefixEdges m hm) hARR hp hr0 hr))) := by
-        rw [← hold]
-    _ = vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p
-          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
-          (endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
-            (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp hr0 hr')) := htmp
-    _ = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := hnew
+  simpa [hold, hnew] using htmp
+
+/-- If the new last edge introduces a fresh leaf endpoint `p`, then that
+successor prefix endpoint has at most one incident end. This is the local
+cardinality fact needed to make the leaf vertex rotation trivial. -/
+theorem incidentEnds_prefix_step_endpoint_card_le_one_of_new_leaf
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+  (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    (hprev : ∀ e : Fin m × Bool, e ∉ incidentEnds (G.prefixEdges m hm) p) :
+    Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) ≤ 1 := by
+  classical
+  refine Fintype.card_le_one_iff_subsingleton.mpr ⟨?_⟩
+  intro a c
+  have ha : a = incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew := by
+    rcases a with ⟨⟨i, bi⟩, hai⟩
+    by_cases hlast : i = Fin.last m
+    · subst hlast
+      cases b
+      · cases bi
+        · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart, hpnew]
+        · exfalso
+          have hne : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p := by
+            simpa [incidentEnds] using hpother
+          have hEq : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p := by
+            simpa [incidentEnds] using hai
+          exact hne hEq
+      · cases bi
+        · exfalso
+          have hne : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p := by
+            simpa [incidentEnds] using hpother
+          have hEq : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p := by
+            simpa [incidentEnds] using hai
+          exact hne hEq
+        · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart, hpnew]
+    · have hsucc : (Fin.castSucc (i.castPred hlast), bi) ∈
+          incidentEnds (G.prefixEdges (m + 1) hm') p := by
+          simpa [Fin.castSucc_castPred] using hai
+      have hsrc : (i.castPred hlast, bi) ∈ incidentEnds (G.prefixEdges m hm) p := by
+        exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
+          (hm' := hm') (p := p) (e := ⟨i.castPred hlast, bi⟩)).mp hsucc
+      exact False.elim ((hprev ⟨i.castPred hlast, bi⟩) hsrc)
+  have hc' : c = incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew := by
+    rcases c with ⟨⟨j, bj⟩, hc⟩
+    by_cases hlast : j = Fin.last m
+    · subst hlast
+      cases b
+      · cases bj
+        · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart, hpnew]
+        · exfalso
+          have hne : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p := by
+            simpa [incidentEnds] using hpother
+          have hEq : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p := by
+            simpa [incidentEnds] using hc
+          exact hne hEq
+      · cases bj
+        · exfalso
+          have hne : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p := by
+            simpa [incidentEnds] using hpother
+          have hEq : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p := by
+            simpa [incidentEnds] using hc
+          exact hne hEq
+        · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart, hpnew]
+    · have hsucc : (Fin.castSucc (j.castPred hlast), bj) ∈
+          incidentEnds (G.prefixEdges (m + 1) hm') p := by
+          simpa [Fin.castSucc_castPred] using hc
+      have hsrc : (j.castPred hlast, bj) ∈ incidentEnds (G.prefixEdges m hm) p := by
+        exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
+          (hm' := hm') (p := p) (e := ⟨j.castPred hlast, bj⟩)).mp hsucc
+      exact False.elim ((hprev ⟨j.castPred hlast, bj⟩) hsrc)
+  rw [ha, hc']
 
 /-- Local splice form of the successor-prefix vertex rotation at an endpoint of
 the new last edge. Once the new angular order is known to restrict to the old
