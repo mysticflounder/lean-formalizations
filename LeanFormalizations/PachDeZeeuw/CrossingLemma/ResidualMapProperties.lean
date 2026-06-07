@@ -753,6 +753,70 @@ theorem vertexRotationAtRadius_prefix_step_endpoint_splice
     (LinearOrder.lift' (endAngleKey (G.prefixEdges (m + 1) hm') p β r') hinj')
     c hmono hpred
 
+/-- A predecessor-corner version of `vertexRotationAtRadius_prefix_step_endpoint_splice`.
+
+This packages the finite-order choice of the corner `c` whose successor is the
+new dart into the theorem itself. It is the form needed when constructing
+ordered-prefix insertion witnesses from a tree / face order. -/
+theorem exists_vertexRotationAtRadius_prefix_step_endpoint_splice
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    {α : (Fin m × Bool) → ℝ → ℝ}
+    {β : (Fin (m + 1) × Bool) → ℝ → ℝ}
+    {r : ℝ} {r' : ℝ}
+    (hinj :
+      Function.Injective (endAngleKey (G.prefixEdges m hm) p α r))
+    (hinj' :
+      Function.Injective (endAngleKey (G.prefixEdges (m + 1) hm') p β r'))
+    (hmono :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
+        endAngleKey (G.prefixEdges (m + 1) hm') p β r'
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p β r'
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p α r a₁ <
+          endAngleKey (G.prefixEdges m hm) p α r a₂)
+    (hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p)) :
+    ∃ c : ↥(incidentEnds (G.prefixEdges m hm) p),
+      (incident_ends_prefix_step_endpoint_equiv (G := G) m hm hm' b hpnew hpother).permCongr
+        (Equiv.swap
+            (Sum.inl ((vertexRotationAtRadius (G.prefixEdges m hm) p α r hinj) c))
+            (Sum.inr ()) *
+          (vertexRotationAtRadius (G.prefixEdges m hm) p α r hinj).sumCongr 1)
+        = vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p β r' hinj' := by
+  classical
+  let L :
+      LinearOrder ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    LinearOrder.lift' (endAngleKey (G.prefixEdges (m + 1) hm') p β r') hinj'
+  let R := vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p β r' hinj'
+  let x : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew
+  have hnotfix : R.symm x ≠ x := by
+    intro hfix
+    have hself : R x = x := by
+      calc
+        R x = R (R.symm x) := by rw [hfix]
+        _ = x := by simp [R]
+    exact rotationOfOrder_apply_ne_self_of_two_le L hcard x hself
+  let y : {e : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) // e ≠ x} :=
+    ⟨R.symm x, hnotfix⟩
+  let c : ↥(incidentEnds (G.prefixEdges m hm) p) :=
+    (incident_ends_prefix_step_endpoint_old_equiv
+      (G := G) m hm hm' b hpnew hpother).symm y
+  refine ⟨c, ?_⟩
+  have hpred : R
+      ((incident_ends_prefix_step_endpoint_old_equiv
+        (G := G) m hm hm' b hpnew hpother c).1) = x := by
+    simpa [L, R, x, y, c] using (Equiv.apply_symm_apply R x)
+  exact vertexRotationAtRadius_prefix_step_endpoint_splice
+    (G := G) m hm hm' b hpnew hpother hinj hinj' c hmono hpred
+
 /-- Every power of the residual edge permutation preserves the edge index. -/
 theorem residualMap_edgePerm_zpow_fst (hARR : ArcsRotationRegular G)
     (k : ℤ) (d : Fin G.numEdges × Bool) :
