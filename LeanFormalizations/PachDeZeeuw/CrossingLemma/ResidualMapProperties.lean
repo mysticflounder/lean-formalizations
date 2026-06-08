@@ -82,6 +82,23 @@ private theorem exists_getElem_of_mem_take_toFinset {α : Type*} [DecidableEq α
       simp
     exact hget ▸ hkEq
 
+private theorem list_mem_of_nodup_length_eq_card {α : Type*}
+    [Fintype α] [DecidableEq α] {l : List α}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card α) (x : α) :
+    x ∈ l := by
+  have hcard : l.toFinset.card = Fintype.card α := by
+    rw [List.toFinset_card_of_nodup hl_nodup, hl_len]
+  have hsub : l.toFinset ⊆ (Finset.univ : Finset α) := by
+    intro y hy
+    simp
+  have hcardle : (Finset.univ : Finset α).card ≤ l.toFinset.card := by
+    rw [Finset.card_univ, hcard]
+  have hfin : l.toFinset = (Finset.univ : Finset α) :=
+    Finset.eq_of_subset_of_card_le hsub hcardle
+  have hx : x ∈ l.toFinset := by
+    simp [hfin]
+  simpa [List.mem_toFinset] using hx
+
 /-! ## Generic helpers: SameCycle under `permCongr` and `sigmaCongrRight`. -/
 
 /-- `SameCycle` for a conjugated permutation `e.permCongr σ` reduces to `SameCycle`
@@ -755,6 +772,37 @@ theorem residualMap_isPlanar_prefix_of_insertions_from
       (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm')
       (hstep m hm' hstartm)
       (ih (Nat.le_of_succ_le hm'))
+
+/-- Bounded ordered-prefix planarity induction for residual maps.
+
+This is the interval form of `residualMap_isPlanar_prefix_of_insertions_from`:
+to prove planarity only up to a target prefix `n`, it is enough to construct
+insertion witnesses only for the steps with `m + 1 ≤ n`. -/
+theorem residualMap_isPlanar_prefix_of_insertions_to
+    (start n : ℕ)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ G.numEdges,
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hbase : ∀ hstart : start ≤ G.numEdges,
+      (residualMap (G.prefixEdges start hstart) (hARR start hstart)).IsPlanar)
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), start ≤ m → m + 1 ≤ n →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm'))
+    (hstartn : start ≤ n) (hn : n ≤ G.numEdges) :
+    (residualMap (G.prefixEdges n hn) (hARR n hn)).IsPlanar := by
+  have hmain : ∀ k : ℕ, start ≤ k → k ≤ n →
+      ∀ hk : k ≤ G.numEdges,
+        (residualMap (G.prefixEdges k hk) (hARR k hk)).IsPlanar := by
+    intro k hstartk
+    refine Nat.le_induction ?base ?step k hstartk
+    · intro _ hstartG
+      exact hbase hstartG
+    · intro m hstartm ih hm_succ_le_n hm_succ
+      exact residualMap_isPlanar_prefixStep_of_insertion
+        (G := G) m (Nat.le_of_succ_le hm_succ) hm_succ
+        (hARR m (Nat.le_of_succ_le hm_succ)) (hARR (m + 1) hm_succ)
+        (hstep m hm_succ hstartm hm_succ_le_n)
+        (ih (Nat.le_of_succ_le hm_succ_le_n) (Nat.le_of_succ_le hm_succ))
+  exact hmain n hstartn (Nat.le_refl n) hn
 
 /-- At an endpoint of the new last edge, the incident-end type of the
 successor prefix is the old incident-end type plus one new dart. -/
@@ -4413,6 +4461,307 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_t
   exact exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints
     (G := H) i.1 hm hm' (p := p) (q := q) hend hqp hleaf hold
     (permuteEdges_arcsJoinEndpoints (G := G) π hjoin) hARR hARR'
+
+/-- The full permuted tree prefix is incident to every listed drawing vertex.
+
+For the root vertex, the first selected parent edge is incident to it.  For any
+later listed vertex, the selected parent edge from its own insertion step is
+incident to it.  Transport through `permuteEdges` and `prefixEdges` converts
+these selected original edges into darts of the full tree prefix. -/
+theorem DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges) :
+    ∀ p : ↥G.V, ∃ d : Fin (l.length - 1) × Bool,
+      d ∈ incidentEnds ((G.permuteEdges π).prefixEdges (l.length - 1) hm)
+        (p : ℝ × ℝ) := by
+  classical
+  let H : DrawnMultigraph := G.permuteEdges π
+  intro p
+  have hp_mem : p ∈ l :=
+    list_mem_of_nodup_length_eq_card hl_nodup hl_len p
+  obtain ⟨k, hk_l, hkval⟩ := List.mem_iff_getElem.mp hp_mem
+  by_cases hk0 : k = 0
+  · let j : Fin (l.length - 1) := ⟨0, by omega⟩
+    let e0 : Fin (l.length - 1) := ⟨0, by omega⟩
+    have hparent_one_mem :
+        parent 1 (by omega) (by omega) ∈ (l.take 1).toFinset :=
+      (hparent 1 (by omega) (by omega)).1
+    obtain ⟨k₁, hk₁lt, hk₁_l, hk₁val⟩ :=
+      exists_getElem_of_mem_take_toFinset hparent_one_mem
+    have hk₁0 : k₁ = 0 := by omega
+    have hparent_one :
+        parent 1 (by omega) (by omega) = l[0]'(by omega) := by
+      simpa [hk₁0] using hk₁val.symm
+    have hp_root : p = l[0]'(by omega) := by
+      simpa [hk0] using hkval.symm
+    obtain ⟨b, hb⟩ :=
+      G.treeEdgeOfLeafOrder_mem_incidentEnds_parent hjoin hmult T hTsub parent hparent j
+    refine ⟨(e0, b), ?_⟩
+    have hcast :
+        (Fin.castLE hm e0 : Fin G.numEdges) = Fin.castLE hk j := by
+      apply Fin.ext
+      rfl
+    have hpos_edge :
+        π (Fin.castLE hm e0) =
+          G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j := by
+      rw [hcast]
+      exact hπ j
+    have hbG : (π (Fin.castLE hm e0), b) ∈ incidentEnds G (p : ℝ × ℝ) := by
+      simpa [hpos_edge, j, hparent_one, hp_root] using hb
+    have hbH : (Fin.castLE hm e0, b) ∈ incidentEnds H (p : ℝ × ℝ) :=
+      (mem_incidentEnds_permuteEdges_iff (G := G) π).mpr (by simpa [H] using hbG)
+    exact (mem_incidentEnds_prefixEdges_iff (G := H) (m := l.length - 1) (hm := hm)).mpr hbH
+  · let j : Fin (l.length - 1) := ⟨k - 1, by omega⟩
+    let epos : Fin (l.length - 1) := ⟨k - 1, by omega⟩
+    obtain ⟨b, hb⟩ :=
+      G.treeEdgeOfLeafOrder_mem_incidentEnds_newVertex hjoin hmult T hTsub parent hparent j
+    refine ⟨(epos, b), ?_⟩
+    have hcast :
+        (Fin.castLE hm epos : Fin G.numEdges) = Fin.castLE hk j := by
+      apply Fin.ext
+      rfl
+    have hpos_edge :
+        π (Fin.castLE hm epos) =
+          G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j := by
+      rw [hcast]
+      exact hπ j
+    have hk_succ : k - 1 + 1 = k := by omega
+    have hbG : (π (Fin.castLE hm epos), b) ∈ incidentEnds G (p : ℝ × ℝ) := by
+      simpa [hpos_edge, j, hk_succ, hkval] using hb
+    have hbH : (Fin.castLE hm epos, b) ∈ incidentEnds H (p : ℝ × ℝ) :=
+      (mem_incidentEnds_permuteEdges_iff (G := G) π).mpr (by simpa [H] using hbG)
+    exact (mem_incidentEnds_prefixEdges_iff (G := H) (m := l.length - 1) (hm := hm)).mpr hbH
+
+/-- The residual map of the full permuted tree prefix has one vertex class for
+each listed drawing vertex. -/
+theorem DrawnMultigraph.residualMap_vertex_card_permuted_treePrefix_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (l.length - 1) hm)) :
+    Fintype.card (residualMap ((G.permuteEdges π).prefixEdges (l.length - 1) hm) hARR).Vertex =
+      Fintype.card ↥G.V := by
+  exact residualMap_vertex_card_of_incident
+    (G := (G.permuteEdges π).prefixEdges (l.length - 1) hm) hARR
+    (by
+      intro p
+      exact G.incidentCoverage_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm p)
+
+/-- In the full permuted tree prefix, the residual-map edge count is one less
+than its vertex count. -/
+theorem DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (l.length - 1) hm)) :
+    Fintype.card (residualMap ((G.permuteEdges π).prefixEdges (l.length - 1) hm) hARR).Edge =
+      Fintype.card (residualMap ((G.permuteEdges π).prefixEdges (l.length - 1) hm) hARR).Vertex - 1 := by
+  rw [residualMap_edge_card]
+  rw [G.residualMap_vertex_card_permuted_treePrefix_of_leafOrder
+    hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hARR]
+  simp [DrawnMultigraph.prefixEdges, Fintype.card_coe, hl_len]
+
+/-- The residual map of the full permuted tree prefix is planar.
+
+This is the formal tree-prefix half of the tree/cotree proof: the first edge is
+the one-edge planar base case, and every later tree edge is inserted by the
+actual leaf-step witness
+`exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder`. -/
+theorem DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm)) :
+    (residualMap ((G.permuteEdges π).prefixEdges (l.length - 1) hm)
+      (hARR (l.length - 1) hm)).IsPlanar := by
+  let H : DrawnMultigraph := G.permuteEdges π
+  exact residualMap_isPlanar_prefix_of_insertions_to
+    (G := H) 1 (l.length - 1) hARR
+    (by
+      intro h1
+      exact residualMap_prefix_one_isPlanar
+        (G := H) h1 (hARR 1 h1)
+        (permuteEdges_arcsJoinEndpoints (G := G) π hjoin))
+    (by
+      intro m hm' hm_start hm_tree
+      let i : Fin (l.length - 1) := ⟨m, by omega⟩
+      exact G.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder
+        hjoin hmult T hTsub hl_nodup parent hparent hπ i hm_start
+        (Nat.le_of_succ_le hm') hm' (hARR m (Nat.le_of_succ_le hm'))
+        (hARR (m + 1) hm'))
+    (by omega) hm
+
+/-- The full permuted tree prefix has exactly one residual face.
+
+This is the one-face predecessor needed for the first cotree/same-face
+insertion: the tree prefix is planar and has `|E| = |V| - 1`. -/
+theorem DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm)) :
+    Fintype.card
+      (residualMap ((G.permuteEdges π).prefixEdges (l.length - 1) hm)
+        (hARR (l.length - 1) hm)).Face = 1 := by
+  let H : DrawnMultigraph := G.permuteEdges π
+  let hARRtree : ArcsRotationRegular (H.prefixEdges (l.length - 1) hm) :=
+    hARR (l.length - 1) hm
+  have hplanar :
+      (residualMap (H.prefixEdges (l.length - 1) hm) hARRtree).IsPlanar := by
+    simpa [H, hARRtree] using
+      G.residualMap_isPlanar_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hARR
+  have hcard :
+      Fintype.card (residualMap (H.prefixEdges (l.length - 1) hm) hARRtree).Edge =
+        Fintype.card (residualMap (H.prefixEdges (l.length - 1) hm) hARRtree).Vertex - 1 := by
+    simpa [H, hARRtree] using
+      G.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hARRtree
+  have hV : 1 ≤ Fintype.card (residualMap (H.prefixEdges (l.length - 1) hm) hARRtree).Vertex := by
+    rw [G.residualMap_vertex_card_permuted_treePrefix_of_leafOrder
+      hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hARRtree]
+    rw [← hl_len]
+    omega
+  exact CombinatorialMap.card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one
+    (M := residualMap (H.prefixEdges (l.length - 1) hm) hARRtree) hV hplanar hcard
+
+/-- The first edge after the permuted tree prefix is a same-face insertion.
+
+After the spanning-tree prefix has been inserted, the predecessor residual map
+has one face.  Therefore any next edge whose endpoints are listed drawing
+vertices has its two predecessor endpoint corners in that same face; the local
+same-face constructor supplies the actual
+`ResidualMapPrefixStepInsertion.sameFace` witness. -/
+theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥G.V) (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ (G.permuteEdges π).numEdges)
+    (hm' : (l.length - 1) + 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm)) :
+    ResidualMapPrefixStepInsertion (G := G.permuteEdges π)
+      (l.length - 1) hm hm'
+      (hARR (l.length - 1) hm) (hARR ((l.length - 1) + 1) hm') := by
+  classical
+  let H : DrawnMultigraph := G.permuteEdges π
+  let m : ℕ := l.length - 1
+  let p₁ : ℝ × ℝ := ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1
+  let p₂ : ℝ × ℝ := ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2
+  have hp₁ : p₁ ∈ H.V := by
+    simpa [p₁, H, m, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using
+      (G.endpoints_mem (π (Fin.castLE hm' (Fin.last m)))).1
+  have hp₂ : p₂ ∈ H.V := by
+    simpa [p₂, H, m, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using
+      (G.endpoints_mem (π (Fin.castLE hm' (Fin.last m)))).2
+  have hne :
+      ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠
+        ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 :=
+    DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints
+      (prefixEdges_arcsJoinEndpoints (G := H) (m + 1) hm'
+        (permuteEdges_arcsJoinEndpoints (G := G) π hjoin))
+      (Fin.last m)
+  have hold₁ : ∃ e : Fin m × Bool,
+      e ∈ incidentEnds (H.prefixEdges m hm) p₁ := by
+    have hcov :=
+      G.incidentCoverage_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₁, by simpa [H] using hp₁⟩
+    simpa [H, m] using hcov
+  have hold₂ : ∃ e : Fin m × Bool,
+      e ∈ incidentEnds (H.prefixEdges m hm) p₂ := by
+    have hcov :=
+      G.incidentCoverage_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₂, by simpa [H] using hp₂⟩
+    simpa [H, m] using hcov
+  have hface :
+      Fintype.card (residualMap (H.prefixEdges m hm) (hARR m hm)).Face = 1 := by
+    simpa [H, m] using
+      G.residualMap_face_card_one_permuted_treePrefix_of_leafOrder
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hARR
+  exact exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one
+    (G := H) m hm hm'
+    (p₁ := p₁) (p₂ := p₂)
+    (by rfl) (by rfl)
+    (by simpa [p₁, p₂] using hne.symm)
+    (by simpa [p₁, p₂] using hne)
+    hp₁ hp₂ hold₁ hold₂
+    (permuteEdges_arcsJoinEndpoints (G := G) π hjoin)
+    (hARR m hm) (hARR (m + 1) hm') hface
 
 /-- Parent edges selected from a leaf-insertion order are distinct. -/
 theorem DrawnMultigraph.treeEdgeOfLeafOrder_injective

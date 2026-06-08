@@ -230,14 +230,21 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOfLeafOrder`
   / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder`
   (with `treeEdgeOfLeafOrder_*incidentEnds*` incidence facts and the
-  permutation transport needed for prefix freshness)
+  permutation transport needed for prefix freshness),
+  the full permuted tree-prefix consequences
+  `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder`
+  / `CrossingLemma.DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder`
+  / `CrossingLemma.DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder`
+  / `CrossingLemma.DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder`,
+  the first post-tree edge witness
+  `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
   and
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`,
   plus the one-face specialization
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
   and planar tree-prefix bridge
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix`;
-  the complementary dual-tree theorem and the global cotree face-cycle
+  the complementary dual-tree theorem and the all-later-cotree face-cycle
   `SameCycle` proof remain the open topological layer. A separate
   `subsetAveraging_master` (`sorry`) is a documented dead-end, not used
   downstream.
