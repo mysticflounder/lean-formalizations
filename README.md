@@ -136,11 +136,15 @@ it was confirmed complete). All headlines axiom-clean:
   `≤ 2` (`CombinatorialMap.eulerCharacteristic_le_two`).
 - **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
   (`CombinatorialMap.EdgeInsertion.*`).
+- **`VertexGraph.lean`** — vertex/face adjacency graphs for combinatorial maps,
+  connectedness-to-spanning-tree bridges, and concrete primal/dual edge
+  selectors for leaf-order edge enumeration.
 
 ### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅
 
 - **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
-  trees, plus explicit parent-edge enumeration via `parentEdgeEquiv`.
+  trees, explicit parent-edge enumeration via `parentEdgeEquiv`, and finite
+  permutation extenders for one-block and two-block edge orders.
   **Axiom-clean.**
 
 ### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons

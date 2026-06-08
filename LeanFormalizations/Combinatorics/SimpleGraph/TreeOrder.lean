@@ -681,4 +681,74 @@ theorem Equiv.Perm.exists_map_fin_castLE {k n : ℕ} (hk : k ≤ n)
     (Fin.castLE_injective hk)
   exact ⟨σ, hσ⟩
 
+/-- Two disjoint injective `Fin`-families in `Fin n` can be extended to a
+permutation putting the first family in the first block and the second family in
+the following block.
+
+This is the finite-ordering bookkeeping used by a tree/cotree edge order: once
+the primal tree edges and dual cotree edges have been constructed as disjoint
+edge injections, a single ambient edge permutation puts them in consecutive
+prefix blocks. -/
+theorem Equiv.Perm.exists_map_fin_twoBlocks {a b n : ℕ} (h : a + b ≤ n)
+    (f : Fin a → Fin n) (g : Fin b → Fin n)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ σ : Equiv.Perm (Fin n),
+      (∀ i : Fin a, σ (f i) = Fin.castLE h (Fin.castAdd b i)) ∧
+        (∀ j : Fin b, σ (g j) = Fin.castLE h (Fin.natAdd a j)) := by
+  classical
+  let x : Fin a ↪ Fin n := ⟨f, hf⟩
+  let y : Fin b ↪ Fin n := ⟨g, hg⟩
+  let F : Fin (a + b) → Fin n := Fin.Embedding.append (x := x) (y := y) hdisj
+  have hF : Function.Injective F := (Fin.Embedding.append (x := x) (y := y) hdisj).injective
+  obtain ⟨σ, hσ⟩ := Equiv.Perm.exists_extending_pair F (Fin.castLE h) hF
+    (Fin.castLE_injective h)
+  refine ⟨σ, ?_, ?_⟩
+  · intro i
+    have := hσ (Fin.castAdd b i)
+    simpa [F, x, y] using this
+  · intro j
+    have := hσ (Fin.natAdd a j)
+    simpa [F, x, y] using this
+
+/-- Finite-type version of `exists_map_fin_twoBlocks`.
+
+Two disjoint injective families in a finite type can be put into consecutive
+initial blocks of an arbitrary `Fintype.equivFin` enumeration by an ambient
+permutation. -/
+theorem Equiv.Perm.exists_map_fintype_twoBlocks {α : Type*} [Fintype α]
+    {a b : ℕ} (h : a + b ≤ Fintype.card α)
+    (f : Fin a → α) (g : Fin b → α)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ π : Equiv.Perm α,
+      (∀ i : Fin a,
+        π (f i) = (Fintype.equivFin α).symm (Fin.castLE h (Fin.castAdd b i))) ∧
+        (∀ j : Fin b,
+          π (g j) = (Fintype.equivFin α).symm (Fin.castLE h (Fin.natAdd a j))) := by
+  classical
+  let e : α ≃ Fin (Fintype.card α) := Fintype.equivFin α
+  let f' : Fin a → Fin (Fintype.card α) := fun i => e (f i)
+  let g' : Fin b → Fin (Fintype.card α) := fun j => e (g j)
+  have hf' : Function.Injective f' := fun i j hij => hf (e.injective hij)
+  have hg' : Function.Injective g' := fun i j hij => hg (e.injective hij)
+  have hdisj' : Disjoint (Set.range f') (Set.range g') := by
+    rw [Set.disjoint_iff]
+    intro x hx
+    rcases hx with ⟨hx, hy⟩
+    rcases hx with ⟨i, rfl⟩
+    rcases hy with ⟨j, hy⟩
+    have hfg : f i = g j := e.injective hy.symm
+    exact False.elim ((Set.disjoint_left.mp hdisj) ⟨i, rfl⟩ ⟨j, hfg.symm⟩)
+  obtain ⟨σ, hσf, hσg⟩ :=
+    Equiv.Perm.exists_map_fin_twoBlocks h f' g' hf' hg' hdisj'
+  let π : Equiv.Perm α := e.trans (σ.trans e.symm)
+  refine ⟨π, ?_, ?_⟩
+  · intro i
+    have := hσf i
+    simpa [π, e, f'] using congrArg e.symm this
+  · intro j
+    have := hσg j
+    simpa [π, e, g'] using congrArg e.symm this
+
 end SimpleGraph

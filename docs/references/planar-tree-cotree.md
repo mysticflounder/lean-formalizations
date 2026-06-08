@@ -4,6 +4,8 @@ Source:
 
 - Jeff Erickson, *Computational Topology*, Lecture 10, “Tree-Cotree Decompositions”
 - PDF: https://jeffe.cs.illinois.edu/teaching/comptop/2020/notes/10-planar-tree-cotree.pdf
+- Sergei K. Lando and Alexander K. Zvonkin, *Graphs on Surfaces and Their
+  Applications*, §1.3.3 (maps as dart permutations `σ`, `α`, `φ`).
 
 Relevant material:
 
@@ -29,6 +31,27 @@ Why this matters here:
 - The missing global witness is the tree-first / cotree-second edge order.
 - This theorem is the exact combinatorial bridge needed to convert a spanning
   tree on `vertexGraph` into the dual-side edge order on `faceGraph`.
+
+Formalized bridge pieces now available:
+
+- `CombinatorialMap.vertexGraphEdge` and
+  `CombinatorialMap.exists_vertexEdgeInjection_of_leafOrder` construct concrete
+  primal map-edge witnesses from a leaf order on a vertex-graph spanning tree.
+- `CombinatorialMap.faceGraphEdge`,
+  `CombinatorialMap.exists_faceEdgeInjection_of_leafOrder`, and
+  `CombinatorialMap.dualEdgeEquiv` do the corresponding cotree-side extraction.
+- `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
+  `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
+  and cotree edge injections into one two-block ambient edge permutation.
+
+Still missing:
+
+- The planar-map complement theorem itself: for a connected planar
+  combinatorial map, the complement of a chosen primal spanning tree is a dual
+  spanning tree.
+- The residual-map face-stability proof that the cotree block, in reverse leaf
+  order, supplies the `SameCycle` hypotheses required by the same-face insertion
+  witness.
 
 Notes for formalization:
 

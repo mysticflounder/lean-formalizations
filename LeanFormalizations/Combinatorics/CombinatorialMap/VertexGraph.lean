@@ -22,6 +22,13 @@ arguments on combinatorial maps:
 The connectedness theorem is the only ingredient used immediately by the
 crossing-lemma development; the spanning-tree corollaries are the bridge to
 later edge-order extraction.
+
+The combinatorial-map model follows Lando--Zvonkin, §1.3.3: darts carry the
+vertex rotation `σ`, the edge involution `α`, and the face permutation `φ`.  The
+tree/cotree edge-order bridge follows the standard planar-map statement that a
+spanning tree in the primal map has complementary dual edges forming a spanning
+cotree; see Erickson, *Tree-Cotree Decompositions*, Corollary "spanning tree
+⇌ spanning cotree".
 -/
 
 set_option linter.style.longLine false
@@ -115,6 +122,108 @@ theorem exists_faceGraph_spanningTree [Fintype D] [Nonempty M.Vertex]
     ∃ T ≤ M.faceGraph, T.IsTree := by
   exact SimpleGraph.Connected.exists_isTree_le
     (G := M.faceGraph) (faceGraph_connected (M := M) hconn)
+
+/-- A chosen edge witnessing a vertex-graph adjacency.
+
+This is the primal-side selector used when turning a spanning tree on vertices
+into concrete map-edge data.  It is the map-theoretic analogue of choosing the
+edge across a dual face adjacency in a tree-cotree decomposition. -/
+noncomputable def vertexGraphEdge (M : CombinatorialMap D)
+    {p q : M.Vertex} (h : (M.vertexGraph).Adj p q) : M.Edge :=
+  Classical.choose h.2
+
+/-- The chosen primal edge really witnesses the vertex adjacency. -/
+@[simp] theorem vertexGraphEdge_spec (M : CombinatorialMap D)
+    {p q : M.Vertex} (h : (M.vertexGraph).Adj p q) :
+    Edge.ends (M := M) (vertexGraphEdge (M := M) h) = s(p, q) := by
+  exact Classical.choose_spec h.2
+
+/-- Swapping the vertex endpoints does not change the chosen primal edge. -/
+@[simp] theorem vertexGraphEdge_symm (M : CombinatorialMap D)
+    {p q : M.Vertex} (h : (M.vertexGraph).Adj p q) :
+    vertexGraphEdge (M := M) (M.vertexGraph.symm h) = vertexGraphEdge (M := M) h := by
+  rcases h with ⟨hne, e, he⟩
+  simp [vertexGraphEdge, Sym2.eq_swap]
+
+/-- Equal chosen vertex-adjacency edges determine the same vertex pair. -/
+theorem vertexGraphEdge_eq (M : CombinatorialMap D)
+    {p q r s : M.Vertex}
+    (h₁ : (M.vertexGraph).Adj p q) (h₂ : (M.vertexGraph).Adj r s)
+    (heq : vertexGraphEdge (M := M) h₁ = vertexGraphEdge (M := M) h₂) :
+    s(p, q) = s(r, s) := by
+  simpa [vertexGraphEdge_spec] using congrArg (Edge.ends (M := M)) heq
+
+/-- A leaf-insertion order on a spanning tree of the vertex graph determines a
+concrete original edge injection.
+
+This is the primal half of the tree/cotree edge-order bridge: parent edges in a
+tree insertion order are represented by actual map edges, and distinct parent
+edges give distinct map edges. -/
+theorem exists_vertexEdgeInjection_of_leafOrder
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.vertexGraph) (_hT : T.IsTree)
+    {l : List M.Vertex}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card M.Vertex)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ f : Fin (l.length - 1) → M.Edge, Function.Injective f := by
+  classical
+  refine ⟨fun i =>
+    vertexGraphEdge (M := M) (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2), ?_⟩
+  intro i j hij
+  let a_i : M.Vertex := l[i.1 + 1]'(by omega)
+  let b_i : M.Vertex := parent (i.1 + 1) (by omega) (by omega)
+  let a_j : M.Vertex := l[j.1 + 1]'(by omega)
+  let b_j : M.Vertex := parent (j.1 + 1) (by omega) (by omega)
+  have hAdj_i : (M.vertexGraph).Adj a_i b_i := by
+    exact hTsub (by simpa [a_i, b_i] using (hparent (i.1 + 1) (by omega) (by omega)).2)
+  have hAdj_j : (M.vertexGraph).Adj a_j b_j := by
+    exact hTsub (by simpa [a_j, b_j] using (hparent (j.1 + 1) (by omega) (by omega)).2)
+  have hEq : vertexGraphEdge (M := M) hAdj_i =
+      vertexGraphEdge (M := M) hAdj_j := by
+    simpa [a_i, b_i, a_j, b_j] using hij
+  have hsym2 : s(a_i, b_i) = s(a_j, b_j) := by
+    exact vertexGraphEdge_eq (M := M) hAdj_i hAdj_j hEq
+  exact SimpleGraph.IsTree.parentEdgeMap_injective (G := T) (l := l) hl_nodup parent
+    hparent hsym2
+
+/-- A leaf-insertion order on a spanning tree of the vertex graph determines an
+edge permutation that moves those tree edges into the initial segment of the
+ambient edge order. This is the primal permutation-level bridge used by the
+ordered prefix insertion route. -/
+theorem exists_vertexEdgePermutation_of_leafOrder
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.vertexGraph) (hT : T.IsTree)
+    {l : List M.Vertex}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card M.Vertex)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ hk : l.length - 1 ≤ Fintype.card M.Edge,
+      ∃ f : Fin (l.length - 1) → M.Edge,
+        Function.Injective f ∧
+          ∃ π : Equiv.Perm M.Edge,
+            ∀ i : Fin (l.length - 1), π (f i) = (Fintype.equivFin M.Edge).symm (Fin.castLE hk i) := by
+  classical
+  rcases
+      exists_vertexEdgeInjection_of_leafOrder
+        (M := M) (T := T) hTsub hT hl_nodup hl_len parent hparent with
+    ⟨f, hf⟩
+  have hk : l.length - 1 ≤ Fintype.card M.Edge := by
+    simpa using Fintype.card_le_of_injective f hf
+  let e : M.Edge ≃ Fin (Fintype.card M.Edge) := Fintype.equivFin M.Edge
+  have hf' : Function.Injective (fun i : Fin (l.length - 1) => e (f i)) := fun _ _ h =>
+    hf (e.injective h)
+  obtain ⟨σ, hσ⟩ := SimpleGraph.Equiv.Perm.exists_map_fin_castLE hk (fun i => e (f i)) hf'
+  let π : Equiv.Perm M.Edge := e.trans (σ.trans e.symm)
+  refine ⟨hk, f, hf, π, ?_⟩
+  intro i
+  simp [π, e, hσ]
 
 /-- A chosen edge witnessing a face-graph adjacency. This is the dual-side
 analogue of `vertexGraphEdge` and is the basic selector used when turning a
