@@ -775,6 +775,47 @@ theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq
   exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq
     (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame
 
+/-- Face equality for carried old darts after a same-face prefix insertion is
+equivalent to equality in the inserted split-face quotient.
+
+This is the quotient-valued form of
+`residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq`.  It
+is the form consumed by the later cotree constructor: the cotree label invariant
+produces equality in `insertedFaceSplitPoolEquiv`, while
+`ResidualMapPrefixStepInsertion.sameFace` asks for equality of predecessor
+`Face_mk` classes. -/
+theorem residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ x y : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl x)) =
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl y)) ↔
+      insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl x)) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl y)) := by
+  constructor
+  · intro hface
+    exact
+      (residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq
+        (G := G) m hm hm' hARR hARR' c₁ c₂ x y hc hsame hvertex).mp
+        (Quotient.eq''.mp hface)
+  · intro hsplit
+    exact Quotient.sound
+      ((residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq
+        (G := G) m hm hm' hARR hARR' c₁ c₂ x y hc hsame hvertex).mpr hsplit)
+
 /-- Same-face prefix insertion separates the two old cut corners into the two
 successor residual faces. -/
 theorem residualMap_prefixStep_sameFace_old_corners_not_sameCycle
