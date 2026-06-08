@@ -281,6 +281,8 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   the split-face dual-adjacency facts
   `CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`
   / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm`,
+  the splice-corner face-equality constructor
+  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq`,
   the first post-tree edge witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
   and

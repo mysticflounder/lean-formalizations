@@ -123,6 +123,10 @@ Formalized bridge pieces now available:
   packages the same-face local data into constructor-facing corners and the
   final `ResidualMapPrefixStepInsertion.sameFace` witness, assuming the
   predecessor `SameCycle` condition for those corners.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq`
+  is the constructor-facing form needed by the cotree label invariant: equality
+  of the predecessor face classes for the actual selected splice corners
+  supplies the same-face witness.
 - `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
   combines that local same-face witness with
   `CombinatorialMap.facePerm_sameCycle_of_card_face_eq_one`, giving the first

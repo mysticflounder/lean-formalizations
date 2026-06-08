@@ -3526,6 +3526,62 @@ theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident
     (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hjoin hARR hARR'
     hp₁ hp₂ hmono₁ hmono₂ c₁ c₂ hc hsame hpred₁ hpred₂
 
+/-- Construct a same-face prefix-step insertion witness from face equality of
+the actual splice predecessor corners.
+
+The old-endpoint constructor chooses the two predecessor corners immediately
+before the new darts.  In later cotree steps the tree-cotree invariant naturally
+produces equality of the predecessor face classes for those selected corners;
+this theorem converts that quotient-face equality into the `SameCycle`
+hypothesis needed by the concrete `ResidualMapPrefixStepInsertion.sameFace`
+constructor. -/
+theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p₁)
+    (hpnew₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p₂)
+    (hpother₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p₁)
+    (hpother₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p₂)
+    (hp₁ : p₁ ∈ G.V) (hp₂ : p₂ ∈ G.V)
+    (hold₁ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₁)
+    (hold₂ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₂)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hface :
+      ∀ (c₁ : ↥(incidentEnds (G.prefixEdges m hm) p₁))
+        (c₂ : ↥(incidentEnds (G.prefixEdges m hm) p₂)),
+        c₁.1 ≠ c₂.1 →
+        vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p₁
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            (endAngleKey_injective (G.prefixEdges (m + 1) hm') p₁ _ _
+              (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₁
+                (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₁) le_rfl))
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' false hpnew₁ hpother₁ c₁).1) =
+          incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' false hpnew₁ →
+        vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p₂
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            (endAngleKey_injective (G.prefixEdges (m + 1) hm') p₂ _ _
+              (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₂
+                (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₂) le_rfl))
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew₂ hpother₂ c₂).1) =
+          incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' true hpnew₂ →
+        (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁.1 =
+          (residualMap (G.prefixEdges m hm) hARR).Face_mk c₂.1) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  obtain ⟨c₁, c₂, hc, hpred₁, hpred₂, hstep⟩ :=
+    exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident
+      (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁ hp₂
+      hold₁ hold₂ hjoin hARR hARR'
+  have hsame :
+      (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁.1 c₂.1 :=
+    Quotient.eq''.mp (hface c₁ c₂ hc hpred₁ hpred₂)
+  exact hstep hsame
+
 /-- Construct a same-face prefix-step insertion witness when the predecessor
 residual map has one face.
 
