@@ -70,6 +70,12 @@ Formalized bridge pieces now available:
   nonempty prefix of a parent leaf-insertion order is connected, and
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
   specializes this to the unpeeled dual prefix at a reverse cotree step.
+- `SimpleGraph.Connected.apply_eq_of_forall_adj`,
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj`,
+  and
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj`
+  transport any edge-local split-face label invariant across that connected
+  unpeeled prefix.
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.

@@ -681,6 +681,107 @@ theorem faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected
   exact SimpleGraph.connected_induce_take_of_leaf_insertion_parent
     (G := T) parent hparent ((Fin.rev i).1 + 2) (by omega) (by omega)
 
+/-- A label constant across every edge of the unpeeled dual prefix is constant
+on that whole prefix.
+
+This is the graph-to-face bookkeeping form used by the cotree layer.  The label
+will later be instantiated by the current split-face side of a residual prefix;
+the edge hypothesis says each unpeeled dual edge has endpoints on the same
+current side, and connectedness makes all unpeeled vertices share that side. -/
+theorem faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : M.dual.Vertex → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      T.Adj u v → label u = label v)
+    {u v : M.dual.Vertex}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 2)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 2)).toFinset) :
+    label u = label v := by
+  let S : Set M.dual.Vertex :=
+    {x : M.dual.Vertex | x ∈ (l.take ((Fin.rev i).1 + 2)).toFinset}
+  have hconn : (T.induce S).Connected := by
+    simpa [S] using
+      M.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected T parent hparent i
+  exact SimpleGraph.Connected.apply_eq_of_forall_adj (G := T.induce S)
+    (f := fun x : ↥S => label x.1) hconn
+    (by
+      intro a b hab
+      have habT : T.Adj a.1 b.1 := by
+        simpa [S, SimpleGraph.induce_adj] using hab
+      exact hadj a.2 b.2 habT)
+    ⟨u, hu⟩ ⟨v, hv⟩
+
+/-- Label equality for the two endpoint faces of a reverse cotree leaf edge,
+assuming the label is constant across every edge of the unpeeled dual prefix. -/
+theorem faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : M.dual.Vertex → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      T.Adj u v → label u = label v) :
+    label (l[(Fin.rev i).1 + 1]'(by omega)) =
+      label (parent ((Fin.rev i).1 + 1) (by omega) (by omega)) := by
+  let r : ℕ := (Fin.rev i).1
+  have hleaf_mem : l[r + 1]'(by omega) ∈ (l.take (r + 2)).toFinset := by
+    rw [List.mem_toFinset]
+    have htake : r + 1 < (l.take (r + 2)).length := by
+      rw [List.length_take]
+      omega
+    have hget : (l.take (r + 2))[r + 1]'htake = l[r + 1]'(by omega) := by
+      exact (List.getElem_take' (xs := l) (i := r + 1) (j := r + 2)
+        (by omega) (by omega)).symm
+    exact List.mem_of_getElem hget
+  have hpar_mem :
+      parent (r + 1) (by omega) (by omega) ∈ (l.take (r + 2)).toFinset := by
+    have hshort_fin :
+        parent (r + 1) (by omega) (by omega) ∈ (l.take (r + 1)).toFinset :=
+      (hparent (r + 1) (by omega) (by omega)).1
+    have hshort : parent (r + 1) (by omega) (by omega) ∈ l.take (r + 1) := by
+      simpa [List.mem_toFinset] using hshort_fin
+    obtain ⟨t, ht_short, htval⟩ := List.mem_iff_getElem.mp hshort
+    have htlt : t < r + 1 := by
+      have : t < (l.take (r + 1)).length := ht_short
+      rw [List.length_take] at this
+      omega
+    have htl : t < l.length := by omega
+    have hpar_eq : parent (r + 1) (by omega) (by omega) = l[t]'htl := by
+      have hget : l[t]'htl = (l.take (r + 1))[t]'ht_short := by
+        exact List.getElem_take' (xs := l) (i := t) (j := r + 1) htl htlt
+      exact (hget.trans htval).symm
+    rw [List.mem_toFinset]
+    have ht_long : t < (l.take (r + 2)).length := by
+      rw [List.length_take]
+      omega
+    have hget_long :
+        (l.take (r + 2))[t]'ht_long = parent (r + 1) (by omega) (by omega) := by
+      have hget : l[t]'htl = (l.take (r + 2))[t]'ht_long := by
+        exact List.getElem_take' (xs := l) (i := t) (j := r + 2) htl (by omega)
+      exact hget.symm.trans hpar_eq.symm
+    exact List.mem_of_getElem hget_long
+  simpa [r] using
+    M.faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj
+      T parent hparent i label (by simpa [r] using hadj)
+      (by simpa [r] using hleaf_mem) (by simpa [r] using hpar_mem)
+
 /-- Reversing a dual leaf-insertion order preserves injectivity of the selected
 cotree edges. -/
 theorem faceEdgeOfLeafOrderReverse_injective

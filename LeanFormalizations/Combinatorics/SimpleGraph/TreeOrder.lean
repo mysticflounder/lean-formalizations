@@ -555,6 +555,24 @@ theorem IsTree.exists_leaf_insertion_order_with_parent {V : Type*} (G : SimpleGr
   intro z hz
   exact ExistsUnique.unique (hl_unique k hk hk') hz hchoose
 
+/-- A label that is constant across every edge is constant along reachability. -/
+theorem eq_of_reachable_of_forall_adj {V β : Type*} {G : SimpleGraph V} {f : V → β}
+    (hadj : ∀ ⦃u v : V⦄, G.Adj u v → f u = f v)
+    {u v : V} (h : G.Reachable u v) : f u = f v := by
+  rw [SimpleGraph.reachable_iff_reflTransGen] at h
+  induction h with
+  | refl => rfl
+  | tail _ hadj_uv ih =>
+      exact ih.trans (hadj hadj_uv)
+
+/-- A label on a connected graph is constant if it is constant across every
+edge. -/
+theorem Connected.apply_eq_of_forall_adj {V β : Type*} {G : SimpleGraph V} {f : V → β}
+    (hconn : G.Connected)
+    (hadj : ∀ ⦃u v : V⦄, G.Adj u v → f u = f v)
+    (u v : V) : f u = f v :=
+  eq_of_reachable_of_forall_adj hadj (hconn.preconnected u v)
+
 /-- Prefixes of a leaf-insertion parent order are connected.
 
 If every non-initial listed vertex chooses an adjacent parent among the earlier
