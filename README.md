@@ -248,6 +248,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle`
   / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle`
   / `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_of_not_sameCycle`,
+  the split-quotient face-stability criterion
+  `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq`,
   the split-face dual-adjacency facts
   `CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`
   / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm`,

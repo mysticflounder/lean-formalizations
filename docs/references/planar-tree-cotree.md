@@ -108,6 +108,12 @@ Formalized bridge pieces now available:
   combines the same local witness with
   `CombinatorialMap.card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one`,
   matching the planar tree-prefix form used in the tree-cotree transition.
+- `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq`
+  and
+  `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq`
+  express the face-stability invariant needed after the first cotree step:
+  carried old darts are in one successor face exactly when their images agree
+  in the split-face quotient.
 
 Still missing:
 

@@ -735,6 +735,46 @@ theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_of_not_sameCy
   exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle
     (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame hx hy
 
+/-- Same-face prefix insertion identifies successor same-face relations for old
+darts with equality in the split-face quotient of the inserted predecessor map.
+
+This is the residual-prefix form of the Lando--Zvonkin face split: after the
+new edge is inserted through one predecessor face, later cotree bookkeeping can
+test whether two old darts still lie in the same successor face by comparing
+their images in `insertedFaceSplitPoolEquiv`. -/
+theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ x y : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl x)) (prefixStepDartEquiv m (Sum.inl y)) ↔
+      insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl x)) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl y)) := by
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+      (iso.toEquiv (Sum.inl x)) (iso.toEquiv (Sum.inl y)) ↔
+    insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+        ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+          (Sum.inl x)) =
+      insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+        ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+          (Sum.inl y))
+  rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+  exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq
+    (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame
+
 /-- Same-face prefix insertion makes the new residual edge a dual adjacency
 between the two split successor faces.
 

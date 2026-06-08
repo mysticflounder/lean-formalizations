@@ -1845,6 +1845,32 @@ corner `c₁` as `0 : Fin 2`. -/
     hstepDartB hleft]
   simp [insFacePermStep1SplitPoolEquiv]
 
+/-- For a same-face insertion, two carried old darts lie in the same successor
+face exactly when the split-face quotient assigns their successor face classes
+to the same old-face-or-side class.
+
+This is the quotient form of the standard face-splitting operation in the
+Lando--Zvonkin dart-permutation model: inserting an edge through one face
+replaces that old face by two split sides, while all face information is carried
+by the induced quotient map. -/
+theorem insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq
+    (M : CombinatorialMap D) (c₁ c₂ x y : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    (insertedEdgeMap M c₁ c₂).facePerm.SameCycle (Sum.inl x) (Sum.inl y) ↔
+      insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+          ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl x)) =
+        insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+          ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl y)) := by
+  constructor
+  · intro hxy
+    exact congrArg (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame) (Quotient.sound hxy)
+  · intro hxy
+    have hface :
+        (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl x) =
+          (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl y) :=
+      (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame).injective hxy
+    exact Quotient.eq''.mp hface
+
 /-- A same-face insertion does not change the face-cycle relation between old
 darts outside the split face. -/
 theorem insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle
