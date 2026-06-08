@@ -28,6 +28,10 @@ Why this matters here:
 
 - The local residual-map lemmas already turn individual edge additions into
   `ResidualMapPrefixStepInsertion` witnesses once an order is fixed.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
+  constructs the actual leaf-insertion witness from the tree-order local data:
+  the old endpoint has an incident dart in the predecessor prefix and the other
+  endpoint is fresh.
 - The missing global witness is the tree-first / cotree-second edge order.
 - This theorem is the exact combinatorial bridge needed to convert a spanning
   tree on `vertexGraph` into the dual-side edge order on `faceGraph`.
@@ -49,6 +53,10 @@ Formalized bridge pieces now available:
 - `CombinatorialMap.exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges`
   turns disjoint concrete primal/cotree edge injections into the single
   tree-first/cotree-second edge permutation.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
+  packages the tree-phase endpoint incidence conditions into the constructor
+  `ResidualMapPrefixStepInsertion.leaf`, with no additional planarity
+  hypothesis.
 
 Still missing:
 

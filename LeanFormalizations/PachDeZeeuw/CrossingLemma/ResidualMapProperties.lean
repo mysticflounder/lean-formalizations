@@ -2670,6 +2670,48 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
     (prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
       (G := G) m hm hm' (p := p) hpnew hpother hleaf hjoin hARR hARR' hp hmono c hpred)
 
+/-- Construct a leaf prefix-step insertion witness from the tree-order local
+incidence data.
+
+If the first endpoint of the new last edge is already incident to the previous
+prefix, while the second endpoint has no incident dart in that prefix, then the
+successor residual map is a genuine leaf insertion.  This packages the
+cardinality side condition in
+`exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice` by exhibiting the
+old carried-over dart and the new last-edge dart as two distinct incident ends at
+the old endpoint. -/
+theorem exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p : ℝ × ℝ}
+    (hpnew : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    (hleaf : ∀ e : Fin m × Bool,
+      e ∉ incidentEnds (G.prefixEdges m hm)
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2)
+    (hold : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  rcases hold with ⟨eold, heold⟩
+  let oldEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    ⟨(eold.1.castSucc, eold.2),
+      (mem_incidentEnds_prefixEdges_castSucc_iff
+        (G := G) (m := m) (hm := hm) (hm' := hm') (p := p) (e := eold)).mpr heold⟩
+  let newEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' false hpnew
+  have hne : oldEnd ≠ newEnd := by
+    intro h
+    have hval : (eold.1.castSucc, eold.2) = (Fin.last m, false) :=
+      congrArg Subtype.val h
+    exact Fin.castSucc_ne_last eold.1 (congrArg Prod.fst hval)
+  have hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) := by
+    have hlt : 1 < Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+      (Fintype.one_lt_card_iff).mpr ⟨oldEnd, newEnd, hne⟩
+    omega
+  exact exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
+    (G := G) m hm hm' hpnew hpother hleaf hjoin hARR hARR' hcard
+
 /-- Every power of the residual edge permutation preserves the edge index. -/
 theorem residualMap_edgePerm_zpow_fst (hARR : ArcsRotationRegular G)
     (k : ℤ) (d : Fin G.numEdges × Bool) :

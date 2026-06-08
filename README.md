@@ -222,8 +222,12 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `EdgeSetDrawing.lean`, `PLArc.lean`, `PLAssembly.lean`,
   `PLCollarSeparation.lean`). The full crossing lemma still bottoms out in a
   labelled conjectured geometric residual (`exists_twoSidedPartition_of_arc`,
-  `sorry`). A separate `subsetAveraging_master` (`sorry`) is a documented
-  dead-end, not used downstream.
+  `sorry`). Current tree-cotree bridge progress includes the constructor-facing
+  leaf witness
+  `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`;
+  the complementary dual-tree and cotree same-face stability theorems remain the
+  open topological layer. A separate `subsetAveraging_master` (`sorry`) is a
+  documented dead-end, not used downstream.
 - **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`
   contain `sorry`).
 - **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
