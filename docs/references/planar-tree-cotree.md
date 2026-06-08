@@ -92,6 +92,14 @@ Formalized bridge pieces now available:
   `SimpleGraph.Equiv.Perm.exists_twoBlocks_map_fintype` provide the inverse
   block convention used by ordered prefixes: a block position evaluates to the
   selected edge.
+- `CrossingLemma.DrawnMultigraph.exists_edgePositionPermutation_of_disjoint_tree_faceEdgeOfLeafOrderReverse`
+  is the drawing-edge form of that block convention: after mapping full
+  residual-map cotree edges through `residualMapEdgeEquiv`, a disjoint primal
+  tree edge block and reverse cotree block give a single
+  `Equiv.Perm (Fin G.numEdges)`.
+- `CrossingLemma.DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block`
+  rewrites the `j`th cotree-block position into the exact "new last edge of the
+  prefix" shape consumed by the residual-map same-face constructor.
 - `CombinatorialMap.card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge`
   formalizes the von Staudt count
   `|E| = (|V|-1)+(|V(M.dual)|-1)` in the list-length form used by leaf orders.
@@ -119,6 +127,10 @@ Formalized bridge pieces now available:
   combines a selected residual edge class, old endpoint incidence at its two
   anchors, and splice-corner face equality into the actual
   `ResidualMapPrefixStepInsertion.sameFace` witness.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`
+  specializes that witness to a reverse cotree block position, so the conclusion
+  is the actual `ResidualMapPrefixStepInsertion.sameFace` witness for the
+  selected full-residual-map cotree edge.
 - `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
   `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
   orientation-parametric: either of the two new darts may be the dart threaded
