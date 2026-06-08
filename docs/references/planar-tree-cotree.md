@@ -142,6 +142,17 @@ Formalized bridge pieces now available:
   package those side labels as the split-separation fact used by the cotree
   face-label invariant: after the insertion, the two old cut corners lie in
   different successor faces.
+- `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB`
+  and `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA`
+  package the complementary local face witnesses: the old cut corner `c₁`
+  remains in the successor face of `dartB`, and `c₂` remains in the successor
+  face of `dartA`.
+- `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true`
+  and
+  `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`
+  transport those witnesses through the prefix-step isomorphism, where `dartB`
+  is the successor dart `(Fin.last m, true)` and `dartA` is
+  `(Fin.last m, false)`.
 
 Still missing:
 

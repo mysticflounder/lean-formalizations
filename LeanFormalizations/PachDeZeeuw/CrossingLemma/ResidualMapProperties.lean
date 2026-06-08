@@ -798,6 +798,64 @@ theorem residualMap_prefixStep_sameFace_old_corners_not_sameCycle
   exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_not_sameCycle_inl_corners
     (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
 
+/-- Same-face prefix insertion puts the old left cut corner in the successor
+face of the new dart `(Fin.last m, true)`. -/
+theorem residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl c₁)) (Fin.last m, true) := by
+  have hcycle :
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl c₁))
+        (prefixStepDartEquiv m (dartB : Fin m × Bool ⊕ Fin 2)) := by
+    let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+    change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (iso.toEquiv (Sum.inl c₁)) (iso.toEquiv (dartB : Fin m × Bool ⊕ Fin 2))
+    rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+    exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB
+      (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+  rw [prefixStepDartEquiv_apply_inr_one] at hcycle
+  exact hcycle
+
+/-- Same-face prefix insertion puts the old right cut corner in the successor
+face of the new dart `(Fin.last m, false)`. -/
+theorem residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl c₂)) (Fin.last m, false) := by
+  have hcycle :
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl c₂))
+        (prefixStepDartEquiv m (dartA : Fin m × Bool ⊕ Fin 2)) := by
+    let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+    change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (iso.toEquiv (Sum.inl c₂)) (iso.toEquiv (dartA : Fin m × Bool ⊕ Fin 2))
+    rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+    exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA
+      (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+  rw [prefixStepDartEquiv_apply_inr_zero] at hcycle
+  exact hcycle
+
 /-- Same-face prefix insertion makes the new residual edge a dual adjacency
 between the two split successor faces.
 

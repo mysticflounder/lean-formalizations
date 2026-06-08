@@ -265,6 +265,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   the split-separation facts
   `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_not_sameCycle_inl_corners`
   / `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_not_sameCycle`,
+  the split corner/new-dart face witnesses
+  `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB`
+  / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`,
   the transported inserted-face preservation facts
   `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle`
   / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle`

@@ -1916,6 +1916,36 @@ theorem insertedEdgeMap_facePerm_not_sameCycle_inl_corners
     insertedFaceSplitPoolEquiv_mk_inl_right M c₁ c₂ hc hsame] at himg
   exact (by decide : (0 : Fin 2) ≠ 1) (Sum.inr.inj himg)
 
+/-- In a same-face insertion, the old left cut corner `c₁` and the new dart
+`dartB` lie on the same successor face. -/
+theorem insertedEdgeMap_facePerm_sameCycle_inl_left_dartB
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    (insertedEdgeMap M c₁ c₂).facePerm.SameCycle (Sum.inl c₁)
+      (dartB : D ⊕ Fin 2) := by
+  have hface :
+      (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₁) =
+        (insertedEdgeMap M c₁ c₂).Face_mk (dartB : D ⊕ Fin 2) := by
+    apply (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame).injective
+    rw [insertedFaceSplitPoolEquiv_mk_inl_left M c₁ c₂ hc hsame,
+      insertedFaceSplitPoolEquiv_mk_dartB_left M c₁ c₂ hc hsame]
+  exact Quotient.eq''.mp hface
+
+/-- In a same-face insertion, the old right cut corner `c₂` and the new dart
+`dartA` lie on the same successor face. -/
+theorem insertedEdgeMap_facePerm_sameCycle_inl_right_dartA
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    (insertedEdgeMap M c₁ c₂).facePerm.SameCycle (Sum.inl c₂)
+      (dartA : D ⊕ Fin 2) := by
+  have hface :
+      (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₂) =
+        (insertedEdgeMap M c₁ c₂).Face_mk (dartA : D ⊕ Fin 2) := by
+    apply (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame).injective
+    rw [insertedFaceSplitPoolEquiv_mk_inl_right M c₁ c₂ hc hsame,
+      insertedFaceSplitPoolEquiv_mk_dartA_right M c₁ c₂ hc hsame]
+  exact Quotient.eq''.mp hface
+
 /-- For a same-face insertion, two carried old darts lie in the same successor
 face exactly when the split-face quotient assigns their successor face classes
 to the same old-face-or-side class.
