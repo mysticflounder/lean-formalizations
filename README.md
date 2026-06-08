@@ -287,7 +287,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   the split-quotient face-stability criterion
   `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq`
   / `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`,
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`,
   and the reverse-cotree specialization
   `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`,
   the split-face dual-adjacency facts

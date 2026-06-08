@@ -182,6 +182,13 @@ Formalized bridge pieces now available:
 - `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`
   is the quotient-face equality form of the same criterion, matching the
   `Face_mk` equality consumed by the same-face prefix-step constructor.
+- `CrossingLemma.residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq`
+  and
+  `CrossingLemma.residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`
+  extend the split-pool criterion from carried old darts to arbitrary successor
+  prefix darts.  This covers the case split needed when a later cotree splice
+  corner is one of the two darts created by the immediately preceding
+  same-face insertion.
 - `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
   composes reverse cotree split-pool label transport with that residual
   same-face criterion: under a label invariant on the unpeeled dual prefix, the
