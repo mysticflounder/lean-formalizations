@@ -254,6 +254,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj`
   / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
+  the residual-edge/order adapter
+  `CrossingLemma.residualMapEdgeEquiv_edge_mk`
+  / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv`,
   the face-splitting quotient specs
   `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_of_not_sameCycle`
   / `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_left`

@@ -103,6 +103,11 @@ Formalized bridge pieces now available:
   concrete drawing edges selected by the parent edges in a vertex-tree leaf
   order, record their endpoint alternatives, and prove that these selected
   drawing edges are distinct.
+- `CrossingLemma.residualMapEdgeEquiv_edge_mk` and
+  `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv`
+  adapt a residual-map edge class selected by the cotree layer to the ordered
+  drawing-prefix convention: the next permuted prefix edge has the two anchors
+  of the selected residual dart and its opposite dart, up to orientation.
 - `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
   `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
   orientation-parametric: either of the two new darts may be the dart threaded

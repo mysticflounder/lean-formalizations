@@ -3927,6 +3927,44 @@ noncomputable def residualMapEdgeEquiv (hARR : ArcsRotationRegular G) :
     intro e
     rfl
 
+/-- The canonical residual-edge index of the edge class represented by a dart
+is the dart's drawing-edge index. -/
+@[simp] theorem residualMapEdgeEquiv_edge_mk (hARR : ArcsRotationRegular G)
+    (d : Fin G.numEdges × Bool) :
+    residualMapEdgeEquiv G hARR ((residualMap G hARR).Edge_mk d) = d.1 := rfl
+
+/-- If the next position of a permuted prefix is the residual-map edge class
+represented by `d`, then the two endpoints of that new drawing edge are exactly
+the two anchors of `d` and its opposite dart, up to the orientation of `d`.
+
+This is the drawing-level adapter between a cotree edge selected in the residual
+map and the ordered-prefix convention used by `DrawnMultigraph.permuteEdges`. -/
+theorem DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv
+    (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges))
+    (hARR : ArcsRotationRegular G)
+    (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges)
+    (d : Fin G.numEdges × Bool)
+    (hπ : π (Fin.castLE hm' (Fin.last m)) =
+      residualMapEdgeEquiv G hARR ((residualMap G hARR).Edge_mk d)) :
+    let p₁ := (((G.permuteEdges π).prefixEdges (m + 1) hm').endpoints (Fin.last m)).1
+    let p₂ := (((G.permuteEdges π).prefixEdges (m + 1) hm').endpoints (Fin.last m)).2
+    (p₁ = dartAnchor G d ∧
+      p₂ = dartAnchor G ((residualMap G hARR).edgePerm d)) ∨
+    (p₁ = dartAnchor G ((residualMap G hARR).edgePerm d) ∧
+      p₂ = dartAnchor G d) := by
+  have hidx : π (Fin.castLE hm' (Fin.last m)) = d.1 := by
+    simpa using hπ
+  rcases d with ⟨e, b⟩
+  cases b
+  · left
+    constructor <;>
+      simp [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, dartAnchor,
+        residualMap_edgePerm_apply, hidx]
+  · right
+    constructor <;>
+      simp [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, dartAnchor,
+        residualMap_edgePerm_apply, hidx]
+
 /-- The residual map has one edge class for each drawn edge. -/
 theorem residualMap_edge_card (hARR : ArcsRotationRegular G) :
     Fintype.card (residualMap G hARR).Edge = G.numEdges := by
