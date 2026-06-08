@@ -775,6 +775,29 @@ theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq
   exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq
     (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame
 
+/-- Same-face prefix insertion separates the two old cut corners into the two
+successor residual faces. -/
+theorem residualMap_prefixStep_sameFace_old_corners_not_sameCycle
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    ¬ (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl c₁)) (prefixStepDartEquiv m (Sum.inl c₂)) := by
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  change ¬ (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+      (iso.toEquiv (Sum.inl c₁)) (iso.toEquiv (Sum.inl c₂))
+  rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+  exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_not_sameCycle_inl_corners
+    (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+
 /-- Same-face prefix insertion makes the new residual edge a dual adjacency
 between the two split successor faces.
 

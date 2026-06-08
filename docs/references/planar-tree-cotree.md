@@ -137,6 +137,11 @@ Formalized bridge pieces now available:
   completes the old-corner side labels for a split face: the old cut corner
   `c₂` lands on side `1`, the same side as the new dart `dartA`, while the
   existing side lemmas put `c₁` and `dartB` on side `0`.
+- `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_not_sameCycle_inl_corners`
+  and `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_not_sameCycle`
+  package those side labels as the split-separation fact used by the cotree
+  face-label invariant: after the insertion, the two old cut corners lie in
+  different successor faces.
 
 Still missing:
 

@@ -1899,6 +1899,23 @@ corner `c₂` as `1 : Fin 2`, the same side as the new dart `dartA`. -/
     hstepC₂ hright]
   simp [insFacePermStep1SplitPoolEquiv]
 
+/-- A same-face insertion separates the two old cut corners into the two
+successor faces. -/
+theorem insertedEdgeMap_facePerm_not_sameCycle_inl_corners
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    ¬ (insertedEdgeMap M c₁ c₂).facePerm.SameCycle (Sum.inl c₁) (Sum.inl c₂) := by
+  intro h
+  have himg := congrArg (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame)
+    (Quotient.sound h)
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+      ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₁)) =
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+      ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₂)) at himg
+  rw [insertedFaceSplitPoolEquiv_mk_inl_left M c₁ c₂ hc hsame,
+    insertedFaceSplitPoolEquiv_mk_inl_right M c₁ c₂ hc hsame] at himg
+  exact (by decide : (0 : Fin 2) ≠ 1) (Sum.inr.inj himg)
+
 /-- For a same-face insertion, two carried old darts lie in the same successor
 face exactly when the split-face quotient assigns their successor face classes
 to the same old-face-or-side class.
