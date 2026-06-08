@@ -555,6 +555,94 @@ theorem IsTree.exists_leaf_insertion_order_with_parent {V : Type*} (G : SimpleGr
   intro z hz
   exact ExistsUnique.unique (hl_unique k hk hk') hz hchoose
 
+/-- Prefixes of a leaf-insertion parent order are connected.
+
+If every non-initial listed vertex chooses an adjacent parent among the earlier
+listed vertices, then the subgraph induced by any nonempty prefix of the list is
+connected.  This is the graph-theoretic component invariant used by the
+tree-cotree layer: before the reverse cotree step peels a dual leaf, the leaf
+and its parent still lie in the connected unpeeled dual prefix. -/
+theorem connected_induce_take_of_leaf_insertion_parent {V : Type*} (G : SimpleGraph V)
+    [DecidableEq V]
+    {l : List V}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        G.Adj (l[k]'hk') (parent k hk hk'))
+    (k : ℕ) (hkpos : 0 < k) (hklen : k ≤ l.length) :
+    (G.induce {x : V | x ∈ (l.take k).toFinset}).Connected := by
+  classical
+  let S : Set V := {x : V | x ∈ (l.take k).toFinset}
+  have hroot_mem : l[0]'(by omega) ∈ S := by
+    change l[0]'(by omega) ∈ (l.take k).toFinset
+    rw [List.mem_toFinset]
+    have htake : 0 < (l.take k).length := by
+      rw [List.length_take]
+      omega
+    have hget : (l.take k)[0]'htake = l[0]'(by omega) := by
+      exact (List.getElem_take' (xs := l) (i := 0) (j := k) (by omega) hkpos).symm
+    exact List.mem_of_getElem hget
+  let root : ↥S := ⟨l[0]'(by omega), hroot_mem⟩
+  have hidx_mem : ∀ j : ℕ, (hjk : j < k) → l[j]'(by omega) ∈ S := by
+    intro j hjk
+    change l[j]'(by omega) ∈ (l.take k).toFinset
+    rw [List.mem_toFinset]
+    have htake : j < (l.take k).length := by
+      rw [List.length_take]
+      omega
+    have hget : (l.take k)[j]'htake = l[j]'(by omega) := by
+      exact (List.getElem_take' (xs := l) (i := j) (j := k) (by omega) hjk).symm
+    exact List.mem_of_getElem hget
+  have hreach_idx : ∀ j : ℕ, ∀ hjk : j < k,
+      (G.induce S).Reachable root ⟨l[j]'(by omega), hidx_mem j hjk⟩ := by
+    intro j
+    induction j using Nat.strong_induction_on with
+    | h j ih =>
+        intro hjk
+        by_cases hj0 : j = 0
+        · subst hj0
+          exact SimpleGraph.Reachable.rfl
+        · have hjpos : 0 < j := Nat.pos_of_ne_zero hj0
+          have hjlen : j < l.length := by omega
+          have hpar_mem_fin : parent j hjpos hjlen ∈ (l.take j).toFinset :=
+            (hparent j hjpos hjlen).1
+          have hpar_mem_list : parent j hjpos hjlen ∈ l.take j := by
+            simpa [List.mem_toFinset] using hpar_mem_fin
+          obtain ⟨r, hr_take, hrval⟩ := List.mem_iff_getElem.mp hpar_mem_list
+          have hrj : r < j := by
+            have : r < (List.take j l).length := hr_take
+            rw [List.length_take] at this
+            omega
+          have hrl : r < l.length := by omega
+          have hparent_eq : parent j hjpos hjlen = l[r]'hrl := by
+            have hget : l[r]'hrl = (l.take j)[r]'hr_take := by
+              exact List.getElem_take' (xs := l) (i := r) (j := j) hrl hrj
+            exact (hget.trans hrval).symm
+          have hreach_parent := ih r hrj (by omega)
+          let vj : ↥S := ⟨l[j]'(by omega), hidx_mem j hjk⟩
+          let vr : ↥S := ⟨l[r]'(by omega), hidx_mem r (by omega)⟩
+          have hadj : (G.induce S).Adj vj vr := by
+            rw [SimpleGraph.induce_adj]
+            simpa [vj, vr, hparent_eq] using (hparent j hjpos hjlen).2
+          exact hreach_parent.trans hadj.symm.reachable
+  refine (SimpleGraph.connected_iff_exists_forall_reachable (G := G.induce S)).2
+    ⟨root, ?_⟩
+  intro v
+  have hv_list : v.1 ∈ l.take k := by
+    simpa [S, List.mem_toFinset] using v.2
+  obtain ⟨j, hj_take, hjval⟩ := List.mem_iff_getElem.mp hv_list
+  have hjk : j < k := by
+    have : j < (l.take k).length := hj_take
+    rw [List.length_take] at this
+    omega
+  have hjl : j < l.length := by omega
+  have hget : l[j]'hjl = (l.take k)[j]'hj_take := by
+    exact List.getElem_take' (xs := l) (i := j) (j := k) hjl hjk
+  have hv_eq : v = ⟨l[j]'(by omega), hidx_mem j hjk⟩ := by
+    apply Subtype.ext
+    exact (hget.trans hjval).symm
+  simpa [hv_eq] using hreach_idx j hjk
+
 /-- The parent-edge map associated to a leaf-insertion order is injective.
 
 This is the combinatorial core behind turning a tree-order into an explicit

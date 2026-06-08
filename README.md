@@ -145,7 +145,10 @@ it was confirmed complete). All headlines axiom-clean:
 
 - **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
   trees, explicit parent-edge enumeration via `parentEdgeEquiv`, and finite
-  permutation extenders for one-block and two-block edge orders.
+  permutation extenders for one-block and two-block edge orders. It also
+  includes the prefix connectedness invariant
+  `SimpleGraph.connected_induce_take_of_leaf_insertion_parent` used by the
+  reverse cotree component argument.
   **Axiom-clean.**
 
 ### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
@@ -244,6 +247,7 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
   / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
   the face-splitting quotient specs
   `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_of_not_sameCycle`

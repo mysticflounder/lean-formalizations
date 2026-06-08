@@ -66,6 +66,10 @@ Formalized bridge pieces now available:
   `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse` read a dual
   leaf-insertion order backwards, the cotree-block convention where inserted
   dual edges peel leaves from the remaining dual tree.
+- `SimpleGraph.connected_induce_take_of_leaf_insertion_parent` proves that each
+  nonempty prefix of a parent leaf-insertion order is connected, and
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
+  specializes this to the unpeeled dual prefix at a reverse cotree step.
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
@@ -134,10 +138,6 @@ Still missing:
 - The residual-map face-stability proof that the cotree block, in reverse leaf
   order, supplies the `SameCycle` hypotheses required by the same-face insertion
   witness.
-- The endpoint-`.2` leaf-splice transport theorem for
-  `ResidualMapPrefixStepInsertion.leaf true`, complementing the existing
-  endpoint-`.1` witness.  The constructor and planarity layer now support this;
-  the remaining proof is the vertex-permutation transport statement.
 
 Notes for formalization:
 

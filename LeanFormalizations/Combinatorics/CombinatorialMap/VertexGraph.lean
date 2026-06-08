@@ -660,6 +660,27 @@ theorem faceEdgeOfLeafOrderReverse_spec_cases
   simpa [faceEdgeOfLeafOrderReverse] using
     M.faceEdgeOfLeafOrder_spec_cases T hTsub parent hparent (Fin.rev i)
 
+/-- The unpeeled dual prefix for a reverse cotree step is connected.
+
+Reading the cotree block backwards peels leaves from the dual tree.  At reverse
+step `i`, the still-unpeeled dual vertices are the prefix ending at the original
+leaf-insertion vertex indexed by `Fin.rev i`; this induced prefix is connected
+because every non-root vertex has its chosen parent earlier in the leaf order. -/
+theorem faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    (T.induce
+      {x : M.dual.Vertex | x ∈ (l.take ((Fin.rev i).1 + 2)).toFinset}).Connected := by
+  exact SimpleGraph.connected_induce_take_of_leaf_insertion_parent
+    (G := T) parent hparent ((Fin.rev i).1 + 2) (by omega) (by omega)
+
 /-- Reversing a dual leaf-insertion order preserves injectivity of the selected
 cotree edges. -/
 theorem faceEdgeOfLeafOrderReverse_injective
