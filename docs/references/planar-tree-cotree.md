@@ -80,6 +80,12 @@ Formalized bridge pieces now available:
   concrete drawing edges selected by the parent edges in a vertex-tree leaf
   order, record their endpoint alternatives, and prove that these selected
   drawing edges are distinct.
+- `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
+  `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
+  orientation-parametric: either of the two new darts may be the dart threaded
+  into the old vertex cycle.  This matches the residual-map endpoint convention
+  under `prefixStepDartEquiv`, where endpoint `.1` is `false` and endpoint `.2`
+  is `true`.
 - `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
   packages the tree-phase endpoint incidence conditions into the constructor
   `ResidualMapPrefixStepInsertion.leaf`, with no additional planarity
@@ -113,6 +119,10 @@ Still missing:
 - The residual-map face-stability proof that the cotree block, in reverse leaf
   order, supplies the `SameCycle` hypotheses required by the same-face insertion
   witness.
+- The endpoint-`.2` leaf-splice transport theorem for
+  `ResidualMapPrefixStepInsertion.leaf true`, complementing the existing
+  endpoint-`.1` witness.  The constructor and planarity layer now support this;
+  the remaining proof is the vertex-permutation transport statement.
 
 Notes for formalization:
 

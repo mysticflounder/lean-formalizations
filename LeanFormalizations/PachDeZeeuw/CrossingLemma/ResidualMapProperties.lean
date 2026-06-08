@@ -213,6 +213,30 @@ theorem isPlanar_iff_of_iso {D D' : Type*} [Fintype D] [Fintype D']
     exact facePerm_permCongr_of_iso f
   exact isPlanar_iff_of_permCongr_eq f.toEquiv hvertex hedge hface
 
+/-- Boolean-indexed leaf-edge insertion preserves Euler-form planarity. The
+`false` case is the standard leaf insertion; the `true` case is its conjugate by
+the swap of the two new darts. -/
+theorem isPlanar_insertedLeafEdgeMapAt {D : Type*} [DecidableEq D] [Fintype D]
+    (M : CombinatorialMap D) (c : D) (b : Bool) (hplanar : M.IsPlanar) :
+    (insertedLeafEdgeMapAt M c b).IsPlanar := by
+  cases b
+  · simpa using isPlanar_insertedLeafEdgeMap (M := M) (c := c) hplanar
+  · let e : D ⊕ Fin 2 ≃ D ⊕ Fin 2 :=
+      (Equiv.refl D).sumCongr (Equiv.swap (0 : Fin 2) 1)
+    have hvertex :
+        e.permCongr (insertedLeafEdgeMap M c).vertexPerm =
+          (insertedLeafEdgeMapAt M c true).vertexPerm := by
+      simpa [e] using leafDartSwap_permCongr_insertedLeafVertexPerm (M := M) c
+    have hedge :
+        e.permCongr (insertedLeafEdgeMap M c).edgePerm =
+          (insertedLeafEdgeMapAt M c true).edgePerm := by
+      simpa [e] using leafDartSwap_permCongr_insertedLeafEdgePerm (M := M)
+    let iso : CombinatorialMap.Iso (insertedLeafEdgeMap M c)
+        (insertedLeafEdgeMapAt M c true) :=
+      isoOfPermCongrOfVertexEdge e hvertex hedge
+    exact (isPlanar_iff_of_iso iso).mpr
+      (isPlanar_insertedLeafEdgeMap (M := M) (c := c) hplanar)
+
 /-- The `i`-th power of `Equiv.sigmaCongrRight F` acts fiberwise. -/
 theorem sigmaCongrRight_zpow {α : Type*} {β : α → Type*} (F : ∀ a, Equiv.Perm (β a))
     (i : ℤ) (s : Σ a, β a) :
@@ -507,17 +531,19 @@ noncomputable def insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
     (hARR : ArcsRotationRegular (G.prefixEdges m hm))
     (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
-    (c : Fin m × Bool)
+    (b : Bool) (c : Fin m × Bool)
     (hvertex :
       (prefixStepDartEquiv m).permCongr
-        (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+        (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c b).vertexPerm =
           (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
     CombinatorialMap.Iso
-      (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c)
+      (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c b)
       (residualMap (G.prefixEdges (m + 1) hm') hARR') :=
   isoOfPermCongrOfVertexEdge (prefixStepDartEquiv m) hvertex
-    (prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
-      (G := G) m hm hm' hARR hARR')
+    (by
+      simpa using
+        (prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
+          (G := G) m hm hm' hARR hARR'))
 
 /-- To identify a successor-prefix residual map with a same-face insertion on
 the previous prefix, it is enough to prove the vertex-permutation splice
@@ -552,18 +578,18 @@ theorem residualMap_isPlanar_prefixStep_leaf_of_vertexPerm
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
     (hARR : ArcsRotationRegular (G.prefixEdges m hm))
     (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
-    (c : Fin m × Bool)
+    (b : Bool) (c : Fin m × Bool)
     (hvertex :
       (prefixStepDartEquiv m).permCongr
-        (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+        (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c b).vertexPerm =
           (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
     (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar) :
     (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar := by
   let iso := insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
-    (G := G) m hm hm' hARR hARR' c hvertex
+    (G := G) m hm hm' hARR hARR' b c hvertex
   exact (isPlanar_iff_of_iso iso).mpr
-    (isPlanar_insertedLeafEdgeMap (M := residualMap (G.prefixEdges m hm) hARR)
-      (c := c) hplanar)
+    (isPlanar_insertedLeafEdgeMapAt (M := residualMap (G.prefixEdges m hm) hARR)
+      (c := c) b hplanar)
 
 /-- **Same-face insertion, residual-map form.** If the successor prefix is
 identified with the facial insertion of a new edge into the previous residual map
@@ -630,10 +656,10 @@ inductive ResidualMapPrefixStepInsertion
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
     (hARR : ArcsRotationRegular (G.prefixEdges m hm))
     (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) : Prop
-  | leaf (c : Fin m × Bool)
+  | leaf (b : Bool) (c : Fin m × Bool)
       (hvertex :
         (prefixStepDartEquiv m).permCongr
-          (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c).vertexPerm =
+          (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c b).vertexPerm =
             (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
   | sameFace (c₁ c₂ : Fin m × Bool)
       (hc : c₁ ≠ c₂)
@@ -653,9 +679,9 @@ theorem residualMap_isPlanar_prefixStep_of_insertion
     (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar) :
     (residualMap (G.prefixEdges (m + 1) hm') hARR').IsPlanar := by
   cases hstep with
-  | leaf c hvertex =>
+  | leaf b c hvertex =>
       exact residualMap_isPlanar_prefixStep_leaf_of_vertexPerm
-        (G := G) m hm hm' hARR hARR' c hvertex hplanar
+        (G := G) m hm hm' hARR hARR' b c hvertex hplanar
   | sameFace c₁ c₂ hc hsame hvertex =>
       exact residualMap_isPlanar_prefixStep_sameFace_of_vertexPerm
         (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex hplanar
@@ -2942,7 +2968,7 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
       (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp
         (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl))
     hmono hcard
-  refine ResidualMapPrefixStepInsertion.leaf c.1 ?hvertex
+  refine ResidualMapPrefixStepInsertion.leaf false c.1 ?hvertex
   simpa using
     (prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
       (G := G) m hm hm' (p := p) hpnew hpother hleaf hjoin hARR hARR' hp hmono c hpred)

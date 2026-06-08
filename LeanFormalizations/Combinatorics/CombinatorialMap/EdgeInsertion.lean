@@ -1715,6 +1715,22 @@ singleton orbit, representing the new leaf vertex. -/
 def insertedLeafVertexPerm : Equiv.Perm (D ⊕ Fin 2) :=
   Equiv.swap (Sum.inl (M.vertexPerm c)) (leafDartA) * M.vertexPerm.sumCongr 1
 
+/-- The new dart threaded into the old vertex cycle when the old endpoint is
+indexed by the Boolean `b`. -/
+abbrev leafThreadDart (b : Bool) : D ⊕ Fin 2 :=
+  Sum.inr (if b then (1 : Fin 2) else (0 : Fin 2))
+
+/-- The new dart left as the singleton leaf vertex when the old endpoint is
+indexed by the Boolean `b`. -/
+abbrev leafSingletonDart (b : Bool) : D ⊕ Fin 2 :=
+  Sum.inr (if b then (0 : Fin 2) else (1 : Fin 2))
+
+/-- The vertex permutation for leaf-edge insertion when either new dart may be
+the dart threaded into the old vertex cycle. -/
+def insertedLeafVertexPermAt (b : Bool) : Equiv.Perm (D ⊕ Fin 2) :=
+  Equiv.swap (Sum.inl (M.vertexPerm c)) (leafThreadDart (D := D) b) *
+    M.vertexPerm.sumCongr 1
+
 /-- The base face permutation before splicing the new dart into an old face: the
 old face permutation on the existing darts and the transposition of the two new
 darts. -/
@@ -1724,6 +1740,10 @@ private def leafBaseFacePerm : Equiv.Perm (D ⊕ Fin 2) :=
 /-- The forced face permutation for leaf-edge insertion. -/
 def insertedLeafFacePerm : Equiv.Perm (D ⊕ Fin 2) :=
   (insertedLeafVertexPerm M c)⁻¹ * insertedLeafEdgePerm M
+
+/-- The forced face permutation for the Boolean-indexed leaf-edge insertion. -/
+def insertedLeafFacePermAt (b : Bool) : Equiv.Perm (D ⊕ Fin 2) :=
+  (insertedLeafVertexPermAt M c b)⁻¹ * insertedLeafEdgePerm M
 
 omit [Fintype D] [DecidableEq D] in
 /-- `insertedLeafEdgePerm` is an involution. -/
@@ -1774,17 +1794,59 @@ def insertedLeafEdgeMap : CombinatorialMap (D ⊕ Fin 2) where
   edgePerm_involutive := insertedLeafEdgePerm_involutive M
   isEmpty_fixedPoints_edgePerm := ⟨fun x => insertedLeafEdgePerm_fixedPointFree M x.1 x.2⟩
 
+/-- **Boolean-indexed leaf-edge insertion on `D ⊕ Fin 2`.** The new dart
+`leafThreadDart b` is threaded into the old vertex cycle at `c`; the other new
+dart is a singleton vertex orbit. -/
+def insertedLeafEdgeMapAt (b : Bool) : CombinatorialMap (D ⊕ Fin 2) where
+  vertexPerm := insertedLeafVertexPermAt M c b
+  edgePerm := insertedLeafEdgePerm M
+  facePerm := insertedLeafFacePermAt M c b
+  face_mul_edge_mul_vertex_eq_one := by
+    unfold insertedLeafFacePermAt
+    rw [mul_assoc, mul_assoc, ← mul_assoc (insertedLeafEdgePerm M)]
+    have he : insertedLeafEdgePerm M * insertedLeafEdgePerm M = 1 := by
+      ext z
+      rw [Equiv.Perm.mul_apply, insertedLeafEdgePerm_involutive M z]
+      rfl
+    rw [he, one_mul, inv_mul_cancel]
+  edgePerm_involutive := insertedLeafEdgePerm_involutive M
+  isEmpty_fixedPoints_edgePerm := ⟨fun x => insertedLeafEdgePerm_fixedPointFree M x.1 x.2⟩
+
 omit [Fintype D] in
 @[simp] lemma insertedLeafEdgeMap_vertexPerm :
     (insertedLeafEdgeMap M c).vertexPerm = insertedLeafVertexPerm M c := rfl
+
+omit [Fintype D] in
+@[simp] lemma insertedLeafEdgeMapAt_vertexPerm (b : Bool) :
+    (insertedLeafEdgeMapAt M c b).vertexPerm = insertedLeafVertexPermAt M c b := rfl
 
 omit [Fintype D] in
 @[simp] lemma insertedLeafEdgeMap_edgePerm :
     (insertedLeafEdgeMap M c).edgePerm = insertedLeafEdgePerm M := rfl
 
 omit [Fintype D] in
+@[simp] lemma insertedLeafEdgeMapAt_edgePerm (b : Bool) :
+    (insertedLeafEdgeMapAt M c b).edgePerm = insertedLeafEdgePerm M := rfl
+
+omit [Fintype D] in
 @[simp] lemma insertedLeafEdgeMap_facePerm :
     (insertedLeafEdgeMap M c).facePerm = insertedLeafFacePerm M c := rfl
+
+omit [Fintype D] in
+@[simp] lemma insertedLeafEdgeMapAt_facePerm (b : Bool) :
+    (insertedLeafEdgeMapAt M c b).facePerm = insertedLeafFacePermAt M c b := rfl
+
+omit [Fintype D] in
+@[simp] lemma insertedLeafVertexPermAt_false :
+    insertedLeafVertexPermAt M c false = insertedLeafVertexPerm M c := rfl
+
+omit [Fintype D] in
+@[simp] lemma insertedLeafFacePermAt_false :
+    insertedLeafFacePermAt M c false = insertedLeafFacePerm M c := rfl
+
+omit [Fintype D] in
+@[simp] lemma insertedLeafEdgeMapAt_false :
+    insertedLeafEdgeMapAt M c false = insertedLeafEdgeMap M c := rfl
 
 /-- A leaf-edge insertion adds one edge orbit. -/
 theorem card_edge_insertedLeafEdgeMap :
@@ -1957,6 +2019,55 @@ private theorem sumCongr_permCongr_swap_inl_inr
         rw [Equiv.swap_apply_of_ne_of_ne hne1 hne2, Equiv.swap_apply_of_ne_of_ne hne3 hne4]
         rfl
 
+private theorem sumCongrRight_permCongr_sumCongr
+    {D β β' : Type*} (e : β ≃ β') (σ : Equiv.Perm D) (τ : Equiv.Perm β) :
+    ((Equiv.refl D).sumCongr e).permCongr (σ.sumCongr τ) =
+      σ.sumCongr (e.permCongr τ) := by
+  ext z
+  cases z <;> rfl
+
+private theorem sumCongrRight_permCongr_swap_inl_inr
+    {D β β' : Type*} [DecidableEq D] [DecidableEq β] [DecidableEq β']
+    (e : β ≃ β') (a : D) (b : β) :
+    ((Equiv.refl D).sumCongr e).permCongr (Equiv.swap (Sum.inl a) (Sum.inr b)) =
+      Equiv.swap (Sum.inl a) (Sum.inr (e b)) := by
+  ext z
+  cases z with
+  | inl x =>
+      by_cases hx : x = a
+      · subst hx
+        simp [Equiv.permCongr_apply, Equiv.swap_apply_left]
+      · simp [Equiv.permCongr_apply]
+        have hne1 : (Sum.inl x : D ⊕ β) ≠ Sum.inl a := by
+          intro h
+          exact hx (Sum.inl.inj h)
+        have hne2 : (Sum.inl x : D ⊕ β) ≠ Sum.inr b := Sum.inl_ne_inr
+        have hne3 : (Sum.inl x : D ⊕ β') ≠ Sum.inl a := by
+          intro h
+          exact hx (Sum.inl.inj h)
+        have hne4 : (Sum.inl x : D ⊕ β') ≠ Sum.inr (e b) := Sum.inl_ne_inr
+        rw [Equiv.swap_apply_of_ne_of_ne hne1 hne2,
+          Equiv.swap_apply_of_ne_of_ne hne3 hne4]
+        rfl
+  | inr y =>
+      by_cases hy : y = e b
+      · subst hy
+        simp [Equiv.permCongr_apply, Equiv.swap_apply_right]
+      · simp [Equiv.permCongr_apply]
+        have hne1 : (Sum.inr (e.symm y) : D ⊕ β) ≠ Sum.inl a := Sum.inr_ne_inl
+        have hne2 : (Sum.inr (e.symm y) : D ⊕ β) ≠ Sum.inr b := by
+          intro h
+          apply hy
+          apply Sum.inr.inj at h
+          simpa using congrArg e h
+        have hne3 : (Sum.inr y : D ⊕ β') ≠ Sum.inl a := Sum.inr_ne_inl
+        have hne4 : (Sum.inr y : D ⊕ β') ≠ Sum.inr (e b) := by
+          intro h
+          exact hy (Sum.inr.inj h)
+        rw [Equiv.swap_apply_of_ne_of_ne hne1 hne2,
+          Equiv.swap_apply_of_ne_of_ne hne3 hne4]
+        simp
+
 variable {D D' : Type*} [Fintype D] [Fintype D'] [DecidableEq D] [DecidableEq D']
   {M : CombinatorialMap D} {M' : CombinatorialMap D'}
 
@@ -2088,6 +2199,68 @@ theorem insertedLeafVertexPerm_permCongr
             rw [sumCongr_permCongr_swap_inl_inr, sumCongr_permCongr_sumCongr]
     _ = insertedLeafVertexPerm M' (e c) := by
           simp [insertedLeafVertexPerm, hvertex, hvc]
+
+omit [Fintype D] in
+/-- Swapping the two new darts turns the standard leaf insertion into the
+Boolean-indexed insertion in which `leafDartB` is threaded into the old vertex
+cycle. -/
+theorem leafDartSwap_permCongr_insertedLeafVertexPerm
+    (M : CombinatorialMap D) (c : D) :
+    ((Equiv.refl D).sumCongr (Equiv.swap (0 : Fin 2) 1)).permCongr
+        (insertedLeafVertexPerm M c) =
+      insertedLeafVertexPermAt M c true := by
+  let e : D ⊕ Fin 2 ≃ D ⊕ Fin 2 :=
+    (Equiv.refl D).sumCongr (Equiv.swap (0 : Fin 2) 1)
+  let f := Equiv.permCongrHom e
+  calc
+    e.permCongr (insertedLeafVertexPerm M c)
+        = f (Equiv.swap (Sum.inl (M.vertexPerm c)) (leafDartA : D ⊕ Fin 2) *
+            M.vertexPerm.sumCongr 1) := by rfl
+    _ = f (Equiv.swap (Sum.inl (M.vertexPerm c)) (leafDartA : D ⊕ Fin 2)) *
+          f (M.vertexPerm.sumCongr (1 : Equiv.Perm (Fin 2))) := by
+            exact map_mul f _ _
+    _ = Equiv.swap (Sum.inl (M.vertexPerm c)) (Sum.inr (1 : Fin 2)) *
+          M.vertexPerm.sumCongr (1 : Equiv.Perm (Fin 2)) := by
+            rw [show f (Equiv.swap (Sum.inl (M.vertexPerm c)) (leafDartA : D ⊕ Fin 2)) =
+                Equiv.swap (Sum.inl (M.vertexPerm c)) (Sum.inr (1 : Fin 2)) by
+                  simpa [f, e, leafDartA] using
+                    sumCongrRight_permCongr_swap_inl_inr
+                      (D := D) (β := Fin 2) (β' := Fin 2)
+                      (Equiv.swap (0 : Fin 2) 1) (M.vertexPerm c) (0 : Fin 2),
+              show f (M.vertexPerm.sumCongr (1 : Equiv.Perm (Fin 2))) =
+                M.vertexPerm.sumCongr (1 : Equiv.Perm (Fin 2)) by
+                  simpa [f, e] using
+                    sumCongrRight_permCongr_sumCongr
+                      (D := D) (β := Fin 2) (β' := Fin 2)
+                      (Equiv.swap (0 : Fin 2) 1) M.vertexPerm
+                      (1 : Equiv.Perm (Fin 2))]
+    _ = insertedLeafVertexPermAt M c true := by
+          simp [insertedLeafVertexPermAt, leafThreadDart]
+
+omit [Fintype D] in
+/-- Swapping the two new darts preserves the enlarged leaf-edge involution. -/
+theorem leafDartSwap_permCongr_insertedLeafEdgePerm
+    (M : CombinatorialMap D) :
+    ((Equiv.refl D).sumCongr (Equiv.swap (0 : Fin 2) 1)).permCongr
+        (insertedLeafEdgePerm M) =
+      insertedLeafEdgePerm M := by
+  let e : D ⊕ Fin 2 ≃ D ⊕ Fin 2 :=
+    (Equiv.refl D).sumCongr (Equiv.swap (0 : Fin 2) 1)
+  let f := Equiv.permCongrHom e
+  calc
+    e.permCongr (insertedLeafEdgePerm M)
+        = f (M.edgePerm.sumCongr (Equiv.swap (0 : Fin 2) 1)) := by rfl
+    _ = M.edgePerm.sumCongr
+          ((Equiv.swap (0 : Fin 2) 1).permCongr (Equiv.swap (0 : Fin 2) 1)) := by
+            simpa [f, e, insertedLeafEdgePerm] using
+              sumCongrRight_permCongr_sumCongr
+                (D := D) (β := Fin 2) (β' := Fin 2)
+                (Equiv.swap (0 : Fin 2) 1) M.edgePerm (Equiv.swap (0 : Fin 2) 1)
+    _ = insertedLeafEdgePerm M := by
+          ext z
+          cases z with
+          | inl d => rfl
+          | inr j => fin_cases j <;> rfl
 
 omit [Fintype D] [Fintype D'] in
 /-- Reindexing the old darts conjugates the forced face permutation of leaf-edge
