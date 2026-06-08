@@ -1007,6 +1007,16 @@ noncomputable def quotientSameCycleEquivOfPermEq {D : Type*} {σ τ : Perm D}
   subst h
   exact Equiv.refl _
 
+/-- Transport by an equality of permutations carries each quotient class to the
+same representative class for the transported permutation. -/
+@[simp] theorem quotientSameCycleEquivOfPermEq_mk {D : Type*} {σ τ : Perm D}
+    (h : σ = τ) (x : D) :
+    quotientSameCycleEquivOfPermEq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid σ) x) =
+      Quotient.mk (Equiv.Perm.SameCycle.setoid τ) x := by
+  subst h
+  rfl
+
 /-! ## D1-A — edge insertion on `D ⊕ Fin 2`
 
 We enlarge the dart set by two new darts `a := Sum.inr 0`, `b := Sum.inr 1`
@@ -1475,6 +1485,33 @@ private lemma insFacePermStep1_sameCycle_iff (φ : Perm D) (c₁ c₂ : D) :
     -- the middle disjunct holds: inl c₁ ~ inl c₂ (= φ.SameCycle) and dartA ~ dartB
     exact Or.inr (Or.inl ⟨hbase_inl.mpr h, baseFacePerm_sameCycle_darts φ⟩)
 
+/-- Old darts have exactly their old face-cycle relation after the intermediate
+merge that attaches the new edge's two-dart face to `c₂`'s old face. -/
+private lemma insFacePermStep1_sameCycle_inl_inl_iff (φ : Perm D) (c₂ x y : D) :
+    (insFacePermStep1 φ c₂).SameCycle (Sum.inl x) (Sum.inl y) ↔
+      φ.SameCycle x y := by
+  unfold insFacePermStep1
+  have hne : ¬ (baseFacePerm φ).SameCycle (Sum.inl c₂) (dartB) := by
+    unfold baseFacePerm
+    exact sumCongr_not_sameCycle_inl_inr φ (Equiv.swap 0 1) c₂ 1
+  rw [sameCycle_swap_mul_iff_of_not_sameCycle (baseFacePerm φ) hne]
+  have hbase_inl_inl :
+      (baseFacePerm φ).SameCycle (Sum.inl x) (Sum.inl y) ↔ φ.SameCycle x y := by
+    unfold baseFacePerm
+    exact sumCongr_sameCycle_inl φ (Equiv.swap 0 1)
+  have hbase_inl_inr : ∀ (d : D) (j : Fin 2),
+      ¬ (baseFacePerm φ).SameCycle (Sum.inl d) (Sum.inr j) := by
+    intro d j
+    unfold baseFacePerm
+    exact sumCongr_not_sameCycle_inl_inr φ (Equiv.swap 0 1) d j
+  constructor
+  · rintro (h | ⟨_hx, hy⟩ | ⟨hx, _hy⟩)
+    · exact hbase_inl_inl.mp h
+    · exact absurd hy (hbase_inl_inr y 1)
+    · exact absurd hx (hbase_inl_inr x 1)
+  · intro h
+    exact Or.inl (hbase_inl_inl.mpr h)
+
 /-- Representative-level map collapsing the intermediate face permutation
 `insFacePermStep1 φ c₂` back to the old `φ`-face quotient.  Old darts keep their
 old face; the two new darts belong to the old face of `c₂`. -/
@@ -1616,29 +1653,158 @@ noncomputable def insFacePermStep1SplitPoolEquiv (φ : Perm D) (c₁ c₂ : D) :
         simpa using congrArg (insFacePermStep1QuotEquiv φ c₂) hold))
     (Equiv.refl (Fin 2))
 
+omit [Fintype D] in
+/-- Face-permutation product decomposition for a same-face edge insertion:
+first merge the new two-dart face into `c₂`'s face, then split the resulting
+cycle at `c₁` and the new dart `dartA`. -/
+theorem insertedEdgeMap_facePerm_eq_splitStep
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂) :
+    (insertedEdgeMap M c₁ c₂).facePerm =
+      Equiv.swap (Sum.inl c₁) (dartA) * insFacePermStep1 M.facePerm c₂ := by
+  rw [insertedEdgeMap_facePerm, insFacePerm_eq_product M c₁ c₂ hc]
+  change Equiv.swap (Sum.inl c₁) (dartA) *
+      Equiv.swap (Sum.inl c₂) (dartB) * baseFacePerm M.facePerm =
+    Equiv.swap (Sum.inl c₁) (dartA) *
+      (Equiv.swap (Sum.inl c₂) (dartB) * baseFacePerm M.facePerm)
+  rw [mul_assoc]
+
+/-- If `c₁` and `c₂` lie in one old face, then after the intermediate merge
+`Sum.inl c₁` and `dartA` lie in one face-cycle. -/
+private theorem insFacePermStep1_sameCycle_inl_dartA_of_sameCycle
+    (φ : Perm D) (c₁ c₂ : D) (hsame : φ.SameCycle c₁ c₂) :
+    (insFacePermStep1 φ c₂).SameCycle (Sum.inl c₁) (dartA) :=
+  (insFacePermStep1_sameCycle_iff φ c₁ c₂).mpr hsame
+
 /-- The inserted face quotient in the same-face case is exactly old faces except
 the split face, plus the two new split sides. -/
 noncomputable def insertedFaceSplitPoolEquiv
     (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
     (hsame : M.facePerm.SameCycle c₁ c₂) :
     (insertedEdgeMap M c₁ c₂).Face ≃
-      ({f : M.Face // f ≠ M.Face_mk c₁} ⊕ Fin 2) := by
-  let step := insFacePermStep1 M.facePerm c₂
-  have hperm :
-      (insertedEdgeMap M c₁ c₂).facePerm =
-        Equiv.swap (Sum.inl c₁) (dartA) * step := by
-    rw [insertedEdgeMap_facePerm, insFacePerm_eq_product M c₁ c₂ hc]
-    change Equiv.swap (Sum.inl c₁) (dartA) *
-        Equiv.swap (Sum.inl c₂) (dartB) * baseFacePerm M.facePerm =
-      Equiv.swap (Sum.inl c₁) (dartA) *
-        (Equiv.swap (Sum.inl c₂) (dartB) * baseFacePerm M.facePerm)
-    rw [mul_assoc]
-  have hstep : step.SameCycle (Sum.inl c₁) (dartA) := by
-    change (insFacePermStep1 M.facePerm c₂).SameCycle (Sum.inl c₁) (dartA)
-    exact (insFacePermStep1_sameCycle_iff M.facePerm c₁ c₂).mpr hsame
-  exact (quotientSameCycleEquivOfPermEq hperm).trans
-    ((splitCycleQuotEquiv step (inl_ne_dartA c₁) hstep).trans
+      ({f : M.Face // f ≠ M.Face_mk c₁} ⊕ Fin 2) :=
+  (quotientSameCycleEquivOfPermEq (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc)).trans
+    ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+      (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame)).trans
       (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂))
+
+/-- An old dart outside the split face is carried to its old face by the
+inserted-face split equivalence. -/
+@[simp] theorem insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle
+    (M : CombinatorialMap D) (c₁ c₂ x : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) (hx : ¬ M.facePerm.SameCycle x c₁) :
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl x)) =
+      Sum.inl ⟨M.Face_mk x, by
+        intro hq
+        exact hx (Quotient.eq''.mp hq)⟩ := by
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        (Quotient.mk
+          (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+          (Sum.inl x)) =
+      Sum.inl ⟨Quotient.mk (Equiv.Perm.SameCycle.setoid M.facePerm) x, by
+        intro hq
+        exact hx (Quotient.eq''.mp hq)⟩
+  have hxstep :
+      ¬ (insFacePermStep1 M.facePerm c₂).SameCycle (Sum.inl x) (Sum.inl c₁) := by
+    intro h
+    exact hx ((insFacePermStep1_sameCycle_inl_inl_iff M.facePerm c₂ x c₁).mp h)
+  change (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂)
+      ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame))
+          ((quotientSameCycleEquivOfPermEq
+            (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc))
+            (Quotient.mk
+              (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+              (Sum.inl x)))) =
+    Sum.inl ⟨Quotient.mk (Equiv.Perm.SameCycle.setoid M.facePerm) x, by
+      intro hq
+      exact hx (Quotient.eq''.mp hq)⟩
+  rw [quotientSameCycleEquivOfPermEq_mk]
+  simp [insFacePermStep1SplitPoolEquiv, hxstep]
+
+/-- The inserted-face split equivalence names the side containing the old cut
+corner `c₁` as `0 : Fin 2`. -/
+@[simp] theorem insertedFaceSplitPoolEquiv_mk_inl_left
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₁)) =
+      Sum.inr (0 : Fin 2) := by
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        (Quotient.mk
+          (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+          (Sum.inl c₁)) =
+      Sum.inr (0 : Fin 2)
+  change (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂)
+      ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame))
+          ((quotientSameCycleEquivOfPermEq
+            (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc))
+            (Quotient.mk
+              (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+              (Sum.inl c₁)))) =
+    Sum.inr (0 : Fin 2)
+  rw [quotientSameCycleEquivOfPermEq_mk]
+  simp [insFacePermStep1SplitPoolEquiv]
+
+/-- The inserted-face split equivalence names the side containing the new dart
+`dartA` as `1 : Fin 2`. -/
+@[simp] theorem insertedFaceSplitPoolEquiv_mk_dartA_right
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (dartA : D ⊕ Fin 2)) =
+      Sum.inr (1 : Fin 2) := by
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        (Quotient.mk
+          (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+          (dartA : D ⊕ Fin 2)) =
+      Sum.inr (1 : Fin 2)
+  change (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂)
+      ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame))
+          ((quotientSameCycleEquivOfPermEq
+            (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc))
+            (Quotient.mk
+              (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+              (dartA : D ⊕ Fin 2)))) =
+    Sum.inr (1 : Fin 2)
+  rw [quotientSameCycleEquivOfPermEq_mk]
+  simp [insFacePermStep1SplitPoolEquiv]
+
+/-- A same-face insertion does not change the face-cycle relation between old
+darts outside the split face. -/
+theorem insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle
+    (M : CombinatorialMap D) (c₁ c₂ x y : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂)
+    (hx : ¬ M.facePerm.SameCycle x c₁) (hy : ¬ M.facePerm.SameCycle y c₁) :
+    (insertedEdgeMap M c₁ c₂).facePerm.SameCycle (Sum.inl x) (Sum.inl y) ↔
+      M.facePerm.SameCycle x y := by
+  constructor
+  · intro hxy
+    have himg := congrArg (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame)
+      (Quotient.sound hxy)
+    rw [insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle M c₁ c₂ x hc hsame hx,
+      insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle M c₁ c₂ y hc hsame hy] at himg
+    have hface : M.Face_mk x = M.Face_mk y := by
+      exact congrArg Subtype.val (Sum.inl.inj himg)
+    exact Quotient.eq''.mp hface
+  · intro hxy
+    have hface : M.Face_mk x = M.Face_mk y := Quotient.sound hxy
+    have himg :
+        insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl x)) =
+          insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl y)) := by
+      rw [insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle M c₁ c₂ x hc hsame hx,
+        insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle M c₁ c₂ y hc hsame hy]
+      apply congrArg Sum.inl
+      exact Subtype.ext hface
+    have hface' :
+        (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl x) =
+          (insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl y) :=
+      (insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame).injective himg
+    exact Quotient.eq''.mp hface'
 
 /-- **Face delta (split / merge dichotomy).** Inserting the edge spliced at corners
 `c₁ ≠ c₂`:

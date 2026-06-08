@@ -97,6 +97,38 @@ structure Iso (M : CombinatorialMap D) (M' : CombinatorialMap D') extends (D ≃
 /-- Interpret an `Iso` as a `Hom`. -/
 add_decl_doc Iso.toHom
 
+/-- An isomorphism conjugates the face permutation of the source map to the
+face permutation of the target map. -/
+theorem Iso.permCongr_facePerm (e : M.Iso M') :
+    e.toEquiv.permCongr M.facePerm = M'.facePerm := by
+  ext x
+  have h := congrFun e.face_comm (e.toEquiv.symm x)
+  simpa [Equiv.permCongr_apply] using h
+
+/-- Transport of permutation cycles across an equivalence. -/
+theorem sameCycle_permCongr_iff {f : Equiv.Perm D} (e : D ≃ D') (x y : D) :
+    (e.permCongr f).SameCycle (e x) (e y) ↔ f.SameCycle x y := by
+  constructor
+  · rintro ⟨n, hn⟩
+    refine ⟨n, ?_⟩
+    apply e.injective
+    have hpow : (e.permCongr f) ^ n = e.permCongr (f ^ n) := by
+      simpa using (map_zpow (Equiv.permCongrHom e) f n).symm
+    simpa [hpow, Equiv.permCongr_apply] using hn
+  · rintro ⟨n, hn⟩
+    refine ⟨n, ?_⟩
+    have hpow : (e.permCongr f) ^ n = e.permCongr (f ^ n) := by
+      simpa using (map_zpow (Equiv.permCongrHom e) f n).symm
+    simp [hpow, Equiv.permCongr_apply, hn]
+
+/-- A combinatorial-map isomorphism preserves and reflects face-cycle
+relations. -/
+theorem Iso.facePerm_sameCycle_iff (e : M.Iso M') (x y : D) :
+    M'.facePerm.SameCycle (e.toEquiv x) (e.toEquiv y) ↔
+      M.facePerm.SameCycle x y := by
+  rw [← e.permCongr_facePerm]
+  exact sameCycle_permCongr_iff e.toEquiv x y
+
 private lemma hom_inv_is_hom_aux {p₁ : Equiv.Perm D} {p₂ : Equiv.Perm D'} {f : Equiv D D'}
     (h : f ∘ p₁ = p₂ ∘ f) : f.symm ∘ p₂ = p₁ ∘ f.symm :=
   calc f.symm ∘ p₂ = f.symm ∘ p₂ ∘ id := rfl

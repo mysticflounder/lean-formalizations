@@ -703,6 +703,38 @@ theorem sameFace_of_planar_prefixStep_of_vertexPerm
     (M := residualMap (G.prefixEdges m hm) hARR) (c₁ := c₁) (c₂ := c₂) hc
     hplanarInserted hplanar
 
+/-- Same-face prefix insertion preserves the face-cycle relation between old
+darts outside the split residual face.
+
+This is the residual-map transport of the standard face-splitting fact for
+combinatorial maps: after inserting an edge through one face, every old face
+other than the split face is carried unchanged through the successor prefix
+isomorphism. -/
+theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_of_not_sameCycle
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ x y : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (hx : ¬ (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle x c₁)
+    (hy : ¬ (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle y c₁) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (prefixStepDartEquiv m (Sum.inl x)) (prefixStepDartEquiv m (Sum.inl y)) ↔
+      (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle x y := by
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+      (iso.toEquiv (Sum.inl x)) (iso.toEquiv (Sum.inl y)) ↔
+    (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle x y
+  rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+  exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle
+    (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame hx hy
+
 /-- The two residual-map insertion alternatives for one ordered prefix step.
 
 The `leaf` case is the tree-growth operation: one endpoint of the new edge is a
