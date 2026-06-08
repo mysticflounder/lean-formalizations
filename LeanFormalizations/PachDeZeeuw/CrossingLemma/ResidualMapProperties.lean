@@ -1018,6 +1018,158 @@ theorem incidentEnds_prefix_step_endpoint_card_le_one_of_new_leaf
       exact False.elim ((hprev ⟨j.castPred hlast, bj⟩) hsrc)
   rw [ha, hc']
 
+/-- If an endpoint of the new last edge already has an incident dart in the
+predecessor prefix, then the successor prefix has at least two incident ends at
+that endpoint: the carried-over old dart and the new last-edge dart. -/
+theorem two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hold : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p) :
+    2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) := by
+  rcases hold with ⟨eold, heold⟩
+  let oldEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    ⟨(eold.1.castSucc, eold.2),
+      (mem_incidentEnds_prefixEdges_castSucc_iff
+        (G := G) (m := m) (hm := hm) (hm' := hm') (p := p) (e := eold)).mpr heold⟩
+  let newEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' b hpnew
+  have hne : oldEnd ≠ newEnd := by
+    intro h
+    have hval : (eold.1.castSucc, eold.2) = (Fin.last m, b) :=
+      congrArg Subtype.val h
+    exact Fin.castSucc_ne_last eold.1 (congrArg Prod.fst hval)
+  have hlt : 1 < Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    (Fintype.one_lt_card_iff).mpr ⟨oldEnd, newEnd, hne⟩
+  omega
+
+/-- At an endpoint of the new last edge, the successor angular order on
+carried-over incident darts is exactly the predecessor angular order.
+
+This is the endpoint-order part of the standard dart-permutation insertion
+operation: adding one new dart at a vertex only splices that dart into the cyclic
+order; it does not reorder the old darts. -/
+theorem endAngleKey_prefix_step_endpoint_old_iff
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p
+             else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p)
+    (hpother : if b then ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p
+               else ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hp : p ∈ G.V) :
+    ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₁).1) <
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₂).1) ↔
+      endAngleKey (G.prefixEdges m hm) p
+          (arrAngle (G.prefixEdges m hm) hARR hp)
+          (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
+        endAngleKey (G.prefixEdges m hm) p
+          (arrAngle (G.prefixEdges m hm) hARR hp)
+          (arrRadius (G.prefixEdges m hm) hARR hp) a₂ := by
+  intro a₁ a₂
+  let s : ℝ :=
+    min (arrRadius (G.prefixEdges m hm) hARR hp)
+      (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+  have hs0 : 0 < s :=
+    lt_min (arrRadius_pos (G := G.prefixEdges m hm) hARR hp)
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp)
+  have hs_pre : s ≤ arrRadius (G.prefixEdges m hm) hARR hp := min_le_left _ _
+  have hs_succ : s ≤ arrRadius (G.prefixEdges (m + 1) hm') hARR' hp := min_le_right _ _
+  have hpre_act_s :
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp)
+          (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
+        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp)
+          (arrRadius (G.prefixEdges m hm) hARR hp) a₂ ↔
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ <
+        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
+    simpa [endAngleKey, s] using
+      (arrAngle_orderStable (G := G.prefixEdges m hm) hARR hp
+        (e₁ := a₁) a₁.2 (e₂ := a₂) a₂.2
+        (r := arrRadius (G.prefixEdges m hm) hARR hp) (r' := s)
+        (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl hs0 hs_pre)
+  have hsucc_act_s :
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₁).1) <
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₂).1) ↔
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₁).1) <
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₂).1) := by
+    simpa [endAngleKey, s] using
+      (arrAngle_orderStable (G := G.prefixEdges (m + 1) hm') hARR' hp
+        (e₁ := (incident_ends_prefix_step_endpoint_old_equiv
+          (G := G) m hm hm' b hpnew hpother a₁).1)
+        ((incident_ends_prefix_step_endpoint_old_equiv
+          (G := G) m hm hm' b hpnew hpother a₁).1).2
+        (e₂ := (incident_ends_prefix_step_endpoint_old_equiv
+          (G := G) m hm hm' b hpnew hpother a₂).1)
+        ((incident_ends_prefix_step_endpoint_old_equiv
+          (G := G) m hm hm' b hpnew hpother a₂).1).2
+        (r := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp) (r' := s)
+        (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl hs0 hs_succ)
+  have hmid :
+      endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₁).1) <
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' b hpnew hpother a₂).1) ↔
+      endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ <
+        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
+    have h₁ :
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₁).1) =
+          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ := by
+      simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
+        incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
+        (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+          (e := a₁.1) a₁.2 hs0 hs_pre hs_succ).symm
+    have h₂ :
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' b hpnew hpother a₂).1) =
+          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
+      simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
+        incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
+        (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+          (e := a₂.1) a₂.2 hs0 hs_pre hs_succ).symm
+    constructor
+    · intro h
+      rw [h₁, h₂] at h
+      exact h
+    · intro h
+      rw [← h₁, ← h₂] at h
+      exact h
+  exact hsucc_act_s.trans (hmid.trans hpre_act_s.symm)
+
 /-- Local splice form of the successor-prefix vertex rotation at an endpoint of
 the new last edge. Once the new angular order is known to restrict to the old
 angular order on the carried-over darts and to place the new dart immediately
@@ -2530,6 +2682,145 @@ theorem exists_residualMapPrefixStepInsertion_sameFace_of_endpoint_splices
     (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hjoin hARR hARR'
     hp₁ hp₂ hmono₁ hmono₂ c₁ c₂ hpred₁ hpred₂
 
+/-- Construct the same-face prefix-step insertion data from local incidence at
+the two old endpoints.
+
+In the dart-permutation model of maps (Lando--Zvonkin, §1.3.3), inserting an
+edge with both ends in a single face chooses the two corners immediately before
+the new darts and cuts that face.  This theorem constructs those two predecessor
+corners from the successor angular rotations.  A proof that the two chosen
+corners lie in one predecessor face then gives the concrete
+`ResidualMapPrefixStepInsertion.sameFace` witness. -/
+theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p₁)
+    (hpnew₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p₂)
+    (hpother₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p₁)
+    (hpother₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p₂)
+    (hp₁ : p₁ ∈ G.V) (hp₂ : p₂ ∈ G.V)
+    (hold₁ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₁)
+    (hold₂ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₂)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    ∃ c₁ : ↥(incidentEnds (G.prefixEdges m hm) p₁),
+    ∃ c₂ : ↥(incidentEnds (G.prefixEdges m hm) p₂),
+      c₁.1 ≠ c₂.1 ∧
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p₁
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₁)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₁)
+          (endAngleKey_injective (G.prefixEdges (m + 1) hm') p₁ _ _
+            (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₁
+              (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₁) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' false hpnew₁ hpother₁ c₁).1) =
+        incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' false hpnew₁ ∧
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p₂
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₂)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₂)
+          (endAngleKey_injective (G.prefixEdges (m + 1) hm') p₂ _ _
+            (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₂
+              (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₂) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' true hpnew₂ hpother₂ c₂).1) =
+        incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' true hpnew₂ ∧
+      ((residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁.1 c₂.1 →
+        ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR') := by
+  have hmono₁ :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p₁),
+        endAngleKey (G.prefixEdges (m + 1) hm') p₁
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' false hpnew₁ hpother₁ a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p₁
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₁)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' false hpnew₁ hpother₁ a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p₁
+            (arrAngle (G.prefixEdges m hm) hARR hp₁)
+            (arrRadius (G.prefixEdges m hm) hARR hp₁) a₁ <
+          endAngleKey (G.prefixEdges m hm) p₁
+            (arrAngle (G.prefixEdges m hm) hARR hp₁)
+            (arrRadius (G.prefixEdges m hm) hARR hp₁) a₂ :=
+    endAngleKey_prefix_step_endpoint_old_iff
+      (G := G) m hm hm' false (p := p₁) hpnew₁ hpother₁ hjoin hARR hARR' hp₁
+  have hmono₂ :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p₂),
+        endAngleKey (G.prefixEdges (m + 1) hm') p₂
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew₂ hpother₂ a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p₂
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₂)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew₂ hpother₂ a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p₂
+            (arrAngle (G.prefixEdges m hm) hARR hp₂)
+            (arrRadius (G.prefixEdges m hm) hARR hp₂) a₁ <
+          endAngleKey (G.prefixEdges m hm) p₂
+            (arrAngle (G.prefixEdges m hm) hARR hp₂)
+            (arrRadius (G.prefixEdges m hm) hARR hp₂) a₂ :=
+    endAngleKey_prefix_step_endpoint_old_iff
+      (G := G) m hm hm' true (p := p₂) hpnew₂ hpother₂ hjoin hARR hARR' hp₂
+  have hcard₁ :
+      2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p₁) :=
+    two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+      (G := G) m hm hm' false hpnew₁ hold₁
+  have hcard₂ :
+      2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p₂) :=
+    two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+      (G := G) m hm hm' true hpnew₂ hold₂
+  obtain ⟨c₁, hpred₁⟩ := exists_vertexRotationAtRadius_prefix_step_endpoint_splice
+    (G := G) m hm hm' false (p := p₁) hpnew₁ hpother₁
+    (α := arrAngle (G.prefixEdges m hm) hARR hp₁)
+    (β := arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₁)
+    (r := arrRadius (G.prefixEdges m hm) hARR hp₁)
+    (r' := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₁)
+    (hinj := endAngleKey_injective (G.prefixEdges m hm) p₁ _ _
+      (arrAngle_injOn (G.prefixEdges m hm) hARR hp₁
+        (arrRadius_pos (G := G.prefixEdges m hm) hARR hp₁) le_rfl))
+    (hinj' := endAngleKey_injective (G.prefixEdges (m + 1) hm') p₁ _ _
+      (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₁
+        (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₁) le_rfl))
+    hmono₁ hcard₁
+  obtain ⟨c₂, hpred₂⟩ := exists_vertexRotationAtRadius_prefix_step_endpoint_splice
+    (G := G) m hm hm' true (p := p₂) hpnew₂ hpother₂
+    (α := arrAngle (G.prefixEdges m hm) hARR hp₂)
+    (β := arrAngle (G.prefixEdges (m + 1) hm') hARR' hp₂)
+    (r := arrRadius (G.prefixEdges m hm) hARR hp₂)
+    (r' := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp₂)
+    (hinj := endAngleKey_injective (G.prefixEdges m hm) p₂ _ _
+      (arrAngle_injOn (G.prefixEdges m hm) hARR hp₂
+        (arrRadius_pos (G := G.prefixEdges m hm) hARR hp₂) le_rfl))
+    (hinj' := endAngleKey_injective (G.prefixEdges (m + 1) hm') p₂ _ _
+      (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp₂
+        (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₂) le_rfl))
+    hmono₂ hcard₂
+  have hpne : p₁ ≠ p₂ := by
+    intro h
+    exact hpother₁ (hpnew₂.trans h.symm)
+  have hc : c₁.1 ≠ c₂.1 := by
+    intro h
+    have hanchor₁ : dartAnchor (G.prefixEdges m hm) c₁.1 = p₁ :=
+      dartAnchor_eq_of_mem (G.prefixEdges m hm) c₁.2
+    have hanchor₂ : dartAnchor (G.prefixEdges m hm) c₂.1 = p₂ :=
+      dartAnchor_eq_of_mem (G.prefixEdges m hm) c₂.2
+    apply hpne
+    calc
+      p₁ = dartAnchor (G.prefixEdges m hm) c₁.1 := hanchor₁.symm
+      _ = dartAnchor (G.prefixEdges m hm) c₂.1 := by rw [h]
+      _ = p₂ := hanchor₂
+  refine ⟨c₁, c₂, hc, hpred₁, hpred₂, ?_⟩
+  intro hsame
+  exact exists_residualMapPrefixStepInsertion_sameFace_of_endpoint_splices
+    (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hjoin hARR hARR'
+    hp₁ hp₂ hmono₁ hmono₂ c₁ c₂ hc hsame hpred₁ hpred₂
+
 /-- Construct the leaf-insertion witness from endpoint-splice data. Once the
 new endpoint has been identified and the successor angular order is known to be
 the single-corner splice of the old one, the successor prefix residual map is
@@ -2551,14 +2842,6 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
     have hp₁ : (G.endpoints (Fin.castLE hm' (Fin.last m))).1 = p := by
       simpa [DrawnMultigraph.prefixEdges] using hpnew
     simpa [hp₁] using (G.endpoints_mem (Fin.castLE hm' (Fin.last m))).1
-  let s : ℝ :=
-    min (arrRadius (G.prefixEdges m hm) hARR hp)
-      (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
-  have hs0 : 0 < s :=
-    lt_min (arrRadius_pos (G := G.prefixEdges m hm) hARR hp)
-      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp)
-  have hs_pre : s ≤ arrRadius (G.prefixEdges m hm) hARR hp := min_le_left _ _
-  have hs_succ : s ≤ arrRadius (G.prefixEdges (m + 1) hm') hARR' hp := min_le_right _ _
   have hmono :
       ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
         endAngleKey (G.prefixEdges (m + 1) hm') p
@@ -2576,82 +2859,9 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
             (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
           endAngleKey (G.prefixEdges m hm) p
             (arrAngle (G.prefixEdges m hm) hARR hp)
-            (arrRadius (G.prefixEdges m hm) hARR hp) a₂ := by
-    intro a₁ a₂
-    have hpre_act_s :
-        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp)
-            (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
-          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp)
-            (arrRadius (G.prefixEdges m hm) hARR hp) a₂ ↔
-        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ <
-          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
-      simpa [endAngleKey, s] using
-        (arrAngle_orderStable (G := G.prefixEdges m hm) hARR hp
-          (e₁ := a₁) a₁.2 (e₂ := a₂) a₂.2
-          (r := arrRadius (G.prefixEdges m hm) hARR hp) (r' := s)
-          (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl hs0 hs_pre)
-    have hsucc_act_s :
-        endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
-            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₁).1) <
-          endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
-            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₂).1) ↔
-        endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₁).1) <
-          endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₂).1) := by
-      simpa [endAngleKey, s] using
-        (arrAngle_orderStable (G := G.prefixEdges (m + 1) hm') hARR' hp
-          (e₁ := (incident_ends_prefix_step_endpoint_old_equiv
-            (G := G) m hm hm' false hpnew hpother a₁).1)
-          ((incident_ends_prefix_step_endpoint_old_equiv
-            (G := G) m hm hm' false hpnew hpother a₁).1).2
-          (e₂ := (incident_ends_prefix_step_endpoint_old_equiv
-            (G := G) m hm hm' false hpnew hpother a₂).1)
-          ((incident_ends_prefix_step_endpoint_old_equiv
-            (G := G) m hm hm' false hpnew hpother a₂).1).2
-          (r := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp) (r' := s)
-          (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl hs0 hs_succ)
-    have hmid :
-        endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₁).1) <
-          endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-            ((incident_ends_prefix_step_endpoint_old_equiv
-              (G := G) m hm hm' false hpnew hpother a₂).1) ↔
-        endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ <
-          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
-      have h₁ :
-          endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-              ((incident_ends_prefix_step_endpoint_old_equiv
-                (G := G) m hm hm' false hpnew hpother a₁).1) =
-          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ := by
-        simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
-          incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
-          (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-            (e := a₁.1) a₁.2 hs0 hs_pre hs_succ).symm
-      have h₂ :
-          endAngleKey (G.prefixEdges (m + 1) hm') p (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
-              ((incident_ends_prefix_step_endpoint_old_equiv
-                (G := G) m hm hm' false hpnew hpother a₂).1) =
-          endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
-        simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
-          incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
-          (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-            (e := a₂.1) a₂.2 hs0 hs_pre hs_succ).symm
-      constructor
-      · intro h
-        rw [h₁, h₂] at h
-        exact h
-      · intro h
-        rw [← h₁, ← h₂] at h
-        exact h
-    exact hsucc_act_s.trans (hmid.trans hpre_act_s.symm)
+            (arrRadius (G.prefixEdges m hm) hARR hp) a₂ :=
+    endAngleKey_prefix_step_endpoint_old_iff
+      (G := G) m hm hm' false (p := p) hpnew hpother hjoin hARR hARR' hp
   obtain ⟨c, hpred⟩ := exists_vertexRotationAtRadius_prefix_step_endpoint_splice
     (G := G) m hm hm' false (p := p) hpnew hpother
     (α := arrAngle (G.prefixEdges m hm) hARR hp)
@@ -2693,22 +2903,9 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident
     (hARR : ArcsRotationRegular (G.prefixEdges m hm))
     (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
     ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
-  rcases hold with ⟨eold, heold⟩
-  let oldEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
-    ⟨(eold.1.castSucc, eold.2),
-      (mem_incidentEnds_prefixEdges_castSucc_iff
-        (G := G) (m := m) (hm := hm) (hm' := hm') (p := p) (e := eold)).mpr heold⟩
-  let newEnd : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
-    incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' false hpnew
-  have hne : oldEnd ≠ newEnd := by
-    intro h
-    have hval : (eold.1.castSucc, eold.2) = (Fin.last m, false) :=
-      congrArg Subtype.val h
-    exact Fin.castSucc_ne_last eold.1 (congrArg Prod.fst hval)
-  have hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) := by
-    have hlt : 1 < Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
-      (Fintype.one_lt_card_iff).mpr ⟨oldEnd, newEnd, hne⟩
-    omega
+  have hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+      (G := G) m hm hm' false hpnew hold
   exact exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
     (G := G) m hm hm' hpnew hpother hleaf hjoin hARR hARR' hcard
 

@@ -32,6 +32,10 @@ Why this matters here:
   constructs the actual leaf-insertion witness from the tree-order local data:
   the old endpoint has an incident dart in the predecessor prefix and the other
   endpoint is fresh.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`
+  constructs the two predecessor corners at old endpoints and turns a
+  predecessor-face `SameCycle` proof for those corners into the actual
+  `ResidualMapPrefixStepInsertion.sameFace` witness.
 - The missing global witness is the tree-first / cotree-second edge order.
 - This theorem is the exact combinatorial bridge needed to convert a spanning
   tree on `vertexGraph` into the dual-side edge order on `faceGraph`.
@@ -57,6 +61,16 @@ Formalized bridge pieces now available:
   packages the tree-phase endpoint incidence conditions into the constructor
   `ResidualMapPrefixStepInsertion.leaf`, with no additional planarity
   hypothesis.
+- `CrossingLemma.endAngleKey_prefix_step_endpoint_old_iff` formalizes the
+  local fact that adding the new dart at an endpoint does not reorder the
+  carried-over incident darts.
+- `CrossingLemma.two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident`
+  supplies the common cardinality witness: one old incident dart plus the new
+  last-edge dart.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`
+  packages the same-face local data into constructor-facing corners and the
+  final `ResidualMapPrefixStepInsertion.sameFace` witness, assuming the
+  predecessor `SameCycle` condition for those corners.
 
 Still missing:
 
@@ -74,5 +88,8 @@ Notes for formalization:
 - The planar-map complement theorem should be stated in the combinatorial-map
   layer, not as a generic graph theorem, because the face side is carried by the
   dual map.
+- The same-face insertion layer is written in the Lando--Zvonkin §1.3.3
+  dart-permutation language: `σ` is the vertex rotation, `α` is the edge
+  involution, and `φ` is the face permutation.
 - The face-count lemma in `CombinatorialMap.Basic` is a useful corollary once the
   primal tree phase is in place, but it does not replace this complement theorem.
