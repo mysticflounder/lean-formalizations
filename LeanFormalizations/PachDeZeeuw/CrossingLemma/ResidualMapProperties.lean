@@ -735,6 +735,63 @@ theorem residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_of_not_sameCy
   exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle
     (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ x y hc hsame hx hy
 
+/-- Same-face prefix insertion makes the new residual edge a dual adjacency
+between the two split successor faces.
+
+This is the residual-map version of
+`CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`: under the prefix-step
+isomorphism, `dartA` and `dartB` become the two darts of the new last edge,
+`(Fin.last m, false)` and `(Fin.last m, true)`.  Thus the new edge is the dual
+edge between the two faces created by the split. -/
+theorem residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    ((residualMap (G.prefixEdges (m + 1) hm') hARR').faceGraph).Adj
+      ((residualMap (G.prefixEdges (m + 1) hm') hARR').dual.Vertex_mk
+        (Fin.last m, false))
+      ((residualMap (G.prefixEdges (m + 1) hm') hARR').dual.Vertex_mk
+        (Fin.last m, true)) := by
+  classical
+  let M₀ := residualMap (G.prefixEdges m hm) hARR
+  let M₁ := residualMap (G.prefixEdges (m + 1) hm') hARR'
+  let I := insertedEdgeMap M₀ c₁ c₂
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  refine ⟨?hne, ⟨M₁.dual.Edge_mk (Fin.last m, false), ?hends⟩⟩
+  · intro h
+    have hface : M₁.Face_mk (Fin.last m, false) = M₁.Face_mk (Fin.last m, true) := by
+      change (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, false) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, true)
+      have h' := congrArg
+        (dualVertexEquivFace (residualMap (G.prefixEdges (m + 1) hm') hARR')) h
+      simpa only [dualVertexEquivFace_vertexMk] using h'
+    have htarget : M₁.facePerm.SameCycle (Fin.last m, false) (Fin.last m, true) :=
+      Quotient.eq''.mp hface
+    have hinsert : I.facePerm.SameCycle (dartA : Fin m × Bool ⊕ Fin 2) dartB := by
+      have hiff := CombinatorialMap.Iso.facePerm_sameCycle_iff iso
+        (dartA : Fin m × Bool ⊕ Fin 2) dartB
+      exact hiff.mp (by simpa [iso, I, M₁] using htarget)
+    have hfaceI : I.Face_mk (dartA : Fin m × Bool ⊕ Fin 2) = I.Face_mk dartB :=
+      Quotient.sound hinsert
+    have himg := congrArg (insertedFaceSplitPoolEquiv M₀ c₁ c₂ hc hsame) hfaceI
+    change (insertedFaceSplitPoolEquiv M₀ c₁ c₂ hc hsame)
+        ((insertedEdgeMap M₀ c₁ c₂).Face_mk dartA) =
+      (insertedFaceSplitPoolEquiv M₀ c₁ c₂ hc hsame)
+        ((insertedEdgeMap M₀ c₁ c₂).Face_mk dartB) at himg
+    rw [insertedFaceSplitPoolEquiv_mk_dartA_right M₀ c₁ c₂ hc hsame,
+      insertedFaceSplitPoolEquiv_mk_dartB_left M₀ c₁ c₂ hc hsame] at himg
+    exact (by decide : (1 : Fin 2) ≠ 0) (Sum.inr.inj himg)
+  · simpa [M₁, faceGraph, CombinatorialMap.dual, residualMap_edgePerm_apply]
+      using (Edge.ends_mk (M := M₁.dual) (Fin.last m, false))
+
 /-- The two residual-map insertion alternatives for one ordered prefix step.
 
 The `leaf` case is the tree-growth operation: one endpoint of the new edge is a

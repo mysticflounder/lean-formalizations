@@ -6,6 +6,7 @@ Authors: Adam McKenna
 
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties
+import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder
 
 /-!
@@ -433,6 +434,40 @@ theorem exists_dart_faceGraphEdge_faces (M : CombinatorialMap D)
               dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) := by
             rw [hdual_edge]
       _ = s(dualVertexEquivFace M p, dualVertexEquivFace M q) := hmap
+
+/-- In a same-face insertion, the newly inserted primal edge is a dual edge
+between the two newly split faces.
+
+In the dart-permutation model of Lando--Zvonkin, §1.3.3, inserting an edge
+through one face splits the corresponding `facePerm` cycle.  The two darts of
+the new edge are incident to the two resulting faces, so in the dual face graph
+the new edge witnesses adjacency of the two split-face vertices.  This is the
+local dual-edge fact used by the tree-cotree decomposition layer. -/
+theorem insertedEdgeMap_faceGraph_adj_new_edge
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    ((EdgeInsertion.insertedEdgeMap M c₁ c₂).faceGraph).Adj
+      ((EdgeInsertion.insertedEdgeMap M c₁ c₂).dual.Vertex_mk
+        (EdgeInsertion.dartA : D ⊕ Fin 2))
+      ((EdgeInsertion.insertedEdgeMap M c₁ c₂).dual.Vertex_mk
+        (EdgeInsertion.dartB : D ⊕ Fin 2)) := by
+  classical
+  let N : CombinatorialMap (D ⊕ Fin 2) := EdgeInsertion.insertedEdgeMap M c₁ c₂
+  refine ⟨?hne, ⟨N.dual.Edge_mk (EdgeInsertion.dartA : D ⊕ Fin 2), ?hends⟩⟩
+  · intro h
+    have hface : N.Face_mk (EdgeInsertion.dartA : D ⊕ Fin 2) =
+        N.Face_mk (EdgeInsertion.dartB : D ⊕ Fin 2) := by
+      have h' := congrArg (dualVertexEquivFace (EdgeInsertion.insertedEdgeMap M c₁ c₂)) h
+      simpa [N] using h'
+    have himg := congrArg (EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame) hface
+    rw [EdgeInsertion.insertedFaceSplitPoolEquiv_mk_dartA_right M c₁ c₂ hc hsame,
+      EdgeInsertion.insertedFaceSplitPoolEquiv_mk_dartB_left M c₁ c₂ hc hsame] at himg
+    have h10 : (1 : Fin 2) ≠ 0 := by decide
+    exact h10 (Sum.inr.inj himg)
+  · simpa [N, faceGraph, CombinatorialMap.dual, EdgeInsertion.insertedEdgeMap,
+      EdgeInsertion.insEdgePerm, EdgeInsertion.dartA, EdgeInsertion.dartB]
+      using (Edge.ends_mk (M := N.dual) (EdgeInsertion.dartA : D ⊕ Fin 2))
 
 /-- The concrete original edge selected by the parent edge at step `i` of a
 leaf-insertion order on a spanning tree of the face graph.

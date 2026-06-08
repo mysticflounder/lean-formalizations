@@ -811,6 +811,26 @@ quotient equivalence. -/
       Sum.inr (1 : Fin 2) := by
   simp [splitCycleQuotEquiv]
 
+/-- An arbitrary representative in the split `f`-cycle lands on side `0` when
+it remains in the post-split component containing `p`. -/
+@[simp] theorem splitCycleQuotEquiv_mk_of_sameCycle_left
+    (f : Perm α) {p q x : α} (hpq : p ≠ q) (h : f.SameCycle p q)
+    (hx : f.SameCycle x p) (hleft : (Equiv.swap p q * f).SameCycle x p) :
+    splitCycleQuotEquiv f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) x) =
+      Sum.inr (0 : Fin 2) := by
+  simp [splitCycleQuotEquiv, splitCycleQuotMap, splitCycleQuotToFun, hx, hleft]
+
+/-- An arbitrary representative in the split `f`-cycle lands on side `1` when
+it is not in the post-split component containing `p`. -/
+@[simp] theorem splitCycleQuotEquiv_mk_of_sameCycle_right
+    (f : Perm α) {p q x : α} (hpq : p ≠ q) (h : f.SameCycle p q)
+    (hx : f.SameCycle x p) (hright : ¬ (Equiv.swap p q * f).SameCycle x p) :
+    splitCycleQuotEquiv f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) x) =
+      Sum.inr (1 : Fin 2) := by
+  simp [splitCycleQuotEquiv, splitCycleQuotMap, splitCycleQuotToFun, hx, hright]
+
 omit [DecidableEq α] in
 /-- The minimal `f`-period of `p` is positive (every point of a `Fintype` perm is
 periodic). -/
@@ -1770,6 +1790,59 @@ corner `c₁` as `0 : Fin 2`. -/
               (dartA : D ⊕ Fin 2)))) =
     Sum.inr (1 : Fin 2)
   rw [quotientSameCycleEquivOfPermEq_mk]
+  simp [insFacePermStep1SplitPoolEquiv]
+
+/-- The inserted-face split equivalence names the side containing the new dart
+`dartB` as `0 : Fin 2`, the same side as the old cut corner `c₁`. -/
+@[simp] theorem insertedFaceSplitPoolEquiv_mk_dartB_left
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (dartB : D ⊕ Fin 2)) =
+      Sum.inr (0 : Fin 2) := by
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        (Quotient.mk
+          (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+          (dartB : D ⊕ Fin 2)) =
+      Sum.inr (0 : Fin 2)
+  change (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂)
+      ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame))
+          ((quotientSameCycleEquivOfPermEq
+            (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc))
+            (Quotient.mk
+              (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+              (dartB : D ⊕ Fin 2)))) =
+    Sum.inr (0 : Fin 2)
+  rw [quotientSameCycleEquivOfPermEq_mk]
+  have hstep_apply :
+      (insFacePermStep1 M.facePerm c₂) (dartB : D ⊕ Fin 2) = dartA := by
+    change (Equiv.swap (Sum.inl c₂) (dartB : D ⊕ Fin 2) *
+        baseFacePerm M.facePerm) (dartB : D ⊕ Fin 2) = dartA
+    rw [Equiv.Perm.mul_apply]
+    have hbase : (baseFacePerm M.facePerm) (dartB : D ⊕ Fin 2) = dartA := by
+      simp [baseFacePerm, dartA, dartB]
+    rw [hbase]
+    exact Equiv.swap_apply_of_ne_of_ne (by simp [dartA]) (by simp [dartA, dartB])
+  have hstepDartB :
+      (insFacePermStep1 M.facePerm c₂).SameCycle (dartB : D ⊕ Fin 2) (Sum.inl c₁) := by
+    have hstepDartA :
+        (insFacePermStep1 M.facePerm c₂).SameCycle (dartA : D ⊕ Fin 2) (Sum.inl c₁) :=
+      (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame).symm
+    have hBA :
+        (insFacePermStep1 M.facePerm c₂).SameCycle (dartB : D ⊕ Fin 2) dartA :=
+      ⟨1, by simpa [zpow_one] using hstep_apply⟩
+    exact hBA.trans hstepDartA
+  have hleft :
+      (Equiv.swap (Sum.inl c₁) (dartA : D ⊕ Fin 2) *
+        insFacePermStep1 M.facePerm c₂).SameCycle (dartB : D ⊕ Fin 2) (Sum.inl c₁) := by
+    exact ⟨1, by
+      rw [zpow_one, Equiv.Perm.mul_apply, hstep_apply]
+      exact Equiv.swap_apply_right (Sum.inl c₁) (dartA : D ⊕ Fin 2)⟩
+  rw [splitCycleQuotEquiv_mk_of_sameCycle_left
+    (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+    (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame)
+    hstepDartB hleft]
   simp [insFacePermStep1SplitPoolEquiv]
 
 /-- A same-face insertion does not change the face-cycle relation between old
