@@ -66,6 +66,22 @@ private theorem list_getElem_not_mem_take_of_nodup {α : Type*} [DecidableEq α]
     (List.Nodup.getElem_inj_iff hl (i := k) (hi := hklt_l) (j := i) (hj := hi)).1 hEq
   omega
 
+private theorem exists_getElem_of_mem_take_toFinset {α : Type*} [DecidableEq α]
+    {l : List α} {n : ℕ} {x : α} (hmem : x ∈ (l.take n).toFinset) :
+    ∃ k : ℕ, k < n ∧ ∃ hk : k < l.length, l[k]'hk = x := by
+  rw [List.mem_toFinset] at hmem
+  obtain ⟨k, hk, hkEq⟩ := List.mem_iff_getElem.mp hmem
+  refine ⟨k, ?_, ?_⟩
+  · have hk_le : (l.take n).length ≤ n := by simp
+    exact Nat.lt_of_lt_of_le hk hk_le
+  · have hk_l : k < l.length := by
+      have hk_le : (l.take n).length ≤ l.length := by simp
+      exact Nat.lt_of_lt_of_le hk hk_le
+    refine ⟨hk_l, ?_⟩
+    have hget : (l.take n)[k] = l[k] := by
+      simp
+    exact hget ▸ hkEq
+
 /-! ## Generic helpers: SameCycle under `permCongr` and `sigmaCongrRight`. -/
 
 /-- `SameCycle` for a conjugated permutation `e.permCongr σ` reduces to `SameCycle`
@@ -4251,6 +4267,152 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOf
       simpa [q] using hleaf e)
     (by simpa [p] using hold)
     hjoin hARR hARR'
+
+/-- A permuted tree-prefix step is a residual-map leaf insertion.
+
+Suppose the edge permutation places the parent edges selected from the
+leaf-insertion order in the initial edge positions. At position `i`, with
+`1 ≤ i`, all earlier prefix edges are selected at earlier tree-order positions:
+the listed new vertex `l[i+1]` has no predecessor dart, while its chosen parent
+already has a predecessor dart. Hence the actual prefix step of the permuted
+drawing is the leaf insertion specified by
+`exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints`. -/
+theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ G.numEdges}
+    {π : Equiv.Perm (Fin G.numEdges)}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)
+    (i : Fin (l.length - 1)) (hi : 1 ≤ i.1)
+    (hm : i.1 ≤ (G.permuteEdges π).numEdges)
+    (hm' : i.1 + 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular ((G.permuteEdges π).prefixEdges i.1 hm))
+    (hARR' : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (i.1 + 1) hm')) :
+    ResidualMapPrefixStepInsertion (G := G.permuteEdges π) i.1 hm hm' hARR hARR' := by
+  classical
+  let H : DrawnMultigraph := G.permuteEdges π
+  let q : ℝ × ℝ := (l[i.1 + 1]'(by omega) : ℝ × ℝ)
+  let p : ℝ × ℝ := (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ)
+  have hlast :
+      π (Fin.castLE hm' (Fin.last i.1)) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i := by
+    have hcast :
+        (Fin.castLE hm' (Fin.last i.1) : Fin G.numEdges) = Fin.castLE hk i := by
+      apply Fin.ext
+      rfl
+    simpa [hcast] using hπ i
+  have hspec := G.treeEdgeOfLeafOrder_spec hjoin hmult T hTsub parent hparent i
+  have hend :
+      (((H.prefixEdges (i.1 + 1) hm').endpoints (Fin.last i.1)).1 = p ∧
+        ((H.prefixEdges (i.1 + 1) hm').endpoints (Fin.last i.1)).2 = q) ∨
+      (((H.prefixEdges (i.1 + 1) hm').endpoints (Fin.last i.1)).1 = q ∧
+        ((H.prefixEdges (i.1 + 1) hm').endpoints (Fin.last i.1)).2 = p) := by
+    rcases hspec with hspec | hspec
+    · right
+      constructor
+      · simpa [H, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, q, hlast]
+          using hspec.1
+      · simpa [H, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, p, hlast]
+          using hspec.2
+    · left
+      constructor
+      · simpa [H, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, p, hlast]
+          using hspec.1
+      · simpa [H, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, q, hlast]
+          using hspec.2
+  have hqp : q ≠ p := by
+    intro hEq
+    have hAdj : T.Adj (l[i.1 + 1]'(by omega)) (parent (i.1 + 1) (by omega) (by omega)) :=
+      (hparent (i.1 + 1) (by omega) (by omega)).2
+    exact hAdj.ne (Subtype.ext (by simpa [q, p] using hEq))
+  have hleaf : ∀ e : Fin i.1 × Bool,
+      e ∉ incidentEnds (H.prefixEdges i.1 hm) q := by
+    rintro ⟨e, b⟩ he
+    let j : Fin (l.length - 1) := ⟨e.1, by omega⟩
+    have hcast :
+        (Fin.castLE hm e : Fin G.numEdges) = Fin.castLE hk j := by
+      apply Fin.ext
+      rfl
+    have heH : (Fin.castLE hm e, b) ∈ incidentEnds H q :=
+      (mem_incidentEnds_prefixEdges_iff (G := H) (m := i.1) (hm := hm)).mp he
+    have heG : (π (Fin.castLE hm e), b) ∈ incidentEnds G q :=
+      (mem_incidentEnds_permuteEdges_iff (G := G) π).mp (by simpa [H] using heH)
+    have hnot :
+        (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j, b) ∉
+          incidentEnds G (l[i.1 + 1]'(by omega) : ℝ × ℝ) :=
+      G.treeEdgeOfLeafOrder_not_mem_incidentEnds_later hjoin hmult T hTsub
+        hl_nodup parent hparent (j := j) (i := i) e.2 b
+    exact hnot (by simpa [q, hcast, hπ j] using heG)
+  have hold : ∃ e : Fin i.1 × Bool, e ∈ incidentEnds (H.prefixEdges i.1 hm) p := by
+    have hparent_mem :
+        parent (i.1 + 1) (by omega) (by omega) ∈
+          (l.take (i.1 + 1)).toFinset :=
+      (hparent (i.1 + 1) (by omega) (by omega)).1
+    obtain ⟨k, hklt, hk_l, hkval⟩ :=
+      exists_getElem_of_mem_take_toFinset hparent_mem
+    by_cases hk0 : k = 0
+    · let j : Fin (l.length - 1) := ⟨0, by omega⟩
+      let e0 : Fin i.1 := ⟨0, by omega⟩
+      have hparent_one_mem :
+          parent 1 (by omega) (by omega) ∈ (l.take 1).toFinset :=
+        (hparent 1 (by omega) (by omega)).1
+      obtain ⟨k₁, hk₁lt, hk₁_l, hk₁val⟩ :=
+        exists_getElem_of_mem_take_toFinset hparent_one_mem
+      have hk₁0 : k₁ = 0 := by omega
+      have hparent_one :
+          parent 1 (by omega) (by omega) = l[0]'(by omega) := by
+        simpa [hk₁0] using hk₁val.symm
+      have hparent_current :
+          parent (i.1 + 1) (by omega) (by omega) = l[0]'(by omega) := by
+        simpa [hk0] using hkval.symm
+      obtain ⟨b, hb⟩ :=
+        G.treeEdgeOfLeafOrder_mem_incidentEnds_parent hjoin hmult T hTsub parent hparent j
+      refine ⟨(e0, b), ?_⟩
+      have hcast :
+          (Fin.castLE hm e0 : Fin G.numEdges) = Fin.castLE hk j := by
+        apply Fin.ext
+        rfl
+      have hpos_edge :
+          π (Fin.castLE hm e0) =
+            G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j := by
+        rw [hcast]
+        exact hπ j
+      have hbG : (π (Fin.castLE hm e0), b) ∈ incidentEnds G p := by
+        simpa [p, hpos_edge, j, hparent_one, hparent_current] using hb
+      have hbH : (Fin.castLE hm e0, b) ∈ incidentEnds H p :=
+        (mem_incidentEnds_permuteEdges_iff (G := G) π).mpr (by simpa [H] using hbG)
+      exact (mem_incidentEnds_prefixEdges_iff (G := H) (m := i.1) (hm := hm)).mpr hbH
+    · let j : Fin (l.length - 1) := ⟨k - 1, by omega⟩
+      let epos : Fin i.1 := ⟨k - 1, by omega⟩
+      obtain ⟨b, hb⟩ :=
+        G.treeEdgeOfLeafOrder_mem_incidentEnds_newVertex hjoin hmult T hTsub parent hparent j
+      refine ⟨(epos, b), ?_⟩
+      have hcast :
+          (Fin.castLE hm epos : Fin G.numEdges) = Fin.castLE hk j := by
+        apply Fin.ext
+        rfl
+      have hpos_edge :
+          π (Fin.castLE hm epos) =
+            G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j := by
+        rw [hcast]
+        exact hπ j
+      have hk_succ : k - 1 + 1 = k := by omega
+      have hbG : (π (Fin.castLE hm epos), b) ∈ incidentEnds G p := by
+        simpa [p, hpos_edge, j, hk_succ, hkval] using hb
+      have hbH : (Fin.castLE hm epos, b) ∈ incidentEnds H p :=
+        (mem_incidentEnds_permuteEdges_iff (G := G) π).mpr (by simpa [H] using hbG)
+      exact (mem_incidentEnds_prefixEdges_iff (G := H) (m := i.1) (hm := hm)).mpr hbH
+  exact exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints
+    (G := H) i.1 hm hm' (p := p) (q := q) hend hqp hleaf hold
+    (permuteEdges_arcsJoinEndpoints (G := G) π hjoin) hARR hARR'
 
 /-- Parent edges selected from a leaf-insertion order are distinct. -/
 theorem DrawnMultigraph.treeEdgeOfLeafOrder_injective

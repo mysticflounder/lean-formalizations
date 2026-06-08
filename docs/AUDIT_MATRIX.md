@@ -168,6 +168,7 @@ substrate is sorry-free and axiom-clean.
 | ACNS 1982 + Leighton | ✅ | Ajtai–Chvátal–Newborn–Szemerédi, "Crossing-free subgraphs", N-H Math Studies 60 (1982) 9–12; Leighton independent |
 | Pach–Tóth multigraph | ✅ | "A Crossing Lemma for Multigraphs", *DCG* 63 (2020) 918–933; SoCG 2018; arXiv:1801.00721 |
 | Lando–Zvonkin §1.3.3 | ✅ | `ResidualMapProperties` / `EdgeInsertion` use the standard dart permutation model: vertex rotation, fixed-point-free edge involution, and face permutation forced by the map relation |
+| Tree-first residual-map insertion layer | ◐ | `DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder` now constructs the actual leaf-step witness for the permuted spanning-tree prefix, including the transported `hleaf`/`hold` incidence hypotheses; remaining cotree work is the same-face/topological face-cycle layer. |
 | Newman, *Elements of the Topology of Plane Sets* | ☐ | crosscut theorem cite in PlaneArcSeparation |
 | Pommerenke, *Boundary Behaviour of Conformal Maps* | ☐ | ditto |
 
