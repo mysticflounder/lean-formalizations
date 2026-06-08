@@ -111,6 +111,10 @@ Formalized bridge pieces now available:
 - `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoint_data_of_residualMapEdgeEquiv`
   packages those two orientations with the non-loop endpoint inequalities
   required by the same-face prefix-step insertion constructor.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv`
+  combines a selected residual edge class, old endpoint incidence at its two
+  anchors, and splice-corner face equality into the actual
+  `ResidualMapPrefixStepInsertion.sameFace` witness.
 - `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
   `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
   orientation-parametric: either of the two new darts may be the dart threaded
