@@ -160,6 +160,11 @@ Formalized bridge pieces now available:
 - `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`
   is the quotient-face equality form of the same criterion, matching the
   `Face_mk` equality consumed by the same-face prefix-step constructor.
+- `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
+  composes reverse cotree split-pool label transport with that residual
+  same-face criterion: under a label invariant on the unpeeled dual prefix, the
+  selected reverse cotree edge has equal successor face classes after the
+  current same-face insertion.
 - `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_right`
   completes the old-corner side labels for a split face: the old cut corner
   `c₂` lands on side `1`, the same side as the new dart `dartA`, while the
