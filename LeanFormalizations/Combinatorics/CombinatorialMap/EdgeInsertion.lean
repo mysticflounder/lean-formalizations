@@ -673,6 +673,39 @@ noncomputable def splitCycleQuotMap (f : Perm α) {p q : α}
   Quotient.lift (splitCycleQuotToFun f hpq h)
     (fun _ _ hxy => splitCycleQuotToFun_respects f hpq h hxy)
 
+/-- A dart outside the split `f`-cycle is carried to its old orbit in the
+split-cycle target pool. -/
+@[simp] theorem splitCycleQuotMap_mk_of_not_sameCycle (f : Perm α) {p q x : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) (hx : ¬ f.SameCycle x p) :
+    splitCycleQuotMap f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) x) =
+      Sum.inl ⟨Quotient.mk (Equiv.Perm.SameCycle.setoid f) x, by
+        intro hq
+        exact hx (Quotient.eq''.mp hq)⟩ := by
+  simp [splitCycleQuotMap, splitCycleQuotToFun, hx]
+
+/-- The split-cycle side containing the cut point `p`. -/
+@[simp] theorem splitCycleQuotMap_mk_left (f : Perm α) {p q : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) :
+    splitCycleQuotMap f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) p) =
+      Sum.inr (0 : Fin 2) := by
+  have hpp : f.SameCycle p p := Equiv.Perm.SameCycle.refl _ _
+  have hgpp : (Equiv.swap p q * f).SameCycle p p := Equiv.Perm.SameCycle.refl _ _
+  simp [splitCycleQuotMap, splitCycleQuotToFun, hpp, hgpp]
+
+/-- The split-cycle side containing the other cut point `q`. -/
+@[simp] theorem splitCycleQuotMap_mk_right (f : Perm α) {p q : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) :
+    splitCycleQuotMap f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) q) =
+      Sum.inr (1 : Fin 2) := by
+  have hqp : f.SameCycle q p := h.symm
+  have hnot : ¬ (Equiv.swap p q * f).SameCycle q p := by
+    intro hg
+    exact (not_sameCycle_swap_mul_of_sameCycle f hpq h) hg.symm
+  simp [splitCycleQuotMap, splitCycleQuotToFun, hqp, hnot]
+
 /-- The split-cycle classifier is onto. -/
 theorem splitCycleQuotMap_surjective (f : Perm α) {p q : α}
     (hpq : p ≠ q) (h : f.SameCycle p q) :
@@ -748,6 +781,35 @@ noncomputable def splitCycleQuotEquiv (f : Perm α) {p q : α}
     ((Fintype.bijective_iff_surjective_and_card _).mpr
       ⟨splitCycleQuotMap_surjective f hpq h,
         card_splitCycleQuotMap_domain f hpq h⟩)
+
+/-- A dart outside the split `f`-cycle is carried unchanged by the split-cycle
+quotient equivalence. -/
+@[simp] theorem splitCycleQuotEquiv_mk_of_not_sameCycle (f : Perm α) {p q x : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) (hx : ¬ f.SameCycle x p) :
+    splitCycleQuotEquiv f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) x) =
+      Sum.inl ⟨Quotient.mk (Equiv.Perm.SameCycle.setoid f) x, by
+        intro hq
+        exact hx (Quotient.eq''.mp hq)⟩ := by
+  simp [splitCycleQuotEquiv, hx]
+
+/-- The split-cycle quotient equivalence sends the side containing `p` to
+`0 : Fin 2`. -/
+@[simp] theorem splitCycleQuotEquiv_mk_left (f : Perm α) {p q : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) :
+    splitCycleQuotEquiv f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) p) =
+      Sum.inr (0 : Fin 2) := by
+  simp [splitCycleQuotEquiv]
+
+/-- The split-cycle quotient equivalence sends the side containing `q` to
+`1 : Fin 2`. -/
+@[simp] theorem splitCycleQuotEquiv_mk_right (f : Perm α) {p q : α}
+    (hpq : p ≠ q) (h : f.SameCycle p q) :
+    splitCycleQuotEquiv f hpq h
+        (Quotient.mk (Equiv.Perm.SameCycle.setoid (Equiv.swap p q * f)) q) =
+      Sum.inr (1 : Fin 2) := by
+  simp [splitCycleQuotEquiv]
 
 omit [DecidableEq α] in
 /-- The minimal `f`-period of `p` is positive (every point of a `Fintype` perm is

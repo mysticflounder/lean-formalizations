@@ -240,6 +240,10 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CombinatorialMap.faceEdgeOfLeafOrder`
   / `CombinatorialMap.faceEdgeOfLeafOrder_spec`
   / `CombinatorialMap.faceEdgeOfLeafOrder_injective`,
+  the face-splitting quotient specs
+  `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_of_not_sameCycle`
+  / `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_left`
+  / `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_right`,
   the first post-tree edge witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
   and
