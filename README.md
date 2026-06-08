@@ -149,8 +149,14 @@ it was confirmed complete). All headlines axiom-clean:
   includes the prefix connectedness invariant
   `SimpleGraph.connected_induce_take_of_leaf_insertion_parent` and the
   connected-graph label transport
-  `SimpleGraph.Connected.apply_eq_of_forall_adj` used by the reverse cotree
-  component argument.
+  `SimpleGraph.Connected.apply_eq_of_forall_adj`, plus
+  `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup` and
+  `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent` for the
+  leaf-peeling fact that the next unpeeled prefix contains no copy of the
+  just-peeled leaf-parent edge. The derived transport theorem
+  `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`
+  turns that exclusion into prefix-wide label constancy. These are used by the
+  reverse cotree component argument.
   **Axiom-clean.**
 
 ### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
@@ -256,6 +262,10 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj`
   / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
+  the reverse leaf-peeling edge exclusion
+  `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`
+  / `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`
+  / `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`,
   the residual-edge/order adapter
   `CrossingLemma.residualMapEdgeEquiv_edge_mk`
   / `CrossingLemma.DrawnMultigraph.exists_edgePositionPermutation_of_disjoint_tree_faceEdgeOfLeafOrderReverse`
@@ -291,9 +301,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq`
   / `CrossingLemma.residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`
   / `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq`,
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq`
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq`,
   and the reverse-cotree specialization
-  `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`,
+  `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`,
   the split-face dual-adjacency facts
   `CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`
   / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm`,

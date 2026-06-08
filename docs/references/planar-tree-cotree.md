@@ -70,6 +70,15 @@ Formalized bridge pieces now available:
   nonempty prefix of a parent leaf-insertion order is connected, and
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
   specializes this to the unpeeled dual prefix at a reverse cotree step.
+- `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup` and
+  `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent` formalize the
+  reverse leaf-peeling edge exclusion: after the current dual leaf-parent edge
+  is peeled, every edge whose endpoints both lie in the next unpeeled prefix is
+  distinct from that peeled edge.
+- `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`
+  uses that exclusion and prefix connectedness to propagate a label across the
+  next unpeeled prefix when the only edge-local obstruction is the peeled
+  leaf-parent edge.
 - `SimpleGraph.Connected.apply_eq_of_forall_adj`,
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj`,
   and
@@ -197,6 +206,13 @@ Formalized bridge pieces now available:
   combines the selected residual-edge endpoint adapter with current split-pool
   equality for the actual splice corners, giving the next concrete same-face
   witness for a permuted-prefix edge chosen by a residual-map edge class.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq`
+  discharges the selected edge's old-endpoint incidence from current endpoint
+  coverage, leaving only the current split-pool equality invariant.
+- `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj`
+  is the residual-map split-pool form of reverse cotree label transport: the
+  selected reverse cotree edge has equal split-pool labels before converting
+  that equality into successor face equality.
 - `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
   composes reverse cotree split-pool label transport with that residual
   same-face criterion: under a label invariant on the unpeeled dual prefix, the

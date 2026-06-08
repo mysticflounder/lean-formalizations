@@ -573,6 +573,61 @@ theorem Connected.apply_eq_of_forall_adj {V β : Type*} {G : SimpleGraph V} {f :
     (u v : V) : f u = f v :=
   eq_of_reachable_of_forall_adj hadj (hconn.preconnected u v)
 
+/-- In a nodup list, an unordered pair whose two endpoints lie in the prefix
+before `l[k]` cannot be the pair joining `l[k]` to any parent vertex.
+
+This is the list/Sym2 core of the leaf-peeling invariant used in tree-cotree
+orders: after the leaf at index `k` is peeled, every edge wholly inside the
+remaining prefix is distinct from the peeled leaf-parent edge. -/
+theorem sym2_ne_getElem_parent_of_mem_take_nodup {V : Type*} [DecidableEq V]
+    {l : List V} (hl_nodup : l.Nodup)
+    {k : ℕ} (hk : k < l.length) {parent u v : V}
+    (hu : u ∈ (l.take k).toFinset) (hv : v ∈ (l.take k).toFinset) :
+    s(u, v) ≠ s(l[k]'hk, parent) := by
+  classical
+  have hleaf_not : l[k]'hk ∉ (l.take k).toFinset := by
+    intro hmem
+    rw [List.mem_toFinset] at hmem
+    obtain ⟨i, hi, hiEq⟩ := List.mem_iff_getElem.mp hmem
+    have hilt_k : i < k := by
+      have : i < (l.take k).length := hi
+      rw [List.length_take] at this
+      omega
+    have hilt_l : i < l.length := by omega
+    have hEq : l[i] = l[k] := by
+      have htake : (l.take k)[i] = l[i] := by simp
+      exact htake ▸ hiEq
+    have hik : i = k :=
+      (List.Nodup.getElem_inj_iff hl_nodup
+        (i := i) (hi := hilt_l) (j := k) (hj := hk)).1 hEq
+    omega
+  intro hsym
+  have hmem_leaf : l[k]'hk ∈ s(u, v) := by
+    simp [hsym]
+  rw [Sym2.mem_iff] at hmem_leaf
+  rcases hmem_leaf with hleaf | hleaf
+  · exact hleaf_not (by simpa [hleaf] using hu)
+  · exact hleaf_not (by simpa [hleaf] using hv)
+
+/-- Reverse leaf-order form of
+`sym2_ne_getElem_parent_of_mem_take_nodup`.
+
+At reverse cotree step `i`, the next unpeeled prefix is the prefix before the
+current leaf `l[(Fin.rev i).1 + 1]`; hence every edge with both endpoints in
+that next prefix is not the current leaf-parent edge. -/
+theorem reverse_leafOrder_prefix_sym2_ne_current_parent {V : Type*}
+    [DecidableEq V] {l : List V} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → V)
+    (i : Fin (l.length - 1)) {u v : V}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset) :
+    s(u, v) ≠
+      s(l[(Fin.rev i).1 + 1]'(by omega),
+        parent ((Fin.rev i).1 + 1) (by omega) (by omega)) := by
+  exact sym2_ne_getElem_parent_of_mem_take_nodup hl_nodup
+    (hk := by omega) (parent := parent ((Fin.rev i).1 + 1) (by omega) (by omega))
+    hu hv
+
 /-- Prefixes of a leaf-insertion parent order are connected.
 
 If every non-initial listed vertex chooses an adjacent parent among the earlier
@@ -660,6 +715,56 @@ theorem connected_induce_take_of_leaf_insertion_parent {V : Type*} (G : SimpleGr
     apply Subtype.ext
     exact (hget.trans hjval).symm
   simpa [hv_eq] using hreach_idx j hjk
+
+/-- A reverse leaf-peeling prefix is label-constant when the only possible
+edge-local obstruction is the peeled leaf-parent edge.
+
+At reverse step `i`, the next unpeeled prefix is `take ((Fin.rev i).1 + 1)`.
+The previous lemma shows every graph edge wholly inside that prefix is distinct
+from the current leaf-parent edge.  Hence any label that is constant across all
+such non-peeled edges is constant on the whole next unpeeled prefix, by
+connectedness of leaf-insertion prefixes. -/
+theorem reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent
+    {V β : Type*} [DecidableEq V] {G : SimpleGraph V}
+    {l : List V} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        G.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) (label : V → β)
+    (hadj : ∀ ⦃u v : V⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      G.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label u = label v)
+    {u v : V}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset) :
+    label u = label v := by
+  classical
+  let k : ℕ := (Fin.rev i).1 + 1
+  let S : Set V := {x : V | x ∈ (l.take k).toFinset}
+  have hconn : (G.induce S).Connected := by
+    simpa [S, k] using
+      connected_induce_take_of_leaf_insertion_parent
+        (G := G) parent hparent k (by omega) (by omega)
+  exact SimpleGraph.Connected.apply_eq_of_forall_adj (G := G.induce S)
+    (f := fun x : ↥S => label x.1) hconn
+    (by
+      intro a b hab
+      have habG : G.Adj a.1 b.1 := by
+        simpa [S, SimpleGraph.induce_adj] using hab
+      have hne :
+          s(a.1, b.1) ≠
+            s(l[(Fin.rev i).1 + 1]'(by omega),
+              parent ((Fin.rev i).1 + 1) (by omega) (by omega)) := by
+        exact reverse_leafOrder_prefix_sym2_ne_current_parent
+          hl_nodup parent i (by exact a.2) (by exact b.2)
+      exact hadj (by exact a.2) (by exact b.2) habG hne)
+    ⟨u, by exact hu⟩ ⟨v, by exact hv⟩
 
 /-- The parent-edge map associated to a leaf-insertion order is injective.
 
