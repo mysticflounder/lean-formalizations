@@ -290,7 +290,8 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`
   / `CrossingLemma.residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq`
   / `CrossingLemma.residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`
-  / `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`,
+  / `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq`,
   and the reverse-cotree specialization
   `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`,
   the split-face dual-adjacency facts

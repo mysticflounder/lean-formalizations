@@ -193,6 +193,10 @@ Formalized bridge pieces now available:
   converts that current-prefix split-pool equality for the two actual splice
   corners of the next edge into the concrete
   `ResidualMapPrefixStepInsertion.sameFace` witness.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq`
+  combines the selected residual-edge endpoint adapter with current split-pool
+  equality for the actual splice corners, giving the next concrete same-face
+  witness for a permuted-prefix edge chosen by a residual-map edge class.
 - `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
   composes reverse cotree split-pool label transport with that residual
   same-face criterion: under a label invariant on the unpeeled dual prefix, the
