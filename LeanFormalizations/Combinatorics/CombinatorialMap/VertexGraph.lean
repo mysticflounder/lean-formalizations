@@ -358,6 +358,46 @@ theorem faceGraphEdge_dualEquiv_eq (M : CombinatorialMap D)
     s(p, q) = s(r, s) := by
   exact faceGraphEdge_eq (M := M) h₁ h₂ ((dualEdgeEquiv M).injective heq)
 
+/-- A face-graph adjacency selects a concrete original edge and the two original
+face classes on its sides.
+
+This unwraps the dual-edge selector into the dart-permutation language used by
+tree-cotree arguments: the chosen dual edge is represented by a dart `d`, and
+its two dual endpoints are the original face classes of `d` and the opposite
+dart `edgePerm d`. -/
+theorem exists_dart_faceGraphEdge_faces (M : CombinatorialMap D)
+    {p q : M.dual.Vertex} (h : (M.faceGraph).Adj p q) :
+    ∃ d : D,
+      dualEdgeEquiv M (faceGraphEdge (M := M) h) = M.Edge_mk d ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M p, dualVertexEquivFace M q) := by
+  obtain ⟨d, hd⟩ := Quotient.exists_rep (faceGraphEdge (M := M) h)
+  refine ⟨d, ?_, ?_⟩
+  · rw [← hd]
+    rfl
+  · have hends := faceGraphEdge_spec (M := M) h
+    rw [← hd, Edge.ends_mk] at hends
+    have hmap :
+        s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+            dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) =
+          s(dualVertexEquivFace M p, dualVertexEquivFace M q) := by
+      simpa only [Sym2.map_mk] using congrArg (Sym2.map (dualVertexEquivFace M)) hends
+    have hedge : M.edgePerm⁻¹ d = M.edgePerm d := by
+      rw [show M.edgePerm⁻¹ = M.edgePerm from
+        M.edgePerm_involutive.symm_eq_self_of_involutive]
+    have hdual_edge : M.dual.edgePerm d = M.edgePerm d := by
+      change M.edgePerm⁻¹ d = M.edgePerm d
+      exact hedge
+    calc
+      s(M.Face_mk d, M.Face_mk (M.edgePerm d))
+          = s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+              dualVertexEquivFace M (M.dual.Vertex_mk (M.edgePerm d))) := by
+            rfl
+      _ = s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+              dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) := by
+            rw [hdual_edge]
+      _ = s(dualVertexEquivFace M p, dualVertexEquivFace M q) := hmap
+
 /-- A leaf-insertion order on a spanning tree of the face graph determines a
 concrete original edge injection. This is the dual-side bridge used by the
 ordered prefix insertion route: the same parent-edge order that enumerates tree

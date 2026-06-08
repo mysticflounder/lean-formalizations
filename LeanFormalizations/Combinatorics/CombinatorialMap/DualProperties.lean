@@ -156,9 +156,17 @@ def quotientSameCycleEquivInv {D : Type*} (f : Equiv.Perm D) :
     | _ x => rfl
 
 /-- Dual vertices are original faces, up to inversion of the face permutation. -/
+def dualVertexEquivFace (M : CombinatorialMap D) : M.dual.Vertex ≃ M.Face :=
+  quotientSameCycleEquivInv M.facePerm
+
+@[simp] theorem dualVertexEquivFace_vertexMk (M : CombinatorialMap D) (d : D) :
+    dualVertexEquivFace M (M.dual.Vertex_mk d) = M.Face_mk d :=
+  rfl
+
+/-- Dual vertices are original faces, up to inversion of the face permutation. -/
 theorem card_dual_vertex [Fintype D] :
     Fintype.card M.dual.Vertex = Fintype.card M.Face :=
-  Fintype.card_congr (quotientSameCycleEquivInv (M.facePerm))
+  Fintype.card_congr (dualVertexEquivFace M)
 
 /-- Dual edges are original edges, up to inversion of the edge involution. -/
 theorem card_dual_edge [Fintype D] :

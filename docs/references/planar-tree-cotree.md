@@ -53,6 +53,10 @@ Formalized bridge pieces now available:
 - `CombinatorialMap.faceGraphEdge`,
   `CombinatorialMap.exists_faceEdgeInjection_of_leafOrder`, and
   `CombinatorialMap.dualEdgeEquiv` do the corresponding cotree-side extraction.
+- `CombinatorialMap.dualVertexEquivFace` identifies dual vertices with original
+  face classes, and `CombinatorialMap.exists_dart_faceGraphEdge_faces` unwraps a
+  face-graph adjacency into a concrete dart `d` whose original edge separates the
+  two original face classes `Face_mk d` and `Face_mk (edgePerm d)`.
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
