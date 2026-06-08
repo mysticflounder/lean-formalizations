@@ -108,6 +108,9 @@ Formalized bridge pieces now available:
   adapt a residual-map edge class selected by the cotree layer to the ordered
   drawing-prefix convention: the next permuted prefix edge has the two anchors
   of the selected residual dart and its opposite dart, up to orientation.
+- `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoint_data_of_residualMapEdgeEquiv`
+  packages those two orientations with the non-loop endpoint inequalities
+  required by the same-face prefix-step insertion constructor.
 - `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
   `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
   orientation-parametric: either of the two new darts may be the dart threaded

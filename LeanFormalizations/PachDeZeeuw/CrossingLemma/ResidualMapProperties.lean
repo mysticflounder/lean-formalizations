@@ -3965,6 +3965,61 @@ theorem DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residual
       simp [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges, dartAnchor,
         residualMap_edgePerm_apply, hidx]
 
+/-- Constructor-facing endpoint data for a permuted-prefix edge selected by a
+residual-map edge class.
+
+The edge class represented by `d` is unoriented, while the prefix-step insertion
+constructors distinguish endpoint `.1` from endpoint `.2`.  This lemma packages
+the two possible orientations, together with the non-loop side conditions
+obtained from `ArcsJoinEndpoints`, in exactly that ordered form. -/
+theorem DrawnMultigraph.permuted_prefix_last_endpoint_data_of_residualMapEdgeEquiv
+    (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges))
+    (hjoin : G.ArcsJoinEndpoints) (hARR : ArcsRotationRegular G)
+    (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges)
+    (d : Fin G.numEdges × Bool)
+    (hπ : π (Fin.castLE hm' (Fin.last m)) =
+      residualMapEdgeEquiv G hARR ((residualMap G hARR).Edge_mk d)) :
+    let H := G.permuteEdges π
+    let e := Fin.last m
+    (((H.prefixEdges (m + 1) hm').endpoints e).1 = dartAnchor G d ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).2 =
+        dartAnchor G ((residualMap G hARR).edgePerm d) ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).2 ≠ dartAnchor G d ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).1 ≠
+        dartAnchor G ((residualMap G hARR).edgePerm d)) ∨
+    (((H.prefixEdges (m + 1) hm').endpoints e).1 =
+        dartAnchor G ((residualMap G hARR).edgePerm d) ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).2 = dartAnchor G d ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).2 ≠
+        dartAnchor G ((residualMap G hARR).edgePerm d) ∧
+      ((H.prefixEdges (m + 1) hm').endpoints e).1 ≠ dartAnchor G d) := by
+  let H : DrawnMultigraph := G.permuteEdges π
+  let e : Fin (m + 1) := Fin.last m
+  have hcases :=
+    G.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv
+      π hARR m hm' d hπ
+  have hne :
+      ((H.prefixEdges (m + 1) hm').endpoints e).1 ≠
+        ((H.prefixEdges (m + 1) hm').endpoints e).2 :=
+    DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints
+      (prefixEdges_arcsJoinEndpoints (G := H) (m + 1) hm'
+        (permuteEdges_arcsJoinEndpoints (G := G) π hjoin))
+      e
+  dsimp only at hcases ⊢
+  rcases hcases with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
+  · left
+    refine ⟨h₁, h₂, ?_, ?_⟩
+    · intro h
+      exact hne (h₁.trans h.symm)
+    · intro h
+      exact hne (h.trans h₂.symm)
+  · right
+    refine ⟨h₁, h₂, ?_, ?_⟩
+    · intro h
+      exact hne (h₁.trans h.symm)
+    · intro h
+      exact hne (h.trans h₂.symm)
+
 /-- The residual map has one edge class for each drawn edge. -/
 theorem residualMap_edge_card (hARR : ArcsRotationRegular G) :
     Fintype.card (residualMap G hARR).Edge = G.numEdges := by
