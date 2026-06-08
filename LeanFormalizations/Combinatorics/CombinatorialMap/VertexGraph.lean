@@ -833,6 +833,56 @@ theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
       _ = label (dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega))) := hlabel.symm
       _ = label (M.Face_mk (M.edgePerm d)) := by rw [hedgePerm]
 
+/-- Split-face label equality for the reverse cotree edge selected at a
+leaf-peeling step.
+
+This specializes the reverse cotree label transport to the face split created
+by inserting an edge through one face.  If a face label agrees, on every
+original face representative, with the corresponding value of
+`insertedFaceSplitPoolEquiv`, and that label is constant across every edge of
+the unpeeled dual prefix, then the concrete reverse cotree edge selected at the
+current step has equal split-pool labels on its two old incident faces. -/
+theorem faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] [DecidableEq M.dual.Vertex]
+    (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂)
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    (label : M.Face → ({f : M.Face // f ≠ M.Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : D,
+      label (M.Face_mk d) =
+        EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+          ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d)))
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      T.Adj u v → label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent i = M.Edge_mk d ∧
+        EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d)) =
+          EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk
+              (Sum.inl (M.edgePerm d))) := by
+  obtain ⟨d, hedge, hlabel_edge⟩ :=
+    M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
+      T hTsub parent hparent i label hadj
+  refine ⟨d, hedge, ?_⟩
+  calc
+    EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d))
+        = label (M.Face_mk d) := (hlabel d).symm
+    _ = label (M.Face_mk (M.edgePerm d)) := hlabel_edge
+    _ = EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl (M.edgePerm d))) :=
+          hlabel (M.edgePerm d)
+
 /-- Reversing a dual leaf-insertion order preserves injectivity of the selected
 cotree edges. -/
 theorem faceEdgeOfLeafOrderReverse_injective
