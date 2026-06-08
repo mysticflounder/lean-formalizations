@@ -74,6 +74,12 @@ Formalized bridge pieces now available:
 - `CombinatorialMap.exists_edgePositionPermutation_of_disjoint_vertex_dual_leafOrder_edges`
   gives the corresponding position-valued version, matching the way an edge
   permutation is read as an ordered edge list.
+- `CrossingLemma.DrawnMultigraph.treeEdgeOfLeafOrder`,
+  `CrossingLemma.DrawnMultigraph.treeEdgeOfLeafOrder_spec`, and
+  `CrossingLemma.DrawnMultigraph.treeEdgeOfLeafOrder_injective` name the
+  concrete drawing edges selected by the parent edges in a vertex-tree leaf
+  order, record their endpoint alternatives, and prove that these selected
+  drawing edges are distinct.
 - `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
   packages the tree-phase endpoint incidence conditions into the constructor
   `ResidualMapPrefixStepInsertion.leaf`, with no additional planarity

@@ -3497,21 +3497,58 @@ theorem DrawnMultigraph.vertexGraphEdge_eq
   exact (DrawnMultigraph.vertexGraph_adj_unique_edge G hjoin hmult h).unique he
     (G.vertexGraphEdge_spec hjoin hmult h)
 
-theorem DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
+/-- The concrete drawing edge selected by the parent edge at step `i` of a
+leaf-insertion order on a spanning tree of the drawing's vertex graph. -/
+noncomputable def DrawnMultigraph.treeEdgeOfLeafOrder
     (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
     (hmult : ∀ p q, G.multiplicity p q ≤ 1)
-    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin) (_hT : T.IsTree)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
     {l : List ↥G.V}
-    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card ↥G.V)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) : Fin G.numEdges :=
+  G.vertexGraphEdge hjoin hmult
+    (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- The parent edge selected by `treeEdgeOfLeafOrder` joins the new vertex at
+position `i + 1` to its chosen earlier parent, in one of the two endpoint
+orientations carried by the drawing. -/
+theorem DrawnMultigraph.treeEdgeOfLeafOrder_spec
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ((G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i)).1 =
+        (l[i.1 + 1]'(by omega) : ℝ × ℝ) ∧
+      (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i)).2 =
+        (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ)) ∨
+    ((G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i)).1 =
+        (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ) ∧
+      (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i)).2 =
+        (l[i.1 + 1]'(by omega) : ℝ × ℝ)) := by
+  exact G.vertexGraphEdge_spec hjoin hmult
+    (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- Parent edges selected from a leaf-insertion order are distinct. -/
+theorem DrawnMultigraph.treeEdgeOfLeafOrder_injective
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V}
+    (hl_nodup : l.Nodup)
     (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
     (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
       parent k hk hk' ∈ (l.take k).toFinset ∧
         T.Adj (l[k]'hk') (parent k hk hk')) :
-    ∃ f : Fin (l.length - 1) → Fin G.numEdges, Function.Injective f := by
+    Function.Injective (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent) := by
   classical
-  refine ⟨fun i =>
-    G.vertexGraphEdge hjoin hmult
-      (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2), ?_⟩
   intro i j hij
   let a_i : ↥G.V := l[i.1 + 1]'(by omega)
   let b_i : ↥G.V := parent (i.1 + 1) (by omega) (by omega)
@@ -3525,7 +3562,7 @@ theorem DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
   have hspec_j := G.vertexGraphEdge_spec hjoin hmult hAdj_j
   have hEq : G.vertexGraphEdge hjoin hmult hAdj_i =
       G.vertexGraphEdge hjoin hmult hAdj_j := by
-    simpa [a_i, b_i, a_j, b_j] using hij
+    simpa [DrawnMultigraph.treeEdgeOfLeafOrder, a_i, b_i, a_j, b_j] using hij
   rw [hEq] at hspec_i
   have hpair :
       (a_i, b_i) = (a_j, b_j) ∨ (a_i, b_i) = (b_j, a_j) := by
@@ -3570,6 +3607,23 @@ theorem DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
         _ = s(a_j, b_j) := Sym2.eq_swap
   exact SimpleGraph.IsTree.parentEdgeMap_injective (G := T) (l := l) hl_nodup parent
     hparent hsym2
+
+/-- A leaf-insertion order on a spanning tree of the vertex graph selects a
+distinct drawing edge for each non-root vertex, namely the tree edge to its
+chosen earlier parent. -/
+theorem DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin) (_hT : T.IsTree)
+    {l : List ↥G.V}
+    (hl_nodup : l.Nodup) (_hl_len : l.length = Fintype.card ↥G.V)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ f : Fin (l.length - 1) → Fin G.numEdges, Function.Injective f := by
+  exact ⟨G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent,
+    G.treeEdgeOfLeafOrder_injective hjoin hmult T hTsub hl_nodup parent hparent⟩
 
 /-- A leaf-insertion order on a spanning tree of the vertex graph determines an
 edge permutation that moves those tree edges into the initial segment of the
