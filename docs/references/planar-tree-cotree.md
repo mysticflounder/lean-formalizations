@@ -189,6 +189,10 @@ Formalized bridge pieces now available:
   prefix darts.  This covers the case split needed when a later cotree splice
   corner is one of the two darts created by the immediately preceding
   same-face insertion.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`
+  converts that current-prefix split-pool equality for the two actual splice
+  corners of the next edge into the concrete
+  `ResidualMapPrefixStepInsertion.sameFace` witness.
 - `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
   composes reverse cotree split-pool label transport with that residual
   same-face criterion: under a label invariant on the unpeeled dual prefix, the

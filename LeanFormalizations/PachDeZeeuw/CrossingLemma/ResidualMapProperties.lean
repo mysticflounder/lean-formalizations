@@ -3778,6 +3778,81 @@ theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_
     Quotient.eq''.mp (hface c₁ c₂ hc hpred₁ hpred₂)
   exact hstep hsame
 
+/-- Construct the next same-face prefix-step witness from a split-pool equality
+invariant carried by the previous same-face insertion.
+
+After a same-face insertion from prefix `m` to `m + 1`, the Lando--Zvonkin
+face-split quotient records exactly which darts of the current prefix lie in
+the same face. Therefore, for the next edge, it is enough to prove that the two
+actual predecessor splice corners chosen at its endpoints have equal
+split-pool labels; this theorem converts that invariant into the concrete
+`ResidualMapPrefixStepInsertion.sameFace` witness for the step
+`m + 1 → (m + 1) + 1`. -/
+theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hm'' : (m + 1) + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hARR'' : ArcsRotationRegular (G.prefixEdges ((m + 1) + 1) hm''))
+    (s₁ s₂ : Fin m × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle s₁ s₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) s₁ s₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ : ((G.prefixEdges ((m + 1) + 1) hm'').endpoints (Fin.last (m + 1))).1 = p₁)
+    (hpnew₂ : ((G.prefixEdges ((m + 1) + 1) hm'').endpoints (Fin.last (m + 1))).2 = p₂)
+    (hpother₁ : ((G.prefixEdges ((m + 1) + 1) hm'').endpoints (Fin.last (m + 1))).2 ≠ p₁)
+    (hpother₂ : ((G.prefixEdges ((m + 1) + 1) hm'').endpoints (Fin.last (m + 1))).1 ≠ p₂)
+    (hp₁ : p₁ ∈ G.V) (hp₂ : p₂ ∈ G.V)
+    (hold₁ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds (G.prefixEdges (m + 1) hm') p₁)
+    (hold₂ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds (G.prefixEdges (m + 1) hm') p₂)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hsplit :
+      ∀ (c₁ : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p₁))
+        (c₂ : ↥(incidentEnds (G.prefixEdges (m + 1) hm') p₂)),
+        c₁.1 ≠ c₂.1 →
+        vertexRotationAtRadius (G.prefixEdges ((m + 1) + 1) hm'') p₁
+            (arrAngle (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₁)
+            (arrRadius (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₁)
+            (endAngleKey_injective (G.prefixEdges ((m + 1) + 1) hm'') p₁ _ _
+              (arrAngle_injOn (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₁
+                (arrRadius_pos (G := G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₁)
+                le_rfl))
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) (m + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+          incident_ends_prefix_step_endpoint_new_dart (G := G) (m + 1) hm'' false hpnew₁ →
+        vertexRotationAtRadius (G.prefixEdges ((m + 1) + 1) hm'') p₂
+            (arrAngle (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₂)
+            (arrRadius (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₂)
+            (endAngleKey_injective (G.prefixEdges ((m + 1) + 1) hm'') p₂ _ _
+              (arrAngle_injOn (G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₂
+                (arrRadius_pos (G := G.prefixEdges ((m + 1) + 1) hm'') hARR'' hp₂)
+                le_rfl))
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) (m + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+          incident_ends_prefix_step_endpoint_new_dart (G := G) (m + 1) hm'' true hpnew₂ →
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) s₁ s₂ hs hsame
+            ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) s₁ s₂).Face_mk
+              ((prefixStepDartEquiv m).symm c₁.1)) =
+          insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) s₁ s₂ hs hsame
+            ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) s₁ s₂).Face_mk
+              ((prefixStepDartEquiv m).symm c₂.1))) :
+    ResidualMapPrefixStepInsertion (G := G) (m + 1) hm' hm'' hARR' hARR'' := by
+  exact exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq
+    (G := G) (m + 1) hm' hm'' hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁ hp₂
+    hold₁ hold₂ hjoin hARR' hARR''
+    (by
+      intro c₁ c₂ hc hpred₁ hpred₂
+      exact
+        (residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq
+          (G := G) m hm hm' hARR hARR' s₁ s₂ hs hsame hvertex c₁.1 c₂.1).mpr
+          (hsplit c₁ c₂ hc hpred₁ hpred₂))
+
 /-- Construct a same-face prefix-step insertion witness when the predecessor
 residual map has one face.
 
