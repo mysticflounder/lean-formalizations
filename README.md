@@ -228,7 +228,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   and
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`,
   plus the one-face specialization
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`;
+  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
+  and planar tree-prefix bridge
+  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix`;
   the complementary dual-tree theorem and the global cotree face-cycle
   `SameCycle` proof remain the open topological layer. A separate
   `subsetAveraging_master` (`sorry`) is a documented dead-end, not used

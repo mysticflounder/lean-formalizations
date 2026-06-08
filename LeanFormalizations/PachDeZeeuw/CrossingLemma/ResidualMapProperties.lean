@@ -2850,6 +2850,44 @@ theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_
     (CombinatorialMap.facePerm_sameCycle_of_card_face_eq_one
       (M := residualMap (G.prefixEdges m hm) hARR) hface c₁.1 c₂.1)
 
+/-- Construct a same-face prefix-step insertion witness after a planar tree
+prefix.
+
+This packages the Euler-count bridge `|E| = |V| - 1 ⇒ |F| = 1` for planar maps:
+once the predecessor residual map is a planar tree prefix, the next old-endpoint
+edge is automatically a same-face insertion. -/
+theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p₁)
+    (hpnew₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p₂)
+    (hpother₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p₁)
+    (hpother₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p₂)
+    (hp₁ : p₁ ∈ G.V) (hp₂ : p₂ ∈ G.V)
+    (hold₁ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₁)
+    (hold₂ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₂)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hplanar : (residualMap (G.prefixEdges m hm) hARR).IsPlanar)
+    (hcard :
+      Fintype.card (residualMap (G.prefixEdges m hm) hARR).Edge =
+        Fintype.card (residualMap (G.prefixEdges m hm) hARR).Vertex - 1) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  have hV : 1 ≤ Fintype.card (residualMap (G.prefixEdges m hm) hARR).Vertex := by
+    rcases hold₁ with ⟨e, _he⟩
+    have hpos :
+        0 < Fintype.card (residualMap (G.prefixEdges m hm) hARR).Vertex :=
+      Fintype.card_pos_iff.mpr ⟨(residualMap (G.prefixEdges m hm) hARR).Vertex_mk e⟩
+    omega
+  have hface :
+      Fintype.card (residualMap (G.prefixEdges m hm) hARR).Face = 1 :=
+    CombinatorialMap.card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one
+      (M := residualMap (G.prefixEdges m hm) hARR) hV hplanar hcard
+  exact exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one
+    (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁ hp₂
+    hold₁ hold₂ hjoin hARR hARR' hface
+
 /-- Construct the leaf-insertion witness from endpoint-splice data. Once the
 new endpoint has been identified and the successor angular order is known to be
 the single-corner splice of the old one, the successor prefix residual map is
