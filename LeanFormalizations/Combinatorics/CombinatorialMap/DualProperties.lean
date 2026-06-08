@@ -135,7 +135,9 @@ theorem dual_connected_iff : M.dual.Connected ↔ M.Connected := by
 theorem connected_dual_iff : M.dual.Connected ↔ M.Connected :=
   dual_connected_iff (M := M)
 
-private def quotientSameCycleEquivInv {D : Type*} (f : Equiv.Perm D) :
+/-- The `SameCycle` quotient of an inverse permutation is canonically equivalent
+to the `SameCycle` quotient of the original permutation. -/
+def quotientSameCycleEquivInv {D : Type*} (f : Equiv.Perm D) :
     Quotient (Equiv.Perm.SameCycle.setoid f⁻¹) ≃
       Quotient (Equiv.Perm.SameCycle.setoid f) where
   toFun := Quotient.map' id (by
@@ -153,16 +155,31 @@ private def quotientSameCycleEquivInv {D : Type*} (f : Equiv.Perm D) :
     induction q using Quotient.ind with
     | _ x => rfl
 
+/-- Dual vertices are original faces, up to inversion of the face permutation. -/
+theorem card_dual_vertex [Fintype D] :
+    Fintype.card M.dual.Vertex = Fintype.card M.Face :=
+  Fintype.card_congr (quotientSameCycleEquivInv (M.facePerm))
+
+/-- Dual edges are original edges, up to inversion of the edge involution. -/
+theorem card_dual_edge [Fintype D] :
+    Fintype.card M.dual.Edge = Fintype.card M.Edge :=
+  Fintype.card_congr (quotientSameCycleEquivInv (M.edgePerm))
+
+/-- Dual faces are original vertices, up to inversion of the vertex permutation. -/
+theorem card_dual_face [Fintype D] :
+    Fintype.card M.dual.Face = Fintype.card M.Vertex :=
+  Fintype.card_congr (quotientSameCycleEquivInv (M.vertexPerm))
+
 /-- Euler-form planarity is preserved by duality. -/
 theorem dual_isPlanar_iff [Fintype D] :
     M.dual.IsPlanar ↔ M.IsPlanar := by
   classical
   have hV : Fintype.card M.dual.Vertex = Fintype.card M.Face :=
-    Fintype.card_congr (quotientSameCycleEquivInv (M.facePerm))
+    card_dual_vertex (M := M)
   have hE : Fintype.card M.dual.Edge = Fintype.card M.Edge :=
-    Fintype.card_congr (quotientSameCycleEquivInv (M.edgePerm))
+    card_dual_edge (M := M)
   have hF : Fintype.card M.dual.Face = Fintype.card M.Vertex :=
-    Fintype.card_congr (quotientSameCycleEquivInv (M.vertexPerm))
+    card_dual_face (M := M)
   unfold CombinatorialMap.IsPlanar CombinatorialMap.eulerCharacteristic
   omega
 

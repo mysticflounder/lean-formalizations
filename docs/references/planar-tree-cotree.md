@@ -43,12 +43,20 @@ Formalized bridge pieces now available:
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
+- `CombinatorialMap.card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge`
+  formalizes the von Staudt count
+  `|E| = (|V|-1)+(|V(M.dual)|-1)` in the list-length form used by leaf orders.
+- `CombinatorialMap.exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges`
+  turns disjoint concrete primal/cotree edge injections into the single
+  tree-first/cotree-second edge permutation.
 
 Still missing:
 
 - The planar-map complement theorem itself: for a connected planar
   combinatorial map, the complement of a chosen primal spanning tree is a dual
-  spanning tree.
+  spanning tree.  The count half and finite edge-order assembly are now
+  formalized; the missing part is the graph-theoretic complement/disjointness
+  and dual connected/acyclic proof.
 - The residual-map face-stability proof that the cotree block, in reverse leaf
   order, supplies the `SameCycle` hypotheses required by the same-face insertion
   witness.

@@ -225,6 +225,83 @@ theorem exists_vertexEdgePermutation_of_leafOrder
   intro i
   simp [π, e, hσ]
 
+/-- The Euler-count half of the spanning-tree/spanning-cotree complement
+statement.
+
+If a planar map has a full vertex leaf order, then the number of edges left
+after the `|V|-1` primal tree edges is exactly `|V(M.dual)|-1`, the edge count of
+a dual spanning tree.  The remaining topological work is to identify those
+remaining edges with a connected acyclic dual subgraph. -/
+theorem card_edge_sub_vertexTreeLeafOrder_eq_card_dualVertex_sub_one
+    (M : CombinatorialMap D) [Fintype D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hplanar : M.IsPlanar)
+    {l : List M.Vertex} (hl_len : l.length = Fintype.card M.Vertex) :
+    Fintype.card M.Edge - (l.length - 1) = Fintype.card M.dual.Vertex - 1 := by
+  have hdual : Fintype.card M.dual.Vertex = Fintype.card M.Face :=
+    card_dual_vertex (M := M)
+  have hplanar' : (Fintype.card M.Vertex : ℤ) - (Fintype.card M.Edge : ℤ) +
+      (Fintype.card M.Face : ℤ) = 2 := hplanar
+  omega
+
+/-- The von Staudt edge count in the exact list-length form used by the
+tree-first/cotree-second edge order.
+
+For a planar map, a full primal vertex tree contributes `|V|-1` edges and a
+full dual vertex tree contributes `|V(M.dual)|-1` edges; together these account
+for all map edges.  The separate complement theorem must still identify the
+second block with the complementary dual spanning tree. -/
+theorem card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge
+    (M : CombinatorialMap D) [Fintype D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hVdual : 1 ≤ Fintype.card M.dual.Vertex)
+    (hplanar : M.IsPlanar)
+    {l : List M.Vertex} (hl_len : l.length = Fintype.card M.Vertex)
+    {lDual : List M.dual.Vertex}
+    (hlDual_len : lDual.length = Fintype.card M.dual.Vertex) :
+    (l.length - 1) + (lDual.length - 1) = Fintype.card M.Edge := by
+  have hdual : Fintype.card M.dual.Vertex = Fintype.card M.Face :=
+    card_dual_vertex (M := M)
+  have hplanar' : (Fintype.card M.Vertex : ℤ) - (Fintype.card M.Edge : ℤ) +
+      (Fintype.card M.Face : ℤ) = 2 := hplanar
+  omega
+
+/-- Assemble disjoint primal-tree and cotree edge injections into one edge
+permutation with consecutive tree/cotree blocks.
+
+This is the finite witness layer behind the tree-first/cotree-second order in
+the literature.  It assumes the two concrete edge injections are already known
+to be disjoint; the remaining complement theorem must provide that disjointness
+for the primal spanning tree and complementary dual spanning tree. -/
+theorem exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges
+    (M : CombinatorialMap D) [Fintype D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hVdual : 1 ≤ Fintype.card M.dual.Vertex)
+    (hplanar : M.IsPlanar)
+    {l : List M.Vertex} (hl_len : l.length = Fintype.card M.Vertex)
+    {lDual : List M.dual.Vertex}
+    (hlDual_len : lDual.length = Fintype.card M.dual.Vertex)
+    (f : Fin (l.length - 1) → M.Edge)
+    (g : Fin (lDual.length - 1) → M.Edge)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ hblock : (l.length - 1) + (lDual.length - 1) ≤ Fintype.card M.Edge,
+      ∃ π : Equiv.Perm M.Edge,
+        (∀ i : Fin (l.length - 1),
+          π (f i) =
+            (Fintype.equivFin M.Edge).symm
+              (Fin.castLE hblock (Fin.castAdd (lDual.length - 1) i))) ∧
+          (∀ j : Fin (lDual.length - 1),
+            π (g j) =
+              (Fintype.equivFin M.Edge).symm
+                (Fin.castLE hblock (Fin.natAdd (l.length - 1) j))) := by
+  classical
+  have hcard := card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge
+    (M := M) hV hVdual hplanar hl_len hlDual_len
+  let hblock : (l.length - 1) + (lDual.length - 1) ≤ Fintype.card M.Edge := by
+    rw [hcard]
+  obtain ⟨π, hπf, hπg⟩ :=
+    SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks
+      (α := M.Edge) hblock f g hf hg hdisj
+  exact ⟨hblock, π, hπf, hπg⟩
+
 /-- A chosen edge witnessing a face-graph adjacency. This is the dual-side
 analogue of `vertexGraphEdge` and is the basic selector used when turning a
 spanning tree on faces into concrete map-edge data. -/

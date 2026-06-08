@@ -138,7 +138,8 @@ it was confirmed complete). All headlines axiom-clean:
   (`CombinatorialMap.EdgeInsertion.*`).
 - **`VertexGraph.lean`** — vertex/face adjacency graphs for combinatorial maps,
   connectedness-to-spanning-tree bridges, and concrete primal/dual edge
-  selectors for leaf-order edge enumeration.
+  selectors for leaf-order edge enumeration, including the von Staudt
+  tree/cotree edge-count bridge and two-block edge-order witness.
 
 ### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅
 
