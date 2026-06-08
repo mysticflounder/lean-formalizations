@@ -225,6 +225,8 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `sorry`). Current tree-cotree bridge progress includes the constructor-facing
   leaf and same-face local witnesses
   `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
+  / `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_incident`
+  / `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints`
   and
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`,
   plus the one-face specialization

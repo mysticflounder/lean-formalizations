@@ -157,14 +157,17 @@ Kernel status: axiom-clean. No source vendored (standard results).
 
 ## Crossing lemma — `PachDeZeeuw/CrossingLemma/*`
 
-Kernel status: **WIP, live `sorry`s** (PlaneArcSeparation 15, CrossingLemmaAmplification 6,
-ResidualMap* 2, Abstractize 1). Math-correctness audit deferred until proofs land.
+Kernel status: **WIP, live `sorry`s** (PlaneArcSeparation, CrossingLemmaAmplification,
+ResidualPlanarization / Abstractize surfaces). Math-correctness audit deferred until
+proofs land. The `Combinatorics/CombinatorialMap/EdgeInsertion.lean` insertion
+substrate is sorry-free and axiom-clean.
 
 | Reference | Status | Note |
 |-----------|--------|------|
 | Székely 1997 | ✅ | "Crossing Numbers and Hard Erdős Problems…", *CPC* 6(3) (1997) 353–358 |
 | ACNS 1982 + Leighton | ✅ | Ajtai–Chvátal–Newborn–Szemerédi, "Crossing-free subgraphs", N-H Math Studies 60 (1982) 9–12; Leighton independent |
 | Pach–Tóth multigraph | ✅ | "A Crossing Lemma for Multigraphs", *DCG* 63 (2020) 918–933; SoCG 2018; arXiv:1801.00721 |
+| Lando–Zvonkin §1.3.3 | ✅ | `ResidualMapProperties` / `EdgeInsertion` use the standard dart permutation model: vertex rotation, fixed-point-free edge involution, and face permutation forced by the map relation |
 | Newman, *Elements of the Topology of Plane Sets* | ☐ | crosscut theorem cite in PlaneArcSeparation |
 | Pommerenke, *Boundary Behaviour of Conformal Maps* | ☐ | ditto |
 

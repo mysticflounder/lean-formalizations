@@ -29,6 +29,14 @@ vertex class iff they share an `incidentEnds` block, i.e. have the same
 that the per-block rotation is `finRotate` conjugated by `isoFin`, hence
 transitive on each block.
 
+The map language follows Lando--Zvonkin, *Graphs on Surfaces and Their
+Applications*, §1.3.3: darts carry a vertex rotation `σ`, a fixed-point-free edge
+involution `α`, and a face permutation `φ` forced by the map relation
+(Proposition 1.3.16 and Remark 1.3.19; Lean uses the corresponding left-action
+convention `facePerm * edgePerm * vertexPerm = 1`).  The prefix-step insertion
+witnesses below construct the corresponding permutation equalities directly for
+leaf insertions and same-face insertions.
+
 Everything is sorry-free and axiom-clean.
 -/
 
@@ -1693,6 +1701,386 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
         simpa [xq, insertedLeafEdgeMap_vertexPerm, insertedLeafVertexPerm,
       prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun] using hfix.symm
 
+/-- Transport the leaf-insertion vertex permutation across a prefix step when
+the old endpoint of the new edge is the second endpoint.
+
+This is the endpoint-`true` analogue of
+`prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm`: the dart
+`Sum.inr 1`, sent by `prefixStepDartEquiv` to `(Fin.last m, true)`, is threaded
+into the old vertex cycle, while `Sum.inr 0` is the singleton leaf dart. -/
+theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p : ℝ × ℝ}
+    (hpnew : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p)
+    (hpother : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hleaf : ∀ e : Fin m × Bool,
+      e ∉ incidentEnds (G.prefixEdges m hm)
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hp : p ∈ G.V)
+    (hmono :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew hpother a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew hpother a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p
+            (arrAngle (G.prefixEdges m hm) hARR hp)
+            (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
+          endAngleKey (G.prefixEdges m hm) p
+            (arrAngle (G.prefixEdges m hm) hARR hp)
+            (arrRadius (G := G.prefixEdges m hm) hARR hp) a₂)
+    (c : ↥(incidentEnds (G.prefixEdges m hm) p))
+    (hpred :
+      vertexRotationAtRadius (G.prefixEdges (m + 1) hm') p
+          (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+          (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+          (endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+            (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp
+              (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := G) m hm hm' true hpnew hpother c).1) =
+        incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' true hpnew) :
+    (prefixStepDartEquiv m).permCongr
+      (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c.1 true).vertexPerm =
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm := by
+  have hsplice :=
+    vertexRotationAtRadius_prefix_step_endpoint_splice
+      (G := G) m hm hm' true (p := p) hpnew hpother
+      (α := arrAngle (G.prefixEdges m hm) hARR hp)
+      (β := arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+      (r := arrRadius (G.prefixEdges m hm) hARR hp)
+      (r' := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+      (hinj := endAngleKey_injective (G.prefixEdges m hm) p _ _
+        (arrAngle_injOn (G.prefixEdges m hm) hARR hp
+          (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl))
+      (hinj' := endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+        (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp
+          (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl))
+      c hmono hpred
+  have hsplice' :
+      (incident_ends_prefix_step_endpoint_equiv (G := G) m hm hm' true hpnew hpother).permCongr
+        (Equiv.swap
+            (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+            (Sum.inr ()) *
+          (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr 1)
+      = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := by
+    simpa [rotation_wellDefined] using hsplice
+  apply Equiv.ext
+  intro d
+  rcases (prefixStepDartEquiv m).surjective d with ⟨z, rfl⟩
+  rw [Equiv.permCongr_apply, Equiv.symm_apply_apply]
+  cases z with
+  | inl a =>
+      by_cases ha : a ∈ incidentEnds (G.prefixEdges m hm) p
+      · let x : ↥(incidentEnds (G.prefixEdges m hm) p) := ⟨a, ha⟩
+        have hpoint := congrArg
+          (fun σ => σ
+            ((incident_ends_prefix_step_endpoint_equiv
+              (G := G) m hm hm' true hpnew hpother) (Sum.inl x))) hsplice'
+        change
+          ((incident_ends_prefix_step_endpoint_equiv
+            (G := G) m hm hm' true hpnew hpother).permCongr
+            (Equiv.swap
+                (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+                (Sum.inr ()) *
+              (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr 1))
+            ((incident_ends_prefix_step_endpoint_equiv
+              (G := G) m hm hm' true hpnew hpother) (Sum.inl x)) =
+            (vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
+              ((incident_ends_prefix_step_endpoint_equiv
+                (G := G) m hm hm' true hpnew hpother) (Sum.inl x)) at hpoint
+        rw [Equiv.permCongr_apply, Equiv.symm_apply_apply] at hpoint
+        have hpoint_val := congrArg Subtype.val hpoint
+        have hvc :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1 =
+              ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 :=
+          residualMap_vertexPerm_apply_of_mem
+            (G := G.prefixEdges m hm) hARR hp c
+        have hva :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm a =
+              ((vertexRotation (G.prefixEdges m hm) hARR hp) x).1 :=
+          residualMap_vertexPerm_apply_of_mem
+            (G := G.prefixEdges m hm) hARR hp x
+        have hnew :
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm
+                ((prefixStepDartEquiv m) (Sum.inl a)) =
+              ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
+                ((incident_ends_prefix_step_endpoint_equiv
+                  (G := G) m hm hm' true hpnew hpother) (Sum.inl x))).1 := by
+          simpa [x, incident_ends_prefix_step_endpoint_equiv] using
+            residualMap_vertexPerm_apply_of_mem
+              (G := G.prefixEdges (m + 1) hm') hARR' hp
+              ((incident_ends_prefix_step_endpoint_equiv
+                (G := G) m hm hm' true hpnew hpother) (Sum.inl x))
+        have hleft :
+            (prefixStepDartEquiv m)
+                ((insertedLeafEdgeMapAt
+                    (residualMap (G.prefixEdges m hm) hARR) c.1 true).vertexPerm
+                  (Sum.inl a)) =
+              ((incident_ends_prefix_step_endpoint_equiv
+                  (G := G) m hm hm' true hpnew hpother)
+                (((Equiv.swap
+                    (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+                    (Sum.inr ())) *
+                  (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr (Equiv.refl Unit))
+                  (Sum.inl x))).1 := by
+          by_cases hrot :
+              (vertexRotation (G.prefixEdges m hm) hARR hp) x =
+                (vertexRotation (G.prefixEdges m hm) hARR hp) c
+          · have hrot_val :
+                ((vertexRotation (G.prefixEdges m hm) hARR hp) x).1 =
+                  ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 :=
+              congrArg Subtype.val hrot
+            simp [x, insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+              Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
+              incident_ends_prefix_step_endpoint_equiv,
+              incident_ends_prefix_step_endpoint_new_dart, prefixStepDartEquiv,
+              prefixStepDartToFun, leafThreadDart, hvc, hva, hrot]
+            rfl
+          · have hrot_val :
+                ((vertexRotation (G.prefixEdges m hm) hARR hp) x).1 ≠
+                  ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 := by
+              intro hv
+              exact hrot (Subtype.ext hv)
+            simp [insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+              Equiv.Perm.mul_apply, Equiv.sumCongr_apply, leafThreadDart, hvc, hva]
+            have hneL₁ :
+                Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) x).1) ≠
+                  (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) c).1) :
+                    Fin m × Bool ⊕ Fin 2) := by
+              intro h
+              exact hrot_val (Sum.inl.inj h)
+            have hneL₂ :
+                Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) x).1) ≠
+                  (Sum.inr (1 : Fin 2) : Fin m × Bool ⊕ Fin 2) := by
+              simp
+            have hneR₁ :
+                Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) x) ≠
+                  (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c) :
+                    ↥(incidentEnds (G.prefixEdges m hm) p) ⊕ Unit) := by
+              intro h
+              exact hrot (Sum.inl.inj h)
+            have hneR₂ :
+                Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) x) ≠
+                  (Sum.inr () : ↥(incidentEnds (G.prefixEdges m hm) p) ⊕ Unit) := by
+              simp
+            have hswapL :
+                (Equiv.swap
+                    (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) c).1))
+                    (Sum.inr (1 : Fin 2)))
+                  (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) x).1)) =
+                    (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hp) x).1) :
+                      Fin m × Bool ⊕ Fin 2) :=
+              Equiv.swap_apply_of_ne_of_ne hneL₁ hneL₂
+            have hswapR :
+                (Equiv.swap
+                    (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+                    (Sum.inr ()))
+                  (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) x)) =
+                    (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) x) :
+                      ↥(incidentEnds (G.prefixEdges m hm) p) ⊕ Unit) :=
+              Equiv.swap_apply_of_ne_of_ne hneR₁ hneR₂
+            simp [hswapL, hswapR]
+        exact hleft.trans (hpoint_val.trans hnew.symm)
+      · let r : ℝ × ℝ := dartAnchor (G.prefixEdges m hm) a
+        have hr : r ∈ G.V := by
+          simpa [r, DrawnMultigraph.prefixEdges] using
+            (dartAnchor_mem (G.prefixEdges m hm) a)
+        have hp1 :
+            ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ r := by
+          intro h
+          exact hleaf a (by
+            have hrq : r = ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 := h.symm
+            simpa [r, hrq] using dart_mem_incidentEnds (G.prefixEdges m hm) a)
+        have hp2 :
+            ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ r := by
+          intro h
+          apply ha
+          have hrp : r = p := by
+            rw [← h, hpnew]
+          simpa [r, hrp] using dart_mem_incidentEnds (G.prefixEdges m hm) a
+        let x : ↥(incidentEnds (G.prefixEdges m hm) r) :=
+          ⟨a, by simpa [r] using dart_mem_incidentEnds (G.prefixEdges m hm) a⟩
+        have hunch := vertexRotation_prefix_step_unchanged
+          (G := G) m hm hm' hjoin hARR hARR' hr hp1 hp2
+        have hpoint := congrArg
+          (fun σ => σ
+            ((incident_ends_prefix_step_unchanged_equiv
+              (G := G) m hm hm' hp1 hp2) x)) hunch
+        change
+          ((incident_ends_prefix_step_unchanged_equiv
+            (G := G) m hm hm' hp1 hp2).permCongr
+            (vertexRotation (G.prefixEdges m hm) hARR hr))
+            ((incident_ends_prefix_step_unchanged_equiv
+              (G := G) m hm hm' hp1 hp2) x) =
+            (vertexRotation (G.prefixEdges (m + 1) hm') hARR' hr)
+              ((incident_ends_prefix_step_unchanged_equiv
+                (G := G) m hm hm' hp1 hp2) x) at hpoint
+        rw [Equiv.permCongr_apply, Equiv.symm_apply_apply] at hpoint
+        have hpoint_val := congrArg Subtype.val hpoint
+        have hxc : a ≠ c.1 := by
+          intro h
+          exact ha (h.symm ▸ c.2)
+        have hvne :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm a ≠
+              (residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1 := by
+          intro h
+          exact hxc ((residualMap (G.prefixEdges m hm) hARR).vertexPerm.injective h)
+        have hvc :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1 =
+              ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 :=
+          residualMap_vertexPerm_apply_of_mem
+            (G := G.prefixEdges m hm) hARR hp c
+        have hva :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm a =
+              ((vertexRotation (G.prefixEdges m hm) hARR hr) x).1 :=
+          residualMap_vertexPerm_apply_of_mem
+            (G := G.prefixEdges m hm) hARR hr x
+        have hnew :
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm
+                ((prefixStepDartEquiv m) (Sum.inl a)) =
+              ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hr)
+                ((incident_ends_prefix_step_unchanged_equiv
+                  (G := G) m hm hm' hp1 hp2) x)).1 := by
+          simpa [x, incident_ends_prefix_step_unchanged_equiv] using
+            residualMap_vertexPerm_apply_of_mem
+              (G := G.prefixEdges (m + 1) hm') hARR' hr
+              ((incident_ends_prefix_step_unchanged_equiv
+                (G := G) m hm hm' hp1 hp2) x)
+        have hleft :
+            (prefixStepDartEquiv m)
+                ((insertedLeafEdgeMapAt
+                    (residualMap (G.prefixEdges m hm) hARR) c.1 true).vertexPerm
+                  (Sum.inl a)) =
+              ((incident_ends_prefix_step_unchanged_equiv
+                  (G := G) m hm hm' hp1 hp2)
+                ((vertexRotation (G.prefixEdges m hm) hARR hr) x)).1 := by
+          have hneU₁ :
+              Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hr) x).1) ≠
+                (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1) :
+                  Fin m × Bool ⊕ Fin 2) := by
+            intro h
+            exact hvne (hva.trans (Sum.inl.inj h))
+          have hneU₂ :
+              Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hr) x).1) ≠
+                (Sum.inr (1 : Fin 2) : Fin m × Bool ⊕ Fin 2) := by
+            simp
+          have hswapU :
+              (Equiv.swap
+                  (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1))
+                  (Sum.inr (1 : Fin 2)))
+                (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hr) x).1)) =
+                  (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hr) x).1) :
+                    Fin m × Bool ⊕ Fin 2) :=
+            Equiv.swap_apply_of_ne_of_ne hneU₁ hneU₂
+          simp [x, insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+            Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
+            incident_ends_prefix_step_unchanged_equiv, leafThreadDart, hva, hswapU]
+        exact hleft.trans (hpoint_val.trans hnew.symm)
+  | inr j =>
+      fin_cases j
+      · let q : ℝ × ℝ := ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1
+        have hq : q ∈ G.V := by
+          simpa [q, DrawnMultigraph.prefixEdges] using
+            (G.endpoints_mem (Fin.castLE hm' (Fin.last m))).1
+        have hpother_q :
+            ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ q := by
+          intro h
+          exact hpother (by
+            calc
+              ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = q := rfl
+              _ = ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 := h.symm
+              _ = p := hpnew)
+        have hcardq :
+            Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') q) ≤ 1 :=
+          incidentEnds_prefix_step_endpoint_card_le_one_of_new_leaf
+            (G := G) m hm hm' false (p := q) (by rfl) hpother_q (by
+              intro e
+              simpa [q] using hleaf e)
+        have hrotq :
+            vertexRotation (G.prefixEdges (m + 1) hm') hARR' hq = 1 :=
+          vertexRotation_eq_one_of_card_le_one
+            (G.prefixEdges (m + 1) hm') hARR' hq hcardq
+        let xq : ↥(incidentEnds (G.prefixEdges (m + 1) hm') q) :=
+          incident_ends_prefix_step_endpoint_new_dart (G := G) m hm' false (p := q) (by rfl)
+        have hfix :
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm xq.1 = xq.1 := by
+          simpa [xq, hrotq] using
+            residualMap_vertexPerm_apply_of_mem
+              (G := G.prefixEdges (m + 1) hm') hARR' hq xq
+        simpa [xq, insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+          leafThreadDart, prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun]
+          using hfix.symm
+      · have hpoint := congrArg
+          (fun σ => σ
+            ((incident_ends_prefix_step_endpoint_equiv
+              (G := G) m hm hm' true hpnew hpother) (Sum.inr ()))) hsplice'
+        change
+          ((incident_ends_prefix_step_endpoint_equiv
+            (G := G) m hm hm' true hpnew hpother).permCongr
+            (Equiv.swap
+                (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+                (Sum.inr ()) *
+              (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr 1))
+            ((incident_ends_prefix_step_endpoint_equiv
+              (G := G) m hm hm' true hpnew hpother) (Sum.inr ())) =
+            (vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
+              ((incident_ends_prefix_step_endpoint_equiv
+                (G := G) m hm hm' true hpnew hpother) (Sum.inr ())) at hpoint
+        rw [Equiv.permCongr_apply, Equiv.symm_apply_apply] at hpoint
+        have hpoint_val := congrArg Subtype.val hpoint
+        have hvc :
+            (residualMap (G.prefixEdges m hm) hARR).vertexPerm c.1 =
+              ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 :=
+          residualMap_vertexPerm_apply_of_mem
+            (G := G.prefixEdges m hm) hARR hp c
+        have hnew :
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm (Fin.last m, true) =
+              ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
+                ((incident_ends_prefix_step_endpoint_equiv
+                  (G := G) m hm hm' true hpnew hpother) (Sum.inr ()))).1 := by
+          simpa [incident_ends_prefix_step_endpoint_equiv] using
+            residualMap_vertexPerm_apply_of_mem
+              (G := G.prefixEdges (m + 1) hm') hARR' hp
+              ((incident_ends_prefix_step_endpoint_equiv
+                (G := G) m hm hm' true hpnew hpother) (Sum.inr ()))
+        have hleft :
+            (prefixStepDartEquiv m)
+                ((insertedLeafEdgeMapAt
+                    (residualMap (G.prefixEdges m hm) hARR) c.1 true).vertexPerm
+                  (Sum.inr (1 : Fin 2))) =
+              ((incident_ends_prefix_step_endpoint_equiv
+                  (G := G) m hm hm' true hpnew hpother)
+                (((Equiv.swap
+                    (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) c))
+                    (Sum.inr ())) *
+                  (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr (Equiv.refl Unit))
+                  (Sum.inr ()))).1 := by
+          simpa [insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+            Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
+            incident_ends_prefix_step_endpoint_equiv,
+            incident_ends_prefix_step_endpoint_new_dart, leafThreadDart, hvc] using
+            (incident_ends_prefix_step_endpoint_old_equiv_apply_val
+              (G := G) m hm hm' true hpnew hpother
+              ((vertexRotation (G.prefixEdges m hm) hARR hp) c)).symm
+        have hnew' :
+            (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm
+                ((prefixStepDartEquiv m) (Sum.inr (1 : Fin 2))) =
+              ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
+                  ((incident_ends_prefix_step_endpoint_equiv
+                    (G := G) m hm hm' true hpnew hpother) (Sum.inr ()))).1 := by
+          simpa using hnew
+        exact hleft.trans (hpoint_val.trans hnew'.symm)
+
 /-- Transport the two-corner edge-insertion vertex permutation across a prefix step.
 
 This is the same-face analogue of
@@ -2973,6 +3361,63 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
     (prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
       (G := G) m hm hm' (p := p) hpnew hpother hleaf hjoin hARR hARR' hp hmono c hpred)
 
+/-- Construct the leaf-insertion witness from endpoint-splice data when the old
+endpoint of the new last edge is its second endpoint. -/
+theorem exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_splice
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p : ℝ × ℝ}
+    (hpnew : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p)
+    (hpother : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hleaf : ∀ e : Fin m × Bool,
+      e ∉ incidentEnds (G.prefixEdges m hm)
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p)) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  have hp : p ∈ G.V := by
+    have hp₂ : (G.endpoints (Fin.castLE hm' (Fin.last m))).2 = p := by
+      simpa [DrawnMultigraph.prefixEdges] using hpnew
+    simpa [hp₂] using (G.endpoints_mem (Fin.castLE hm' (Fin.last m))).2
+  have hmono :
+      ∀ a₁ a₂ : ↥(incidentEnds (G.prefixEdges m hm) p),
+        endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew hpother a₁).1) <
+          endAngleKey (G.prefixEdges (m + 1) hm') p
+            (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+            (arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+            ((incident_ends_prefix_step_endpoint_old_equiv
+              (G := G) m hm hm' true hpnew hpother a₂).1) ↔
+        endAngleKey (G.prefixEdges m hm) p
+            (arrAngle (G.prefixEdges m hm) hARR hp)
+            (arrRadius (G.prefixEdges m hm) hARR hp) a₁ <
+          endAngleKey (G.prefixEdges m hm) p
+            (arrAngle (G.prefixEdges m hm) hARR hp)
+            (arrRadius (G.prefixEdges m hm) hARR hp) a₂ :=
+    endAngleKey_prefix_step_endpoint_old_iff
+      (G := G) m hm hm' true (p := p) hpnew hpother hjoin hARR hARR' hp
+  obtain ⟨c, hpred⟩ := exists_vertexRotationAtRadius_prefix_step_endpoint_splice
+    (G := G) m hm hm' true (p := p) hpnew hpother
+    (α := arrAngle (G.prefixEdges m hm) hARR hp)
+    (β := arrAngle (G.prefixEdges (m + 1) hm') hARR' hp)
+    (r := arrRadius (G.prefixEdges m hm) hARR hp)
+    (r' := arrRadius (G.prefixEdges (m + 1) hm') hARR' hp)
+    (hinj := endAngleKey_injective (G.prefixEdges m hm) p _ _
+      (arrAngle_injOn (G.prefixEdges m hm) hARR hp
+        (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl))
+    (hinj' := endAngleKey_injective (G.prefixEdges (m + 1) hm') p _ _
+      (arrAngle_injOn (G.prefixEdges (m + 1) hm') hARR' hp
+        (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl))
+    hmono hcard
+  refine ResidualMapPrefixStepInsertion.leaf true c.1 ?hvertex
+  simpa using
+    (prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
+      (G := G) m hm hm' (p := p) hpnew hpother hleaf hjoin hARR hARR' hp hmono c hpred)
+
 /-- Construct a leaf prefix-step insertion witness from the tree-order local
 incidence data.
 
@@ -3001,6 +3446,62 @@ theorem exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident
       (G := G) m hm hm' false hpnew hold
   exact exists_residualMapPrefixStepInsertion_leaf_of_endpoint_splice
     (G := G) m hm hm' hpnew hpother hleaf hjoin hARR hARR' hcard
+
+/-- Construct a leaf prefix-step insertion witness when the second endpoint of
+the new last edge is already incident to the previous prefix and the first
+endpoint is a new leaf vertex. -/
+theorem exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_incident
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p : ℝ × ℝ}
+    (hpnew : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p)
+    (hpother : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p)
+    (hleaf : ∀ e : Fin m × Bool,
+      e ∉ incidentEnds (G.prefixEdges m hm)
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1)
+    (hold : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  have hcard : 2 ≤ Fintype.card ↥(incidentEnds (G.prefixEdges (m + 1) hm') p) :=
+    two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+      (G := G) m hm hm' true hpnew hold
+  exact exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_splice
+    (G := G) m hm hm' hpnew hpother hleaf hjoin hARR hARR' hcard
+
+/-- Construct a leaf prefix-step insertion witness from unoriented endpoint data.
+
+If `p` is already incident to the predecessor prefix, `q` is fresh for that
+prefix, and the new last edge has endpoints `{p, q}` in either endpoint
+orientation, then the successor prefix is a leaf insertion. -/
+theorem exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p q : ℝ × ℝ}
+    (hend :
+      (((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p ∧
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = q) ∨
+      (((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = q ∧
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p))
+    (hqp : q ≠ p)
+    (hleaf : ∀ e : Fin m × Bool, e ∉ incidentEnds (G.prefixEdges m hm) q)
+    (hold : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  rcases hend with hend | hend
+  · exact exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident
+      (G := G) m hm hm' hend.1 (by simpa [hend.2] using hqp)
+      (by
+        intro e
+        simpa [hend.2] using hleaf e)
+      hold hjoin hARR hARR'
+  · exact exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_incident
+      (G := G) m hm hm' hend.2 (by simpa [hend.1] using hqp)
+      (by
+        intro e
+        simpa [hend.1] using hleaf e)
+      hold hjoin hARR hARR'
 
 /-- Every power of the residual edge permutation preserves the edge index. -/
 theorem residualMap_edgePerm_zpow_fst (hARR : ArcsRotationRegular G)
