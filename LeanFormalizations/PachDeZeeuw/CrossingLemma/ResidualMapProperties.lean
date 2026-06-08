@@ -2821,6 +2821,35 @@ theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident
     (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hjoin hARR hARR'
     hp₁ hp₂ hmono₁ hmono₂ c₁ c₂ hc hsame hpred₁ hpred₂
 
+/-- Construct a same-face prefix-step insertion witness when the predecessor
+residual map has one face.
+
+This is the first cotree-step specialization of the same-face local witness:
+after the primal tree prefix, Euler counting gives one residual face, so every
+pair of predecessor corners is automatically in the same `facePerm` cycle. -/
+theorem exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p₁)
+    (hpnew₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p₂)
+    (hpother₁ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 ≠ p₁)
+    (hpother₂ : ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠ p₂)
+    (hp₁ : p₁ ∈ G.V) (hp₂ : p₂ ∈ G.V)
+    (hold₁ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₁)
+    (hold₂ : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p₂)
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (hface : Fintype.card (residualMap (G.prefixEdges m hm) hARR).Face = 1) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  obtain ⟨c₁, c₂, _hc, _hpred₁, _hpred₂, hstep⟩ :=
+    exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident
+      (G := G) m hm hm' hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁ hp₂
+      hold₁ hold₂ hjoin hARR hARR'
+  exact hstep
+    (CombinatorialMap.facePerm_sameCycle_of_card_face_eq_one
+      (M := residualMap (G.prefixEdges m hm) hARR) hface c₁.1 c₂.1)
+
 /-- Construct the leaf-insertion witness from endpoint-splice data. Once the
 new endpoint has been identified and the successor angular order is known to be
 the single-corner splice of the old one, the successor prefix residual map is

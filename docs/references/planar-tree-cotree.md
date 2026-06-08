@@ -36,6 +36,8 @@ Why this matters here:
   constructs the two predecessor corners at old endpoints and turns a
   predecessor-face `SameCycle` proof for those corners into the actual
   `ResidualMapPrefixStepInsertion.sameFace` witness.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
+  discharges that `SameCycle` condition in the one-face predecessor case.
 - The missing global witness is the tree-first / cotree-second edge order.
 - This theorem is the exact combinatorial bridge needed to convert a spanning
   tree on `vertexGraph` into the dual-side edge order on `faceGraph`.
@@ -71,6 +73,10 @@ Formalized bridge pieces now available:
   packages the same-face local data into constructor-facing corners and the
   final `ResidualMapPrefixStepInsertion.sameFace` witness, assuming the
   predecessor `SameCycle` condition for those corners.
+- `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
+  combines that local same-face witness with
+  `CombinatorialMap.facePerm_sameCycle_of_card_face_eq_one`, giving the first
+  cotree-step witness once the primal tree prefix has been counted to one face.
 
 Still missing:
 
