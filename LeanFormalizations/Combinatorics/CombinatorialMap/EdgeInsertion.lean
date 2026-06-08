@@ -1845,6 +1845,60 @@ corner `c₁` as `0 : Fin 2`. -/
     hstepDartB hleft]
   simp [insFacePermStep1SplitPoolEquiv]
 
+/-- The inserted-face split equivalence names the side containing the old cut
+corner `c₂` as `1 : Fin 2`, the same side as the new dart `dartA`. -/
+@[simp] theorem insertedFaceSplitPoolEquiv_mk_inl_right
+    (M : CombinatorialMap D) (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂) :
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl c₂)) =
+      Sum.inr (1 : Fin 2) := by
+  change insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        (Quotient.mk
+          (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+          (Sum.inl c₂)) =
+      Sum.inr (1 : Fin 2)
+  change (insFacePermStep1SplitPoolEquiv M.facePerm c₁ c₂)
+      ((splitCycleQuotEquiv (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame))
+          ((quotientSameCycleEquivOfPermEq
+            (insertedEdgeMap_facePerm_eq_splitStep M c₁ c₂ hc))
+            (Quotient.mk
+              (Equiv.Perm.SameCycle.setoid (insertedEdgeMap M c₁ c₂).facePerm)
+              (Sum.inl c₂)))) =
+    Sum.inr (1 : Fin 2)
+  rw [quotientSameCycleEquivOfPermEq_mk]
+  have hstep_apply :
+      (insFacePermStep1 M.facePerm c₂) (dartA : D ⊕ Fin 2) = Sum.inl c₂ := by
+    change (Equiv.swap (Sum.inl c₂) (dartB : D ⊕ Fin 2) *
+        baseFacePerm M.facePerm) (dartA : D ⊕ Fin 2) = Sum.inl c₂
+    rw [Equiv.Perm.mul_apply, baseFacePerm_dartA]
+    exact Equiv.swap_apply_right (Sum.inl c₂) (dartB : D ⊕ Fin 2)
+  have hstepC₂ :
+      (insFacePermStep1 M.facePerm c₂).SameCycle (Sum.inl c₂) (Sum.inl c₁) :=
+    (insFacePermStep1_sameCycle_inl_inl_iff M.facePerm c₂ c₂ c₁).mpr hsame.symm
+  have hfinalDartA :
+      (Equiv.swap (Sum.inl c₁) (dartA : D ⊕ Fin 2) *
+        insFacePermStep1 M.facePerm c₂).SameCycle
+          (dartA : D ⊕ Fin 2) (Sum.inl c₂) := by
+    exact ⟨1, by
+      rw [zpow_one, Equiv.Perm.mul_apply, hstep_apply]
+      exact Equiv.swap_apply_of_ne_of_ne (by simp [hc.symm]) (by simp [dartA])⟩
+  have hright :
+      ¬ (Equiv.swap (Sum.inl c₁) (dartA : D ⊕ Fin 2) *
+        insFacePermStep1 M.facePerm c₂).SameCycle (Sum.inl c₂) (Sum.inl c₁) := by
+    intro hfinalC₂
+    have hnot :=
+      not_sameCycle_swap_mul_of_sameCycle (insFacePermStep1 M.facePerm c₂)
+        (inl_ne_dartA c₁)
+        (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame)
+    exact hnot ((hfinalDartA.trans hfinalC₂).symm)
+  rw [splitCycleQuotEquiv_mk_of_sameCycle_right
+    (insFacePermStep1 M.facePerm c₂) (inl_ne_dartA c₁)
+    (insFacePermStep1_sameCycle_inl_dartA_of_sameCycle M.facePerm c₁ c₂ hsame)
+    hstepC₂ hright]
+  simp [insFacePermStep1SplitPoolEquiv]
+
 /-- For a same-face insertion, two carried old darts lie in the same successor
 face exactly when the split-face quotient assigns their successor face classes
 to the same old-face-or-side class.

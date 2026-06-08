@@ -133,6 +133,10 @@ Formalized bridge pieces now available:
   express the face-stability invariant needed after the first cotree step:
   carried old darts are in one successor face exactly when their images agree
   in the split-face quotient.
+- `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_right`
+  completes the old-corner side labels for a split face: the old cut corner
+  `c₂` lands on side `1`, the same side as the new dart `dartA`, while the
+  existing side lemmas put `c₁` and `dartB` on side `0`.
 
 Still missing:
 
