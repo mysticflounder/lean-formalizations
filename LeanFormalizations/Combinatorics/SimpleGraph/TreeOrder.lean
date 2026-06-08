@@ -681,6 +681,22 @@ theorem Equiv.Perm.exists_map_fin_castLE {k n : ℕ} (hk : k ≤ n)
     (Fin.castLE_injective hk)
   exact ⟨σ, hσ⟩
 
+/-- Any injective map `Fin k → Fin n` can be extended to a permutation of
+`Fin n` that places the family at the initial positions.
+
+This is the inverse-convention form of `exists_map_fin_castLE`: it is the
+version used by ordered edge prefixes, where `permuteEdges σ` reads old edge
+`σ i` at new position `i`. -/
+theorem Equiv.Perm.exists_castLE_map_fin {k n : ℕ} (hk : k ≤ n)
+    (f : Fin k → Fin n) (hf : Function.Injective f) :
+    ∃ σ : Equiv.Perm (Fin n), ∀ i : Fin k, σ (Fin.castLE hk i) = f i := by
+  classical
+  obtain ⟨τ, hτ⟩ := Equiv.Perm.exists_map_fin_castLE hk f hf
+  refine ⟨τ.symm, ?_⟩
+  intro i
+  rw [← hτ i]
+  exact Equiv.symm_apply_apply τ (f i)
+
 /-- Two disjoint injective `Fin`-families in `Fin n` can be extended to a
 permutation putting the first family in the first block and the second family in
 the following block.
@@ -750,5 +766,53 @@ theorem Equiv.Perm.exists_map_fintype_twoBlocks {α : Type*} [Fintype α]
   · intro j
     have := hσg j
     simpa [π, e, g'] using congrArg e.symm this
+
+/-- Two disjoint injective `Fin`-families in `Fin n` can be extended to a
+permutation whose first and second blocks evaluate to those families.
+
+This is the inverse-convention form of `exists_map_fin_twoBlocks`, used by
+ordered prefixes: after applying the resulting permutation as an edge reindexing,
+the first block of positions contains `f` and the second block contains `g`. -/
+theorem Equiv.Perm.exists_twoBlocks_map_fin {a b n : ℕ} (h : a + b ≤ n)
+    (f : Fin a → Fin n) (g : Fin b → Fin n)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ σ : Equiv.Perm (Fin n),
+      (∀ i : Fin a, σ (Fin.castLE h (Fin.castAdd b i)) = f i) ∧
+        (∀ j : Fin b, σ (Fin.castLE h (Fin.natAdd a j)) = g j) := by
+  classical
+  obtain ⟨τ, hτf, hτg⟩ := Equiv.Perm.exists_map_fin_twoBlocks h f g hf hg hdisj
+  refine ⟨τ.symm, ?_, ?_⟩
+  · intro i
+    rw [← hτf i]
+    exact Equiv.symm_apply_apply τ (f i)
+  · intro j
+    rw [← hτg j]
+    exact Equiv.symm_apply_apply τ (g j)
+
+/-- Finite-type version of `exists_twoBlocks_map_fin`.
+
+The resulting permutation evaluates the chosen block positions to the two
+specified disjoint families. -/
+theorem Equiv.Perm.exists_twoBlocks_map_fintype {α : Type*} [Fintype α]
+    {a b : ℕ} (h : a + b ≤ Fintype.card α)
+    (f : Fin a → α) (g : Fin b → α)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ π : Equiv.Perm α,
+      (∀ i : Fin a,
+        π ((Fintype.equivFin α).symm (Fin.castLE h (Fin.castAdd b i))) = f i) ∧
+        (∀ j : Fin b,
+          π ((Fintype.equivFin α).symm (Fin.castLE h (Fin.natAdd a j))) = g j) := by
+  classical
+  obtain ⟨τ, hτf, hτg⟩ :=
+    Equiv.Perm.exists_map_fintype_twoBlocks h f g hf hg hdisj
+  refine ⟨τ.symm, ?_, ?_⟩
+  · intro i
+    rw [← hτf i]
+    exact Equiv.symm_apply_apply τ (f i)
+  · intro j
+    rw [← hτg j]
+    exact Equiv.symm_apply_apply τ (g j)
 
 end SimpleGraph

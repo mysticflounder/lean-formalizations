@@ -302,6 +302,42 @@ theorem exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges
       (α := M.Edge) hblock f g hf hg hdisj
   exact ⟨hblock, π, hπf, hπg⟩
 
+/-- Assemble disjoint primal-tree and cotree edge injections into one edge
+permutation whose block positions evaluate to the chosen edges.
+
+This is the inverse-convention companion to
+`exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges`. It is the form
+used when a permutation is read as an ordered edge list: the edge at a block
+position is the value of the permutation at that position. -/
+theorem exists_edgePositionPermutation_of_disjoint_vertex_dual_leafOrder_edges
+    (M : CombinatorialMap D) [Fintype D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hVdual : 1 ≤ Fintype.card M.dual.Vertex)
+    (hplanar : M.IsPlanar)
+    {l : List M.Vertex} (hl_len : l.length = Fintype.card M.Vertex)
+    {lDual : List M.dual.Vertex}
+    (hlDual_len : lDual.length = Fintype.card M.dual.Vertex)
+    (f : Fin (l.length - 1) → M.Edge)
+    (g : Fin (lDual.length - 1) → M.Edge)
+    (hf : Function.Injective f) (hg : Function.Injective g)
+    (hdisj : Disjoint (Set.range f) (Set.range g)) :
+    ∃ hblock : (l.length - 1) + (lDual.length - 1) ≤ Fintype.card M.Edge,
+      ∃ π : Equiv.Perm M.Edge,
+        (∀ i : Fin (l.length - 1),
+          π ((Fintype.equivFin M.Edge).symm
+              (Fin.castLE hblock (Fin.castAdd (lDual.length - 1) i))) = f i) ∧
+          (∀ j : Fin (lDual.length - 1),
+            π ((Fintype.equivFin M.Edge).symm
+                (Fin.castLE hblock (Fin.natAdd (l.length - 1) j))) = g j) := by
+  classical
+  have hcard := card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge
+    (M := M) hV hVdual hplanar hl_len hlDual_len
+  let hblock : (l.length - 1) + (lDual.length - 1) ≤ Fintype.card M.Edge := by
+    rw [hcard]
+  obtain ⟨π, hπf, hπg⟩ :=
+    SimpleGraph.Equiv.Perm.exists_twoBlocks_map_fintype
+      (α := M.Edge) hblock f g hf hg hdisj
+  exact ⟨hblock, π, hπf, hπg⟩
+
 /-- A chosen edge witnessing a face-graph adjacency. This is the dual-side
 analogue of `vertexGraphEdge` and is the basic selector used when turning a
 spanning tree on faces into concrete map-edge data. -/

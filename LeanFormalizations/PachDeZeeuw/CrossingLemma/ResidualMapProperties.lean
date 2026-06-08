@@ -3600,6 +3600,36 @@ theorem DrawnMultigraph.exists_treeEdgePermutation_of_leafOrder
   obtain ⟨π, hπ⟩ := SimpleGraph.Equiv.Perm.exists_map_fin_castLE hk f hf
   exact ⟨hk, f, hf, π, hπ⟩
 
+/-- A leaf-insertion order on a spanning tree of the vertex graph determines an
+edge permutation whose initial positions are exactly those tree edges.
+
+This is the prefix-order convention used by `DrawnMultigraph.permuteEdges`: the
+edge at new position `i` is the old edge `π i`. -/
+theorem DrawnMultigraph.exists_treeEdgePositionPermutation_of_leafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin) (hT : T.IsTree)
+    {l : List ↥G.V}
+    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card ↥G.V)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ hk : l.length - 1 ≤ G.numEdges,
+      ∃ f : Fin (l.length - 1) → Fin G.numEdges,
+        Function.Injective f ∧
+          ∃ π : Equiv.Perm (Fin G.numEdges),
+            ∀ i : Fin (l.length - 1), π (Fin.castLE hk i) = f i := by
+  classical
+  rcases
+      DrawnMultigraph.exists_treeEdgeInjection_of_leafOrder
+        (G := G) hjoin hmult T hTsub hT hl_nodup hl_len parent hparent with
+    ⟨f, hf⟩
+  have hk : l.length - 1 ≤ G.numEdges := by
+    simpa using Fintype.card_le_of_injective f hf
+  obtain ⟨π, hπ⟩ := SimpleGraph.Equiv.Perm.exists_castLE_map_fin hk f hf
+  exact ⟨hk, f, hf, π, hπ⟩
+
 /-- A connected drawing with at least two listed vertices has no isolated listed
 vertex: every `p : G.V` has an incident dart. -/
 theorem incidentCoverage_of_graphConnected_of_two_le

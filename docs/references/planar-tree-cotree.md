@@ -60,12 +60,20 @@ Formalized bridge pieces now available:
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
+- `SimpleGraph.Equiv.Perm.exists_castLE_map_fin`,
+  `SimpleGraph.Equiv.Perm.exists_twoBlocks_map_fin`, and
+  `SimpleGraph.Equiv.Perm.exists_twoBlocks_map_fintype` provide the inverse
+  block convention used by ordered prefixes: a block position evaluates to the
+  selected edge.
 - `CombinatorialMap.card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge`
   formalizes the von Staudt count
   `|E| = (|V|-1)+(|V(M.dual)|-1)` in the list-length form used by leaf orders.
 - `CombinatorialMap.exists_edgePermutation_of_disjoint_vertex_dual_leafOrder_edges`
   turns disjoint concrete primal/cotree edge injections into the single
   tree-first/cotree-second edge permutation.
+- `CombinatorialMap.exists_edgePositionPermutation_of_disjoint_vertex_dual_leafOrder_edges`
+  gives the corresponding position-valued version, matching the way an edge
+  permutation is read as an ordered edge list.
 - `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
   packages the tree-phase endpoint incidence conditions into the constructor
   `ResidualMapPrefixStepInsertion.leaf`, with no additional planarity
