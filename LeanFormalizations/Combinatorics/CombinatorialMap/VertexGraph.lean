@@ -559,6 +559,80 @@ theorem exists_faceEdgeInjection_of_leafOrder
   exact ⟨M.faceEdgeOfLeafOrder T hTsub parent hparent,
     M.faceEdgeOfLeafOrder_injective T hTsub hl_nodup parent hparent⟩
 
+/-- The cotree edge selected by reading a dual leaf-insertion order backwards.
+
+For the tree-cotree insertion order, the dual tree is naturally peeled by
+leaves: earlier cotree insertions separate leaves, while the unpeeled suffix
+remains in the unsplit face.  This selector keeps the same parent-edge data as
+`faceEdgeOfLeafOrder`, but indexes it by `Fin.rev`. -/
+noncomputable def faceEdgeOfLeafOrderReverse
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) : M.Edge :=
+  M.faceEdgeOfLeafOrder T hTsub parent hparent (Fin.rev i)
+
+/-- The reverse cotree selector is the same face-adjacency edge as
+`faceEdgeOfLeafOrder`, at the reversed index. -/
+theorem faceEdgeOfLeafOrderReverse_spec
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent i = M.Edge_mk d ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega)),
+            dualVertexEquivFace M
+              (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := by
+  simpa [faceEdgeOfLeafOrderReverse] using
+    M.faceEdgeOfLeafOrder_spec T hTsub parent hparent (Fin.rev i)
+
+/-- Reversing a dual leaf-insertion order preserves injectivity of the selected
+cotree edges. -/
+theorem faceEdgeOfLeafOrderReverse_injective
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    Function.Injective (M.faceEdgeOfLeafOrderReverse T hTsub parent hparent) := by
+  intro i j hij
+  have hrev : Fin.rev i = Fin.rev j :=
+    M.faceEdgeOfLeafOrder_injective T hTsub hl_nodup parent hparent
+      (by simpa [faceEdgeOfLeafOrderReverse] using hij)
+  exact Fin.rev_injective hrev
+
+/-- A reverse dual leaf order gives an injective family of cotree edges. This is
+the finite selector for the cotree block in the tree-first/cotree-second order. -/
+theorem exists_faceEdgeInjection_of_leafOrderReverse
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.faceGraph) (_hT : T.IsTree)
+    {l : List M.dual.Vertex}
+    (hl_nodup : l.Nodup) (_hl_len : l.length = Fintype.card M.dual.Vertex)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ f : Fin (l.length - 1) → M.Edge, Function.Injective f := by
+  exact ⟨M.faceEdgeOfLeafOrderReverse T hTsub parent hparent,
+    M.faceEdgeOfLeafOrderReverse_injective T hTsub hl_nodup parent hparent⟩
+
 /-- A leaf-insertion order on a spanning tree of the face graph determines an
 edge permutation that moves those cotree edges into the initial segment of the
 ambient edge order. This is the dual permutation-level bridge used by the
