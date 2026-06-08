@@ -996,6 +996,23 @@ theorem mem_incidentEnds_prefixEdges_iff
     · rw [incidentEnds, Finset.mem_filter] at h ⊢
       exact ⟨Finset.mem_univ _, by simpa [DrawnMultigraph.prefixEdges] using h.2⟩
 
+/-- If a vertex is incident to some dart in a shorter ordered prefix, it remains
+incident to the corresponding dart in every longer prefix. -/
+theorem exists_mem_incidentEnds_prefixEdges_of_le
+    {m n : ℕ} (hm : m ≤ G.numEdges) (hn : n ≤ G.numEdges) (hmn : m ≤ n)
+    {p : ℝ × ℝ}
+    (h : ∃ e : Fin m × Bool, e ∈ incidentEnds (G.prefixEdges m hm) p) :
+    ∃ e : Fin n × Bool, e ∈ incidentEnds (G.prefixEdges n hn) p := by
+  rcases h with ⟨e, he⟩
+  refine ⟨(Fin.castLE hmn e.1, e.2), ?_⟩
+  have heG : (Fin.castLE hm e.1, e.2) ∈ incidentEnds G p :=
+    (mem_incidentEnds_prefixEdges_iff (G := G) (m := m) (hm := hm)).mp he
+  have hcast : Fin.castLE hn (Fin.castLE hmn e.1) = Fin.castLE hm e.1 := by
+    ext
+    rfl
+  exact (mem_incidentEnds_prefixEdges_iff (G := G) (m := n) (hm := hn)).mpr
+    (by simpa [hcast] using heG)
+
 private theorem castLE_castSucc_eq_castLE {m n : ℕ}
     (hm : m ≤ n) (hm' : m + 1 ≤ n) (i : Fin m) :
     Fin.castLE hm' i.castSucc = Fin.castLE hm i := by

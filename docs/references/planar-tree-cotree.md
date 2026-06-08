@@ -131,6 +131,16 @@ Formalized bridge pieces now available:
   specializes that witness to a reverse cotree block position, so the conclusion
   is the actual `ResidualMapPrefixStepInsertion.sameFace` witness for the
   selected full-residual-map cotree edge.
+- `CrossingLemma.exists_mem_incidentEnds_prefixEdges_of_le` and
+  `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`
+  transport the spanning-tree prefix's endpoint incidence into any later
+  prefix.  This is the formal "already present endpoint" input needed after the
+  tree block has been extended by cotree edges.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block_of_treePrefix_incidence`
+  uses that monotone incidence transport to build the actual reverse-cotree
+  `ResidualMapPrefixStepInsertion.sameFace` witness without separately assuming
+  old-endpoint incidence; the remaining input is the selected splice-corner
+  face equality.
 - `CombinatorialMap.EdgeInsertion.insertedLeafEdgeMapAt` and
   `CrossingLemma.isPlanar_insertedLeafEdgeMapAt` make leaf insertion
   orientation-parametric: either of the two new darts may be the dart threaded
@@ -206,8 +216,8 @@ Still missing:
   formalized; the missing part is the graph-theoretic complement/disjointness
   and dual connected/acyclic proof.
 - The residual-map face-stability proof that the cotree block, in reverse leaf
-  order, supplies the `SameCycle` hypotheses required by the same-face insertion
-  witness.
+  order, supplies the splice-corner `Face_mk` equality required by the
+  same-face insertion witness at every later cotree step.
 
 Notes for formalization:
 

@@ -238,6 +238,7 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   permutation transport needed for prefix freshness),
   the full permuted tree-prefix consequences
   `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder`
+  / `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`
   / `CrossingLemma.DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder`,
@@ -295,7 +296,8 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   the splice-corner face-equality constructor
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq`,
   the reverse-cotree block witness
-  `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`,
+  `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block_of_treePrefix_incidence`,
   the first post-tree edge witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
   and
