@@ -239,8 +239,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   the cotree-side finite edge selector
   `CombinatorialMap.faceEdgeOfLeafOrder`
   / `CombinatorialMap.faceEdgeOfLeafOrder_spec`
+  / `CombinatorialMap.faceEdgeOfLeafOrder_spec_cases`
   / `CombinatorialMap.faceEdgeOfLeafOrder_injective`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases`
   / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
   the face-splitting quotient specs
   `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_of_not_sameCycle`

@@ -57,6 +57,10 @@ Formalized bridge pieces now available:
   face classes, and `CombinatorialMap.exists_dart_faceGraphEdge_faces` unwraps a
   face-graph adjacency into a concrete dart `d` whose original edge separates the
   two original face classes `Face_mk d` and `Face_mk (edgePerm d)`.
+- `CombinatorialMap.faceEdgeOfLeafOrder_spec_cases` and
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases` split the unordered
+  cotree endpoint statement into the two dart orientations, matching the
+  constructor-facing corner data for same-face residual insertions.
 - `CombinatorialMap.faceEdgeOfLeafOrderReverse`,
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec`, and
   `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse` read a dual

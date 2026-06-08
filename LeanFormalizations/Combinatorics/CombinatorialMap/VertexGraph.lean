@@ -510,6 +510,38 @@ theorem faceEdgeOfLeafOrder_spec
   exact exists_dart_faceGraphEdge_faces (M := M)
     (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
 
+/-- Oriented endpoint form of `faceEdgeOfLeafOrder_spec`.
+
+The chosen cotree edge has the new dual-tree vertex and its earlier parent as
+the two original face endpoints, in one of the two dart orientations.  This is
+the orientation-sensitive witness needed when turning a dual-tree edge into the
+two predecessor corners of a same-face residual insertion. -/
+theorem faceEdgeOfLeafOrder_spec_cases
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrder T hTsub parent hparent i = M.Edge_mk d ∧
+        ((M.Face_mk d =
+            dualVertexEquivFace M (l[i.1 + 1]'(by omega)) ∧
+          M.Face_mk (M.edgePerm d) =
+            dualVertexEquivFace M (parent (i.1 + 1) (by omega) (by omega))) ∨
+        (M.Face_mk d =
+            dualVertexEquivFace M (parent (i.1 + 1) (by omega) (by omega)) ∧
+          M.Face_mk (M.edgePerm d) =
+            dualVertexEquivFace M (l[i.1 + 1]'(by omega)))) := by
+  obtain ⟨d, hedge, hfaces⟩ :=
+    M.faceEdgeOfLeafOrder_spec T hTsub parent hparent i
+  refine ⟨d, hedge, ?_⟩
+  rw [Sym2.eq_iff] at hfaces
+  exact hfaces
+
 /-- Cotree parent edges selected from a face-tree leaf order are distinct. -/
 theorem faceEdgeOfLeafOrder_injective
     (M : CombinatorialMap D)
@@ -597,6 +629,36 @@ theorem faceEdgeOfLeafOrderReverse_spec
               (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := by
   simpa [faceEdgeOfLeafOrderReverse] using
     M.faceEdgeOfLeafOrder_spec T hTsub parent hparent (Fin.rev i)
+
+/-- Oriented endpoint form of `faceEdgeOfLeafOrderReverse_spec`.
+
+The reverse cotree selector has the reversed dual leaf-order vertex and its
+earlier parent as the two original face endpoints, in one of the two dart
+orientations. -/
+theorem faceEdgeOfLeafOrderReverse_spec_cases
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent i = M.Edge_mk d ∧
+        ((M.Face_mk d =
+            dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega)) ∧
+          M.Face_mk (M.edgePerm d) =
+            dualVertexEquivFace M
+              (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) ∨
+        (M.Face_mk d =
+            dualVertexEquivFace M
+              (parent ((Fin.rev i).1 + 1) (by omega) (by omega)) ∧
+          M.Face_mk (M.edgePerm d) =
+            dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega)))) := by
+  simpa [faceEdgeOfLeafOrderReverse] using
+    M.faceEdgeOfLeafOrder_spec_cases T hTsub parent hparent (Fin.rev i)
 
 /-- Reversing a dual leaf-insertion order preserves injectivity of the selected
 cotree edges. -/
