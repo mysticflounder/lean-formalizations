@@ -4063,6 +4063,66 @@ theorem DrawnMultigraph.treeEdgeOfLeafOrder_spec
   exact G.vertexGraphEdge_spec hjoin hmult
     (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
 
+/-- A parent edge selected by a vertex-tree leaf-insertion order gives the
+corresponding residual-map leaf insertion witness once that edge is the new last
+edge of the ordered prefix.
+
+The remaining hypotheses are the genuine prefix-order incidence facts: the
+listed leaf vertex has no predecessor-prefix dart, while its chosen parent
+already has one. -/
+theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOfLeafOrder
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hedge :
+      Fin.castLE hm' (Fin.last m) =
+        G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i)
+    (hleaf : ∀ e : Fin m × Bool,
+      e ∉ incidentEnds (G.prefixEdges m hm) (l[i.1 + 1]'(by omega) : ℝ × ℝ))
+    (hold : ∃ e : Fin m × Bool,
+      e ∈ incidentEnds (G.prefixEdges m hm)
+        (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ))
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm')) :
+    ResidualMapPrefixStepInsertion (G := G) m hm hm' hARR hARR' := by
+  classical
+  let q : ℝ × ℝ := (l[i.1 + 1]'(by omega) : ℝ × ℝ)
+  let p : ℝ × ℝ := (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ)
+  have hspec := G.treeEdgeOfLeafOrder_spec hjoin hmult T hTsub parent hparent i
+  have hend :
+      (((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = p ∧
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = q) ∨
+      (((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 = q ∧
+        ((G.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 = p) := by
+    rcases hspec with hspec | hspec
+    · right
+      constructor
+      · simpa [DrawnMultigraph.prefixEdges, q, hedge] using hspec.1
+      · simpa [DrawnMultigraph.prefixEdges, p, hedge] using hspec.2
+    · left
+      constructor
+      · simpa [DrawnMultigraph.prefixEdges, p, hedge] using hspec.1
+      · simpa [DrawnMultigraph.prefixEdges, q, hedge] using hspec.2
+  have hqp : q ≠ p := by
+    intro hEq
+    have hAdj : T.Adj (l[i.1 + 1]'(by omega)) (parent (i.1 + 1) (by omega) (by omega)) :=
+      (hparent (i.1 + 1) (by omega) (by omega)).2
+    exact hAdj.ne (Subtype.ext (by simpa [q, p] using hEq))
+  exact exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints
+    (G := G) m hm hm' (p := p) (q := q) hend hqp
+    (by
+      intro e
+      simpa [q] using hleaf e)
+    (by simpa [p] using hold)
+    hjoin hARR hARR'
+
 /-- Parent edges selected from a leaf-insertion order are distinct. -/
 theorem DrawnMultigraph.treeEdgeOfLeafOrder_injective
     (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
