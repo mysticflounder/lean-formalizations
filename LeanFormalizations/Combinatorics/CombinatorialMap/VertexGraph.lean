@@ -34,6 +34,28 @@ cotree; see Erickson, *Tree-Cotree Decompositions*, Corollary "spanning tree
 
 set_option linter.style.longLine false
 
+namespace Fin
+
+/-- Consecutive reverse indices are consecutive in the opposite direction. -/
+theorem val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one
+    {n : ℕ} {i j : Fin n}
+    (h : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1) :
+    j.1 = i.1 + 1 := by
+  simp [Fin.rev] at h ⊢
+  omega
+
+/-- Block-offset form of
+`Fin.val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one`. -/
+theorem add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one
+    {n a : ℕ} {i j : Fin n}
+    (h : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1) :
+    a + j.1 = a + i.1 + 1 := by
+  have hj : j.1 = i.1 + 1 :=
+    val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one h
+  omega
+
+end Fin
+
 namespace CombinatorialMap
 
 open scoped BigOperators
@@ -721,6 +743,84 @@ theorem faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj
       exact hadj a.2 b.2 habT)
     ⟨u, hu⟩ ⟨v, hv⟩
 
+/-- A label is constant on the next unpeeled reverse-cotree prefix when the only
+possible edge-local obstruction is the just-peeled leaf-parent edge.
+
+This is the map-facing form of the reverse leaf-peeling invariant for the
+spanning cotree side of a tree-cotree decomposition: at reverse step `i`, the
+next unpeeled prefix is `take ((Fin.rev i).1 + 1)`, and every edge internal to
+that prefix is distinct from the leaf-parent edge selected at step `i`.  Thus
+connectedness of the next prefix propagates any label that is constant across
+all non-peeled internal edges.  The dual-graph language follows the
+spanning-tree/spanning-cotree convention in Erickson, §10.5. -/
+theorem faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : M.dual.Vertex → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label u = label v)
+    {u v : M.dual.Vertex}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset) :
+    label u = label v := by
+  exact SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent
+    (G := T) (l := l) hl_nodup parent hparent i label
+    (by
+      intro u v hu hv huv hne
+      exact hadj hu hv huv hne)
+    hu hv
+
+/-- Face-label version of
+`faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent`.
+
+The label is read on original faces via the canonical dual-vertex/face
+equivalence, matching the dart-permutation model of maps in Lando--Zvonkin,
+§1.3.3. -/
+theorem faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : M.Face → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v))
+    {u v : M.dual.Vertex}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset) :
+    label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v) := by
+  exact
+    M.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent
+      T hl_nodup parent hparent i
+      (fun u => label (dualVertexEquivFace M u))
+      (by
+        intro u v hu hv huv hne
+        exact hadj hu hv huv hne)
+      hu hv
+
 /-- Label equality for the two endpoint faces of a reverse cotree leaf edge,
 assuming the label is constant across every edge of the unpeeled dual prefix. -/
 theorem faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj
@@ -833,6 +933,97 @@ theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
       _ = label (dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega))) := hlabel.symm
       _ = label (M.Face_mk (M.edgePerm d)) := by rw [hedgePerm]
 
+/-- Label equality for the next reverse-cotree edge after a leaf-peeling step.
+
+Suppose step `i` has just peeled the leaf-parent edge, and `j` is an index whose
+unpeeled prefix is the next prefix, i.e.
+`(Fin.rev j).1 + 2 = (Fin.rev i).1 + 1`.  If the only edge-local obstruction to
+the label invariant on that next prefix is the peeled leaf-parent edge, then the
+concrete reverse cotree edge selected at `j` has equal labels on its two
+incident original faces.  This is the constructor-facing cotree-edge form of
+the spanning cotree leaf-peeling step in Erickson, §10.5. -/
+theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    {β : Type*} (label : M.Face → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent j = M.Edge_mk d ∧
+        label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  exact
+    M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
+      T hTsub parent hparent j label
+      (by
+        have htake :
+            (l.take ((Fin.rev j).1 + 2)).toFinset =
+              (l.take ((Fin.rev i).1 + 1)).toFinset := by
+          rw [hprefix]
+        intro u v hu hv huv
+        exact
+          M.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent
+            T hl_nodup parent hparent i label hadj
+            (by exact htake ▸ hu) (by exact htake ▸ hv))
+
+/-- Representative-invariant label equality for the next reverse-cotree edge.
+
+Suppose step `i` has just peeled the current reverse leaf-parent edge and `j`
+selects the next unpeeled prefix.  If a face label is constant on every
+non-peeled edge inside that prefix, then every dart representative of the
+selected reverse-cotree edge has equal labels on its two incident original
+faces.
+
+This is the dart-representative form of the same Lando--Zvonkin
+permutational-map fact as
+`faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent`:
+an edge class is the two-dart `α`-orbit, so a label equality proved for one
+representative transfers to any representative of that edge class. -/
+theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    {β : Type*} (label : M.Face → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v))
+    (d : D)
+    (hd :
+      M.Edge_mk d =
+        M.faceEdgeOfLeafOrderReverse T hTsub parent hparent j) :
+    label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  obtain ⟨d₀, hedge, hlabel₀⟩ :=
+    M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent
+      T hTsub hl_nodup parent hparent i j hprefix label hadj
+  have hE : M.Edge_mk d = M.Edge_mk d₀ := by
+    exact hd.trans hedge
+  exact M.edge_face_label_eq_of_edge_mk_eq label hE hlabel₀
+
 /-- Split-face label equality for the reverse cotree edge selected at a
 leaf-peeling step.
 
@@ -873,6 +1064,63 @@ theorem faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_
   obtain ⟨d, hedge, hlabel_edge⟩ :=
     M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
       T hTsub parent hparent i label hadj
+  refine ⟨d, hedge, ?_⟩
+  calc
+    EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d))
+        = label (M.Face_mk d) := (hlabel d).symm
+    _ = label (M.Face_mk (M.edgePerm d)) := hlabel_edge
+    _ = EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl (M.edgePerm d))) :=
+          hlabel (M.edgePerm d)
+
+/-- Split-pool equality for the next reverse-cotree edge after a leaf-peeling
+same-face insertion.
+
+This is the split-face quotient form of
+`faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent`:
+the selected next reverse cotree edge has equal `insertedFaceSplitPoolEquiv`
+labels on its two old incident faces once the split label is locally constant
+on every edge internal to the next unpeeled prefix except the just-peeled
+leaf-parent edge.  The terminology is the spanning cotree side of the
+tree-cotree decomposition in Erickson, §10.5, expressed in the
+dart-permutation model of Lando--Zvonkin, §1.3.3. -/
+theorem faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] [DecidableEq M.dual.Vertex]
+    (c₁ c₂ : D) (hc : c₁ ≠ c₂)
+    (hsame : M.facePerm.SameCycle c₁ c₂)
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (label : M.Face → ({f : M.Face // f ≠ M.Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : D,
+      label (M.Face_mk d) =
+        EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+          ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d)))
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent j = M.Edge_mk d ∧
+        EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d)) =
+          EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+            ((EdgeInsertion.insertedEdgeMap M c₁ c₂).Face_mk
+              (Sum.inl (M.edgePerm d))) := by
+  obtain ⟨d, hedge, hlabel_edge⟩ :=
+    M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent
+      T hTsub hl_nodup parent hparent i j hprefix label hadj
   refine ⟨d, hedge, ?_⟩
   calc
     EdgeInsertion.insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame

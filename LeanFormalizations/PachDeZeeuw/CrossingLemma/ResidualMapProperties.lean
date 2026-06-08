@@ -1023,6 +1023,277 @@ theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_o
         ((residualMap (G.prefixEdges m hm) hARR).edgePerm d)
         hc hsame hvertex).mpr hsplit
 
+/-- Reverse cotree split-pool label transport for the next unpeeled prefix.
+
+This is the residual-map form of the reverse leaf-peeling invariant: after the
+current reverse cotree leaf-parent edge is peeled, it is enough to verify the
+split-pool label invariant on every edge internal to the next unpeeled dual
+prefix except that peeled edge.  Connectedness of the next prefix then gives
+split-pool equality for the next selected reverse cotree edge. -/
+theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent
+    (m : ℕ) (hm : m ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (T : SimpleGraph (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    [DecidableEq (residualMap (G.prefixEdges m hm) hARR).dual.Vertex]
+    (hTsub : T ≤ (residualMap (G.prefixEdges m hm) hARR).faceGraph)
+    {l : List (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (label : (residualMap (G.prefixEdges m hm) hARR).Face →
+      ({f : (residualMap (G.prefixEdges m hm) hARR).Face //
+        f ≠ (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : Fin m × Bool,
+      label ((residualMap (G.prefixEdges m hm) hARR).Face_mk d) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)))
+    (hadj : ∀ ⦃u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+        label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v)) :
+    ∃ d : Fin m × Bool,
+      (residualMap (G.prefixEdges m hm) hARR).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j =
+        (residualMap (G.prefixEdges m hm) hARR).Edge_mk d ∧
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).edgePerm d))) := by
+  exact
+    CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj_ne_current_parent
+      (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+      T hTsub hl_nodup parent hparent i j hprefix label hlabel hadj
+
+/-- Representative-invariant reverse cotree split-pool label transport.
+
+The selector `faceEdgeOfLeafOrderReverse` names an unoriented edge class.  This
+version of
+`residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent`
+works for any dart representative of that edge class, reversing the two
+incident faces if necessary.  This is the shape consumed by constructor-facing
+same-face insertion witnesses, whose endpoint adapter may choose either
+orientation of the selected residual edge. -/
+theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+    (m : ℕ) (hm : m ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (T : SimpleGraph (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    [DecidableEq (residualMap (G.prefixEdges m hm) hARR).dual.Vertex]
+    (hTsub : T ≤ (residualMap (G.prefixEdges m hm) hARR).faceGraph)
+    {l : List (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (label : (residualMap (G.prefixEdges m hm) hARR).Face →
+      ({f : (residualMap (G.prefixEdges m hm) hARR).Face //
+        f ≠ (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : Fin m × Bool,
+      label ((residualMap (G.prefixEdges m hm) hARR).Face_mk d) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)))
+    (hadj : ∀ ⦃u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+        label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v))
+    (d : Fin m × Bool)
+    (hd :
+      (residualMap (G.prefixEdges m hm) hARR).Edge_mk d =
+        (residualMap (G.prefixEdges m hm) hARR).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j) :
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).edgePerm d))) := by
+  let M := residualMap (G.prefixEdges m hm) hARR
+  obtain ⟨d₀, hedge, hsplit₀⟩ :=
+    residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent
+      (G := G) m hm hARR c₁ c₂ hc hsame
+      T hTsub hl_nodup parent hparent i j hprefix label hlabel hadj
+  have hE : M.Edge_mk d = M.Edge_mk d₀ := by
+    exact hd.trans hedge
+  have hlabel₀ : label (M.Face_mk d₀) = label (M.Face_mk (M.edgePerm d₀)) := by
+    calc
+      label (M.Face_mk d₀)
+          = insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+              ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d₀)) := hlabel d₀
+      _ = insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+              ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl (M.edgePerm d₀))) := hsplit₀
+      _ = label (M.Face_mk (M.edgePerm d₀)) := (hlabel (M.edgePerm d₀)).symm
+  have hlabel_d : label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) :=
+    M.edge_face_label_eq_of_edge_mk_eq label hE hlabel₀
+  calc
+    insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl d))
+        = label (M.Face_mk d) := (hlabel d).symm
+    _ = label (M.Face_mk (M.edgePerm d)) := hlabel_d
+    _ = insertedFaceSplitPoolEquiv M c₁ c₂ hc hsame
+        ((insertedEdgeMap M c₁ c₂).Face_mk (Sum.inl (M.edgePerm d))) :=
+          hlabel (M.edgePerm d)
+
+/-- Reverse cotree successor face equality for the next unpeeled prefix.
+
+This composes the non-peeled-edge split-pool transport with the residual
+same-face quotient criterion, producing successor `Face_mk` equality for the
+next selected reverse cotree edge after one same-face insertion. -/
+theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj_ne_current_parent
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (T : SimpleGraph (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    [DecidableEq (residualMap (G.prefixEdges m hm) hARR).dual.Vertex]
+    (hTsub : T ≤ (residualMap (G.prefixEdges m hm) hARR).faceGraph)
+    {l : List (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (label : (residualMap (G.prefixEdges m hm) hARR).Face →
+      ({f : (residualMap (G.prefixEdges m hm) hARR).Face //
+        f ≠ (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : Fin m × Bool,
+      label ((residualMap (G.prefixEdges m hm) hARR).Face_mk d) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)))
+    (hadj : ∀ ⦃u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+        label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v)) :
+    ∃ d : Fin m × Bool,
+      (residualMap (G.prefixEdges m hm) hARR).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j =
+        (residualMap (G.prefixEdges m hm) hARR).Edge_mk d ∧
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+          (prefixStepDartEquiv m (Sum.inl d)) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+          (prefixStepDartEquiv m
+            (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).edgePerm d))) := by
+  classical
+  obtain ⟨d, hedge, hsplit⟩ :=
+    residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent
+      (G := G) m hm hARR c₁ c₂ hc hsame
+      T hTsub hl_nodup parent hparent i j hprefix label hlabel hadj
+  refine ⟨d, hedge, ?_⟩
+  exact
+    (residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq
+      (G := G) m hm hm' hARR hARR' c₁ c₂ d
+        ((residualMap (G.prefixEdges m hm) hARR).edgePerm d)
+        hc hsame hvertex).mpr hsplit
+
+/-- Representative-invariant reverse cotree successor face equality.
+
+This converts the non-peeled-edge split-pool invariant into successor
+`Face_mk` equality for any dart representative of the selected reverse cotree
+edge, rather than only the representative produced by the cotree selector proof.
+It is the face-equality form needed before matching the selected edge to the
+actual endpoint splice corners of the ordered drawing prefix. -/
+theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (T : SimpleGraph (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    [DecidableEq (residualMap (G.prefixEdges m hm) hARR).dual.Vertex]
+    (hTsub : T ≤ (residualMap (G.prefixEdges m hm) hARR).faceGraph)
+    {l : List (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (label : (residualMap (G.prefixEdges m hm) hARR).Face →
+      ({f : (residualMap (G.prefixEdges m hm) hARR).Face //
+        f ≠ (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁} ⊕ Fin 2))
+    (hlabel : ∀ d : Fin m × Bool,
+      label ((residualMap (G.prefixEdges m hm) hARR).Face_mk d) =
+        insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            (Sum.inl d)))
+    (hadj : ∀ ⦃u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+        label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v))
+    (d : Fin m × Bool)
+    (hd :
+      (residualMap (G.prefixEdges m hm) hARR).Edge_mk d =
+        (residualMap (G.prefixEdges m hm) hARR).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j) :
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+          (prefixStepDartEquiv m (Sum.inl d)) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+          (prefixStepDartEquiv m
+            (Sum.inl ((residualMap (G.prefixEdges m hm) hARR).edgePerm d))) := by
+  have hsplit :=
+    residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+      (G := G) m hm hARR c₁ c₂ hc hsame
+      T hTsub hl_nodup parent hparent i j hprefix label hlabel hadj d hd
+  exact
+    (residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq
+      (G := G) m hm hm' hARR hARR' c₁ c₂ d
+        ((residualMap (G.prefixEdges m hm) hARR).edgePerm d)
+        hc hsame hvertex).mpr hsplit
+
 /-- Same-face prefix insertion separates the two old cut corners into the two
 successor residual faces. -/
 theorem residualMap_prefixStep_sameFace_old_corners_not_sameCycle
@@ -1103,6 +1374,95 @@ theorem residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false
       (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
   rw [prefixStepDartEquiv_apply_inr_zero] at hcycle
   exact hcycle
+
+/-- Face-class form of
+`residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true`. -/
+theorem residualMap_prefixStep_sameFace_old_left_corner_face_eq_last_true
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl c₁)) =
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, true) := by
+  exact Quotient.sound
+    (residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex)
+
+/-- Face-class form of
+`residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`. -/
+theorem residualMap_prefixStep_sameFace_old_right_corner_face_eq_last_false
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl c₂)) =
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, false) := by
+  exact Quotient.sound
+    (residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex)
+
+/-- Same-face prefix insertion separates the two old cut-corner face classes in
+the successor residual map. -/
+theorem residualMap_prefixStep_sameFace_old_corners_face_ne
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl c₁)) ≠
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk
+        (prefixStepDartEquiv m (Sum.inl c₂)) := by
+  intro hface
+  exact residualMap_prefixStep_sameFace_old_corners_not_sameCycle
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex
+    (Quotient.eq''.mp hface)
+
+/-- Same-face prefix insertion creates two distinct successor faces on the two
+sides of the new last edge. -/
+theorem residualMap_prefixStep_sameFace_new_edge_faces_ne
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool)
+    (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, false) ≠
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk (Fin.last m, true) := by
+  intro hlast
+  have hleft :=
+    residualMap_prefixStep_sameFace_old_left_corner_face_eq_last_true
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex
+  have hright :=
+    residualMap_prefixStep_sameFace_old_right_corner_face_eq_last_false
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex
+  exact
+    residualMap_prefixStep_sameFace_old_corners_face_ne
+      (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex
+      (hleft.trans (hlast.symm.trans hright.symm))
 
 /-- Same-face prefix insertion makes the new residual edge a dual adjacency
 between the two split successor faces.
@@ -4352,6 +4712,57 @@ theorem DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_bl
   rw [hcast]
   exact hπcotree j
 
+/-- Consecutive reverse-cotree block positions.
+
+If `j` is the next reverse leaf-peeling index after `i`, then the edge at
+prefix position `a + i + 1` is the reverse-cotree edge selected by `j`.  This is
+the ordered-prefix form of the spanning cotree reverse leaf-peeling convention
+from Erickson's tree-cotree decomposition, expressed for Lando-Zvonkin dart
+maps. -/
+theorem DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block
+    (G : DrawnMultigraph) (hARRG : ArcsRotationRegular G)
+    {a : ℕ} (π : Equiv.Perm (Fin G.numEdges))
+    (T : SimpleGraph (residualMap G hARRG).dual.Vertex)
+    [DecidableEq (residualMap G hARRG).dual.Vertex]
+    (hTsub : T ≤ (residualMap G hARRG).faceGraph)
+    {l : List (residualMap G hARRG).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap G hARRG).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ G.numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv G hARRG
+          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
+            T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm' : (a + i.1 + 1) + 1 ≤ (G.permuteEdges π).numEdges) :
+    π (Fin.castLE hm' (Fin.last (a + i.1 + 1))) =
+      residualMapEdgeEquiv G hARRG
+        ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j) := by
+  have hnext : a + j.1 = a + i.1 + 1 :=
+    Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one hprefix
+  have hmj' : a + j.1 + 1 ≤ (G.permuteEdges π).numEdges := by
+    omega
+  have hlast :=
+    G.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block
+      hARRG π T hTsub parent hparent hblock hπcotree j hmj'
+  have hfin :
+      Fin.castLE hm' (Fin.last (a + i.1 + 1)) =
+        Fin.castLE hmj' (Fin.last (a + j.1)) := by
+    ext
+    simp [hnext]
+  calc
+    π (Fin.castLE hm' (Fin.last (a + i.1 + 1)))
+        = π (Fin.castLE hmj' (Fin.last (a + j.1))) := congrArg π hfin
+    _ = residualMapEdgeEquiv G hARRG
+        ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
+          T hTsub parent hparent j) := hlast
+
 /-- If the next position of a permuted prefix is the residual-map edge class
 represented by `d`, then the two endpoints of that new drawing edge are exactly
 the two anchors of `d` and its opposite dart, up to the orientation of `d`.
@@ -4798,6 +5209,405 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residu
     G.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq
       π hjoin hARRG m hm hm' hm'' hARR hARR' hARR'' s₁ s₂ hs hsame hvertex
       d hπ hold₁ hold₂ hsplit
+
+/-- Consecutive reverse-cotree block step after one same-face insertion.
+
+This is the current split-pool witness constructor in cotree-block coordinates:
+step `i` is the just-performed same-face insertion, `j` is the next reverse
+leaf-peeling edge, and the theorem constructs the actual
+`ResidualMapPrefixStepInsertion.sameFace` witness for the prefix step at
+position `a + i + 1`.  The terminology follows Erickson's spanning
+tree/cotree complement theorem; the witness itself is the Lando-Zvonkin
+same-face dart insertion (`σ`, `α`, `φ`) specialized to ordered drawing
+prefixes. -/
+theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
+    (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges))
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARRG : ArcsRotationRegular G)
+    {a : ℕ}
+    (T : SimpleGraph (residualMap G hARRG).dual.Vertex)
+    [DecidableEq (residualMap G hARRG).dual.Vertex]
+    (hTsub : T ≤ (residualMap G hARRG).faceGraph)
+    {l : List (residualMap G hARRG).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap G hARRG).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ G.numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv G hARRG
+          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
+            T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm : a + i.1 ≤ (G.permuteEdges π).numEdges)
+    (hm' : a + i.1 + 1 ≤ (G.permuteEdges π).numEdges)
+    (hm'' : (a + i.1 + 1) + 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (a + i.1) hm))
+    (hARR' : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm'))
+    (hARR'' :
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm''))
+    (s₁ s₂ : Fin (a + i.1) × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame : (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).facePerm.SameCycle
+      s₁ s₂)
+    (hvertex :
+      (prefixStepDartEquiv (a + i.1)).permCongr
+        (insertedEdgeMap (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+          s₁ s₂).vertexPerm =
+          (residualMap ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') hARR').vertexPerm)
+    (hcoverage : ∀ p : ↥G.V, ∃ e : Fin (a + i.1 + 1) × Bool,
+      e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') (p : ℝ × ℝ))
+    (hsplit : ∀ d : Fin G.numEdges × Bool,
+      (residualMap G hARRG).Edge_mk d =
+        (residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j →
+      ∀ {p₁ p₂ : ℝ × ℝ}
+        (hpnew₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 = p₁)
+        (hpnew₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 = p₂)
+        (hpother₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+        (hpother₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+        ((p₁ = dartAnchor G d ∧
+            p₂ = dartAnchor G ((residualMap G hARRG).edgePerm d)) ∨
+          (p₁ = dartAnchor G ((residualMap G hARRG).edgePerm d) ∧
+            p₂ = dartAnchor G d)) →
+        (hp₁ : p₁ ∈ (G.permuteEdges π).V) →
+        (hp₂ : p₂ ∈ (G.permuteEdges π).V) →
+        ∀ (c₁ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁))
+          (c₂ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂)),
+          c₁.1 ≠ c₂.1 →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₁
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₁ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₁
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₁) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' false hpnew₁ →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₂
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₂ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₂
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₂) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' true hpnew₂ →
+          insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+            insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1))) :
+    ResidualMapPrefixStepInsertion (G := G.permuteEdges π)
+      (a + i.1 + 1) hm' hm'' hARR' hARR'' := by
+  classical
+  obtain ⟨d, hd⟩ := Quotient.exists_rep
+    ((residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j)
+  have hπnext :
+      π (Fin.castLE hm'' (Fin.last (a + i.1 + 1))) =
+        residualMapEdgeEquiv G hARRG
+          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j) :=
+    G.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block
+      hARRG π T hTsub parent hparent hblock hπcotree i j hprefix hm''
+  have hπd :
+      π (Fin.castLE hm'' (Fin.last (a + i.1 + 1))) =
+        residualMapEdgeEquiv G hARRG ((residualMap G hARRG).Edge_mk d) := by
+    simpa [← hd] using hπnext
+  exact
+    G.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq
+      π hjoin hARRG (a + i.1) hm hm' hm'' hARR hARR' hARR''
+      s₁ s₂ hs hsame hvertex d hπd hcoverage (hsplit d hd)
+
+/-- Consecutive reverse-cotree block step from side labels.
+
+This is the next faithful layer of the tree-cotree proof.  The previous
+constructor-facing theorem asks directly for equality of the split-pool labels
+of the two actual splice predecessor corners.  Here that equality is assembled
+from the two pieces used in the literature:
+
+* a dual-prefix label invariant, transported across the selected reverse-cotree
+  edge to give equal labels on its two full-map dart sides, and
+* a sector-to-face comparison identifying each actual angular predecessor
+  corner with the side label of the corresponding full-map dart.
+
+Thus the theorem still constructs the actual
+`ResidualMapPrefixStepInsertion.sameFace` witness; the remaining geometric
+content is isolated in the two sector comparison hypotheses.  The terminology
+follows Lando--Zvonkin, §1.3.3, where faces are cycles of the dart face
+permutation, and the reverse cotree leaf-peeling convention in Erickson's
+tree-cotree decomposition. -/
+theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels
+    (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges))
+    (hjoin : G.ArcsJoinEndpoints)
+    (hARRG : ArcsRotationRegular G)
+    {a : ℕ}
+    (T : SimpleGraph (residualMap G hARRG).dual.Vertex)
+    [DecidableEq (residualMap G hARRG).dual.Vertex]
+    (hTsub : T ≤ (residualMap G hARRG).faceGraph)
+    {l : List (residualMap G hARRG).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap G hARRG).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ G.numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv G hARRG
+          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
+            T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm : a + i.1 ≤ (G.permuteEdges π).numEdges)
+    (hm' : a + i.1 + 1 ≤ (G.permuteEdges π).numEdges)
+    (hm'' : (a + i.1 + 1) + 1 ≤ (G.permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (a + i.1) hm))
+    (hARR' : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm'))
+    (hARR'' :
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm''))
+    (s₁ s₂ : Fin (a + i.1) × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame : (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).facePerm.SameCycle
+      s₁ s₂)
+    (hvertex :
+      (prefixStepDartEquiv (a + i.1)).permCongr
+        (insertedEdgeMap (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+          s₁ s₂).vertexPerm =
+          (residualMap ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') hARR').vertexPerm)
+    (hcoverage : ∀ p : ↥G.V, ∃ e : Fin (a + i.1 + 1) × Bool,
+      e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') (p : ℝ × ℝ))
+    (sideLabel : Fin G.numEdges × Bool →
+      ({f : (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).Face //
+        f ≠ (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).Face_mk s₁} ⊕
+          Fin 2))
+    (label : (residualMap G hARRG).Face →
+      ({f : (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).Face //
+        f ≠ (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR).Face_mk s₁} ⊕
+          Fin 2))
+    (hsideLabel : ∀ d : Fin G.numEdges × Bool,
+      sideLabel d = label ((residualMap G hARRG).Face_mk d))
+    (hl_nodup : l.Nodup)
+    (hadj : ∀ ⦃u v : (residualMap G hARRG).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap G hARRG) u) =
+        label (dualVertexEquivFace (residualMap G hARRG) v))
+    (hsector_direct : ∀ d : Fin G.numEdges × Bool,
+      (residualMap G hARRG).Edge_mk d =
+        (residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j →
+      ∀ {p₁ p₂ : ℝ × ℝ}
+        (hpnew₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 = p₁)
+        (hpnew₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 = p₂)
+        (hpother₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+        (hpother₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+        p₁ = dartAnchor G d ∧
+          p₂ = dartAnchor G ((residualMap G hARRG).edgePerm d) →
+        (hp₁ : p₁ ∈ (G.permuteEdges π).V) →
+        (hp₂ : p₂ ∈ (G.permuteEdges π).V) →
+        ∀ (c₁ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁))
+          (c₂ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂)),
+          c₁.1 ≠ c₂.1 →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₁
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₁ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₁
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₁) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' false hpnew₁ →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₂
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₂ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₂
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₂) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' true hpnew₂ →
+          insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+              sideLabel d ∧
+            insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) =
+              sideLabel ((residualMap G hARRG).edgePerm d))
+    (hsector_swapped : ∀ d : Fin G.numEdges × Bool,
+      (residualMap G hARRG).Edge_mk d =
+        (residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j →
+      ∀ {p₁ p₂ : ℝ × ℝ}
+        (hpnew₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 = p₁)
+        (hpnew₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 = p₂)
+        (hpother₁ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+        (hpother₂ :
+          (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
+              (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+        p₁ = dartAnchor G ((residualMap G hARRG).edgePerm d) ∧
+          p₂ = dartAnchor G d →
+        (hp₁ : p₁ ∈ (G.permuteEdges π).V) →
+        (hp₂ : p₂ ∈ (G.permuteEdges π).V) →
+        ∀ (c₁ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁))
+          (c₂ : ↥(incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂)),
+          c₁.1 ≠ c₂.1 →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₁
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₁)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₁ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₁
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₁) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' false hpnew₁ →
+          vertexRotationAtRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') p₂
+              (arrAngle ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (arrRadius ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'') hARR'' hp₂)
+              (endAngleKey_injective ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                p₂ _ _
+                (arrAngle_injOn ((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                  hARR'' hp₂
+                  (arrRadius_pos
+                    (G := (G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'')
+                    hARR'' hp₂) le_rfl))
+              ((incident_ends_prefix_step_endpoint_old_equiv
+                (G := G.permuteEdges π) (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+            incident_ends_prefix_step_endpoint_new_dart
+              (G := G.permuteEdges π) (a + i.1 + 1) hm'' true hpnew₂ →
+          insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+              sideLabel ((residualMap G hARRG).edgePerm d) ∧
+            insertedFaceSplitPoolEquiv
+              (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR) s₁ s₂ hs hsame
+              ((insertedEdgeMap
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) =
+              sideLabel d) :
+    ResidualMapPrefixStepInsertion (G := G.permuteEdges π)
+      (a + i.1 + 1) hm' hm'' hARR' hARR'' := by
+  have hcotree : ∀ d : Fin G.numEdges × Bool,
+      (residualMap G hARRG).Edge_mk d =
+        (residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j →
+      sideLabel d = sideLabel ((residualMap G hARRG).edgePerm d) := by
+    intro d hd
+    calc
+      sideLabel d = label ((residualMap G hARRG).Face_mk d) := hsideLabel d
+      _ = label ((residualMap G hARRG).Face_mk ((residualMap G hARRG).edgePerm d)) := by
+        exact
+          (residualMap G hARRG).faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+            T hTsub hl_nodup parent hparent i j hprefix label hadj d hd
+      _ = sideLabel ((residualMap G hARRG).edgePerm d) :=
+          (hsideLabel ((residualMap G hARRG).edgePerm d)).symm
+  exact
+    G.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
+      π hjoin hARRG T hTsub parent hparent hblock hπcotree i j hprefix
+      hm hm' hm'' hARR hARR' hARR'' s₁ s₂ hs hsame hvertex hcoverage
+      (by
+        intro d hd p₁ p₂ hpnew₁ hpnew₂ hpother₁ hpother₂ hcase hp₁ hp₂
+          c₁ c₂ hc hpred₁ hpred₂
+        rcases hcase with hdirect | hswapped
+        · obtain ⟨hside₁, hside₂⟩ :=
+            hsector_direct d hd hpnew₁ hpnew₂ hpother₁ hpother₂ hdirect
+              hp₁ hp₂ c₁ c₂ hc hpred₁ hpred₂
+          calc
+            insertedFaceSplitPoolEquiv
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂ hs hsame
+                ((insertedEdgeMap
+                  (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                  s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1))
+                = sideLabel d := hside₁
+            _ = sideLabel ((residualMap G hARRG).edgePerm d) := hcotree d hd
+            _ = insertedFaceSplitPoolEquiv
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂ hs hsame
+                ((insertedEdgeMap
+                  (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                  s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) :=
+                  hside₂.symm
+        · obtain ⟨hside₁, hside₂⟩ :=
+            hsector_swapped d hd hpnew₁ hpnew₂ hpother₁ hpother₂ hswapped
+              hp₁ hp₂ c₁ c₂ hc hpred₁ hpred₂
+          calc
+            insertedFaceSplitPoolEquiv
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂ hs hsame
+                ((insertedEdgeMap
+                  (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                  s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1))
+                = sideLabel ((residualMap G hARRG).edgePerm d) := hside₁
+            _ = sideLabel d := (hcotree d hd).symm
+            _ = insertedFaceSplitPoolEquiv
+                (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                s₁ s₂ hs hsame
+                ((insertedEdgeMap
+                  (residualMap ((G.permuteEdges π).prefixEdges (a + i.1) hm) hARR)
+                  s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) :=
+                  hside₂.symm)
 
 /-- A reverse cotree block position gives the actual same-face prefix-step
 insertion witness.

@@ -248,8 +248,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder`,
-  the cotree-side finite edge selector
-  `CombinatorialMap.faceEdgeOfLeafOrder`
+  the cotree-side finite edge selector and dart-representative adapter
+  `CombinatorialMap.edge_face_label_eq_of_edge_mk_eq`
+  / `CombinatorialMap.faceEdgeOfLeafOrder`
   / `CombinatorialMap.faceEdgeOfLeafOrder_spec`
   / `CombinatorialMap.faceEdgeOfLeafOrder_spec_cases`
   / `CombinatorialMap.faceEdgeOfLeafOrder_injective`
@@ -258,18 +259,27 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
   / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj`
+  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj_ne_current_parent`
   / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
   the reverse leaf-peeling edge exclusion
   `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`
   / `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`
   / `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`,
+  the reverse-index arithmetic
+  `Fin.val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one`
+  / `Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one`,
   the residual-edge/order adapter
   `CrossingLemma.residualMapEdgeEquiv_edge_mk`
   / `CrossingLemma.DrawnMultigraph.exists_edgePositionPermutation_of_disjoint_tree_faceEdgeOfLeafOrderReverse`
   / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block`
+  / `CrossingLemma.DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block`
   / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv`
   / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoint_data_of_residualMapEdgeEquiv`
   / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv`,
@@ -289,7 +299,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB`
   / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA`
   / `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`,
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_face_eq_last_true`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_face_eq_last_false`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_face_ne`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faces_ne`,
   the transported inserted-face preservation facts
   `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle`
   / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle`
@@ -305,7 +319,11 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq`,
   and the reverse-cotree specialization
   `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`,
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj_ne_current_parent`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
+  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`,
   the split-face dual-adjacency facts
   `CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`
   / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm`,
@@ -313,6 +331,8 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq`,
   the reverse-cotree block witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq`
+  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels`
   / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block_of_treePrefix_incidence`,
   the first post-tree edge witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
@@ -322,8 +342,10 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
   and planar tree-prefix bridge
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix`;
-  the complementary dual-tree theorem and the all-later-cotree face-cycle
-  `SameCycle` proof remain the open topological layer. A separate
+  the complementary dual-tree theorem and the sector-to-face comparisons that
+  identify each actual later splice predecessor corner with the side label of
+  the corresponding full-residual-map cotree dart remain the open topological
+  layer. A separate
   `subsetAveraging_master` (`sorry`) is a documented dead-end, not used
   downstream.
 - **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`

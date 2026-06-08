@@ -61,6 +61,10 @@ Formalized bridge pieces now available:
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases` split the unordered
   cotree endpoint statement into the two dart orientations, matching the
   constructor-facing corner data for same-face residual insertions.
+- `CombinatorialMap.edge_face_label_eq_of_edge_mk_eq` records the
+  Lando-Zvonkin dart-permutation edge-class convention: equality of the two
+  incident face labels is independent of the chosen dart representative, up to
+  the fixed-point-free edge involution.
 - `CombinatorialMap.faceEdgeOfLeafOrderReverse`,
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec`, and
   `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse` read a dual
@@ -93,6 +97,18 @@ Formalized bridge pieces now available:
   specializes this label transport to the split-face quotient for inserting an
   edge through one face: the selected reverse cotree edge has equal
   `insertedFaceSplitPoolEquiv` labels on its two old incident faces.
+- `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent`,
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent`,
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent`,
+  and
+  `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj_ne_current_parent`
+  are the next-prefix variants used after a reverse cotree leaf-parent edge has
+  been peeled: a label invariant on every non-peeled internal dual-tree edge
+  propagates to the next selected reverse cotree edge.
+- `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
+  is the representative-invariant version of that next-prefix label transport:
+  any dart representative of the selected reverse cotree edge class has equal
+  labels on its two incident original faces.
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
@@ -109,6 +125,12 @@ Formalized bridge pieces now available:
 - `CrossingLemma.DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block`
   rewrites the `j`th cotree-block position into the exact "new last edge of the
   prefix" shape consumed by the residual-map same-face constructor.
+- `Fin.val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one`,
+  `Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one`, and
+  `CrossingLemma.DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block`
+  formalize the consecutive reverse-leaf-order arithmetic: if `j` is the next
+  reverse cotree leaf after `i`, the selected cotree edge is read at ordered
+  prefix position `a + i + 1`.
 - `CombinatorialMap.card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge`
   formalizes the von Staudt count
   `|E| = (|V|-1)+(|V(M.dual)|-1)` in the list-length form used by leaf orders.
@@ -140,6 +162,20 @@ Formalized bridge pieces now available:
   specializes that witness to a reverse cotree block position, so the conclusion
   is the actual `ResidualMapPrefixStepInsertion.sameFace` witness for the
   selected full-residual-map cotree edge.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq`
+  is the consecutive-block version after one same-face cotree insertion: it
+  internally chooses a dart representative for the next reverse cotree edge,
+  reads it at prefix position `a + i + 1`, discharges endpoint incidence by
+  current endpoint coverage, and returns the actual
+  `ResidualMapPrefixStepInsertion.sameFace` witness from current split-pool
+  equality for the actual splice corners.
+- `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels`
+  factors that current split-pool equality into the two literature ingredients:
+  a dual-prefix label invariant that derives cotree equality of side labels
+  across the selected reverse-cotree edge, and the sector-to-face comparison
+  identifying each actual splice predecessor corner with the side label of the
+  corresponding full-residual-map dart.  The conclusion is still the actual
+  `ResidualMapPrefixStepInsertion.sameFace` witness.
 - `CrossingLemma.exists_mem_incidentEnds_prefixEdges_of_le` and
   `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`
   transport the spanning-tree prefix's endpoint incidence into any later
@@ -198,6 +234,13 @@ Formalized bridge pieces now available:
   prefix darts.  This covers the case split needed when a later cotree splice
   corner is one of the two darts created by the immediately preceding
   same-face insertion.
+- `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_face_eq_last_true`,
+  `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_face_eq_last_false`,
+  `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_face_ne`, and
+  `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faces_ne` expose the
+  local Lando-Zvonkin face-split side information directly as quotient
+  `Face_mk` equalities and inequalities for the old cut corners and the two
+  sides of the new last edge.
 - `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`
   converts that current-prefix split-pool equality for the two actual splice
   corners of the next edge into the concrete
@@ -218,6 +261,19 @@ Formalized bridge pieces now available:
   same-face criterion: under a label invariant on the unpeeled dual prefix, the
   selected reverse cotree edge has equal successor face classes after the
   current same-face insertion.
+- `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent`
+  and
+  `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj_ne_current_parent`
+  are the residual-map next-prefix versions: the current peeled leaf-parent
+  edge is explicitly excluded from the local invariant, leaving the actual
+  remaining obligation as split-pool stability on all other dual-tree edges in
+  the next unpeeled prefix.
+- `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
+  and
+  `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
+  remove the last orientation choice from that bridge: any dart representative
+  of the selected reverse cotree edge class inherits the split-pool and
+  successor-face equalities.
 - `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_right`
   completes the old-corner side labels for a split face: the old cut corner
   `c₂` lands on side `1`, the same side as the new dart `dartA`, while the
@@ -248,7 +304,11 @@ Still missing:
   and dual connected/acyclic proof.
 - The residual-map face-stability proof that the cotree block, in reverse leaf
   order, supplies the splice-corner `Face_mk` equality required by the
-  same-face insertion witness at every later cotree step.
+  same-face insertion witness at every later cotree step.  The precise missing
+  bridge is now reduced to two sector-to-face comparisons: the predecessor
+  corner chosen by the vertex rotation at each endpoint immediately before a
+  future edge must be identified with the current split-face label of the
+  corresponding full-residual-map cotree dart side.
 
 Notes for formalization:
 

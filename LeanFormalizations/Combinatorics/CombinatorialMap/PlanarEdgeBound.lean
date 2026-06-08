@@ -155,6 +155,25 @@ lemma edge_mk_eq_iff (a d₀ : D) :
   rw [Edge_mk, Edge_mk, Quotient.eq]
   exact ⟨fun h => h.symm, fun h => h.symm⟩
 
+/-- Equality of a two-sided face label is independent of the chosen dart
+representative of an edge class.
+
+For a fixed-point-free involution, an edge class has exactly the two dart
+representatives `d₀` and `edgePerm d₀`. Thus a label equality between the two
+faces incident to `d₀` transports to any representative of the same edge class,
+possibly reversing the equality. -/
+theorem edge_face_label_eq_of_edge_mk_eq {β : Type*} (label : M.Face → β)
+    {d d₀ : D}
+    (hE : M.Edge_mk d = M.Edge_mk d₀)
+    (hlabel : label (M.Face_mk d₀) = label (M.Face_mk (M.edgePerm d₀))) :
+    label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  have hsc : M.edgePerm.SameCycle d₀ d := (M.edge_mk_eq_iff d d₀).mp hE
+  rcases (M.sameCycle_edgePerm_iff d₀ d).mp hsc with hd | hd
+  · rw [hd]
+    exact hlabel
+  · rw [hd, M.edgePerm_involutive d₀]
+    exact hlabel.symm
+
 /-- Each fiber of `Edge_mk` has exactly two elements. -/
 lemma card_edge_fiber [Fintype D] (e : M.Edge)
     [DecidablePred fun a : D => M.Edge_mk a = e] :
