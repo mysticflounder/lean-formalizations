@@ -49,6 +49,23 @@ open CombinatorialMap.EdgeInsertion
 
 variable (G : DrawnMultigraph)
 
+private theorem list_getElem_not_mem_take_of_nodup {α : Type*} [DecidableEq α]
+    {l : List α} (hl : l.Nodup) {i n : ℕ} (hi : i < l.length) (hn : n ≤ i) :
+    l[i] ∉ (l.take n).toFinset := by
+  intro hmem
+  rw [List.mem_toFinset] at hmem
+  obtain ⟨k, hk, hkEq⟩ := List.mem_iff_getElem.mp hmem
+  have hklt_n : k < n := by
+    exact Nat.lt_of_lt_of_le hk (by simp)
+  have hklt_l : k < l.length := by omega
+  have hEq : l[k] = l[i] := by
+    have htake : (l.take n)[k] = l[k] := by
+      simp
+    exact htake ▸ hkEq
+  have hki : k = i :=
+    (List.Nodup.getElem_inj_iff hl (i := k) (hi := hklt_l) (j := i) (hj := hi)).1 hEq
+  omega
+
 /-! ## Generic helpers: SameCycle under `permCongr` and `sigmaCongrRight`. -/
 
 /-- `SameCycle` for a conjugated permutation `e.permCongr σ` reduces to `SameCycle`
@@ -4062,6 +4079,118 @@ theorem DrawnMultigraph.treeEdgeOfLeafOrder_spec
         (l[i.1 + 1]'(by omega) : ℝ × ℝ)) := by
   exact G.vertexGraphEdge_spec hjoin hmult
     (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- A parent edge selected at an earlier leaf-order step is not incident to a
+later leaf-order vertex. -/
+theorem DrawnMultigraph.treeEdgeOfLeafOrder_not_mem_incidentEnds_later
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {j i : Fin (l.length - 1)} (hji : j.1 < i.1) (b : Bool) :
+    (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j, b) ∉
+      incidentEnds G (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+  classical
+  intro hmem
+  have hnot_later :
+      l[i.1 + 1]'(by omega) ∉ (l.take (j.1 + 1)).toFinset :=
+    list_getElem_not_mem_take_of_nodup hl_nodup
+      (i := i.1 + 1) (n := j.1 + 1) (hi := by omega) (hn := by omega)
+  have hparmem :
+      parent (j.1 + 1) (by omega) (by omega) ∈ (l.take (j.1 + 1)).toFinset :=
+    (hparent (j.1 + 1) (by omega) (by omega)).1
+  have hspec := G.treeEdgeOfLeafOrder_spec hjoin hmult T hTsub parent hparent j
+  rcases hspec with hspec | hspec
+  · cases b
+    · have hfirst :
+          (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)).1 =
+            (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+        simpa [incidentEnds] using hmem
+      have hsub :
+          l[j.1 + 1]'(by omega) = l[i.1 + 1]'(by omega) :=
+        Subtype.ext (hspec.1.symm.trans hfirst)
+      have hidx :
+          j.1 + 1 = i.1 + 1 :=
+        (List.Nodup.getElem_inj_iff hl_nodup
+          (i := j.1 + 1) (hi := by omega)
+          (j := i.1 + 1) (hj := by omega)).1 hsub
+      omega
+    · have hsecond :
+          (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)).2 =
+            (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+        simpa [incidentEnds] using hmem
+      have hsub :
+          parent (j.1 + 1) (by omega) (by omega) = l[i.1 + 1]'(by omega) :=
+        Subtype.ext (hspec.2.symm.trans hsecond)
+      exact hnot_later (by simpa [hsub] using hparmem)
+  · cases b
+    · have hfirst :
+          (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)).1 =
+            (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+        simpa [incidentEnds] using hmem
+      have hsub :
+          parent (j.1 + 1) (by omega) (by omega) = l[i.1 + 1]'(by omega) :=
+        Subtype.ext (hspec.1.symm.trans hfirst)
+      exact hnot_later (by simpa [hsub] using hparmem)
+    · have hsecond :
+          (G.endpoints (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent j)).2 =
+            (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+        simpa [incidentEnds] using hmem
+      have hsub :
+          l[j.1 + 1]'(by omega) = l[i.1 + 1]'(by omega) :=
+        Subtype.ext (hspec.2.symm.trans hsecond)
+      have hidx :
+          j.1 + 1 = i.1 + 1 :=
+        (List.Nodup.getElem_inj_iff hl_nodup
+          (i := j.1 + 1) (hi := by omega)
+          (j := i.1 + 1) (hj := by omega)).1 hsub
+      omega
+
+/-- The parent edge selected at leaf-order step `i` is incident to the listed new
+vertex `l[i+1]`. -/
+theorem DrawnMultigraph.treeEdgeOfLeafOrder_mem_incidentEnds_newVertex
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ b : Bool,
+      (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i, b) ∈
+        incidentEnds G (l[i.1 + 1]'(by omega) : ℝ × ℝ) := by
+  classical
+  have hspec := G.treeEdgeOfLeafOrder_spec hjoin hmult T hTsub parent hparent i
+  rcases hspec with hspec | hspec
+  · exact ⟨false, by simp [incidentEnds, hspec.1]⟩
+  · exact ⟨true, by simp [incidentEnds, hspec.2]⟩
+
+/-- The parent edge selected at leaf-order step `i` is incident to the chosen
+earlier parent. -/
+theorem DrawnMultigraph.treeEdgeOfLeafOrder_mem_incidentEnds_parent
+    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+    (hmult : ∀ p q, G.multiplicity p q ≤ 1)
+    (T : SimpleGraph ↥G.V) (hTsub : T ≤ G.vertexGraph hjoin)
+    {l : List ↥G.V}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → ↥G.V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ b : Bool,
+      (G.treeEdgeOfLeafOrder hjoin hmult T hTsub parent hparent i, b) ∈
+        incidentEnds G (parent (i.1 + 1) (by omega) (by omega) : ℝ × ℝ) := by
+  classical
+  have hspec := G.treeEdgeOfLeafOrder_spec hjoin hmult T hTsub parent hparent i
+  rcases hspec with hspec | hspec
+  · exact ⟨true, by simp [incidentEnds, hspec.2]⟩
+  · exact ⟨false, by simp [incidentEnds, hspec.1]⟩
 
 /-- A parent edge selected by a vertex-tree leaf-insertion order gives the
 corresponding residual-map leaf insertion witness once that edge is the new last
