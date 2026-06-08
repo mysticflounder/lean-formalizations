@@ -8089,6 +8089,93 @@ theorem sectorMinus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Pl
   exact ⟨sectorMinus_subset_taperedTube β R S δ₀ ρ i hi1 hvS hρδ hρR hz,
     sectorMinus_subset_compl_carrier β ρ hδsep hsep hρsep i hi1 hz⟩
 
+/-- A positive vertex sector that lies in the clipped collar ground is contained
+in the positive collar side.
+
+This is the local sector-to-collar direction used by the crosscut side
+classification: once the sliver budgets put the sector in
+`taperedTube R S δ₀ \ β.carrier`, its defining positive-sector membership places
+it in `collarPlus`. -/
+theorem sectorPlus_subset_collarPlus_of_subset_ground (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hground : sectorPlus β ρ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorPlus β ρ i hi1 ⊆ collarPlus β R S δ₀ α ρ := by
+  intro z hz
+  refine ⟨hground hz, ?_⟩
+  refine Or.inl (Or.inl (Or.inr ?_))
+  exact Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨hi1, hz⟩⟩
+
+/-- A negative vertex sector that lies in the clipped collar ground is contained
+in the negative collar side. -/
+theorem sectorMinus_subset_collarMinus_of_subset_ground (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hground : sectorMinus β ρ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorMinus β ρ i hi1 ⊆ collarMinus β R S δ₀ α ρ := by
+  intro z hz
+  refine ⟨hground hz, ?_⟩
+  refine Or.inl (Or.inl (Or.inr ?_))
+  exact Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨hi1, hz⟩⟩
+
+/-- If the positive collar is assigned to a side `U`, then any positive vertex
+sector already placed in the clipped collar ground is assigned to `U`. -/
+theorem sectorPlus_subset_of_collarPlus_subset (β : PolyArc) (R S U : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hPlusU : collarPlus β R S δ₀ α ρ ⊆ U)
+    (hground : sectorPlus β ρ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorPlus β ρ i hi1 ⊆ U :=
+  (sectorPlus_subset_collarPlus_of_subset_ground β R S δ₀ α ρ i hi1 hground).trans
+    hPlusU
+
+/-- If the negative collar is assigned to a side `V`, then any negative vertex
+sector already placed in the clipped collar ground is assigned to `V`. -/
+theorem sectorMinus_subset_of_collarMinus_subset (β : PolyArc) (R S V : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hMinusV : collarMinus β R S δ₀ α ρ ⊆ V)
+    (hground : sectorMinus β ρ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorMinus β ρ i hi1 ⊆ V :=
+  (sectorMinus_subset_collarMinus_of_subset_ground β R S δ₀ α ρ i hi1 hground).trans
+    hMinusV
+
+/-- Positive vertex sectors are contained in `collarPlus` under the standard
+sliver-budget hypotheses. -/
+theorem sectorPlus_subset_collarPlus_of_sliver_budgets (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
+    (hδsep : 0 < δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hvS : β.verts (Fin.succ i) ∈ S)
+    (hρδ : ρ (Fin.succ i) ≤ δ₀)
+    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
+    sectorPlus β ρ i hi1 ⊆ collarPlus β R S δ₀ α ρ :=
+  sectorPlus_subset_collarPlus_of_subset_ground β R S δ₀ α ρ i hi1
+    (sectorPlus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep hsep hρsep
+      i hi1 hvS hρδ hρR)
+
+/-- Negative vertex sectors are contained in `collarMinus` under the standard
+sliver-budget hypotheses. -/
+theorem sectorMinus_subset_collarMinus_of_sliver_budgets (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
+    (hδsep : 0 < δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δsep →
+      Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hvS : β.verts (Fin.succ i) ∈ S)
+    (hρδ : ρ (Fin.succ i) ≤ δ₀)
+    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
+    sectorMinus β ρ i hi1 ⊆ collarMinus β R S δ₀ α ρ :=
+  sectorMinus_subset_collarMinus_of_subset_ground β R S δ₀ α ρ i hi1
+    (sectorMinus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep hsep hρsep
+      i hi1 hvS hρδ hρR)
+
 /-- **Negative clipped-collar preconnectedness from sliver-budget end-cap inputs.**
 
 This packages the full `P5⁻` assembly for `collarMinus`. The band and sector pieces

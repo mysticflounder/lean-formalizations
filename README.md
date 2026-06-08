@@ -342,10 +342,18 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
   and planar tree-prefix bridge
   `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix`;
-  the complementary dual-tree theorem and the sector-to-face comparisons that
-  identify each actual later splice predecessor corner with the side label of
-  the corresponding full-residual-map cotree dart remain the open topological
-  layer. A separate
+  the PL collar side-classification layer
+  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_collar_with_collar_sides`
+  / `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`
+  / `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides`
+  / `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_of_collarPlus_subset`
+  / `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_of_collarMinus_subset`
+  / `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_collarPlus_of_sliver_budgets`
+  / `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_collarMinus_of_sliver_budgets`;
+  the complementary dual-tree theorem and the remaining residual-map
+  identification that each actual later splice predecessor corner lies on the
+  side label of the corresponding full-residual-map cotree dart remain open. A
+  separate
   `subsetAveraging_master` (`sorry`) is a documented dead-end, not used
   downstream.
 - **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`

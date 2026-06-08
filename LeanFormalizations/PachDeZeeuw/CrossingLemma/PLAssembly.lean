@@ -131,7 +131,7 @@ The two collar sides must each be preconnected (`hTp_pre`, `hTm_pre` — the
 geometric obligation **P5**). All other inputs are the collar's already-proved
 structural facts; the former `G4` reachability condition is derived internally
 from connectedness of `R` and the neighborhood cover `R ∩ C ⊆ T`. -/
-theorem exists_twoSidedPartition_of_collar
+theorem exists_twoSidedPartition_of_collar_with_collar_sides
     {R C T Tp Tm : Set Plane}
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hC : IsClosed C)
@@ -142,7 +142,7 @@ theorem exists_twoSidedPartition_of_collar
     (hTp_pre : IsPreconnected Tp) (hTm_pre : IsPreconnected Tm)
     (hTp_ne : Tp.Nonempty) (hTm_ne : Tm.Nonempty)
     (hcover : R ∩ C ⊆ T) :
-    ∃ U V, IsTwoSidedPartition (R \ C) U V := by
+    ∃ U V, IsTwoSidedPartition (R \ C) U V ∧ Tp ⊆ U ∧ Tm ⊆ V := by
   classical
   -- Abbreviation for the region-minus-cut.
   set W : Set Plane := R \ C with hWdef
@@ -207,8 +207,12 @@ theorem exists_twoSidedPartition_of_collar
     connectedComponentIn_meets_neighborhood_of_cut hR hRsc hC hT_open hTR hTC_ne hcover
   have hpW : p ∈ W := hTpW hpTp
   have hmW : m ∈ W := hTmW hmTm
+  have hTpU : Tp ⊆ connectedComponentIn W p :=
+    hTp_pre.subset_connectedComponentIn hpTp hTpW
+  have hTmV : Tm ⊆ connectedComponentIn W m :=
+    hTm_pre.subset_connectedComponentIn hmTm hTmW
   -- The two sides: connected components of `W` through `p` and `m`.
-  refine ⟨connectedComponentIn W p, connectedComponentIn W m, ?_⟩
+  refine ⟨connectedComponentIn W p, connectedComponentIn W m, ?_, hTpU, hTmV⟩
   -- The continuous lift `W → ↥V₀` and `σ` pulled back to `↥W`.
   -- For `z ∈ W`: `z ∈ R` and `⟨z,·⟩ ∈ V₀`, giving a point of `↥V₀`.
   have hmemR : ∀ {z : Plane}, z ∈ W → z ∈ R := fun hz => hz.1
@@ -289,5 +293,33 @@ theorem exists_twoSidedPartition_of_collar
           (connectedComponentIn_eq hwV).symm
         rw [← this, ← hzcomp]
         exact mem_connectedComponentIn hz
+
+/-- **The abstract collar ⇒ two-sided partition reduction.**
+
+Given a simply connected open region `R ⊆ ℝ²`, a closed cut `C`, and a *collar*
+`Tp ⊔ Tm` carved out of a preconnected tube `T` around the part of `C` inside `R`,
+the region-minus-cut `R ∖ C` admits a two-sided open partition.
+
+The two collar sides must each be preconnected (`hTp_pre`, `hTm_pre` — the
+geometric obligation **P5**). All other inputs are the collar's already-proved
+structural facts; the former `G4` reachability condition is derived internally
+from connectedness of `R` and the neighborhood cover `R ∩ C ⊆ T`. -/
+theorem exists_twoSidedPartition_of_collar
+    {R C T Tp Tm : Set Plane}
+    (hR : IsOpen R) (hRsc : IsSimplyConnected R)
+    (hC : IsClosed C)
+    (hT_open : IsOpen T) (hTR : T ⊆ R) (hT_pre : IsPreconnected T)
+    (hTp_open : IsOpen Tp) (hTm_open : IsOpen Tm)
+    (hdisj : Disjoint Tp Tm)
+    (hpart : Tp ∪ Tm = T \ C)
+    (hTp_pre : IsPreconnected Tp) (hTm_pre : IsPreconnected Tm)
+    (hTp_ne : Tp.Nonempty) (hTm_ne : Tm.Nonempty)
+    (hcover : R ∩ C ⊆ T) :
+    ∃ U V, IsTwoSidedPartition (R \ C) U V := by
+  obtain ⟨U, V, hUV, _, _⟩ :=
+    exists_twoSidedPartition_of_collar_with_collar_sides
+      hR hRsc hC hT_open hTR hT_pre hTp_open hTm_open
+      hdisj hpart hTp_pre hTm_pre hTp_ne hTm_ne hcover
+  exact ⟨U, V, hUV⟩
 
 end CrossingLemma.PlaneArcSeparation

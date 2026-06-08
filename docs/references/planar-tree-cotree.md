@@ -5,7 +5,8 @@ Source:
 - Jeff Erickson, *Computational Topology*, Lecture 10, “Tree-Cotree Decompositions”
 - PDF: https://jeffe.cs.illinois.edu/teaching/comptop/2020/notes/10-planar-tree-cotree.pdf
 - Sergei K. Lando and Alexander K. Zvonkin, *Graphs on Surfaces and Their
-  Applications*, §1.3.3 (maps as dart permutations `σ`, `α`, `φ`).
+  Applications*, §1.3.3, Proposition 1.3.16 (maps as dart permutations `σ`,
+  `α`, `φ`, with `φ = α⁻¹σ⁻¹` in their convention).
 
 Relevant material:
 
@@ -176,6 +177,22 @@ Formalized bridge pieces now available:
   identifying each actual splice predecessor corner with the side label of the
   corresponding full-residual-map dart.  The conclusion is still the actual
   `ResidualMapPrefixStepInsertion.sameFace` witness.
+- `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_collar_with_collar_sides`,
+  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`,
+  and
+  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides`
+  export the side data constructed by the PL collar proof: the positive collar
+  is contained in one component of the region-minus-crosscut and the negative
+  collar is contained in the other.
+- `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_collarPlus_of_sliver_budgets`
+  and
+  `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_collarMinus_of_sliver_budgets`
+  place the local positive/negative vertex sectors in the corresponding
+  polygonal collar side under the standard sliver-budget hypotheses.
+- `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_of_collarPlus_subset` and
+  `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_of_collarMinus_subset`
+  compose sector-to-collar containment with the side containment returned by the
+  two-sided partition theorem.
 - `CrossingLemma.exists_mem_incidentEnds_prefixEdges_of_le` and
   `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`
   transport the spanning-tree prefix's endpoint incidence into any later
@@ -305,10 +322,10 @@ Still missing:
 - The residual-map face-stability proof that the cotree block, in reverse leaf
   order, supplies the splice-corner `Face_mk` equality required by the
   same-face insertion witness at every later cotree step.  The precise missing
-  bridge is now reduced to two sector-to-face comparisons: the predecessor
-  corner chosen by the vertex rotation at each endpoint immediately before a
-  future edge must be identified with the current split-face label of the
-  corresponding full-residual-map cotree dart side.
+  bridge is now reduced past collar separation: one still has to identify the
+  predecessor corner chosen by the vertex rotation at each endpoint immediately
+  before a future edge with the current split-face label of the corresponding
+  full-residual-map cotree dart side.
 
 Notes for formalization:
 
@@ -317,6 +334,9 @@ Notes for formalization:
   dual map.
 - The same-face insertion layer is written in the Lando--Zvonkin §1.3.3
   dart-permutation language: `σ` is the vertex rotation, `α` is the edge
-  involution, and `φ` is the face permutation.
+  involution, and `φ` is the face permutation.  Proposition 1.3.16 gives
+  `φ = α⁻¹σ⁻¹`; because `α` is involutive and Lean composes permutations in the
+  corresponding left-action convention, `CombinatorialMap.facePerm_eq` is
+  stated as `facePerm = vertexPerm⁻¹ * edgePerm`.
 - The face-count lemma in `CombinatorialMap.Basic` is a useful corollary once the
   primal tree phase is in place, but it does not replace this complement theorem.

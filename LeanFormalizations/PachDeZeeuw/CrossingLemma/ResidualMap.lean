@@ -25,6 +25,12 @@ The dart type is `Fin G.numEdges × Bool`: each edge has two oriented ends, with
   fiberwise rotations are transported.
 * `edgePerm` is the end-swap involution `(e, b) ↦ (e, !b)`.
 * `facePerm := vertexPerm⁻¹ * edgePerm`, the forced choice (`facePerm_eq`).
+  This is the Lando--Zvonkin §1.3.3 dart model: their Proposition 1.3.16 says
+  the face permutation is `φ = α⁻¹ σ⁻¹` for the vertex rotation `σ` and
+  fixed-point-free edge involution `α`; since `edgePerm` is involutive and this
+  Lean development uses the corresponding left-action convention
+  `facePerm * edgePerm * vertexPerm = 1`, the stored formula is
+  `facePerm = vertexPerm⁻¹ * edgePerm`.
 
 Everything is sorry-free and axiom-clean.
 -/
