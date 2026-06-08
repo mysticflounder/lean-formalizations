@@ -236,6 +236,10 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   / `CrossingLemma.DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder`
   / `CrossingLemma.DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder`,
+  the cotree-side finite edge selector
+  `CombinatorialMap.faceEdgeOfLeafOrder`
+  / `CombinatorialMap.faceEdgeOfLeafOrder_spec`
+  / `CombinatorialMap.faceEdgeOfLeafOrder_injective`,
   the first post-tree edge witness
   `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
   and

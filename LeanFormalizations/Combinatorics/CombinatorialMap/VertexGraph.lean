@@ -434,25 +434,60 @@ theorem exists_dart_faceGraphEdge_faces (M : CombinatorialMap D)
             rw [hdual_edge]
       _ = s(dualVertexEquivFace M p, dualVertexEquivFace M q) := hmap
 
-/-- A leaf-insertion order on a spanning tree of the face graph determines a
-concrete original edge injection. This is the dual-side bridge used by the
-ordered prefix insertion route: the same parent-edge order that enumerates tree
-edges on the primal vertex graph also enumerates cotree edges on the dual side. -/
-theorem exists_faceEdgeInjection_of_leafOrder
+/-- The concrete original edge selected by the parent edge at step `i` of a
+leaf-insertion order on a spanning tree of the face graph.
+
+This is the cotree-side analogue of a primal tree parent edge.  The selected
+edge is a dual edge of `M.dual`, transported back to an original edge of `M`;
+this is the finite edge witness used in the tree-cotree decomposition of a
+planar map. -/
+noncomputable def faceEdgeOfLeafOrder
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) : M.Edge :=
+  dualEdgeEquiv M
+    (faceGraphEdge (M := M) (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2))
+
+/-- The cotree parent edge selected by `faceEdgeOfLeafOrder` has a dart whose
+two incident original faces are the new dual-tree vertex and its chosen earlier
+parent, up to the unordered endpoint convention of `Sym2`. -/
+theorem faceEdgeOfLeafOrder_spec
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrder T hTsub parent hparent i = M.Edge_mk d ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M (l[i.1 + 1]'(by omega)),
+            dualVertexEquivFace M (parent (i.1 + 1) (by omega) (by omega))) := by
+  exact exists_dart_faceGraphEdge_faces (M := M)
+    (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- Cotree parent edges selected from a face-tree leaf order are distinct. -/
+theorem faceEdgeOfLeafOrder_injective
     (M : CombinatorialMap D)
     [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
-    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.faceGraph) (_hT : T.IsTree)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.faceGraph)
     {l : List M.dual.Vertex}
-    (hl_nodup : l.Nodup) (hl_len : l.length = Fintype.card M.dual.Vertex)
+    (hl_nodup : l.Nodup)
     (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
     (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
       parent k hk hk' ∈ (l.take k).toFinset ∧
         T.Adj (l[k]'hk') (parent k hk hk')) :
-    ∃ f : Fin (l.length - 1) → M.Edge, Function.Injective f := by
+    Function.Injective (M.faceEdgeOfLeafOrder T hTsub parent hparent) := by
   classical
-  refine ⟨fun i =>
-    dualEdgeEquiv M
-      (faceGraphEdge (M := M) (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)), ?_⟩
   intro i j hij
   let a_i : M.dual.Vertex := l[i.1 + 1]'(by omega)
   let b_i : M.dual.Vertex := parent (i.1 + 1) (by omega) (by omega)
@@ -464,11 +499,30 @@ theorem exists_faceEdgeInjection_of_leafOrder
     exact hTsub (by simpa [a_j, b_j] using (hparent (j.1 + 1) (by omega) (by omega)).2)
   have hEq : dualEdgeEquiv M (faceGraphEdge (M := M) hAdj_i) =
       dualEdgeEquiv M (faceGraphEdge (M := M) hAdj_j) := by
-    simpa [a_i, b_i, a_j, b_j] using hij
+    simpa [faceEdgeOfLeafOrder, a_i, b_i, a_j, b_j] using hij
   have hsym2 : s(a_i, b_i) = s(a_j, b_j) := by
     exact faceGraphEdge_dualEquiv_eq (M := M) hAdj_i hAdj_j hEq
   exact SimpleGraph.IsTree.parentEdgeMap_injective (G := T) (l := l) hl_nodup parent
     hparent hsym2
+
+/-- A leaf-insertion order on a spanning tree of the face graph determines a
+concrete original edge injection. This is the dual-side bridge used by the
+ordered prefix insertion route: the same parent-edge order that enumerates tree
+edges on the primal vertex graph also enumerates cotree edges on the dual side. -/
+theorem exists_faceEdgeInjection_of_leafOrder
+    (M : CombinatorialMap D)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj] (hTsub : T ≤ M.faceGraph) (_hT : T.IsTree)
+    {l : List M.dual.Vertex}
+    (hl_nodup : l.Nodup) (_hl_len : l.length = Fintype.card M.dual.Vertex)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    ∃ f : Fin (l.length - 1) → M.Edge, Function.Injective f := by
+  classical
+  exact ⟨M.faceEdgeOfLeafOrder T hTsub parent hparent,
+    M.faceEdgeOfLeafOrder_injective T hTsub hl_nodup parent hparent⟩
 
 /-- A leaf-insertion order on a spanning tree of the face graph determines an
 edge permutation that moves those cotree edges into the initial segment of the
