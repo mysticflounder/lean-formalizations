@@ -782,6 +782,57 @@ theorem faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj
       T parent hparent i label (by simpa [r] using hadj)
       (by simpa [r] using hleaf_mem) (by simpa [r] using hpar_mem)
 
+/-- Label equality for the two original faces incident to the reverse cotree
+edge selected at a leaf-peeling step.
+
+This is the dart-level form of the tree-cotree label invariant: in the reverse
+dual leaf order, if a face label is constant along every edge of the still
+unpeeled dual prefix, then the concrete cotree edge selected at the current
+step has equal labels on its two incident original faces. -/
+theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : M.Face → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 2)).toFinset →
+      T.Adj u v → label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderReverse T hTsub parent hparent i = M.Edge_mk d ∧
+        label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  obtain ⟨d, hedge, hfaces⟩ :=
+    M.faceEdgeOfLeafOrderReverse_spec_cases T hTsub parent hparent i
+  have hlabel :
+      label (dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega))) =
+        label (dualVertexEquivFace M
+          (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := by
+    exact M.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj
+      T parent hparent i (fun u => label (dualVertexEquivFace M u))
+      (by
+        intro u v hu hv huv
+        exact hadj hu hv huv)
+  refine ⟨d, hedge, ?_⟩
+  rcases hfaces with ⟨hd, hedgePerm⟩ | ⟨hd, hedgePerm⟩
+  · calc
+      label (M.Face_mk d)
+          = label (dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega))) := by rw [hd]
+      _ = label (dualVertexEquivFace M
+            (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := hlabel
+      _ = label (M.Face_mk (M.edgePerm d)) := by rw [hedgePerm]
+  · calc
+      label (M.Face_mk d)
+          = label (dualVertexEquivFace M
+            (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := by rw [hd]
+      _ = label (dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega))) := hlabel.symm
+      _ = label (M.Face_mk (M.edgePerm d)) := by rw [hedgePerm]
+
 /-- Reversing a dual leaf-insertion order preserves injectivity of the selected
 cotree edges. -/
 theorem faceEdgeOfLeafOrderReverse_injective

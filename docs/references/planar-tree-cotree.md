@@ -76,6 +76,10 @@ Formalized bridge pieces now available:
   `CombinatorialMap.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj`
   transport any edge-local split-face label invariant across that connected
   unpeeled prefix.
+- `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj`
+  turns the leaf/parent label equality into a constructor-facing cotree edge:
+  the selected reverse cotree edge has a concrete dart representative whose two
+  original incident faces receive equal labels.
 - `SimpleGraph.Equiv.Perm.exists_map_fin_twoBlocks` and
   `SimpleGraph.Equiv.Perm.exists_map_fintype_twoBlocks` assemble disjoint primal
   and cotree edge injections into one two-block ambient edge permutation.
