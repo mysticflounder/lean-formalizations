@@ -174,6 +174,26 @@ theorem edge_face_label_eq_of_edge_mk_eq {β : Type*} (label : M.Face → β)
   · rw [hd, M.edgePerm_involutive d₀]
     exact hlabel.symm
 
+/-- Equality of a two-sided face label depends only on the unordered pair of
+incident faces.
+
+If two darts determine the same unordered pair of incident face classes, then a
+label equality across one pair transports to the other, possibly reversing the
+two faces. -/
+theorem edge_face_label_eq_of_face_pair_eq {β : Type*} (label : M.Face → β)
+    {d d₀ : D}
+    (hF :
+      s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+        s(M.Face_mk d₀, M.Face_mk (M.edgePerm d₀)))
+    (hlabel : label (M.Face_mk d₀) = label (M.Face_mk (M.edgePerm d₀))) :
+    label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  rw [Sym2.eq_iff] at hF
+  rcases hF with ⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩
+  · rw [hd₁, hd₂]
+    exact hlabel
+  · rw [hd₁, hd₂]
+    exact hlabel.symm
+
 /-- Each fiber of `Edge_mk` has exactly two elements. -/
 lemma card_edge_fiber [Fintype D] (e : M.Edge)
     [DecidablePred fun a : D => M.Edge_mk a = e] :

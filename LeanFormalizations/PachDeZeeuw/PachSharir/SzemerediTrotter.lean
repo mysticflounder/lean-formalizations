@@ -2237,6 +2237,2220 @@ theorem stComponentDrawing_arcsRotationRegular
     edgeSetDrawing_arcsRotationRegular (G := G) (hE := hEc) hDsub
       (stMultigraph_arcsRotationRegular P L hL)
 
+/-- The endpoint-direction angle family for a canonical straight-line component.
+
+An edge of the component drawing is first transported back to the ambient
+`stMultigraph` by `edgeSetDrawingEdge`; the angle is then the straight-segment
+endpoint direction already used in `stMultigraph_arcsRotationRegular`.  The
+extra radius argument is ignored so that this function can be used directly as
+an ARR angle family. -/
+noncomputable def stComponentDrawing_incidentAngle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (p : ℝ × ℝ) :
+    (Fin (stComponentDrawing P L S E hE C).numEdges × Bool) → ℝ → ℝ :=
+  fun e _ =>
+    stMultigraph_incidentAngle P L p
+      (edgeSetDrawingEdge (stMultigraph P L)
+        (edgeSetComponentEdgeSet_subset_edgeSetOn (stMultigraph P L) hE
+          (stMultigraph_arcsJoinEndpoints P L) C) e.1, e.2)
+
+/-- First crossings in a canonical component are the same straight-segment
+first crossings as in the ambient `stMultigraph`.
+
+The angle on the left is deliberately the ambient endpoint-direction angle,
+after transporting the component edge index by `edgeSetDrawingEdge`.  This is
+the concrete geometric bridge needed by the residual-map insertion layer: the
+component drawing has not acquired arbitrary local sectors; its darts still
+enter endpoint neighborhoods along the original straight incidence segments. -/
+lemma stComponentDrawing_firstCrossing_localRadius_angle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    {p : ℝ × ℝ}
+    {e : Fin (stComponentDrawing P L S E hE C).numEdges × Bool}
+    (he : e ∈ incidentEnds (stComponentDrawing P L S E hE C) p)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p) :
+    ∃ t : Set.Icc (0 : ℝ) 1,
+      IsFirstCrossing (stComponentDrawing P L S E hE C) p e r t ∧
+      stComponentDrawing_incidentAngle P L C p e r =
+        angleAt p (((stComponentDrawing P L S E hE C).arc e.1).param t) := by
+  let G := stMultigraph P L
+  let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+    (stMultigraph_arcsJoinEndpoints P L) C
+  have heG :
+      (edgeSetDrawingEdge G hEc e.1, e.2) ∈ incidentEnds G p := by
+    have hiff := mem_incidentEnds_edgeSetDrawing_iff (G := G) (hE := hEc)
+      (p := p) (e := e)
+    simpa [stComponentDrawing, G, hEc] using hiff.mp he
+  obtain ⟨t, hfirst, hangle⟩ :=
+    stMultigraph_firstCrossing_localRadius_angle P L heG hr0 hr
+  refine ⟨t, ?_, ?_⟩
+  · have hiff := edgeSetDrawing_isFirstCrossing_iff (G := G) (hE := hEc)
+      (p := p) (e := e) (r := r) (t := t)
+    simpa [stComponentDrawing, G, hEc] using hiff.mpr hfirst
+  · simpa [stComponentDrawing_incidentAngle, stComponentDrawing, G, hEc] using hangle
+
+/-- The endpoint-direction angle family is injective on incident component
+darts.  This is the component form of `straightLineIncidentAnglesDistinct`,
+transported through the canonical `edgeSetDrawingEdge` embedding. -/
+lemma stComponentDrawing_incidentAngle_injOn
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    {p : ℝ × ℝ} {r : ℝ} :
+    Set.InjOn (fun e => stComponentDrawing_incidentAngle P L C p e r)
+      (incidentEnds (stComponentDrawing P L S E hE C) p :
+        Set (Fin (stComponentDrawing P L S E hE C).numEdges × Bool)) := by
+  let G := stMultigraph P L
+  let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+    (stMultigraph_arcsJoinEndpoints P L) C
+  intro e₁ he₁ e₂ he₂ hangle
+  have he₁G : (edgeSetDrawingEdge G hEc e₁.1, e₁.2) ∈ incidentEnds G p := by
+    have hiff := mem_incidentEnds_edgeSetDrawing_iff (G := G) (hE := hEc)
+      (p := p) (e := e₁)
+    simpa [stComponentDrawing, G, hEc] using hiff.mp he₁
+  have he₂G : (edgeSetDrawingEdge G hEc e₂.1, e₂.2) ∈ incidentEnds G p := by
+    have hiff := mem_incidentEnds_edgeSetDrawing_iff (G := G) (hE := hEc)
+      (p := p) (e := e₂)
+    simpa [stComponentDrawing, G, hEc] using hiff.mp he₂
+  have hpG : p ∈ G.V := by
+    have he := he₁G
+    rw [incidentEnds, Finset.mem_filter] at he
+    by_cases hb : e₁.2
+    · have hp : (G.endpoints (edgeSetDrawingEdge G hEc e₁.1)).2 = p := by
+        simpa [hb] using he.2
+      simpa [← hp] using (G.endpoints_mem (edgeSetDrawingEdge G hEc e₁.1)).2
+    · have hp : (G.endpoints (edgeSetDrawingEdge G hEc e₁.1)).1 = p := by
+        simpa [hb] using he.2
+      simpa [← hp] using (G.endpoints_mem (edgeSetDrawingEdge G hEc e₁.1)).1
+  have hinjG := straightLineIncidentAnglesDistinct P L hL p hpG
+  have hmap : (edgeSetDrawingEdge G hEc e₁.1, e₁.2) =
+      (edgeSetDrawingEdge G hEc e₂.1, e₂.2) := by
+    exact hinjG he₁G he₂G
+      (by simpa [stComponentDrawing_incidentAngle, G, hEc] using hangle)
+  have hidx : edgeSetDrawingEdge G hEc e₁.1 = edgeSetDrawingEdge G hEc e₂.1 :=
+    congrArg (fun x : Fin G.numEdges × Bool => x.1) hmap
+  have hb : e₁.2 = e₂.2 :=
+    congrArg (fun x : Fin G.numEdges × Bool => x.2) hmap
+  exact Prod.ext (edgeSetDrawingEdge_injective (G := G) (hE := hEc) hidx) hb
+
+/-- The canonical component vertex rotation can be read from the explicit
+straight endpoint-direction angle family.
+
+This avoids depending on the particular angle function selected from the ARR
+existential.  By `vertexRotation_eq_of_witness`, the component's canonical
+rotation is the same rotation obtained by sorting incident darts by their
+transported straight-segment endpoint directions on any sufficiently small
+circle. -/
+theorem stComponentDrawing_vertexRotation_eq_incidentAngle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    {p : ℝ × ℝ}
+    (hp : p ∈ (stComponentDrawing P L S E hE C).V)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p) :
+    vertexRotationAtRadius (stComponentDrawing P L S E hE C) p
+        (stComponentDrawing_incidentAngle P L C p) r
+        (endAngleKey_injective (stComponentDrawing P L S E hE C) p _ _
+          (stComponentDrawing_incidentAngle_injOn P L hL C (p := p) (r := r))) =
+      vertexRotation (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C) hp := by
+  let G := stMultigraph P L
+  let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+    (stMultigraph_arcsJoinEndpoints P L) C
+  let D := stComponentDrawing P L S E hE C
+  let hDarr := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  have hDjoin : D.ArcsJoinEndpoints := by
+    simpa [D, stComponentDrawing, G, hEc] using edgeSetDrawing_arcsJoinEndpoints
+      (G := G) (hE := hEc) (stMultigraph_arcsJoinEndpoints P L)
+  refine vertexRotation_eq_of_witness D hDarr hDjoin hp ?_ ?_ ?_ hr0 hr
+  · intro e he r hr0 hr
+    obtain ⟨t, hfirst, hangle⟩ :=
+      stComponentDrawing_firstCrossing_localRadius_angle P L C he hr0 hr
+    exact ⟨t, hfirst, hangle⟩
+  · intro r _hr0 _hr
+    simpa [D] using stComponentDrawing_incidentAngle_injOn P L hL C (p := p) (r := r)
+  · intro _e₁ _he₁ _e₂ _he₂ _r _hr0 _hr _r' _hr'0 _hr'
+    rfl
+
+/-- The straight endpoint-direction angle family on a permuted ordered prefix of
+a canonical component drawing.
+
+This is the angle family used by the residual-map insertion proofs after the
+component edges have been reindexed by a literature order and truncated to a
+prefix.  A prefix dart is cast to the permuted component, transported through
+`π`, and then read by `stComponentDrawing_incidentAngle`. -/
+noncomputable def stComponentDrawing_prefixPermuteIncidentAngle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ) (hm : m ≤ (stComponentDrawing P L S E hE C).numEdges)
+    (p : ℝ × ℝ) :
+    (Fin (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).numEdges ×
+      Bool) → ℝ → ℝ :=
+  fun e r => stComponentDrawing_incidentAngle P L C p (π (Fin.castLE hm e.1), e.2) r
+
+/-- First crossings in a permuted ordered prefix of a canonical component are
+still the first crossings of the underlying straight incidence segments. -/
+lemma stComponentDrawing_prefixPermuteIncidentAngle_firstCrossing
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {m : ℕ} {hm : m ≤ (stComponentDrawing P L S E hE C).numEdges}
+    {p : ℝ × ℝ}
+    {e : Fin (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).numEdges ×
+      Bool}
+    (he : e ∈ incidentEnds (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+      m hm) p)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p) :
+    ∃ t : Set.Icc (0 : ℝ) 1,
+      IsFirstCrossing (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)
+        p e r t ∧
+      stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p e r =
+        angleAt p (((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).arc
+          e.1).param t) := by
+  let D := stComponentDrawing P L S E hE C
+  have heH : (Fin.castLE hm e.1, e.2) ∈ incidentEnds (D.permuteEdges π) p := by
+    exact (mem_incidentEnds_prefixEdges_iff (G := D.permuteEdges π) (m := m) (hm := hm)).mp
+      (by simpa [D] using he)
+  have heD : (π (Fin.castLE hm e.1), e.2) ∈ incidentEnds D p := by
+    exact (mem_incidentEnds_permuteEdges_iff (G := D) π).mp heH
+  obtain ⟨t, hfirstD, hangle⟩ :=
+    stComponentDrawing_firstCrossing_localRadius_angle P L C heD hr0 hr
+  refine ⟨t, ?_, ?_⟩
+  · have hfirstH : IsFirstCrossing (D.permuteEdges π) p (Fin.castLE hm e.1, e.2) r t := by
+      exact (permuteEdges_isFirstCrossing_iff (G := D) π).mpr hfirstD
+    have hfirstPrefix :=
+      (prefixEdges_isFirstCrossing_iff (G := D.permuteEdges π) (m := m) (hm := hm)).mpr
+        hfirstH
+    simpa [D] using hfirstPrefix
+  · simpa [stComponentDrawing_prefixPermuteIncidentAngle, D, DrawnMultigraph.prefixEdges,
+      DrawnMultigraph.permuteEdges] using hangle
+
+/-- The straight endpoint-direction angle family is injective on incident darts
+of a permuted ordered prefix of a canonical component drawing. -/
+lemma stComponentDrawing_prefixPermuteIncidentAngle_injOn
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {m : ℕ} {hm : m ≤ (stComponentDrawing P L S E hE C).numEdges}
+    {p : ℝ × ℝ} {r : ℝ} :
+    Set.InjOn (fun e => stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p e r)
+      (incidentEnds (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p :
+        Set (Fin (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).numEdges ×
+          Bool)) := by
+  let D := stComponentDrawing P L S E hE C
+  intro e₁ he₁ e₂ he₂ hangle
+  have he₁H : (Fin.castLE hm e₁.1, e₁.2) ∈ incidentEnds (D.permuteEdges π) p := by
+    exact (mem_incidentEnds_prefixEdges_iff (G := D.permuteEdges π) (m := m) (hm := hm)).mp
+      (by simpa [D] using he₁)
+  have he₂H : (Fin.castLE hm e₂.1, e₂.2) ∈ incidentEnds (D.permuteEdges π) p := by
+    exact (mem_incidentEnds_prefixEdges_iff (G := D.permuteEdges π) (m := m) (hm := hm)).mp
+      (by simpa [D] using he₂)
+  have he₁D : (π (Fin.castLE hm e₁.1), e₁.2) ∈ incidentEnds D p :=
+    (mem_incidentEnds_permuteEdges_iff (G := D) π).mp he₁H
+  have he₂D : (π (Fin.castLE hm e₂.1), e₂.2) ∈ incidentEnds D p :=
+    (mem_incidentEnds_permuteEdges_iff (G := D) π).mp he₂H
+  have hinjD := stComponentDrawing_incidentAngle_injOn P L hL (hE := hE) C
+    (p := p) (r := r)
+  have hmap : (π (Fin.castLE hm e₁.1), e₁.2) = (π (Fin.castLE hm e₂.1), e₂.2) := by
+    exact hinjD he₁D he₂D
+      (by simpa [stComponentDrawing_prefixPermuteIncidentAngle, D] using hangle)
+  have hidxπ : π (Fin.castLE hm e₁.1) = π (Fin.castLE hm e₂.1) :=
+    congrArg (fun x : Fin D.numEdges × Bool => x.1) hmap
+  have hidx : e₁.1 = e₂.1 := by
+    apply Fin.ext
+    have hcast : Fin.castLE hm e₁.1 = Fin.castLE hm e₂.1 := π.injective hidxπ
+    simpa using congrArg Fin.val hcast
+  have hb : e₁.2 = e₂.2 :=
+    congrArg (fun x : Fin D.numEdges × Bool => x.2) hmap
+  exact Prod.ext hidx hb
+
+/-- The vertex rotation of a permuted ordered prefix of a canonical component can
+be read from the explicit straight endpoint-direction angle family.
+
+This is the prefix-order version of
+`stComponentDrawing_vertexRotation_eq_incidentAngle`, and is the rotation bridge
+needed by residual-map prefix insertions. -/
+theorem stComponentDrawing_prefixPermute_vertexRotation_eq_incidentAngle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {m : ℕ} {hm : m ≤ (stComponentDrawing P L S E hE C).numEdges}
+    {p : ℝ × ℝ}
+    (hp : p ∈ (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).V)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p) :
+    vertexRotationAtRadius (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+        m hm) p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p) r
+        (endAngleKey_injective
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r))) =
+      vertexRotation (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)
+        (prefixEdges_arcsRotationRegular ((stComponentDrawing P L S E hE C).permuteEdges π)
+          m hm
+          (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp := by
+  let D := stComponentDrawing P L S E hE C
+  let H := (D.permuteEdges π).prefixEdges m hm
+  let hDarr := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  let hHarr := prefixEdges_arcsRotationRegular (D.permuteEdges π) m hm
+    (permuteEdges_arrRotationRegular D π hDarr)
+  have hDjoin : D.ArcsJoinEndpoints := by
+    let G := stMultigraph P L
+    let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+      (stMultigraph_arcsJoinEndpoints P L) C
+    simpa [D, stComponentDrawing, G, hEc] using edgeSetDrawing_arcsJoinEndpoints
+      (G := G) (hE := hEc) (stMultigraph_arcsJoinEndpoints P L)
+  have hHjoin : H.ArcsJoinEndpoints := by
+    simpa [H] using prefixEdges_arcsJoinEndpoints (D.permuteEdges π) m hm
+      (permuteEdges_arcsJoinEndpoints D π hDjoin)
+  refine vertexRotation_eq_of_witness H hHarr hHjoin (by simpa [H, D] using hp) ?_ ?_ ?_ hr0 hr
+  · intro e he r hr0 hr
+    obtain ⟨t, hfirst, hangle⟩ :=
+      stComponentDrawing_prefixPermuteIncidentAngle_firstCrossing P L C π he hr0 hr
+    exact ⟨t, hfirst, hangle⟩
+  · intro r _hr0 _hr
+    simpa [H, D] using
+      stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+        (p := p) (r := r)
+  · intro _e₁ _he₁ _e₂ _he₂ _r _hr0 _hr _r' _hr'0 _hr'
+    rfl
+
+/-- On a permuted ordered prefix of a canonical component, the explicit
+straight-angle rotation agrees with the ARR rotation read at the canonical ARR
+radius.
+
+This is the radius-parametrized form of
+`stComponentDrawing_prefixPermute_vertexRotation_eq_incidentAngle`.  It is the
+convenient bridge for later cotree steps: hypotheses stated using
+`vertexRotationAtRadius` and `arrAngle` can be transported to the explicit
+straight endpoint-direction angles already formalized for the component
+drawing. -/
+theorem stComponentDrawing_prefixPermute_vertexRotationAtRadius_eq_arr
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {m : ℕ} {hm : m ≤ (stComponentDrawing P L S E hE C).numEdges}
+    {p : ℝ × ℝ}
+    (hp : p ∈ (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm).V)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p) :
+    vertexRotationAtRadius
+        (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p) r
+        (endAngleKey_injective
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r))) =
+      vertexRotationAtRadius
+        (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p
+        (arrAngle
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)
+          (prefixEdges_arcsRotationRegular
+            ((stComponentDrawing P L S E hE C).permuteEdges π) m hm
+            (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+              (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+        (arrRadius
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)
+          (prefixEdges_arcsRotationRegular
+            ((stComponentDrawing P L S E hE C).permuteEdges π) m hm
+            (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+              (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+        (endAngleKey_injective
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm) p _ _
+          (arrAngle_injOn
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)
+            (prefixEdges_arcsRotationRegular
+              ((stComponentDrawing P L S E hE C).permuteEdges π) m hm
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp
+            (arrRadius_pos
+              (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm))
+              (prefixEdges_arcsRotationRegular
+                ((stComponentDrawing P L S E hE C).permuteEdges π) m hm
+                (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+            le_rfl)) := by
+  let D := stComponentDrawing P L S E hE C
+  let H := (D.permuteEdges π).prefixEdges m hm
+  let hDarr := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  let hHarr := prefixEdges_arcsRotationRegular (D.permuteEdges π) m hm
+    (permuteEdges_arrRotationRegular D π hDarr)
+  calc
+    vertexRotationAtRadius H p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p) r
+        (endAngleKey_injective H p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r)))
+      = vertexRotation H hHarr hp :=
+        stComponentDrawing_prefixPermute_vertexRotation_eq_incidentAngle
+          P L hL hS (hE := hE) C π hp hr0 hr
+    _ = vertexRotationAtRadius H p (arrAngle H hHarr hp) (arrRadius H hHarr hp)
+          (endAngleKey_injective H p _ _
+            (arrAngle_injOn H hHarr hp (arrRadius_pos (G := H) hHarr hp) le_rfl)) := by
+          symm
+          exact rotation_wellDefined H hHarr hp (arrRadius_pos (G := H) hHarr hp) le_rfl
+
+lemma stComponentDrawing_prefixPermute_endpoint_splice_incidentAngle_of_arr
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 = p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 = p)
+    (hpother :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 ≠ p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 ≠ p)
+    (hp : p ∈ (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').V)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p)
+    {c :
+      ↥(incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p)}
+    (hpred :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+              (prefixEdges_arcsRotationRegular
+                (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp
+              (arrRadius_pos
+                (G := ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1)
+                  hm')))
+                (prefixEdges_arcsRotationRegular
+                  (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                  (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                    (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+              le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew) :
+    vertexRotationAtRadius
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+        (endAngleKey_injective
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r)))
+        ((incident_ends_prefix_step_endpoint_old_equiv
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+          c).1) =
+      incident_ends_prefix_step_endpoint_new_dart
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew := by
+  calc
+    vertexRotationAtRadius
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+        (endAngleKey_injective
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r)))
+        ((incident_ends_prefix_step_endpoint_old_equiv
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+          c).1)
+      =
+        vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+              (prefixEdges_arcsRotationRegular
+                (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp
+              (arrRadius_pos
+                (G := ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1)
+                  hm')))
+                (prefixEdges_arcsRotationRegular
+                  (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                  (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                    (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+              le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c).1) := by
+      exact congrArg (fun σ => σ ((incident_ends_prefix_step_endpoint_old_equiv
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+        c).1))
+        (stComponentDrawing_prefixPermute_vertexRotationAtRadius_eq_arr
+          P L hL hS (hE := hE) C π (m := m + 1) (hm := hm') hp hr0 hr)
+    _ = incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew := hpred
+
+/-- The explicit straight-angle predecessor corner at an endpoint of a
+permuted component prefix is unique.
+
+Once the successor endpoint rotation is read in the explicit straight-angle
+order, at most one old incident corner can map to the newly inserted dart.  In
+later cotree steps this is the uniqueness bridge that lets arbitrary
+constructor-facing predecessor corners collapse back to the distinguished
+straight-angle predecessor witness. -/
+lemma stComponentDrawing_prefixPermute_endpoint_splice_incidentAngle_unique
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (_hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 = p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 = p)
+    (hpother :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 ≠ p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 ≠ p)
+    {r : ℝ}
+    {c₁ c₂ :
+      ↥(incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p)}
+    (hpred₁ :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+              (p := p) (r := r)))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c₁).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew)
+    (hpred₂ :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+              (p := p) (r := r)))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c₂).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew) :
+    c₁ = c₂ := by
+  have hEqVal :
+      ((incident_ends_prefix_step_endpoint_old_equiv
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+        c₁).1) =
+      ((incident_ends_prefix_step_endpoint_old_equiv
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+        c₂).1) := by
+    exact
+      (vertexRotationAtRadius
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+        (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+        (endAngleKey_injective
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+          (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+            (p := p) (r := r)))).injective
+        (hpred₁.trans hpred₂.symm)
+  have hEq :
+      incident_ends_prefix_step_endpoint_old_equiv
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+        c₁ =
+      incident_ends_prefix_step_endpoint_old_equiv
+        (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+        c₂ := by
+    apply Subtype.ext
+    exact hEqVal
+  exact
+    (incident_ends_prefix_step_endpoint_old_equiv
+      (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother).injective
+      hEq
+
+private theorem stComponentDrawing_prefixPermute_castLE_castSucc_eq_castLE
+    {n m : ℕ} (hn : n ≤ m) (hn' : n + 1 ≤ m) (i : Fin n) :
+    Fin.castLE hn' i.castSucc = Fin.castLE hn i := by
+  apply Fin.ext
+  rfl
+
+/-- On carried-over incident darts, the straight endpoint-direction order is
+unchanged when one more edge is added to a permuted component prefix.
+
+This is the straight-line specialization of the generic prefix-step order
+monotonicity: the explicit angle family is literally transported from the
+ambient component drawing, so old darts keep the same endpoint direction after
+the new edge is appended. -/
+lemma stComponentDrawing_prefixPermute_endAngleKey_old_iff
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 = p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 = p)
+    (hpother :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 ≠ p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 ≠ p)
+    {r r' : ℝ} :
+    ∀ a₁ a₂ :
+        ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p),
+      endAngleKey
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r'
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₁).1) <
+        endAngleKey
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r'
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₂).1) ↔
+      endAngleKey
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p) r a₁ <
+        endAngleKey
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p) r a₂ := by
+  intro a₁ a₂
+  change
+      stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₁).1) r' <
+        stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₂).1) r' ↔
+      stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p a₁ r <
+        stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p a₂ r
+  have h₁ :
+      stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₁).1) r' =
+        stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p a₁ r := by
+    have hcast : Fin.castLE hm' (a₁.1.1.castSucc) = Fin.castLE hm a₁.1.1 := by
+      apply Fin.ext
+      rfl
+    change
+        stComponentDrawing_incidentAngle P L C p
+            (π (Fin.castLE hm' (a₁.1.1.castSucc)), a₁.1.2) r' =
+          stComponentDrawing_incidentAngle P L C p
+            (π (Fin.castLE hm a₁.1.1), a₁.1.2) r
+    cases hcast
+    rfl
+  have h₂ :
+      stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            a₂).1) r' =
+        stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p a₂ r := by
+    have hcast : Fin.castLE hm' (a₂.1.1.castSucc) = Fin.castLE hm a₂.1.1 := by
+      apply Fin.ext
+      rfl
+    change
+        stComponentDrawing_incidentAngle P L C p
+            (π (Fin.castLE hm' (a₂.1.1.castSucc)), a₂.1.2) r' =
+          stComponentDrawing_incidentAngle P L C p
+            (π (Fin.castLE hm a₂.1.1), a₂.1.2) r
+    cases hcast
+    rfl
+  rw [h₁, h₂]
+
+/-- Straight endpoint-direction angles produce the actual predecessor corner at
+an endpoint of the next edge in a permuted component prefix.
+
+This is the explicit-angle form of
+`exists_vertexRotationAtRadius_prefix_step_endpoint_splice`: once the endpoint
+already has an old incident dart, the new straight segment has a unique
+predecessor corner in the cyclic order read from the transported endpoint
+directions. -/
+lemma stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)}
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 = p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 = p)
+    (hpother :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 ≠ p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 ≠ p)
+    (hold : ∃ e : Fin m × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p)
+    {r r' : ℝ} :
+    ∃ c :
+        ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p),
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r'
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+              (p := p) (r := r'))) ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew := by
+  have hcard :
+      2 ≤ Fintype.card
+        ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p) := by
+    exact two_le_card_incidentEnds_prefix_step_endpoint_of_old_incident
+      (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hold
+  exact exists_vertexRotationAtRadius_prefix_step_endpoint_splice
+    (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+    (hinj := endAngleKey_injective
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p _ _
+      (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+        (p := p) (r := r)))
+    (hinj' := endAngleKey_injective
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+      (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+        (p := p) (r := r')))
+    (α := stComponentDrawing_prefixPermuteIncidentAngle P L C π m hm p)
+    (β := stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p)
+    (r := r) (r' := r')
+    (stComponentDrawing_prefixPermute_endAngleKey_old_iff P L C π m hm hm' b hpnew hpother)
+    hcard
+
+/-- Under the ARR rotation, the predecessor corner at a successor endpoint of a
+permuted component prefix is the distinguished explicit straight-angle witness.
+
+This packages the two preceding bridges.  The explicit witness exists by the
+straight-angle endpoint-splice theorem, and any ARR-facing predecessor corner
+must coincide with it because the explicit successor endpoint rotation has a
+unique old preimage of the new dart. -/
+lemma stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (b : Bool) {p : ℝ × ℝ}
+    (hpnew :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 = p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 = p)
+    (hpother :
+      if b then
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).1 ≠ p
+      else
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').endpoints
+          (Fin.last m)).2 ≠ p)
+    (hp : p ∈ (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm').V)
+    (hold : ∃ e : Fin m × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p)
+    {r : ℝ} (hr0 : 0 < r) (hr : r ≤ stMultigraph_localRadius P L p)
+    {c :
+      ↥(incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) p)}
+    (hpred :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+            (prefixEdges_arcsRotationRegular
+              (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+              (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm'))
+              (prefixEdges_arcsRotationRegular
+                (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp
+              (arrRadius_pos
+                (G := ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1)
+                  hm')))
+                (prefixEdges_arcsRotationRegular
+                  (((stComponentDrawing P L S E hE C).permuteEdges π)) (m + 1) hm'
+                  (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+                    (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) hp)
+              le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew) :
+    c =
+      Classical.choose
+        (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+          P L hL (hE := hE) C π m hm hm' b hpnew hpother hold (r := r) (r' := r)) := by
+  let c₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π m hm hm' b hpnew hpother hold (r := r) (r' := r))
+  have hc₀ :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+              (p := p) (r := r)))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c₀).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew := by
+    exact
+      Classical.choose_spec
+        (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+          P L hL (hE := hE) C π m hm hm' b hpnew hpother hold (r := r) (r' := r))
+  have hc :
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p
+          (stComponentDrawing_prefixPermuteIncidentAngle P L C π (m + 1) hm' p) r
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p _ _
+            (stComponentDrawing_prefixPermuteIncidentAngle_injOn P L hL (hE := hE) C π
+              (p := p) (r := r)))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm hm' b hpnew hpother
+            c).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π)) m hm' b hpnew := by
+    exact
+      stComponentDrawing_prefixPermute_endpoint_splice_incidentAngle_of_arr
+        P L hL hS (hE := hE) C π m hm hm' b hpnew hpother hp hr0 hr hpred
+  have heq :
+      c = c₀ := by
+    exact
+      stComponentDrawing_prefixPermute_endpoint_splice_incidentAngle_unique
+        P L hL hS (hE := hE) C π m hm hm' b hpnew hpother hc hc₀
+  simpa [c₀] using heq
+
+private lemma stComponentDrawing_prefixPermute_sector_sideLabels_direct_of_choose
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm'' : (m + 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)))
+    (hARR' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')))
+    (hARR'' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')))
+    (s₁ s₂ : Fin m × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame :
+      (residualMap
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).facePerm.SameCycle
+        s₁ s₂)
+    (_hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (CombinatorialMap.EdgeInsertion.insertedEdgeMap
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂).vertexPerm =
+        (residualMap
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) hARR').vertexPerm)
+    (d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 = p₁)
+    (hpnew₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 = p₂)
+    (hpother₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 ≠ p₁)
+    (hpother₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 ≠ p₂)
+    (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V)
+    (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V)
+    (sideLabel :
+      Fin (stComponentDrawing P L S E hE C).numEdges × Bool →
+        ({f :
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).Face //
+          f ≠
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).Face_mk
+              s₁} ⊕ Fin 2))
+    (hold₁ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁)
+    (hold₂ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)
+    (hchoose :
+      let c₁ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+            (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+      let c₂ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+            (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        sideLabel d ∧
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1)) =
+        sideLabel
+          ((residualMap (stComponentDrawing P L S E hE C)
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d)) :
+    ∀ (c₁ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁))
+      (c₂ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)),
+      c₁.1 ≠ c₂.1 →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₁
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₁ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₁
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₁) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' false hpnew₁ →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₂
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₂ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₂
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₂) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' true hpnew₂ →
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        sideLabel d ∧
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1)) =
+        sideLabel
+          ((residualMap (stComponentDrawing P L S E hE C)
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) := by
+  intro c₁ c₂ _hc hpred₁ hpred₂
+  let c₁₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+        (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+  let c₂₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+        (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+  have hc₁ :
+      c₁ = c₁₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ ?_ hold₁
+      (stMultigraph_localRadius_pos P L p₁) le_rfl hpred₁
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₁
+  have hc₂ :
+      c₂ = c₂₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ ?_ hold₂
+      (stMultigraph_localRadius_pos P L p₂) le_rfl hpred₂
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₂
+  simpa [c₁₀, c₂₀, hc₁, hc₂] using hchoose
+
+private lemma stComponentDrawing_prefixPermute_sector_sideLabels_swapped_of_choose
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm'' : (m + 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)))
+    (hARR' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')))
+    (hARR'' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')))
+    (s₁ s₂ : Fin m × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame :
+      (residualMap
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).facePerm.SameCycle
+        s₁ s₂)
+    (_hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (CombinatorialMap.EdgeInsertion.insertedEdgeMap
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂).vertexPerm =
+        (residualMap
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) hARR').vertexPerm)
+    (d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 = p₁)
+    (hpnew₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 = p₂)
+    (hpother₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 ≠ p₁)
+    (hpother₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 ≠ p₂)
+    (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V)
+    (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V)
+    (sideLabel :
+      Fin (stComponentDrawing P L S E hE C).numEdges × Bool →
+        ({f :
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).Face //
+          f ≠
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).Face_mk
+              s₁} ⊕ Fin 2))
+    (hold₁ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁)
+    (hold₂ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)
+    (hchoose :
+      let c₁ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+            (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+      let c₂ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+            (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        sideLabel
+          ((residualMap (stComponentDrawing P L S E hE C)
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) ∧
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1)) =
+        sideLabel d) :
+    ∀ (c₁ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁))
+      (c₂ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)),
+      c₁.1 ≠ c₂.1 →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₁
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₁ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₁
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₁) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' false hpnew₁ →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₂
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₂ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₂
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₂) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' true hpnew₂ →
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        sideLabel
+          ((residualMap (stComponentDrawing P L S E hE C)
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) ∧
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1)) =
+        sideLabel d := by
+  intro c₁ c₂ _hc hpred₁ hpred₂
+  let c₁₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+        (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+  let c₂₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+        (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+  have hc₁ :
+      c₁ = c₁₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ ?_ hold₁
+      (stMultigraph_localRadius_pos P L p₁) le_rfl hpred₁
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₁
+  have hc₂ :
+      c₂ = c₂₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ ?_ hold₂
+      (stMultigraph_localRadius_pos P L p₂) le_rfl hpred₂
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₂
+  simpa [c₁₀, c₂₀, hc₁, hc₂] using hchoose
+
+private lemma stComponentDrawing_prefixPermute_current_splitPool_eq_of_choose
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (m : ℕ)
+    (hm : m ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : m + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm'' : (m + 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)))
+    (hARR' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')))
+    (hARR'' : ArcsRotationRegular
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')))
+    (s₁ s₂ : Fin m × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame :
+      (residualMap
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR).facePerm.SameCycle
+        s₁ s₂)
+    (_hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (CombinatorialMap.EdgeInsertion.insertedEdgeMap
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂).vertexPerm =
+        (residualMap
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) hARR').vertexPerm)
+    {p₁ p₂ : ℝ × ℝ}
+    (hpnew₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 = p₁)
+    (hpnew₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 = p₂)
+    (hpother₁ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).2 ≠ p₁)
+    (hpother₂ :
+      ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'').endpoints
+          (Fin.last (m + 1))).1 ≠ p₂)
+    (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V)
+    (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V)
+    (hold₁ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁)
+    (hold₂ : ∃ e : Fin (m + 1) × Bool,
+      e ∈ incidentEnds
+        ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)
+    (hchoose :
+      let c₁ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+            (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+      let c₂ :=
+        Classical.choose
+          (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+            P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+            (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1))) :
+    ∀ (c₁ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₁))
+      (c₂ : ↥(incidentEnds
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (m + 1) hm')) p₂)),
+      c₁.1 ≠ c₂.1 →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₁
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₁)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₁ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₁
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₁) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' false hpnew₁ hpother₁ c₁).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' false hpnew₁ →
+      vertexRotationAtRadius
+          ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm'')) p₂
+          (arrAngle
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (arrRadius
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            hARR'' hp₂)
+          (endAngleKey_injective
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+            p₂ _ _
+            (arrAngle_injOn
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((m + 1) + 1) hm''))
+              hARR'' hp₂
+              (arrRadius_pos
+                (G := (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((m + 1) + 1) hm'')) hARR'' hp₂) le_rfl))
+          ((incident_ends_prefix_step_endpoint_old_equiv
+            (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+            (m + 1) hm' hm'' true hpnew₂ hpother₂ c₂).1) =
+        incident_ends_prefix_step_endpoint_new_dart
+          (G := ((stComponentDrawing P L S E hE C).permuteEdges π))
+          (m + 1) hm'' true hpnew₂ →
+      CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₁.1)) =
+        CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+          (residualMap
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+          s₁ s₂ hs hsame
+          ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+            (residualMap
+              ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges m hm)) hARR)
+            s₁ s₂).Face_mk ((prefixStepDartEquiv m).symm c₂.1)) := by
+  intro c₁ c₂ _hc hpred₁ hpred₂
+  let c₁₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+        (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+  let c₂₀ :=
+    Classical.choose
+      (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+        P L hL (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+        (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+  have hc₁ :
+      c₁ = c₁₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' false hpnew₁ hpother₁ ?_ hold₁
+      (stMultigraph_localRadius_pos P L p₁) le_rfl hpred₁
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₁
+  have hc₂ :
+      c₂ = c₂₀ := by
+    refine stComponentDrawing_prefixPermute_endpoint_splice_eq_choose_of_arr
+      P L hL hS (hE := hE) C π (m + 1) hm' hm'' true hpnew₂ hpother₂ ?_ hold₂
+      (stMultigraph_localRadius_pos P L p₂) le_rfl hpred₂
+    simpa [DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using hp₂
+  simpa [c₁₀, c₂₀, hc₁, hc₂] using hchoose
+
+private theorem
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_choose_sideLabels
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {a : ℕ}
+    (T :
+      SimpleGraph
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex)
+    [DecidableEq
+      (residualMap (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex]
+    (hTsub :
+      T ≤
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).faceGraph)
+    {l :
+      List
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ (stComponentDrawing P L S E hE C).numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)
+          (CombinatorialMap.faceEdgeOfLeafOrderReverse
+            (residualMap (stComponentDrawing P L S E hE C)
+              (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+            T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm : a + i.1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : a + i.1 + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm'' :
+      (a + i.1 + 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm))
+    (hARR' : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm'))
+    (hARR'' : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm''))
+    (s₁ s₂ : Fin (a + i.1) × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame :
+      (residualMap (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+        hARR).facePerm.SameCycle s₁ s₂)
+    (hvertex :
+      (prefixStepDartEquiv (a + i.1)).permCongr
+        (CombinatorialMap.EdgeInsertion.insertedEdgeMap
+          (residualMap
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+            hARR)
+          s₁ s₂).vertexPerm =
+        (residualMap
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm')
+          hARR').vertexPerm)
+    (hcoverage :
+      ∀ p : ↥(stComponentDrawing P L S E hE C).V,
+        ∃ e : Fin (a + i.1 + 1) × Bool,
+          e ∈ incidentEnds
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm')
+            (p : ℝ × ℝ))
+    (sideLabel :
+      Fin (stComponentDrawing P L S E hE C).numEdges × Bool →
+        ({f :
+          (residualMap
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+            hARR).Face //
+          f ≠
+            (residualMap
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+              hARR).Face_mk s₁} ⊕
+          Fin 2))
+    (label :
+      (residualMap (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Face →
+        ({f :
+          (residualMap
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+            hARR).Face //
+          f ≠
+            (residualMap
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+              hARR).Face_mk s₁} ⊕
+          Fin 2))
+    (hsideLabel :
+      ∀ d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool,
+        sideLabel d =
+          label
+            ((residualMap (stComponentDrawing P L S E hE C)
+              (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Face_mk d))
+    (hl_nodup : l.Nodup)
+    (hadj :
+      ∀ ⦃u v :
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex⦄,
+        u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+        v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+        T.Adj u v →
+        s(u, v) ≠
+          s(l[(Fin.rev i).1 + 1]'(by omega),
+            parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+        label
+            (CombinatorialMap.dualVertexEquivFace
+              (residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+              u) =
+          label
+            (CombinatorialMap.dualVertexEquivFace
+              (residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+              v))
+    (hchoose_direct :
+      ∀ d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool,
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Edge_mk d =
+            (CombinatorialMap.faceEdgeOfLeafOrderReverse
+              (residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+              T hTsub parent hparent j) →
+        ∀ {p₁ p₂ : ℝ × ℝ}
+          (hpnew₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 = p₁)
+          (hpnew₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 = p₂)
+          (hpother₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+          (hpother₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+          p₁ = dartAnchor (stComponentDrawing P L S E hE C) d ∧
+            p₂ =
+              dartAnchor (stComponentDrawing P L S E hE C)
+                ((residualMap (stComponentDrawing P L S E hE C)
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) →
+          (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₁) →
+          (hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₂) →
+          let c₁ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+                (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+          let c₂ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+                (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+          CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+            sideLabel d ∧
+            CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) =
+            sideLabel
+              ((residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d))
+    (hchoose_swapped :
+      ∀ d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool,
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Edge_mk d =
+            (CombinatorialMap.faceEdgeOfLeafOrderReverse
+              (residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+              T hTsub parent hparent j) →
+        ∀ {p₁ p₂ : ℝ × ℝ}
+          (hpnew₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 = p₁)
+          (hpnew₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 = p₂)
+          (hpother₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+          (hpother₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+          p₁ =
+              dartAnchor (stComponentDrawing P L S E hE C)
+                ((residualMap (stComponentDrawing P L S E hE C)
+                  (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) ∧
+            p₂ = dartAnchor (stComponentDrawing P L S E hE C) d →
+          (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₁) →
+          (hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₂) →
+          let c₁ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+                (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+          let c₂ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+                (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+          CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+            sideLabel
+              ((residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) ∧
+            CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1)) =
+            sideLabel d) :
+    ResidualMapPrefixStepInsertion
+      (G := (stComponentDrawing P L S E hE C).permuteEdges π)
+      (a + i.1 + 1) hm' hm'' hARR' hARR'' := by
+  let G := stComponentDrawing P L S E hE C
+  let G₀ := stMultigraph P L
+  let hEc :=
+    edgeSetComponentEdgeSet_subset_edgeSetOn G₀ hE (stMultigraph_arcsJoinEndpoints P L) C
+  let hARRG := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  have hjoin : G.ArcsJoinEndpoints := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_arcsJoinEndpoints (G := G₀) (hE := hEc)
+        (stMultigraph_arcsJoinEndpoints P L)
+  exact
+    G.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels
+      π hjoin hARRG T hTsub parent hparent hblock hπcotree i j hprefix
+      hm hm' hm'' hARR hARR' hARR'' s₁ s₂ hs hsame hvertex hcoverage
+      sideLabel label hsideLabel hl_nodup hadj
+      (by
+        intro d hd p₁ p₂ hpnew₁ hpnew₂ hpother₁ hpother₂ hdirect hp₁ hp₂
+          c₁ c₂ hc hpred₁ hpred₂
+        have hp₁G : p₁ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₁
+        have hp₂G : p₂ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₂
+        have hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁ := by
+          simpa [G] using hcoverage ⟨p₁, hp₁G⟩
+        have hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂ := by
+          simpa [G] using hcoverage ⟨p₂, hp₂G⟩
+        exact
+          stComponentDrawing_prefixPermute_sector_sideLabels_direct_of_choose
+            P L hL hS (hE := hE) C π (a + i.1) hm hm' hm'' hARR hARR' hARR''
+            s₁ s₂ hs hsame hvertex d hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁G hp₂G
+            sideLabel hold₁ hold₂
+            (hchoose_direct d hd hpnew₁ hpnew₂ hpother₁ hpother₂ hdirect
+              hp₁G hp₂G hold₁ hold₂)
+            c₁ c₂ hc hpred₁ hpred₂)
+      (by
+        intro d hd p₁ p₂ hpnew₁ hpnew₂ hpother₁ hpother₂ hswapped hp₁ hp₂
+          c₁ c₂ hc hpred₁ hpred₂
+        have hp₁G : p₁ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₁
+        have hp₂G : p₂ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₂
+        have hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁ := by
+          simpa [G] using hcoverage ⟨p₁, hp₁G⟩
+        have hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂ := by
+          simpa [G] using hcoverage ⟨p₂, hp₂G⟩
+        exact
+          stComponentDrawing_prefixPermute_sector_sideLabels_swapped_of_choose
+            P L hL hS (hE := hE) C π (a + i.1) hm hm' hm'' hARR hARR' hARR''
+            s₁ s₂ hs hsame hvertex d hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁G hp₂G
+            sideLabel hold₁ hold₂
+            (hchoose_swapped d hd hpnew₁ hpnew₂ hpother₁ hpother₂ hswapped
+              hp₁G hp₂G hold₁ hold₂)
+            c₁ c₂ hc hpred₁ hpred₂)
+
+private theorem
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderReverse_next_block_of_choose_splitPool_eq
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    {a : ℕ}
+    (T :
+      SimpleGraph
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex)
+    [DecidableEq
+      (residualMap (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex]
+    (hTsub :
+      T ≤
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).faceGraph)
+    {l :
+      List
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (stComponentDrawing P L S E hE C)
+        (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ (stComponentDrawing P L S E hE C).numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)
+          (CombinatorialMap.faceEdgeOfLeafOrderReverse
+            (residualMap (stComponentDrawing P L S E hE C)
+              (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+            T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm : a + i.1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : a + i.1 + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm'' :
+      (a + i.1 + 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm))
+    (hARR' : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm'))
+    (hARR'' : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm''))
+    (s₁ s₂ : Fin (a + i.1) × Bool)
+    (hs : s₁ ≠ s₂)
+    (hsame :
+      (residualMap (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+        hARR).facePerm.SameCycle s₁ s₂)
+    (hvertex :
+      (prefixStepDartEquiv (a + i.1)).permCongr
+        (CombinatorialMap.EdgeInsertion.insertedEdgeMap
+          (residualMap
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+            hARR)
+          s₁ s₂).vertexPerm =
+        (residualMap
+          (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm')
+          hARR').vertexPerm)
+    (hcoverage :
+      ∀ p : ↥(stComponentDrawing P L S E hE C).V,
+        ∃ e : Fin (a + i.1 + 1) × Bool,
+          e ∈ incidentEnds
+            (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1 + 1) hm')
+            (p : ℝ × ℝ))
+    (hchoose :
+      ∀ d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool,
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Edge_mk d =
+            (CombinatorialMap.faceEdgeOfLeafOrderReverse
+              (residualMap (stComponentDrawing P L S E hE C)
+                (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+              T hTsub parent hparent j) →
+        ∀ {p₁ p₂ : ℝ × ℝ}
+          (hpnew₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 = p₁)
+          (hpnew₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 = p₂)
+          (hpother₁ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).2 ≠ p₁)
+          (hpother₂ :
+            ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                  ((a + i.1 + 1) + 1) hm'').endpoints
+                (Fin.last (a + i.1 + 1))).1 ≠ p₂),
+          ((p₁ = dartAnchor (stComponentDrawing P L S E hE C) d ∧
+              p₂ =
+                dartAnchor (stComponentDrawing P L S E hE C)
+                  ((residualMap (stComponentDrawing P L S E hE C)
+                    (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d)) ∨
+            (p₁ =
+                dartAnchor (stComponentDrawing P L S E hE C)
+                  ((residualMap (stComponentDrawing P L S E hE C)
+                    (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).edgePerm d) ∧
+              p₂ = dartAnchor (stComponentDrawing P L S E hE C) d)) →
+          (hp₁ : p₁ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hp₂ : p₂ ∈ (stComponentDrawing P L S E hE C).V) →
+          (hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₁) →
+          (hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds
+              (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
+                (a + i.1 + 1) hm')
+              p₂) →
+          let c₁ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' false hpnew₁ hpother₁ hold₁
+                (r := stMultigraph_localRadius P L p₁) (r' := stMultigraph_localRadius P L p₁))
+          let c₂ :=
+            Classical.choose
+              (stComponentDrawing_prefixPermute_exists_endpoint_splice_incidentAngle
+                P L hL (hE := hE) C π (a + i.1 + 1) hm' hm'' true hpnew₂ hpother₂ hold₂
+                (r := stMultigraph_localRadius P L p₂) (r' := stMultigraph_localRadius P L p₂))
+          CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₁.1)) =
+            CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv
+              (residualMap
+                (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                hARR)
+              s₁ s₂ hs hsame
+              ((CombinatorialMap.EdgeInsertion.insertedEdgeMap
+                (residualMap
+                  (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (a + i.1) hm)
+                  hARR)
+                s₁ s₂).Face_mk ((prefixStepDartEquiv (a + i.1)).symm c₂.1))) :
+    Nonempty
+      (ResidualMapPrefixStepSameFaceData
+        (G := (stComponentDrawing P L S E hE C).permuteEdges π)
+        (a + i.1 + 1) hm' hm'' hARR' hARR'') := by
+  let G := stComponentDrawing P L S E hE C
+  let G₀ := stMultigraph P L
+  let hEc :=
+    edgeSetComponentEdgeSet_subset_edgeSetOn G₀ hE (stMultigraph_arcsJoinEndpoints P L) C
+  let hARRG := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  have hjoin : G.ArcsJoinEndpoints := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_arcsJoinEndpoints (G := G₀) (hE := hEc)
+        (stMultigraph_arcsJoinEndpoints P L)
+  exact
+    G.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
+      π hjoin hARRG T hTsub parent hparent hblock hπcotree i j hprefix
+      hm hm' hm'' hARR hARR' hARR'' s₁ s₂ hs hsame hvertex hcoverage
+      (by
+        intro d hd p₁ p₂ hpnew₁ hpnew₂ hpother₁ hpother₂ hcase hp₁ hp₂
+          c₁ c₂ hc hpred₁ hpred₂
+        have hp₁G : p₁ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₁
+        have hp₂G : p₂ ∈ G.V := by
+          simpa [G, DrawnMultigraph.permuteEdges] using hp₂
+        have hold₁ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₁ := by
+          simpa [G] using hcoverage ⟨p₁, hp₁G⟩
+        have hold₂ : ∃ e : Fin (a + i.1 + 1) × Bool,
+            e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') p₂ := by
+          simpa [G] using hcoverage ⟨p₂, hp₂G⟩
+        exact
+          stComponentDrawing_prefixPermute_current_splitPool_eq_of_choose
+            P L hL hS (hE := hE) C π (a + i.1) hm hm' hm'' hARR hARR' hARR''
+            s₁ s₂ hs hsame hvertex hpnew₁ hpnew₂ hpother₁ hpother₂ hp₁G hp₂G
+            hold₁ hold₂
+            (hchoose d hd hpnew₁ hpnew₂ hpother₁ hpother₂ hcase hp₁G hp₂G hold₁ hold₂)
+            c₁ c₂ hc hpred₁ hpred₂)
+
+private theorem
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOfLeafOrder
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (_hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (T : SimpleGraph ↥(stComponentDrawing P L S E hE C).V)
+    (hTsub :
+      T ≤
+        (stComponentDrawing P L S E hE C).vertexGraph
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L)))
+    {l : List ↥(stComponentDrawing P L S E hE C).V}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      ↥(stComponentDrawing P L S E hE C).V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ (stComponentDrawing P L S E hE C).numEdges}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        (stComponentDrawing P L S E hE C).treeEdgeOfLeafOrder
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L))
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_multiplicity_le (G := G) (hE := hEc)
+                (stMultigraph_multiplicity_le_one P L hL))
+          T hTsub parent hparent j)
+    (i : Fin (l.length - 1)) (hi : 1 ≤ i.1)
+    (hm : i.1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : i.1 + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hARR : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges i.1 hm))
+    (hARR' : ArcsRotationRegular
+      (((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges (i.1 + 1) hm')) :
+    ResidualMapPrefixStepInsertion
+      (G := (stComponentDrawing P L S E hE C).permuteEdges π)
+      i.1 hm hm' hARR hARR' := by
+  let G := stComponentDrawing P L S E hE C
+  let G₀ := stMultigraph P L
+  let hEc :=
+    edgeSetComponentEdgeSet_subset_edgeSetOn G₀ hE (stMultigraph_arcsJoinEndpoints P L) C
+  have hjoin : G.ArcsJoinEndpoints := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_arcsJoinEndpoints (G := G₀) (hE := hEc)
+        (stMultigraph_arcsJoinEndpoints P L)
+  have hmult : ∀ p q, G.multiplicity p q ≤ 1 := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_multiplicity_le (G := G₀) (hE := hEc)
+        (stMultigraph_multiplicity_le_one P L hL)
+  exact
+    G.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder
+      hjoin hmult T hTsub hl_nodup parent hparent hπ i hi hm hm' hARR hARR'
+
+private theorem
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepSameFaceData_of_treePrefix_next
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (T : SimpleGraph ↥(stComponentDrawing P L S E hE C).V)
+    (hTsub :
+      T ≤
+        (stComponentDrawing P L S E hE C).vertexGraph
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L)))
+    {l : List ↥(stComponentDrawing P L S E hE C).V}
+    (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥(stComponentDrawing P L S E hE C).V)
+    (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      ↥(stComponentDrawing P L S E hE C).V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ (stComponentDrawing P L S E hE C).numEdges}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        (stComponentDrawing P L S E hE C).treeEdgeOfLeafOrder
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L))
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_multiplicity_le (G := G) (hE := hEc)
+                (stMultigraph_multiplicity_le_one P L hL))
+          T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : (l.length - 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges) :
+    Nonempty
+      (ResidualMapPrefixStepSameFaceData
+        (G := (stComponentDrawing P L S E hE C).permuteEdges π)
+        (l.length - 1) hm hm'
+        (prefixEdges_arcsRotationRegular
+          ((stComponentDrawing P L S E hE C).permuteEdges π) (l.length - 1) hm
+          (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)))
+        (prefixEdges_arcsRotationRegular
+          ((stComponentDrawing P L S E hE C).permuteEdges π) ((l.length - 1) + 1) hm'
+          (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+            (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)))) := by
+  let G := stComponentDrawing P L S E hE C
+  let G₀ := stMultigraph P L
+  let hEc :=
+    edgeSetComponentEdgeSet_subset_edgeSetOn G₀ hE (stMultigraph_arcsJoinEndpoints P L) C
+  have hjoin : G.ArcsJoinEndpoints := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_arcsJoinEndpoints (G := G₀) (hE := hEc)
+        (stMultigraph_arcsJoinEndpoints P L)
+  have hmult : ∀ p q, G.multiplicity p q ≤ 1 := by
+    simpa [G, stComponentDrawing, G₀, hEc] using
+      edgeSetDrawing_multiplicity_le (G := G₀) (hE := hEc)
+        (stMultigraph_multiplicity_le_one P L hL)
+  let hARRprefix : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm) :=
+    fun m hm =>
+      prefixEdges_arcsRotationRegular (G.permuteEdges π) m hm
+        (permuteEdges_arrRotationRegular G π
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
+  exact
+    G.exists_residualMapPrefixStepSameFaceData_of_permuted_treePrefix_next
+      hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hm' hARRprefix
+
+private theorem
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepInsertion_sameFace_of_treePrefix_next
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
+    (T : SimpleGraph ↥(stComponentDrawing P L S E hE C).V)
+    (hTsub :
+      T ≤
+        (stComponentDrawing P L S E hE C).vertexGraph
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L)))
+    {l : List ↥(stComponentDrawing P L S E hE C).V}
+    (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card ↥(stComponentDrawing P L S E hE C).V)
+    (hl_two : 2 ≤ l.length)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      ↥(stComponentDrawing P L S E hE C).V)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    {hk : l.length - 1 ≤ (stComponentDrawing P L S E hE C).numEdges}
+    (hπ : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hk j) =
+        (stComponentDrawing P L S E hE C).treeEdgeOfLeafOrder
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_arcsJoinEndpoints (G := G) (hE := hEc)
+                (stMultigraph_arcsJoinEndpoints P L))
+          (by
+            let G := stMultigraph P L
+            let hEc := edgeSetComponentEdgeSet_subset_edgeSetOn G hE
+              (stMultigraph_arcsJoinEndpoints P L) C
+            simpa [stComponentDrawing, G, hEc] using
+              edgeSetDrawing_multiplicity_le (G := G) (hE := hEc)
+                (stMultigraph_multiplicity_le_one P L hL))
+          T hTsub parent hparent j)
+    (hm : l.length - 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
+    (hm' : (l.length - 1) + 1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges) :
+    ResidualMapPrefixStepInsertion
+      (G := (stComponentDrawing P L S E hE C).permuteEdges π)
+      (l.length - 1) hm hm'
+      (prefixEdges_arcsRotationRegular
+        ((stComponentDrawing P L S E hE C).permuteEdges π) (l.length - 1) hm
+        (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)))
+      (prefixEdges_arcsRotationRegular
+        ((stComponentDrawing P L S E hE C).permuteEdges π) ((l.length - 1) + 1) hm'
+        (permuteEdges_arrRotationRegular (stComponentDrawing P L S E hE C) π
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))) := by
+  obtain ⟨hdata⟩ :=
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepSameFaceData_of_treePrefix_next
+      P L hL hS (hE := hE) C π T hTsub hl_nodup hl_len hl_two parent hparent hπ hm hm'
+  exact hdata.toInsertion
+
 /-- **Straight-line canonical-component residual-map planarity, with ARR already
 inherited from the straight-line drawing.**
 
@@ -2301,6 +4515,107 @@ theorem straightLineCrossingFreeComponentwisePlanarization_of_canonical_componen
     simpa [D, stComponentDrawing, G, hEc] using
       abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
         (G := G) hplD
+
+/-- **Straight-line canonical-component residual-map planarity statement.**
+
+This is the genus-zero bridge for the Szemerédi--Trotter incidence
+construction: the component-level straight-line residual map is organized to
+follow the literature's ordered insertion proof, and the later corollary
+reuses it to obtain planar residual maps for the canonical connected
+components of crossing-free survivors. -/
+theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
+    StraightLineCanonicalComponentResidualMapPlanarityOfARR := by
+  intro P L hL S hS E hE hfree C hv
+  let G := stComponentDrawing P L S E hE C
+  let hARRG := stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C
+  have hjoin : G.ArcsJoinEndpoints := by
+    simpa [G, stComponentDrawing] using
+      edgeSetDrawing_arcsJoinEndpoints
+        (G := stMultigraph P L)
+        (hE := edgeSetComponentEdgeSet_subset_edgeSetOn (stMultigraph P L) hE
+          (stMultigraph_arcsJoinEndpoints P L) C)
+        (stMultigraph_arcsJoinEndpoints P L)
+  have hmult : ∀ p q, G.multiplicity p q ≤ 1 := by
+    simpa [G, stComponentDrawing] using
+      edgeSetDrawing_multiplicity_le
+        (G := stMultigraph P L)
+        (hE := edgeSetComponentEdgeSet_subset_edgeSetOn (stMultigraph P L) hE
+          (stMultigraph_arcsJoinEndpoints P L) C)
+        (stMultigraph_multiplicity_le_one P L hL)
+  have hconn : G.GraphConnected := by
+    simpa [G, stComponentDrawing] using
+      edgeSetComponentDrawing_graphConnected
+        (G := stMultigraph P L) hE (stMultigraph_arcsJoinEndpoints P L) C
+  have hV : 3 ≤ G.V.card := by
+    simpa [G, stComponentDrawing, edgeSetDrawing] using hv
+  obtain ⟨Tvertex, hTvertex_sub, hTvertex_tree, lvertex, hlvertex_nodup,
+    hlvertex_len, parentVertex, hparentVertex, Tface, hTface_sub, hTface_tree,
+    lface, hlface_nodup, hlface_len, parentFace, hparentFace, hblock, π, hπtree,
+    hπrest⟩ :=
+    G.exists_treeCotreePositionPermutation_of_graphConnected
+      hjoin hmult hARRG hconn hV
+  have hlvertex_two : 2 ≤ lvertex.length := by
+    rw [hlvertex_len]
+    have hV' : 3 ≤ Fintype.card ↥G.V := by
+      simpa using hV
+    omega
+  have hmtree : lvertex.length - 1 ≤ (G.permuteEdges π).numEdges := by
+    have hblock' : lvertex.length - 1 ≤ G.numEdges := by
+      exact le_trans (Nat.le_add_right _ _) hblock
+    simpa [G, DrawnMultigraph.permuteEdges] using hblock'
+  let hARRprefix : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
+      ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm) :=
+    fun m hm =>
+      prefixEdges_arcsRotationRegular (G.permuteEdges π) m hm
+        (permuteEdges_arrRotationRegular G π hARRG)
+  have hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), 1 ≤ m →
+      ResidualMapPrefixStepInsertion (G := G.permuteEdges π) m
+        (Nat.le_of_succ_le hm') hm' (hARRprefix m (Nat.le_of_succ_le hm'))
+        (hARRprefix (m + 1) hm') := by
+    intro m hm' hmpos
+    have hm : m ≤ (G.permuteEdges π).numEdges := Nat.le_of_succ_le hm'
+    have hARRm : ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm) :=
+      hARRprefix m hm
+    have hARRm' : ArcsRotationRegular ((G.permuteEdges π).prefixEdges (m + 1) hm') :=
+      hARRprefix (m + 1) hm'
+    by_cases htree : m + 1 ≤ lvertex.length - 1
+    · have hmle : m < lvertex.length - 1 := Nat.lt_of_succ_le htree
+      have hi : 1 ≤ m := hmpos
+      let i : Fin (lvertex.length - 1) := ⟨m, by
+        have : m < lvertex.length - 1 := hmle
+        omega⟩
+      have hstep' :=
+        G.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder
+          (hjoin := hjoin) (hmult := hmult) (T := Tvertex) (hTsub := hTvertex_sub)
+          (hl_nodup := hlvertex_nodup) (parent := parentVertex) (hparent := hparentVertex)
+          (hk := by
+            have hktree' : lvertex.length - 1 ≤ G.numEdges := by
+              omega
+            simpa [G, DrawnMultigraph.permuteEdges] using hktree')
+          (hπ := hπtree) i hi hm hm' hARRm hARRm'
+      simpa [G, hARRprefix, hARRm, hARRm'] using hstep'
+    · have htree_or_later : m = lvertex.length - 1 ∨ lvertex.length - 1 < m := by
+        omega
+      rcases htree_or_later with rfl | hgt
+      · exact
+          stComponentDrawing_prefixPermute_exists_residualMapPrefixStepInsertion_sameFace_of_treePrefix_next
+            P L hL hS (hE := hE) C π Tvertex hTvertex_sub hlvertex_nodup hlvertex_len
+            hlvertex_two parentVertex hparentVertex (hk := hmtree) (hπ := hπtree)
+            hm hm'
+      · -- The remaining cotree block needs the reverse-prefix label induction.
+        sorry
+  have hplanarπ : ∃ hARRπ : ArcsRotationRegular (G.permuteEdges π),
+      (residualMap (G.permuteEdges π) hARRπ).IsPlanar := by
+    exact exists_residualMap_isPlanar_of_prefix_insertions_connected
+      (G := G.permuteEdges π) (permuteEdges_arcsJoinEndpoints G π hjoin)
+      ((DrawnMultigraph.permuteEdges_graphConnected_iff G π).2 hconn) hV
+      hARRprefix hstep
+  rcases hplanarπ with ⟨hARRπ, hplanarπ⟩
+  have hARRπ_eq : hARRπ = permuteEdges_arrRotationRegular G π hARRG := Subsingleton.elim _ _
+  have hplanar : (residualMap G hARRG).IsPlanar := by
+    exact (isPlanar_iff_of_iso (residualMapIsoPermuteEdges (G := G) π hjoin hARRG)).2
+      (by simpa [hARRπ_eq] using hplanarπ)
+  simpa [G, hARRG] using hplanar
 
 /-- Componentwise genus-zero planarization for crossing-free straight-line
 survivors gives the numerical straight-line crossing-free edge bound. -/

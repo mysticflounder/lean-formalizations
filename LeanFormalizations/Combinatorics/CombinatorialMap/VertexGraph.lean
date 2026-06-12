@@ -8,6 +8,7 @@ import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder
+import Mathlib.GroupTheory.Perm.Cycle.Concrete
 
 /-!
 # Vertex and face adjacency graphs for combinatorial maps
@@ -116,6 +117,37 @@ theorem vertexGraph_connected [Fintype D] [Nonempty M.Vertex]
   rw [SimpleGraph.reachable_iff_reflTransGen]
   exact Relation.ReflTransGen.lift' M.Vertex_mk hstep (hconn d d')
 
+/-- Darts in the same vertex class are connected by `vertexPerm` steps.
+
+Since `Vertex_mk` is the quotient by `vertexPerm` cycles, equality of vertex
+classes means that one dart is a positive power of `vertexPerm` applied to the
+other.  Hence the combinatorial-map one-step relation reaches between them
+without using any `edgePerm` step. -/
+theorem reflTransGen_of_eq_vertex_mk [Fintype D] {a b : D}
+    (h : M.Vertex_mk a = M.Vertex_mk b) :
+    Relation.ReflTransGen
+      (fun x y ↦ y = M.vertexPerm x ∨ y = M.vertexPerm⁻¹ x ∨ y = M.edgePerm x) a b := by
+  have hsc : M.vertexPerm.SameCycle a b := Quotient.eq''.mp h
+  obtain ⟨n, hn⟩ := hsc.exists_nat_pow_eq
+  have hpow :
+      ∀ n : ℕ,
+        Relation.ReflTransGen
+          (fun x y ↦ y = M.vertexPerm x ∨ y = M.vertexPerm⁻¹ x ∨ y = M.edgePerm x)
+          a ((M.vertexPerm ^ n) a) := by
+    intro n
+    induction n with
+    | zero =>
+        simpa using
+          (Relation.ReflTransGen.refl :
+            Relation.ReflTransGen
+              (fun x y ↦ y = M.vertexPerm x ∨ y = M.vertexPerm⁻¹ x ∨ y = M.edgePerm x)
+              a a)
+    | succ n ih =>
+        refine ih.tail ?_
+        left
+        simp [pow_succ', Equiv.Perm.mul_apply]
+  simpa [hn] using hpow n
+
 /-- A connected combinatorial map has a connected face adjacency graph. -/
 theorem faceGraph_connected [Fintype D] [Nonempty M.Vertex]
     (hconn : M.Connected) :
@@ -175,6 +207,97 @@ theorem vertexGraphEdge_eq (M : CombinatorialMap D)
     (heq : vertexGraphEdge (M := M) h₁ = vertexGraphEdge (M := M) h₂) :
     s(p, q) = s(r, s) := by
   simpa [vertexGraphEdge_spec] using congrArg (Edge.ends (M := M)) heq
+
+/-- The chosen primal edge across a vertex adjacency admits an orientation whose
+tail is the first endpoint and whose head is the second.
+
+An edge class is the two-dart orbit of `edgePerm`, so after choosing any dart
+representative of `vertexGraphEdge h` we may flip by `edgePerm` if needed to
+orient it from `p` to `q`. -/
+theorem vertexGraphEdge_spec_oriented (M : CombinatorialMap D)
+    {p q : M.Vertex} (h : (M.vertexGraph).Adj p q) :
+    ∃ d : D,
+      vertexGraphEdge (M := M) h = M.Edge_mk d ∧
+        M.Vertex_mk d = p ∧
+        M.Vertex_mk (M.edgePerm d) = q := by
+  obtain ⟨d, hd⟩ := Quotient.exists_rep (vertexGraphEdge (M := M) h)
+  have hends : s(M.Vertex_mk d, M.Vertex_mk (M.edgePerm d)) = s(p, q) := by
+    have hends' := vertexGraphEdge_spec (M := M) h
+    rw [← hd, Edge.ends_mk] at hends'
+    exact hends'
+  rw [Sym2.eq_iff] at hends
+  rcases hends with ⟨hleft, hright⟩ | ⟨hleft, hright⟩
+  · exact ⟨d, by simp [hd], hleft, hright⟩
+  · refine ⟨M.edgePerm d, ?_, ?_, ?_⟩
+    · have hedge :
+          M.Edge_mk (M.edgePerm d) = M.Edge_mk d := by
+        exact (M.edge_mk_eq_iff (M.edgePerm d) d).2
+          ((M.sameCycle_edgePerm_iff d (M.edgePerm d)).2 (Or.inr rfl))
+      exact hd ▸ hedge.symm
+    · exact hright
+    · rw [M.edgePerm_involutive d]
+      exact hleft
+
+/-- A connected vertex adjacency graph already implies that the combinatorial
+map itself is connected.
+
+Every vertex-graph edge is represented by an original dart.  Starting from a
+chosen representative of the source vertex, we move within that vertex cycle to
+the dart of the edge, cross the edge by one `edgePerm` step, and then move
+within the target vertex cycle.  Lifting a vertex-graph path in this way gives
+the combinatorial-map connectivity relation. -/
+theorem connected_of_vertexGraph_connected [Fintype D]
+    (hconn : (M.vertexGraph).Connected) :
+    M.Connected := by
+  classical
+  let R : D → D → Prop :=
+    fun x y ↦ y = M.vertexPerm x ∨ y = M.vertexPerm⁻¹ x ∨ y = M.edgePerm x
+  have hadj :
+      ∀ {p q : M.Vertex}, (M.vertexGraph).Adj p q →
+        Relation.ReflTransGen R (Quotient.out p) (Quotient.out q) := by
+    intro p q hpq
+    obtain ⟨d, _hd, hd_left, hd_right⟩ := M.vertexGraphEdge_spec_oriented hpq
+    have hstart :
+        Relation.ReflTransGen R (Quotient.out p) d :=
+      M.reflTransGen_of_eq_vertex_mk
+        (show M.Vertex_mk (Quotient.out p) = M.Vertex_mk d from
+          calc
+            M.Vertex_mk (Quotient.out p) = p := Quotient.out_eq p
+            _ = M.Vertex_mk d := hd_left.symm)
+    have hedge : Relation.ReflTransGen R d (M.edgePerm d) := by
+      exact Relation.ReflTransGen.single (Or.inr (Or.inr rfl))
+    have hend :
+        Relation.ReflTransGen R (M.edgePerm d) (Quotient.out q) :=
+      M.reflTransGen_of_eq_vertex_mk
+        (show M.Vertex_mk (M.edgePerm d) = M.Vertex_mk (Quotient.out q) from
+          calc
+            M.Vertex_mk (M.edgePerm d) = q := hd_right
+            _ = M.Vertex_mk (Quotient.out q) := (Quotient.out_eq q).symm)
+    exact hstart.trans (hedge.trans hend)
+  have hreach :
+      ∀ {p q : M.Vertex},
+        Relation.ReflTransGen (M.vertexGraph.Adj) p q →
+          Relation.ReflTransGen R (Quotient.out p) (Quotient.out q) := by
+    intro p q hpq
+    induction hpq with
+    | refl =>
+        exact Relation.ReflTransGen.refl
+    | tail _ hpq ih =>
+        exact ih.trans (hadj hpq)
+  intro a b
+  have hstart :
+      Relation.ReflTransGen R a (Quotient.out (M.Vertex_mk a)) :=
+    M.reflTransGen_of_eq_vertex_mk (h := (Quotient.out_eq (M.Vertex_mk a)).symm)
+  have hmid :
+      Relation.ReflTransGen R (Quotient.out (M.Vertex_mk a))
+        (Quotient.out (M.Vertex_mk b)) := by
+    have hreachV := hconn.preconnected (M.Vertex_mk a) (M.Vertex_mk b)
+    rw [SimpleGraph.reachable_iff_reflTransGen] at hreachV
+    exact hreach hreachV
+  have hend :
+      Relation.ReflTransGen R (Quotient.out (M.Vertex_mk b)) b :=
+    M.reflTransGen_of_eq_vertex_mk (h := Quotient.out_eq (M.Vertex_mk b))
+  exact hstart.trans (hmid.trans hend)
 
 /-- A leaf-insertion order on a spanning tree of the vertex graph determines a
 concrete original edge injection.
@@ -247,6 +370,454 @@ theorem exists_vertexEdgePermutation_of_leafOrder
   refine ⟨hk, f, hf, π, ?_⟩
   intro i
   simp [π, e, hσ]
+
+/-- If every edge other than `d` incident to the vertex of `d` identifies the
+same face label on its two sides, then `d` does as well.
+
+This is the local vertex-cycle step behind the spanning-tree/spanning-cotree
+complement theorem.  Around a leaf of the remaining primal tree, every other
+incident edge is already known to preserve the current face label, so the last
+remaining tree edge preserves it too. -/
+theorem face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    {β : Type*} (label : M.Face → β) {d x : D}
+    (hloop : M.Vertex_mk (M.edgePerm d) ≠ M.Vertex_mk d)
+    (hx : x ∈ Equiv.Perm.toList M.vertexPerm d)
+    (hother : ∀ y : D, M.Vertex_mk y = M.Vertex_mk d →
+      M.Edge_mk y ≠ M.Edge_mk d →
+      label (M.Face_mk y) = label (M.Face_mk (M.edgePerm y))) :
+    label (M.Face_mk x) = label (M.Face_mk d) := by
+  classical
+  set L : List D := Equiv.Perm.toList M.vertexPerm d with hL
+  have hx' : x ∈ L := by simpa [hL] using hx
+  have hsupp : d ∈ M.vertexPerm.support := by
+    exact (Equiv.Perm.mem_toList_iff.mp (by simpa [hL] using hx')).2
+  have hvertex_pow : ∀ n : ℕ, M.Vertex_mk ((M.vertexPerm ^ n) d) = M.Vertex_mk d := by
+    intro n
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+        rw [pow_succ', Equiv.Perm.mul_apply, vertexMk_vertexPerm, ih]
+  have hlabel_pow :
+      ∀ n : ℕ, ∀ hn : n < L.length,
+        label (M.Face_mk (L[n]'hn)) = label (M.Face_mk d) := by
+    intro n
+    induction n with
+    | zero =>
+        intro hn
+        have hzero : L[0]'hn = d := by
+          simpa [hL] using
+            Equiv.Perm.toList_getElem_zero (p := M.vertexPerm) (x := d) hsupp
+        simp [hzero]
+    | succ n ih =>
+        intro hn
+        have hn' : n < L.length := by omega
+        have hprev := ih hn'
+        let y : D := L[n.succ]'hn
+        have hy : y = (M.vertexPerm ^ n.succ) d := by
+          simpa [hL, y] using
+            Equiv.Perm.getElem_toList (p := M.vertexPerm) (x := d) n.succ hn
+        have hy_vertex : M.Vertex_mk y = M.Vertex_mk d := by
+          rw [hy]
+          exact hvertex_pow n.succ
+        have hy_ne : y ≠ d := by
+          intro hyd
+          have hnodup := Equiv.Perm.nodup_toList (p := M.vertexPerm) (x := d)
+          have hlen_pos : 0 < L.length := by
+            simpa [hL] using
+              Equiv.Perm.length_toList_pos_of_mem_support (p := M.vertexPerm) (x := d) hsupp
+          have hzero : L[0]'hlen_pos = d := by
+            simpa [hL] using
+              Equiv.Perm.toList_getElem_zero (p := M.vertexPerm) (x := d) hsupp
+          have hsucc : L[n.succ]'hn = d := by
+            simp [y, hyd]
+          have hidx :
+              (0 : ℕ) = n.succ := by
+            exact (List.Nodup.getElem_inj_iff hnodup
+              (i := 0) (hi := hlen_pos) (j := n.succ) (hj := hn)).1 (hzero.trans hsucc.symm)
+          omega
+        have hy_edge_ne : M.Edge_mk y ≠ M.Edge_mk d := by
+          intro hE
+          have hsc : M.edgePerm.SameCycle d y := (M.edge_mk_eq_iff y d).mp hE
+          rcases (M.sameCycle_edgePerm_iff d y).mp hsc with hyd | hyd
+          · exact hy_ne hyd
+          · exact hloop (by simpa [hyd] using hy_vertex)
+        have hstep :
+            label (M.Face_mk y) = label (M.Face_mk (M.edgePerm y)) :=
+          hother y hy_vertex hy_edge_ne
+        have hpred : M.vertexPerm⁻¹ y = L[n]'hn' := by
+          simpa [hy, hL, pow_succ', Equiv.Perm.mul_apply] using
+            (Equiv.Perm.getElem_toList (p := M.vertexPerm) (x := d) n hn').symm
+        have hface :
+            M.Face_mk (M.edgePerm y) = M.Face_mk (L[n]'hn') := by
+          calc
+            M.Face_mk (M.edgePerm y)
+                = M.Face_mk (M.facePerm (M.edgePerm y)) := by
+                    rw [faceMk_facePerm]
+            _ = M.Face_mk (M.vertexPerm⁻¹ y) := by
+                  rw [vertexPerm_inv_eq_facePerm_edgePerm]
+            _ = M.Face_mk (L[n]'hn') := by rw [hpred]
+        calc
+          label (M.Face_mk (L[n.succ]'hn))
+              = label (M.Face_mk y) := by rfl
+          _ = label (M.Face_mk (M.edgePerm y)) := hstep
+          _ = label (M.Face_mk (L[n]'hn')) := by rw [hface]
+          _ = label (M.Face_mk d) := hprev
+  obtain ⟨n, hn, hxn⟩ := List.mem_iff_getElem.mp hx'
+  rw [← hxn]
+  exact hlabel_pow n hn
+
+/-- A face label can be transported along any initial segment of the vertex
+cycle of `d` provided each dart on that segment identifies the same label on
+its two sides.
+
+This is the directional form of
+`face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge`. It
+only needs the label-preservation hypothesis on the visited prefix of
+`Equiv.Perm.toList M.vertexPerm d`, rather than on the entire vertex class. -/
+theorem face_label_eq_of_getElem_vertexPerm_toList_of_forall_edge_face_label_eq_on_prefix
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    {β : Type*} (label : M.Face → β) {d : D}
+    (n : ℕ) (hn : n < (Equiv.Perm.toList M.vertexPerm d).length)
+    (hstep : ∀ k : ℕ,
+      (hk0 : 0 < k) →
+      (hk : k < (Equiv.Perm.toList M.vertexPerm d).length) →
+      k ≤ n →
+      label (M.Face_mk ((Equiv.Perm.toList M.vertexPerm d)[k]'hk)) =
+        label (M.Face_mk (M.edgePerm ((Equiv.Perm.toList M.vertexPerm d)[k]'hk)))) :
+    label (M.Face_mk ((Equiv.Perm.toList M.vertexPerm d)[n]'hn)) =
+      label (M.Face_mk d) := by
+  classical
+  set L : List D := Equiv.Perm.toList M.vertexPerm d with hL
+  change label (M.Face_mk (L[n]'hn)) = label (M.Face_mk d)
+  have hmem : L[n]'hn ∈ Equiv.Perm.toList M.vertexPerm d := by
+    rw [← hL]
+    exact List.getElem_mem (l := L) (n := n) hn
+  have hsupp : d ∈ M.vertexPerm.support := by
+    exact (Equiv.Perm.mem_toList_iff.mp hmem).2
+  have hlabel_prefix :
+      ∀ m : ℕ, ∀ hm : m < L.length, m ≤ n →
+        label (M.Face_mk (L[m]'hm)) = label (M.Face_mk d) := by
+    intro m
+    induction m with
+    | zero =>
+        intro hm _hmle
+        have hzero : L[0]'hm = d := by
+          simpa [hL] using
+            Equiv.Perm.toList_getElem_zero (p := M.vertexPerm) (x := d) hsupp
+        simp [hzero]
+    | succ m ih =>
+        intro hm hmle
+        have hm' : m < L.length := by omega
+        have hmle' : m ≤ n := by omega
+        have hprev := ih hm' hmle'
+        have hcur :
+            label (M.Face_mk (L[m.succ]'hm)) =
+              label (M.Face_mk (M.edgePerm (L[m.succ]'hm))) := by
+          exact hstep m.succ (Nat.succ_pos _) hm hmle
+        have hpow_succ :
+            L[m.succ]'hm = (M.vertexPerm ^ m.succ) d := by
+          simpa [hL] using
+            Equiv.Perm.getElem_toList (p := M.vertexPerm) (x := d) m.succ hm
+        have hpred : M.vertexPerm⁻¹ (L[m.succ]'hm) = L[m]'hm' := by
+          calc
+            M.vertexPerm⁻¹ (L[m.succ]'hm)
+                = (M.vertexPerm ^ m) d := by
+                    rw [hpow_succ, pow_succ', Equiv.Perm.mul_apply]
+                    exact M.vertexPerm.symm_apply_apply ((M.vertexPerm ^ m) d)
+            _ = L[m]'hm' := by
+                  simpa [hL] using
+                    (Equiv.Perm.getElem_toList (p := M.vertexPerm) (x := d) m hm').symm
+        have hface :
+            M.Face_mk (M.edgePerm (L[m.succ]'hm)) = M.Face_mk (L[m]'hm') := by
+          calc
+            M.Face_mk (M.edgePerm (L[m.succ]'hm))
+                = M.Face_mk (M.facePerm (M.edgePerm (L[m.succ]'hm))) := by
+                    rw [faceMk_facePerm]
+            _ = M.Face_mk (M.vertexPerm⁻¹ (L[m.succ]'hm)) := by
+                  rw [vertexPerm_inv_eq_facePerm_edgePerm]
+            _ = M.Face_mk (L[m]'hm') := by rw [hpred]
+        calc
+          label (M.Face_mk (L[m.succ]'hm))
+              = label (M.Face_mk (M.edgePerm (L[m.succ]'hm))) := hcur
+          _ = label (M.Face_mk (L[m]'hm')) := by rw [hface]
+          _ = label (M.Face_mk d) := hprev
+  exact hlabel_prefix n hn le_rfl
+
+/-- A face label can be transported to any dart in the same vertex class once
+every other incident edge at that vertex preserves the label across its two
+sides.
+
+This is the quotient-level form of
+`face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge`: the
+input is equality in `Vertex_mk`, which is the form produced naturally by
+residual-map anchor comparisons. -/
+theorem face_label_eq_of_eq_vertex_mk_of_forall_same_vertex_other_edge
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    {β : Type*} (label : M.Face → β) {d x : D}
+    (hloop : M.Vertex_mk (M.edgePerm d) ≠ M.Vertex_mk d)
+    (hxv : M.Vertex_mk x = M.Vertex_mk d)
+    (hother : ∀ y : D, M.Vertex_mk y = M.Vertex_mk d →
+      M.Edge_mk y ≠ M.Edge_mk d →
+      label (M.Face_mk y) = label (M.Face_mk (M.edgePerm y))) :
+    label (M.Face_mk x) = label (M.Face_mk d) := by
+  by_cases hxd : x = d
+  · simp [hxd]
+  · have hsc : M.vertexPerm.SameCycle d x := Quotient.eq''.mp hxv.symm
+    have hsupp : d ∈ M.vertexPerm.support := by
+      rw [Equiv.Perm.mem_support]
+      intro hfix
+      have hfixx : d = x := Equiv.Perm.SameCycle.eq_of_left hsc hfix
+      exact hxd hfixx.symm
+    have hx : x ∈ Equiv.Perm.toList M.vertexPerm d :=
+      (Equiv.Perm.mem_toList_iff).2 ⟨hsc, hsupp⟩
+    exact
+      M.face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge
+        label hloop hx hother
+
+/-- If every edge other than `d` incident to the vertex of `d` identifies the
+same face label on its two sides, then `d` does as well.
+
+This is the local vertex-cycle step behind the spanning-tree/spanning-cotree
+complement theorem.  Around a leaf of the remaining primal tree, every other
+incident edge is already known to preserve the current face label, so the last
+remaining tree edge preserves it too. -/
+theorem edge_face_label_eq_of_forall_same_vertex_other_edge
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    {β : Type*} (label : M.Face → β) {d : D}
+    (hloop : M.Vertex_mk (M.edgePerm d) ≠ M.Vertex_mk d)
+    (hother : ∀ x : D, M.Vertex_mk x = M.Vertex_mk d →
+      M.Edge_mk x ≠ M.Edge_mk d →
+      label (M.Face_mk x) = label (M.Face_mk (M.edgePerm x))) :
+    label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  by_cases hfix : M.vertexPerm d = d
+  · have hface :
+        M.Face_mk (M.edgePerm d) = M.Face_mk d := by
+      calc
+        M.Face_mk (M.edgePerm d)
+            = M.Face_mk (M.facePerm (M.edgePerm d)) := by
+                rw [faceMk_facePerm]
+        _ = M.Face_mk (M.vertexPerm⁻¹ d) := by
+              rw [vertexPerm_inv_eq_facePerm_edgePerm]
+        _ = M.Face_mk d := by
+              have hfix' : M.vertexPerm⁻¹ d = d := by
+                apply M.vertexPerm.injective
+                simp [hfix]
+              rw [hfix']
+    rw [hface]
+  · set L : List D := Equiv.Perm.toList M.vertexPerm d with hL
+    have hsupp : d ∈ M.vertexPerm.support := by
+      simpa [Equiv.Perm.mem_support] using hfix
+    have hlen_pos : 0 < L.length := by
+      simpa [hL] using
+        Equiv.Perm.length_toList_pos_of_mem_support (p := M.vertexPerm) (x := d) hsupp
+    have hlast_lt : L.length - 1 < L.length := by
+      omega
+    have hlast_label :
+        label (M.Face_mk (L[L.length - 1]'hlast_lt)) = label (M.Face_mk d) := by
+      let hmem : L[L.length - 1]'hlast_lt ∈ Equiv.Perm.toList M.vertexPerm d := by
+        rw [← hL]
+        exact List.getElem_mem (l := L) (n := L.length - 1) hlast_lt
+      exact
+        M.face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge
+          label hloop hmem hother
+    have hcycle : (M.vertexPerm ^ L.length) d = d := by
+      simpa [hL] using
+        (Equiv.Perm.pow_mod_card_support_cycleOf_self_apply
+          (f := M.vertexPerm) (n := L.length) (x := d)).symm
+    have hlast_apply : M.vertexPerm (L[L.length - 1]'hlast_lt) = d := by
+      have hlast_pow :
+          L[L.length - 1]'hlast_lt = (M.vertexPerm ^ (L.length - 1)) d := by
+        simpa [hL] using
+          Equiv.Perm.getElem_toList (p := M.vertexPerm) (x := d) (L.length - 1) hlast_lt
+      rw [hlast_pow]
+      calc
+        M.vertexPerm ((M.vertexPerm ^ (L.length - 1)) d)
+            = (M.vertexPerm ^ ((L.length - 1) + 1)) d := by
+                simp [pow_succ', Equiv.Perm.mul_apply]
+        _ = (M.vertexPerm ^ L.length) d := by
+              rw [Nat.sub_add_cancel (Nat.succ_le_of_lt hlen_pos)]
+        _ = d := hcycle
+    have hlast_inv : L[L.length - 1]'hlast_lt = M.vertexPerm⁻¹ d := by
+      apply M.vertexPerm.injective
+      simpa using hlast_apply
+    have hlast_face :
+        M.Face_mk (L[L.length - 1]'hlast_lt) = M.Face_mk (M.edgePerm d) := by
+      rw [hlast_inv, vertexPerm_inv_eq_facePerm_edgePerm, faceMk_facePerm]
+    have hfinal :
+        label (M.Face_mk (M.edgePerm d)) = label (M.Face_mk d) := by
+      calc
+        label (M.Face_mk (M.edgePerm d))
+            = label (M.Face_mk (L[L.length - 1]'hlast_lt)) := by rw [hlast_face]
+        _ = label (M.Face_mk d) := hlast_label
+    exact hfinal.symm
+
+/-- If a face label is constant across every non-tree edge, then it is constant
+across every selected tree edge of a primal leaf-insertion order.
+
+This is the reverse-induction heart of the planar tree/cotree complement
+argument.  At the current leaf-order vertex `l[k]`, any incident selected tree
+edge other than the current parent edge comes from a later leaf-order step; an
+earlier selected tree edge has both endpoints in the prefix `take k` and hence
+cannot be incident to `l[k]`.  Therefore the local vertex-cycle lemma upgrades
+the complement-edge label invariant to the current tree edge, and decreasing
+induction propagates that to the whole primal tree block. -/
+theorem vertexLeafOrder_edge_face_label_eq_of_not_mem_range
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.vertexGraph)
+    {l : List M.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (f : Fin (l.length - 1) → M.Edge)
+    (hf : ∀ i : Fin (l.length - 1),
+      f i =
+        vertexGraphEdge (M := M)
+          (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2))
+    {β : Type*} (label : M.Face → β)
+    (hcomp : ∀ d : D,
+      M.Edge_mk d ∉ Set.range f →
+      label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d))) :
+    ∀ i : Fin (l.length - 1), ∃ d : D,
+      f i = M.Edge_mk d ∧
+        label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  classical
+  let P : ℕ → Prop := fun k =>
+    ∀ hk : k < l.length, ∀ hkpos : 0 < k,
+      ∃ d : D,
+        f ⟨k - 1, by omega⟩ = M.Edge_mk d ∧
+          label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d))
+  have hP : ∀ k : ℕ, P k := by
+    refine Nat.strong_decreasing_induction ?_ ?_
+    · refine ⟨l.length, ?_⟩
+      intro m hm hm_lt
+      omega
+    · intro k ih hk hkpos
+      let i : Fin (l.length - 1) := ⟨k - 1, by omega⟩
+      have hi_succ : i.1 + 1 = k := by
+        dsimp [i]
+        exact Nat.sub_add_cancel (Nat.succ_le_of_lt hkpos)
+      have hAdj :
+          (M.vertexGraph).Adj (l[k]'hk) (parent k hkpos hk) := by
+        exact hTsub (hparent k hkpos hk).2
+      obtain ⟨d, hd, hd_left, hd_right⟩ :=
+        M.vertexGraphEdge_spec_oriented
+          (hTsub (hparent k hkpos hk).2)
+      have hfi : f i = M.Edge_mk d := by
+        have hfi0 : f i =
+            vertexGraphEdge (M := M)
+              (hTsub (hparent k hkpos hk).2) := by
+          simpa [hi_succ] using hf i
+        exact hfi0.trans hd
+      have hloop : M.Vertex_mk (M.edgePerm d) ≠ M.Vertex_mk d := by
+        simpa [hd_left, hd_right] using hAdj.1.symm
+      refine ⟨d, hfi, ?_⟩
+      apply M.edge_face_label_eq_of_forall_same_vertex_other_edge label hloop
+      intro x hx_vertex hx_edge_ne
+      by_cases hxcomp : M.Edge_mk x ∉ Set.range f
+      · exact hcomp x hxcomp
+      · push Not at hxcomp
+        rcases hxcomp with ⟨j, hj⟩
+        have hj_step_pos : 0 < j.1 + 1 := by omega
+        have hj_step_lt : j.1 + 1 < l.length := by omega
+        have hj_ne : j ≠ i := by
+          intro hji
+          apply hx_edge_ne
+          calc
+            M.Edge_mk x = f j := hj.symm
+            _ = f i := by rw [hji]
+            _ = M.Edge_mk d := hfi
+        by_cases hj_lt : j.1 + 1 < k
+        · have hpair_short :
+              s(M.Vertex_mk x, M.Vertex_mk (M.edgePerm x)) =
+                s(l[j.1 + 1]'hj_step_lt,
+                  parent (j.1 + 1) hj_step_pos hj_step_lt) := by
+            calc
+              s(M.Vertex_mk x, M.Vertex_mk (M.edgePerm x))
+                  = Edge.ends (M := M) (M.Edge_mk x) := by
+                      rw [Edge.ends_mk]
+              _ = Edge.ends (M := M) (f j) := by rw [hj]
+              _ = Edge.ends (M := M)
+                    (vertexGraphEdge (M := M)
+                      (hTsub (hparent (j.1 + 1) hj_step_pos hj_step_lt).2)) := by
+                        rw [hf j]
+              _ = s(l[j.1 + 1]'hj_step_lt,
+                    parent (j.1 + 1) hj_step_pos hj_step_lt) := by
+                      exact
+                        vertexGraphEdge_spec (M := M)
+                          (hTsub (hparent (j.1 + 1) hj_step_pos hj_step_lt).2)
+          have hprefix_mem :
+              l[j.1 + 1]'hj_step_lt ∈ (l.take k).toFinset := by
+            rw [List.mem_toFinset]
+            have htake : j.1 + 1 < (l.take k).length := by
+              rw [List.length_take]
+              omega
+            have hget :
+                (l.take k)[j.1 + 1]'htake = l[j.1 + 1]'hj_step_lt := by
+              exact (List.getElem_take' (xs := l) (i := j.1 + 1) (j := k) hj_step_lt hj_lt).symm
+            exact List.mem_of_getElem hget
+          have hparent_mem :
+              parent (j.1 + 1) hj_step_pos hj_step_lt ∈ (l.take k).toFinset := by
+            rw [List.mem_toFinset]
+            have hpar_short :
+                parent (j.1 + 1) hj_step_pos hj_step_lt ∈ l.take (j.1 + 1) := by
+              simpa [List.mem_toFinset] using (hparent (j.1 + 1) hj_step_pos hj_step_lt).1
+            obtain ⟨r, hr_short, hr_val⟩ := List.mem_iff_getElem.mp hpar_short
+            have hr_short' : r < j.1 + 1 := by
+              have : r < (l.take (j.1 + 1)).length := hr_short
+              rw [List.length_take] at this
+              omega
+            have hr_long : r < k := by omega
+            have hrl : r < l.length := by omega
+            have hpar_eq :
+                parent (j.1 + 1) hj_step_pos hj_step_lt = l[r]'hrl := by
+              have hget :
+                  l[r]'hrl = (l.take (j.1 + 1))[r]'hr_short := by
+                exact List.getElem_take' (xs := l) (i := r) (j := j.1 + 1) hrl hr_short'
+              exact (hget.trans hr_val).symm
+            have htake : r < (l.take k).length := by
+              rw [List.length_take]
+              omega
+            have hget :
+                (l.take k)[r]'htake = l[r]'hrl := by
+              exact (List.getElem_take' (xs := l) (i := r) (j := k) hrl hr_long).symm
+            simpa [hpar_eq] using List.mem_of_getElem hget
+          have hpair_ne :
+              s(l[j.1 + 1]'hj_step_lt,
+                parent (j.1 + 1) hj_step_pos hj_step_lt) ≠
+                s(l[k]'hk, M.Vertex_mk (M.edgePerm x)) := by
+            exact SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup
+              hl_nodup (hk := hk) (parent := M.Vertex_mk (M.edgePerm x))
+              hprefix_mem hparent_mem
+          have hpair_x :
+              s(M.Vertex_mk x, M.Vertex_mk (M.edgePerm x)) =
+                s(l[k]'hk, M.Vertex_mk (M.edgePerm x)) := by
+            rw [hx_vertex, hd_left]
+          exact (hpair_ne (hpair_short.symm.trans hpair_x)).elim
+        · have hj_gt : k < j.1 + 1 := by
+            have hj_ne_nat : j.1 + 1 ≠ k := by
+              intro hEq
+              apply hj_ne
+              apply Fin.ext
+              omega
+            have hj_ge : k ≤ j.1 + 1 := by omega
+            exact lt_of_le_of_ne hj_ge hj_ne_nat.symm
+          obtain ⟨d', hd', hlabel'⟩ := ih (j.1 + 1) hj_gt (by omega) (by omega)
+          have hj_idx : (⟨j.1 + 1 - 1, by omega⟩ : Fin (l.length - 1)) = j := by
+            apply Fin.ext
+            exact Nat.succ_sub_one j.1
+          have hd'' : f j = M.Edge_mk d' := by
+            simpa [hj_idx] using hd'
+          have hE : M.Edge_mk x = M.Edge_mk d' := by
+            calc
+              M.Edge_mk x = f j := hj.symm
+              _ = M.Edge_mk d' := hd''
+          exact M.edge_face_label_eq_of_edge_mk_eq label hE hlabel'
+  intro i
+  exact hP (i.1 + 1) (by omega) (by omega)
 
 /-- The Euler-count half of the spanning-tree/spanning-cotree complement
 statement.
@@ -417,6 +988,115 @@ theorem faceGraphEdge_dualEquiv_eq (M : CombinatorialMap D)
     s(p, q) = s(r, s) := by
   exact faceGraphEdge_eq (M := M) h₁ h₂ ((dualEdgeEquiv M).injective heq)
 
+/-- The face adjacency graph carried by a chosen set of original edge classes.
+
+Two dual vertices are adjacent when some original edge in `S` has those faces
+on its two sides.  This is the graph-theoretic surface for the complementary
+cotree side of a planar tree/cotree decomposition: later, `S` will be the set
+of edges not used by the primal spanning tree. -/
+def faceGraphOnEdgeSet (M : CombinatorialMap D) (S : Set M.Edge) :
+    SimpleGraph M.dual.Vertex where
+  Adj p q :=
+    p ≠ q ∧ ∃ e : M.dual.Edge, dualEdgeEquiv M e ∈ S ∧ Edge.ends (M := M.dual) e = s(p, q)
+  symm := by
+    intro p q hpq
+    rcases hpq with ⟨hne, e, heS, he⟩
+    exact ⟨hne.symm, e, heS, by
+      calc
+        Edge.ends (M := M.dual) e = s(p, q) := he
+        _ = s(q, p) := Sym2.eq_swap⟩
+  loopless := ⟨fun p hp => hp.1 rfl⟩
+
+/-- A face adjacency carried by `S` is in particular an ordinary face
+adjacency. -/
+theorem faceGraphOnEdgeSet_le_faceGraph (M : CombinatorialMap D) (S : Set M.Edge) :
+    M.faceGraphOnEdgeSet S ≤ M.faceGraph := by
+  intro p q hpq
+  rcases hpq with ⟨hne, e, _heS, he⟩
+  exact ⟨hne, e, he⟩
+
+/-- A chosen edge witnessing a face adjacency carried by `S`. -/
+noncomputable def faceGraphOnEdgeSetEdge (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) : M.dual.Edge :=
+  Classical.choose h.2
+
+/-- The chosen carried face adjacency really uses an edge from `S`. -/
+@[simp] theorem faceGraphOnEdgeSetEdge_mem (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) :
+    dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S h) ∈ S := by
+  exact (Classical.choose_spec h.2).1
+
+/-- The chosen carried face adjacency really witnesses the given face pair. -/
+@[simp] theorem faceGraphOnEdgeSetEdge_spec (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) :
+    Edge.ends (M := M.dual) (faceGraphOnEdgeSetEdge (M := M) S h) = s(p, q) := by
+  exact (Classical.choose_spec h.2).2
+
+/-- Swapping the face endpoints does not change the chosen carried dual edge. -/
+@[simp] theorem faceGraphOnEdgeSetEdge_symm (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) :
+    faceGraphOnEdgeSetEdge (M := M) S ((M.faceGraphOnEdgeSet S).symm h) =
+      faceGraphOnEdgeSetEdge (M := M) S h := by
+  rcases h with ⟨hne, e, heS, he⟩
+  simp [faceGraphOnEdgeSetEdge, Sym2.eq_swap]
+
+/-- Equal chosen carried face-adjacency edges determine the same face pair. -/
+theorem faceGraphOnEdgeSetEdge_eq (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q r s : M.dual.Vertex}
+    (h₁ : (M.faceGraphOnEdgeSet S).Adj p q) (h₂ : (M.faceGraphOnEdgeSet S).Adj r s)
+    (heq : faceGraphOnEdgeSetEdge (M := M) S h₁ =
+      faceGraphOnEdgeSetEdge (M := M) S h₂) :
+    s(p, q) = s(r, s) := by
+  simpa [faceGraphOnEdgeSetEdge_spec] using congrArg (Edge.ends (M := M.dual)) heq
+
+/-- Equal transported carried edges determine the same face pair. -/
+theorem faceGraphOnEdgeSetEdge_dualEquiv_eq (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q r s : M.dual.Vertex}
+    (h₁ : (M.faceGraphOnEdgeSet S).Adj p q) (h₂ : (M.faceGraphOnEdgeSet S).Adj r s)
+    (heq : dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S h₁) =
+      dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S h₂)) :
+    s(p, q) = s(r, s) := by
+  exact faceGraphOnEdgeSetEdge_eq (M := M) S h₁ h₂ ((dualEdgeEquiv M).injective heq)
+
+/-- A carried face adjacency selects a concrete original edge in `S` and the
+two original face classes on its sides. -/
+theorem exists_dart_faceGraphOnEdgeSetEdge_faces (M : CombinatorialMap D) (S : Set M.Edge)
+    {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) :
+    ∃ d : D,
+      dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S h) = M.Edge_mk d ∧
+        M.Edge_mk d ∈ S ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M p, dualVertexEquivFace M q) := by
+  obtain ⟨d, hd⟩ := Quotient.exists_rep (faceGraphOnEdgeSetEdge (M := M) S h)
+  refine ⟨d, ?_, ?_, ?_⟩
+  · rw [← hd]
+    rfl
+  · have hmem := faceGraphOnEdgeSetEdge_mem (M := M) S h
+    rw [← hd] at hmem
+    simpa using hmem
+  · have hends := faceGraphOnEdgeSetEdge_spec (M := M) S h
+    rw [← hd, Edge.ends_mk] at hends
+    have hmap :
+        s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+            dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) =
+          s(dualVertexEquivFace M p, dualVertexEquivFace M q) := by
+      simpa only [Sym2.map_mk] using congrArg (Sym2.map (dualVertexEquivFace M)) hends
+    have hedge : M.edgePerm⁻¹ d = M.edgePerm d := by
+      rw [show M.edgePerm⁻¹ = M.edgePerm from
+        M.edgePerm_involutive.symm_eq_self_of_involutive]
+    have hdual_edge : M.dual.edgePerm d = M.edgePerm d := by
+      change M.edgePerm⁻¹ d = M.edgePerm d
+      exact hedge
+    calc
+      s(M.Face_mk d, M.Face_mk (M.edgePerm d))
+          = s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+              dualVertexEquivFace M (M.dual.Vertex_mk (M.edgePerm d))) := by
+            rfl
+      _ = s(dualVertexEquivFace M (M.dual.Vertex_mk d),
+              dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) := by
+            rw [hdual_edge]
+      _ = s(dualVertexEquivFace M p, dualVertexEquivFace M q) := hmap
+
 /-- A face-graph adjacency selects a concrete original edge and the two original
 face classes on its sides.
 
@@ -456,6 +1136,278 @@ theorem exists_dart_faceGraphEdge_faces (M : CombinatorialMap D)
               dualVertexEquivFace M (M.dual.Vertex_mk (M.dual.edgePerm d))) := by
             rw [hdual_edge]
       _ = s(dualVertexEquivFace M p, dualVertexEquivFace M q) := hmap
+
+/-- The dual graph carried by the complement of a primal tree block is
+connected.
+
+Fix a primal leaf-insertion order and the corresponding selected tree edges
+`f`.  If two faces are separated by a complementary edge, they are adjacent in
+`faceGraphOnEdgeSet {e | e ∉ Set.range f}` and therefore lie in the same
+connected component.  The previous reverse-induction theorem upgrades this
+component-label equality from complementary edges to the selected tree edges as
+well.  Hence every edge of the full face graph preserves the component label,
+and connectedness of the full face graph forces the carried dual graph to have a
+single connected component. This is Erickson's spanning-tree/complementary
+spanning-cotree connectivity statement in the Lando--Zvonkin dart model. -/
+theorem faceGraphOnEdgeSet_connected_of_not_mem_range_vertexLeafOrder
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.vertexGraph) (hT : T.IsTree)
+    {l : List M.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (f : Fin (l.length - 1) → M.Edge)
+    (hf : ∀ i : Fin (l.length - 1),
+      f i =
+        vertexGraphEdge (M := M)
+          (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)) :
+    (M.faceGraphOnEdgeSet {e | e ∉ Set.range f}).Connected := by
+  classical
+  let S : Set M.Edge := {e | e ∉ Set.range f}
+  let Gc : SimpleGraph M.dual.Vertex := M.faceGraphOnEdgeSet S
+  let labelFace : M.Face → Gc.ConnectedComponent :=
+    fun φ => Gc.connectedComponentMk ((dualVertexEquivFace M).symm φ)
+  have hcompFace : ∀ d : D,
+      M.Edge_mk d ∈ S →
+      labelFace (M.Face_mk d) = labelFace (M.Face_mk (M.edgePerm d)) := by
+    intro d hdS
+    dsimp [labelFace]
+    by_cases hface : M.Face_mk d = M.Face_mk (M.edgePerm d)
+    · rw [hface]
+    · apply SimpleGraph.ConnectedComponent.connectedComponentMk_eq_of_adj
+      refine ⟨?_, M.dual.Edge_mk d, ?_, ?_⟩
+      · intro hEq
+        apply hface
+        exact congrArg (dualVertexEquivFace M) hEq
+      · change M.Edge_mk d ∈ S
+        exact hdS
+      · have hdual_edge : M.dual.edgePerm d = M.edgePerm d := by
+          change M.edgePerm⁻¹ d = M.edgePerm d
+          rw [show M.edgePerm⁻¹ = M.edgePerm from
+            M.edgePerm_involutive.symm_eq_self_of_involutive]
+        have hleft :
+            (dualVertexEquivFace M).symm (M.Face_mk d) = M.dual.Vertex_mk d := by
+          apply (dualVertexEquivFace M).injective
+          simp
+        have hright :
+            (dualVertexEquivFace M).symm (M.Face_mk (M.edgePerm d)) =
+              M.dual.Vertex_mk (M.edgePerm d) := by
+          apply (dualVertexEquivFace M).injective
+          simp
+        rw [hleft, hright]
+        simpa [hdual_edge] using (Edge.ends_mk (M := M.dual) d)
+  have htreeLabel :=
+    M.vertexLeafOrder_edge_face_label_eq_of_not_mem_range
+      T hTsub hl_nodup parent hparent f hf labelFace
+      (by intro d hdS; exact hcompFace d hdS)
+  have hadj_full :
+      ∀ ⦃u v : M.dual.Vertex⦄, (M.faceGraph).Adj u v →
+        Gc.connectedComponentMk u = Gc.connectedComponentMk v := by
+    intro u v huv
+    obtain ⟨d, _hdE, hfaces⟩ := M.exists_dart_faceGraphEdge_faces huv
+    have hdlabel :
+        labelFace (M.Face_mk d) = labelFace (M.Face_mk (M.edgePerm d)) := by
+      by_cases hdS : M.Edge_mk d ∉ Set.range f
+      · exact hcompFace d hdS
+      · push Not at hdS
+        rcases hdS with ⟨j, hj⟩
+        obtain ⟨d', hd', hlabel'⟩ := htreeLabel j
+        have hE : M.Edge_mk d = M.Edge_mk d' := by
+          calc
+            M.Edge_mk d = f j := hj.symm
+            _ = M.Edge_mk d' := hd'
+        exact M.edge_face_label_eq_of_edge_mk_eq labelFace hE hlabel'
+    rw [Sym2.eq_iff] at hfaces
+    rcases hfaces with ⟨hu, hv⟩ | ⟨hu, hv⟩
+    · simpa [labelFace, hu, hv] using hdlabel
+    · simpa [labelFace, hu, hv] using hdlabel.symm
+  have hVconn : (M.vertexGraph).Connected := hT.connected.mono hTsub
+  have hMconn : M.Connected := M.connected_of_vertexGraph_connected hVconn
+  letI : Nonempty M.Vertex := hVconn.nonempty
+  have hfaceConn : (M.faceGraph).Connected := M.faceGraph_connected hMconn
+  exact {
+    preconnected := by
+      intro u v
+      have hEq :
+          Gc.connectedComponentMk u = Gc.connectedComponentMk v :=
+        SimpleGraph.Connected.apply_eq_of_forall_adj (G := M.faceGraph)
+          hfaceConn hadj_full u v
+      exact SimpleGraph.ConnectedComponent.eq.mp hEq
+    nonempty := hfaceConn.nonempty
+  }
+
+/-- A carried dual-face adjacency selects a concrete complementary edge.
+
+This unwraps an edge of `faceGraphOnEdgeSet S` into an actual dual edge whose
+original edge class lies in `S` and whose dual endpoints are exactly the given
+unordered face pair. -/
+theorem exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    {z : Sym2 M.dual.Vertex}
+    (hz : z ∈ (M.faceGraphOnEdgeSet S).edgeSet) :
+    ∃ e : M.dual.Edge, dualEdgeEquiv M e ∈ S ∧ Edge.ends (M := M.dual) e = z := by
+  induction z using Sym2.inductionOn with
+  | hf p q =>
+      have hAdj : (M.faceGraphOnEdgeSet S).Adj p q := by
+        simpa using hz
+      exact ⟨faceGraphOnEdgeSetEdge (M := M) S hAdj,
+        faceGraphOnEdgeSetEdge_mem (M := M) S hAdj,
+        faceGraphOnEdgeSetEdge_spec (M := M) S hAdj⟩
+
+/-- The carried dual graph on `S` injects into the original edge set `S`.
+
+Each simple dual adjacency chooses one concrete original edge in `S`. Two
+different carried dual adjacencies cannot choose the same original edge,
+because that would force the same unordered pair of dual face endpoints. -/
+noncomputable def faceGraphOnEdgeSet_edgeSetToEdge
+    (M : CombinatorialMap D) (S : Set M.Edge) :
+    (M.faceGraphOnEdgeSet S).edgeSet → {e : M.Edge // e ∈ S} :=
+  fun e => ⟨dualEdgeEquiv M (Classical.choose
+      (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e.2)),
+    (Classical.choose_spec
+      (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e.2)).1⟩
+
+/-- The chosen original-edge map from carried dual adjacencies is injective. -/
+theorem faceGraphOnEdgeSet_edgeSetToEdge_injective
+    (M : CombinatorialMap D) (S : Set M.Edge) :
+    Function.Injective (faceGraphOnEdgeSet_edgeSetToEdge (M := M) S) := by
+  intro e₁ e₂ h
+  apply Subtype.ext
+  have hEdge :
+      Classical.choose (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₁.2) =
+        Classical.choose (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₂.2) := by
+    apply (dualEdgeEquiv M).injective
+    simpa [faceGraphOnEdgeSet_edgeSetToEdge] using congrArg Subtype.val h
+  have hEnds₁ := (Classical.choose_spec
+      (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₁.2)).2
+  have hEnds₂ := (Classical.choose_spec
+      (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₂.2)).2
+  calc
+    e₁.1 = Edge.ends (M := M.dual)
+        (Classical.choose (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₁.2)) := by
+          simpa using hEnds₁.symm
+    _ = Edge.ends (M := M.dual)
+        (Classical.choose (exists_dualEdge_of_mem_faceGraphOnEdgeSet_edgeSet (M := M) S e₂.2)) := by
+          rw [hEdge]
+    _ = e₂.1 := by
+          simpa using hEnds₂
+
+/-- In a planar map, the full complementary dual graph of a primal spanning tree
+is itself a spanning tree.
+
+This is Erickson's spanning-tree/complementary-spanning-cotree theorem in the
+combinatorial-map layer. The earlier connectivity theorem gives dual
+connectedness on complementary edges; Euler counting forces that carried dual
+graph to have exactly `|F|-1` edges, hence it is acyclic as well. -/
+theorem faceGraphOnEdgeSet_isTree_of_not_mem_range_vertexLeafOrder
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    (hV : 1 ≤ Fintype.card M.Vertex) (hplanar : M.IsPlanar)
+    (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.vertexGraph) (hT : T.IsTree)
+    {l : List M.Vertex} (hl_nodup : l.Nodup)
+    (hl_len : l.length = Fintype.card M.Vertex)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (f : Fin (l.length - 1) → M.Edge)
+    (hf : ∀ i : Fin (l.length - 1),
+      f i =
+        vertexGraphEdge (M := M)
+          (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)) :
+    (M.faceGraphOnEdgeSet {e | e ∉ Set.range f}).IsTree := by
+  classical
+  let S : Set M.Edge := {e | e ∉ Set.range f}
+  let Gc : SimpleGraph M.dual.Vertex := M.faceGraphOnEdgeSet S
+  have hconn : Gc.Connected :=
+    M.faceGraphOnEdgeSet_connected_of_not_mem_range_vertexLeafOrder
+      T hTsub hT hl_nodup parent hparent f hf
+  have hf_inj : Function.Injective f := by
+    intro i j hij
+    let a_i : M.Vertex := l[i.1 + 1]'(by omega)
+    let b_i : M.Vertex := parent (i.1 + 1) (by omega) (by omega)
+    let a_j : M.Vertex := l[j.1 + 1]'(by omega)
+    let b_j : M.Vertex := parent (j.1 + 1) (by omega) (by omega)
+    have hAdj_i : (M.vertexGraph).Adj a_i b_i := by
+      exact hTsub (by simpa [a_i, b_i] using
+        (hparent (i.1 + 1) (by omega) (by omega)).2)
+    have hAdj_j : (M.vertexGraph).Adj a_j b_j := by
+      exact hTsub (by simpa [a_j, b_j] using
+        (hparent (j.1 + 1) (by omega) (by omega)).2)
+    have hEq : vertexGraphEdge (M := M) hAdj_i =
+        vertexGraphEdge (M := M) hAdj_j := by
+      calc
+        vertexGraphEdge (M := M) hAdj_i = f i := (hf i).symm
+        _ = f j := hij
+        _ = vertexGraphEdge (M := M) hAdj_j := hf j
+    have hsym2 : s(a_i, b_i) = s(a_j, b_j) := by
+      exact vertexGraphEdge_eq (M := M) hAdj_i hAdj_j hEq
+    exact SimpleGraph.IsTree.parentEdgeMap_injective
+      (G := T) (l := l) hl_nodup parent hparent hsym2
+  have hrange : Set.ncard (Set.range f) = l.length - 1 := by
+    simpa using Set.ncard_range_of_injective hf_inj
+  have hS : S.ncard = Fintype.card M.dual.Vertex - 1 := by
+    have hScard : S.ncard = Nat.card M.Edge - (l.length - 1) := by
+      change (Set.range f)ᶜ.ncard = Nat.card M.Edge - (l.length - 1)
+      rw [Set.ncard_compl, hrange]
+    have hcount :=
+      M.card_edge_sub_vertexTreeLeafOrder_eq_card_dualVertex_sub_one hV hplanar hl_len
+    rw [Nat.card_eq_fintype_card] at hScard
+    omega
+  have hedge_le : Nat.card Gc.edgeSet ≤ S.ncard := by
+    have hedge_le' : Fintype.card Gc.edgeSet ≤ Fintype.card {e : M.Edge // e ∈ S} :=
+      Fintype.card_le_of_injective
+        (faceGraphOnEdgeSet_edgeSetToEdge (M := M) S)
+        (faceGraphOnEdgeSet_edgeSetToEdge_injective (M := M) S)
+    have hedge_le'' : Nat.card Gc.edgeSet ≤ Fintype.card {e : M.Edge // e ∈ S} := by
+      simpa [Nat.card_eq_fintype_card] using hedge_le'
+    have hSubtype : Fintype.card {e : M.Edge // e ∈ S} = S.ncard := by
+      exact Set.fintypeCard_eq_ncard (s := S)
+    exact hedge_le''.trans (by simp [hSubtype])
+  have hVdual : 1 ≤ Fintype.card M.dual.Vertex := by
+    have hpos : 0 < Fintype.card M.dual.Vertex :=
+      Fintype.card_pos_iff.mpr hconn.nonempty
+    omega
+  apply (SimpleGraph.isTree_iff_connected_and_card (G := Gc)).2
+  refine ⟨hconn, le_antisymm ?_ hconn.card_vert_le_card_edgeSet_add_one⟩
+  calc
+    Nat.card Gc.edgeSet + 1 ≤ S.ncard + 1 := Nat.add_le_add_right hedge_le 1
+    _ = Fintype.card M.dual.Vertex := by
+      rw [hS]
+      omega
+    _ = Nat.card M.dual.Vertex := Nat.card_eq_fintype_card.symm
+
+/-- The complement of a primal tree block contains a dual spanning tree.
+
+Once the carried dual graph on complementary edges is known to be connected,
+`exists_isTree_le` extracts an explicit spanning tree inside it.  This is the
+tree side of Erickson's spanning-tree/complementary-spanning-cotree
+correspondence, in the exact edge-set form consumed by the residual-map
+permutation layer. -/
+theorem exists_faceGraphOnEdgeSet_spanningTree_of_not_mem_range_vertexLeafOrder
+    (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
+    (T : SimpleGraph M.Vertex)
+    [DecidableEq M.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.vertexGraph) (hT : T.IsTree)
+    {l : List M.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (f : Fin (l.length - 1) → M.Edge)
+    (hf : ∀ i : Fin (l.length - 1),
+      f i =
+        vertexGraphEdge (M := M)
+          (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)) :
+    ∃ Tface ≤ M.faceGraphOnEdgeSet {e | e ∉ Set.range f}, Tface.IsTree := by
+  exact SimpleGraph.Connected.exists_isTree_le
+    (G := M.faceGraphOnEdgeSet {e | e ∉ Set.range f})
+    (M.faceGraphOnEdgeSet_connected_of_not_mem_range_vertexLeafOrder
+      T hTsub hT hl_nodup parent hparent f hf)
 
 /-- In a same-face insertion, the newly inserted primal edge is a dual edge
 between the two newly split faces.
@@ -531,6 +1483,133 @@ theorem faceEdgeOfLeafOrder_spec
             dualVertexEquivFace M (parent (i.1 + 1) (by omega) (by omega))) := by
   exact exists_dart_faceGraphEdge_faces (M := M)
     (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- The concrete original edge selected from a leaf-insertion order on a face
+graph carried by a chosen edge set.
+
+This is the complementary-cotree selector needed later in the planar
+tree/cotree decomposition: the selected dual-tree edge is represented by an
+actual original edge known a priori to lie in `S`. -/
+noncomputable def faceEdgeOfLeafOrderOnEdgeSet
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) : M.Edge :=
+  dualEdgeEquiv M
+    (faceGraphOnEdgeSetEdge (M := M) S
+      (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2))
+
+/-- The carried cotree parent edge selected by `faceEdgeOfLeafOrderOnEdgeSet`
+lies in `S` and has the expected two face endpoints. -/
+theorem faceEdgeOfLeafOrderOnEdgeSet_spec
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderOnEdgeSet S T hTsub parent hparent i = M.Edge_mk d ∧
+        M.Edge_mk d ∈ S ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M (l[i.1 + 1]'(by omega)),
+            dualVertexEquivFace M (parent (i.1 + 1) (by omega) (by omega))) := by
+  exact exists_dart_faceGraphOnEdgeSetEdge_faces (M := M) S
+    (hTsub (hparent (i.1 + 1) (by omega) (by omega)).2)
+
+/-- Carried cotree parent edges selected from a face-tree leaf order are
+distinct. -/
+theorem faceEdgeOfLeafOrderOnEdgeSet_injective
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    Function.Injective (M.faceEdgeOfLeafOrderOnEdgeSet S T hTsub parent hparent) := by
+  classical
+  intro i j hij
+  let a_i : M.dual.Vertex := l[i.1 + 1]'(by omega)
+  let b_i : M.dual.Vertex := parent (i.1 + 1) (by omega) (by omega)
+  let a_j : M.dual.Vertex := l[j.1 + 1]'(by omega)
+  let b_j : M.dual.Vertex := parent (j.1 + 1) (by omega) (by omega)
+  have hAdj_i : (M.faceGraphOnEdgeSet S).Adj a_i b_i := by
+    exact hTsub (by simpa [a_i, b_i] using (hparent (i.1 + 1) (by omega) (by omega)).2)
+  have hAdj_j : (M.faceGraphOnEdgeSet S).Adj a_j b_j := by
+    exact hTsub (by simpa [a_j, b_j] using (hparent (j.1 + 1) (by omega) (by omega)).2)
+  have hEq :
+      dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S hAdj_i) =
+        dualEdgeEquiv M (faceGraphOnEdgeSetEdge (M := M) S hAdj_j) := by
+    simpa [faceEdgeOfLeafOrderOnEdgeSet, a_i, b_i, a_j, b_j] using hij
+  have hsym2 : s(a_i, b_i) = s(a_j, b_j) := by
+    exact faceGraphOnEdgeSetEdge_dualEquiv_eq (M := M) S hAdj_i hAdj_j hEq
+  exact SimpleGraph.IsTree.parentEdgeMap_injective (G := T) (l := l) hl_nodup parent
+    hparent hsym2
+
+/-- The carried cotree edge selected by reading a dual leaf-insertion order
+backwards. -/
+noncomputable def faceEdgeOfLeafOrderOnEdgeSetReverse
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) : M.Edge :=
+  M.faceEdgeOfLeafOrderOnEdgeSet S T hTsub parent hparent (Fin.rev i)
+
+/-- The reverse carried cotree selector stays in `S` and has the reversed
+leaf-parent face pair. -/
+theorem faceEdgeOfLeafOrderOnEdgeSetReverse_spec
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1)) :
+    ∃ d : D,
+      M.faceEdgeOfLeafOrderOnEdgeSetReverse S T hTsub parent hparent i = M.Edge_mk d ∧
+        M.Edge_mk d ∈ S ∧
+        s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+          s(dualVertexEquivFace M (l[(Fin.rev i).1 + 1]'(by omega)),
+            dualVertexEquivFace M
+              (parent ((Fin.rev i).1 + 1) (by omega) (by omega))) := by
+  simpa [faceEdgeOfLeafOrderOnEdgeSetReverse] using
+    M.faceEdgeOfLeafOrderOnEdgeSet_spec S T hTsub parent hparent (Fin.rev i)
+
+/-- Reverse carried cotree selectors are injective. -/
+theorem faceEdgeOfLeafOrderOnEdgeSetReverse_injective
+    (M : CombinatorialMap D) (S : Set M.Edge)
+    [Fintype D] [DecidableEq D] (T : SimpleGraph M.dual.Vertex)
+    [DecidableEq M.dual.Vertex] [DecidableRel T.Adj]
+    (hTsub : T ≤ M.faceGraphOnEdgeSet S)
+    {l : List M.dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk')) :
+    Function.Injective (M.faceEdgeOfLeafOrderOnEdgeSetReverse S T hTsub parent hparent) := by
+  intro i j hij
+  apply Fin.rev_injective
+  exact M.faceEdgeOfLeafOrderOnEdgeSet_injective S T hTsub hl_nodup parent hparent hij
 
 /-- Oriented endpoint form of `faceEdgeOfLeafOrder_spec`.
 
@@ -1023,6 +2102,49 @@ theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_ad
   have hE : M.Edge_mk d = M.Edge_mk d₀ := by
     exact hd.trans hedge
   exact M.edge_face_label_eq_of_edge_mk_eq label hE hlabel₀
+
+/-- Representative-invariant label equality for any dart whose incident face
+pair is the next reverse-cotree parent pair.
+
+This is the face-pair version of
+`faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`:
+the transport depends only on the unordered pair of dual endpoints prescribed by
+the leaf-peeling step, not on the specific selector representative of that edge
+class. -/
+theorem faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_face_pair_eq_of_forall_adj_ne_current_parent
+    (M : CombinatorialMap D)
+    [DecidableEq M.dual.Vertex]
+    (T : SimpleGraph M.dual.Vertex) (hTsub : T ≤ M.faceGraph)
+    {l : List M.dual.Vertex} (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) → M.dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    {β : Type*} (label : M.Face → β)
+    (hadj : ∀ ⦃u v : M.dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace M u) = label (dualVertexEquivFace M v))
+    (d : D)
+    (hd :
+      s(M.Face_mk d, M.Face_mk (M.edgePerm d)) =
+        s(dualVertexEquivFace M (l[(Fin.rev j).1 + 1]'(by omega)),
+          dualVertexEquivFace M
+            (parent ((Fin.rev j).1 + 1) (by omega) (by omega)))) :
+    label (M.Face_mk d) = label (M.Face_mk (M.edgePerm d)) := by
+  obtain ⟨d₀, hedge, hfaces₀⟩ :=
+    M.faceEdgeOfLeafOrderReverse_spec T hTsub parent hparent j
+  have hlabel₀ :
+      label (M.Face_mk d₀) = label (M.Face_mk (M.edgePerm d₀)) :=
+    M.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent
+      T hTsub hl_nodup parent hparent i j hprefix label hadj d₀ hedge.symm
+  exact M.edge_face_label_eq_of_face_pair_eq label (hd.trans hfaces₀.symm) hlabel₀
 
 /-- Split-face label equality for the reverse cotree edge selected at a
 leaf-peeling step.
