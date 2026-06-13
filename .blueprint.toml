@@ -3,19 +3,17 @@ name = "lean-formalizations"
 slug = "lean-formalizations"
 
 [paths]
-db          = "data/proof-blueprint.db"
-lean_lib    = "."
-lake_script = "lake-build.sh"
-
-[obligations]
-root_slug = "root"
+db       = "data/proof-blueprint.db"
+lean_lib = "."
 
 [publish]
-# target_symbol = "Mod.top_level_theorem"  # what verify-publish gates
-state = "wip"  # "wip" | "complete"; while "wip", sorryAx is auto-approved in the spine view
+# Multi-theorem library — no single target_symbol.
+# Set per-session when gating a specific result:
+#   target_symbol = "Finset.balog_szemeredi_gowers_symmetric"
+state = "wip"
 
 [axioms]
-# Project-declared approved custom axioms (full FQ names). The Lean core
-# axioms (propext, Classical.choice, Quot.sound, Lean.ofReduceBool,
-# Lean.ofReduceNat) are always approved; do NOT list them here.
+# Full FQ names of deliberately approved non-core axioms.
+# Core axioms (propext, Classical.choice, Quot.sound, Lean.ofReduceBool,
+# Lean.ofReduceNat) are always approved; do not list them here.
 approved = []

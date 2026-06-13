@@ -1,9 +1,0 @@
-layer = [
-    { slug = "additive", title = "Additive combinatorics — BSG", ordinal = 1 },
-    { slug = "euclidean", title = "Euclidean geometry", ordinal = 2 },
-    { slug = "elekes-sharir", title = "Elekes–Sharir generic lemmas", ordinal = 3 },
-    { slug = "combinatorial-map", title = "Combinatorial maps", ordinal = 4 },
-    { slug = "convex", title = "Convex geometry", ordinal = 5 },
-    { slug = "unit-distance", title = "Unit distances", ordinal = 6 },
-    { slug = "pach-de-zeeuw", title = "Pach–de Zeeuw program", ordinal = 7 },
-]

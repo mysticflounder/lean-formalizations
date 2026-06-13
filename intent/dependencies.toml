@@ -1,3 +1,0 @@
-dependency = [
-    { obligation = "pdz-bezout", depends_on = "pdz-algebraic-prelim" },
-]
