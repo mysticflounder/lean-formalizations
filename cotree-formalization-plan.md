@@ -97,7 +97,82 @@ Files:
 
 ---
 
-## 0. Status (2026-06-13, latest) — INDUCTION LOCKED IN; gap = 2 geometric residuals
+## 0. Status (2026-06-13, VERDICT) — §4 SameFaceData route does NOT close residual 2; co-faciality is irreducibly geometric
+
+**Conclusion (evidence-backed end-to-end trace, no code written).** The §4
+strategy below — discharge the cotree co-faciality (`hface`, residual 2, the
+`ST:4713` inline `sorry`) *combinatorially* by threading co-faciality through a
+`ResidualMapPrefixStepSameFaceData` `Nat.le_induction` (carry `hsame` in the
+motive; seed at `t = 0`; preserve via `RM:6395`) and finishing with
+`.toInsertion` — **does not eliminate the geometry. It relocates `hface` into a
+per-step hypothesis (`hchoose` / `hsplit`) that nothing in the repo produces and
+that is logically equivalent to `hface`.** The plan's premise that the carried
+`hsame` supplies the new step's co-faciality is false.
+
+**The trace (file:line, all verifiable):**
+
+1. **The carried `hsame` is NOT the new co-faciality.** The deepest SameFaceData
+   constructor `DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_residualMapEdgeEquiv_of_current_splitPool_eq`
+   (`RM:5785`) takes, as a *required hypothesis*, `hsplit` (`RM:≈5993`–`5998`):
+   `insertedFaceSplitPoolEquiv … (Face_mk c₁) = insertedFaceSplitPoolEquiv …
+   (Face_mk c₂)` for the **angular splice corners** `c₁, c₂` at the two endpoints
+   of the new cotree edge, conditioned on the vertex-rotation match. The
+   predecessor `hsame` is consumed only as a *parameter* to
+   `insertedFaceSplitPoolEquiv` — it does **not** prove `hsplit`.
+
+2. **The seed dodges this only because the full-tree-prefix residual map has one
+   face.** `RM:9114` proves its `hsame` via
+   `residualMap_face_card_one_permuted_treePrefix_of_leafOrder` (`RM:≈9169`):
+   `card Face = 1`, so any two corners are trivially co-facial. After the first
+   cotree split `card Face > 1`, so the seed's trick provably does not extend to
+   the inductive step.
+
+3. **`RM:6395`'s `hsector_direct/swapped` reduce to `hchoose`, which is geometric.**
+   The ST sector helpers `ST:3157` / `ST:3347` are *pure transport*
+   (`simpa using hchoose` after `endpoint_splice_eq_choose_of_arr`): they
+   convert `hchoose` into the rotation-form output. `hchoose` is
+   `insertedFaceSplitPoolEquiv (Face_mk c₁₀) = sideLabel d` at the
+   **Classical-chosen angular splice corner** `c₁₀` (`ST:2966`,
+   `exists_endpoint_splice_incidentAngle`, via
+   `exists_vertexRotationAtRadius_prefix_step_endpoint_splice`). **No lemma in
+   the repo produces `hchoose`** (grep: zero producers; the never-called
+   wrappers `ST:3710` / `ST:4045` and helpers `ST:3537` all *take* it).
+
+4. **§4.1 `hadj` gives only the combinatorial half.** `hadj` → (`VG:2114` +
+   `RM:1411`) → `label (Face_mk d) = label (Face_mk (edgePerm d))`, i.e.
+   `sideLabel d = sideLabel (edgePerm d)` and DART co-faciality
+   `Face_mk (Sum.inl d) = Face_mk (Sum.inl (edgePerm d))` in the successor map.
+   The missing GEOMETRIC half is the identification of the **angular** splice
+   corner `c₁₀` with dart `d`'s split-face side — i.e. `hchoose`.
+
+5. **`hchoose`/`hsplit` ≡ `hface`.** `insertedFaceSplitPoolEquiv` is an
+   `Equiv` (injective), and `RM:1469`
+   (`old_face_eq_iff_splitPool_eq`) makes split-pool equality ⇔ `Face_mk`
+   equality. So the §4 per-step obligation is logically the same fact as the raw
+   `hface` at `RM:9670` (`ST:4713`). Routing through SameFaceData renames it; it
+   does not discharge it.
+
+6. **Documented as still-missing geometry.** `docs/references/planar-tree-cotree.md`
+   lines 322–328 names exactly this: "identify the predecessor corner chosen by
+   the vertex rotation at each endpoint immediately before a future edge with the
+   current split-face label of the corresponding full-residual-map cotree dart
+   side", and states it is "reduced past collar separation" — i.e. it depends on
+   the `PlaneArcSeparation` crosscut/arc-separation machinery, the **same
+   geometric residual as residual 1** (the genus-0 producer at `ST:4562`).
+
+**VERDICT.** Residual 2 (cotree co-faciality) is genuinely geometric, not
+combinatorial plumbing. It cannot be closed by a SameFaceData co-faciality
+induction. Closing it requires the angular-corner ↔ cotree-dart-side
+identification, which reduces to the `PlaneArcSeparation` sector-to-collar
+arc-separation development (the PL\* covering-space side). The §4 plan below is
+therefore retained only as the combinatorial *scaffold* (which is real and
+proven: `hadj` global propagation `TO:727`, the `RM:6395` chain, the seed); its
+claim to discharge co-faciality without geometry is **withdrawn**. The
+`ST:4713` `sorry` stays until the `PlaneArcSeparation` bridge lands.
+
+---
+
+## 0. Status (2026-06-13, earlier) — INDUCTION LOCKED IN; gap = 2 geometric residuals
 
 **DONE & building (whole project, 8491 jobs).** The cotree branch is wired and
 the shipped `6e13e51` step lemma **fires**. The raw `sorry` at the old `ST:4610`
