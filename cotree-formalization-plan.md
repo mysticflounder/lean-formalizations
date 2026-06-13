@@ -13,6 +13,90 @@ packaging to assemble. Every building-block lemma named below exists.
 
 ---
 
+## Location index — START HERE (file:line, as of `d410ea9`)
+
+Line numbers are valid as of commit `d410ea9` (2026-06-12); `ST` and `RM` are
+large, actively-edited files, so a number may drift by a few lines. **If a line
+is off, do not re-read the file front-to-back — grep the name.** The
+declaration keyword (`theorem` / `private theorem` / `def`) sits on the line
+*above* the name when the name is long (it wraps):
+
+```
+grep -nE "(^|\.)<unqualified-name>\b" <file>        # finds decl + call sites
+```
+
+Files:
+- `ST` = `LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean`
+- `RM` = `LeanFormalizations/PachDeZeeuw/CrossingLemma/ResidualMapProperties.lean`
+- `VG` = `LeanFormalizations/Combinatorics/CombinatorialMap/VertexGraph.lean`
+
+### Target
+| What | Location |
+|---|---|
+| `theorem straightLineCanonicalComponentResidualMapPlanarityOfARR` | `ST:4530` |
+| the open `sorry` (later-cotree branch `hgt : lvertex.length - 1 < m`) | `ST:4610` |
+| `m = lvertex.length - 1` base case (already closed, mirror for shape) | `ST:4604` |
+| `obtain ⟨…, π, hπtree, hπrest⟩` destructure of the position permutation | `ST:4555` |
+
+### The permutation `π` and the selector set `Sₑ`
+| What | Location |
+|---|---|
+| `DrawnMultigraph.exists_treeCotreePositionPermutation_of_graphConnected` (produces `π`) | `RM:9741` |
+| cotree-block conjunct of its statement (the placement `hπrest` proves) | `RM:9781`–`9788` |
+
+`Sₑ` (the edge set the cotree block is selected over) is **exactly**:
+```
+{e | residualMapEdgeEquiv G hARRG e ∉
+      Set.range (G.treeEdgeOfLeafOrder hjoin hmult Tvertex hTvertex_sub
+        parentVertex hparentVertex)}
+```
+(`RM:9760`–`9762`, repeated `9785`–`9787`). In `ST`, `hTface_sub` /
+`hπrest` already use this set — reuse them, do not rebuild it.
+
+### Seed and base (§2)
+| What | Location |
+|---|---|
+| `…_exists_residualMapPrefixStepSameFaceData_of_treePrefix_next` (the SameFaceData seed, `t = 0`) | decl `ST:4308`, called `ST:4454` |
+| `…_exists_residualMapPrefixStepInsertion_sameFace_of_treePrefix_next` (Insertion variant used by the `m = a` branch) | decl `ST:4392`, used `ST:4605` |
+
+### Successor wrapper (§3) — the OnEdgeSet entry point
+| What | Location |
+|---|---|
+| `…_exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_choose_splitPool_eq` | decl `ST:4044` |
+
+### The chain the wrapper rides (selector → block → workhorse)
+| What | Location |
+|---|---|
+| `DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_endpointCoverage_of_current_splitPool_eq` (block lemma) | `RM:6261` |
+| `DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq` (selector-agnostic workhorse, takes a bare dart) | `RM:6022` |
+| `DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block` | `RM:5393` |
+| `DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block` | `RM:5302` |
+
+### `hcoverage` producer (§4.1 — AVAILABLE)
+| What | Location |
+|---|---|
+| `DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le` | `RM:8521` |
+
+### `hchoose` ingredients (§4.2 — the hard core, producer NOT yet written)
+| What | Location |
+|---|---|
+| split-pool eq **from** `hadj`, face-pair form (consumes `hadj`, gives the wrapper's `hchoose` shape) | `RM:1209` |
+| split-pool eq **from** `hadj`, plain form | `RM:1033` |
+| reverse-prefix label transport (residual layer) | `RM:1089` |
+| **the `hadj` hypothesis shape** (read this to know what must be proven) | `RM:1235`–`1243` (inside the `RM:1209` signature) |
+| CombinatorialMap-layer label transport | `VG:1871` |
+| CombinatorialMap-layer face-pair label eq | `VG:2114` |
+
+### Selectors and structures (definitions)
+| What | Location |
+|---|---|
+| `faceEdgeOfLeafOrderOnEdgeSetReverse` (def) | `VG:1563` |
+| `faceEdgeOfLeafOrderReverse` (def) | `VG:1701` |
+| `structure ResidualMapPrefixStepSameFaceData` (fields: `c₁ c₂ hc hsame hvertex`) | `RM:1732` |
+| `ResidualMapPrefixStepSameFaceData.toInsertion` | `RM:1747` |
+
+---
+
 ## 0. Status (2026-06-12)
 
 **DONE & building (committed):** the OnEdgeSet cotree-block plumbing. This
