@@ -1161,6 +1161,50 @@ theorem range_toSimpleArc : Set.range β.toSimpleArc = β.carrier := by
     obtain ⟨i, hi⟩ := hz
     exact β.segCarrier_subset_range_param i hi
 
+/-! #### Endpoint values of the parametrisation
+
+The PL parametrisation `param` carries the two `SimpleArc` endpoints `src = ⟨0,_⟩`,
+`tgt = ⟨1,_⟩` to the first and last `PolyArc` vertices.  These bridge the
+`ArcInRegion` frontier hypotheses (stated for `β.toSimpleArc`'s endpoints) to the PL
+collar's vertex hypotheses (`verts 0 ∈ Rᶜ`, `verts (last) ∈ Rᶜ`). -/
+
+/-- `paramRaw 0 = verts 0`: at `x = 0` every ramp `ramp (0 - i)` vanishes
+(`-i ≤ 0`), leaving the base vertex. -/
+theorem paramRaw_zero : β.paramRaw 0 = β.verts 0 := by
+  have hcs0 : (Fin.castSucc β.firstSeg : Fin (β.numSegs + 1)) = 0 :=
+    Fin.ext (by simp [firstSeg])
+  have h := β.paramRaw_collapse_of 0 β.firstSeg 0 (by simp [firstSeg]) le_rfl zero_le_one
+  rw [h, hcs0]; simp
+
+/-- `paramRaw 1 = verts (last)`: at `x = 1` every ramp `ramp (n - i)` is `1`
+(`n - i ≥ 1`), so the telescoping sum collapses to the last vertex. -/
+theorem paramRaw_one : β.paramRaw 1 = β.verts (Fin.last β.numSegs) := by
+  have hpos := β.numSegs_pos
+  have hsl : (Fin.succ β.lastSeg : Fin (β.numSegs + 1)) = Fin.last β.numSegs := by
+    apply Fin.ext; simp only [Fin.val_succ, lastSeg, Fin.val_last]; omega
+  have hx : (β.numSegs : ℝ) * 1 = ((β.lastSeg : ℕ) : ℝ) + 1 := by
+    have : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
+    rw [this]; push_cast [Nat.cast_sub hpos]; ring
+  have h := β.paramRaw_collapse_of 1 β.lastSeg 1 hx zero_le_one le_rfl
+  rw [h, hsl]; simp
+
+/-- `param src = verts 0` (the `SimpleArc` source endpoint is the first vertex). -/
+theorem param_src : β.param SimpleArc.src = β.verts 0 := by
+  rw [param, show ((SimpleArc.src : Set.Icc (0 : ℝ) 1) : ℝ) = 0 from rfl]
+  exact β.paramRaw_zero
+
+/-- `param tgt = verts (last)` (the `SimpleArc` target endpoint is the last vertex). -/
+theorem param_tgt : β.param SimpleArc.tgt = β.verts (Fin.last β.numSegs) := by
+  rw [param, show ((SimpleArc.tgt : Set.Icc (0 : ℝ) 1) : ℝ) = 1 from rfl]
+  exact β.paramRaw_one
+
+/-- The `toSimpleArc` source endpoint is the first vertex. -/
+theorem toSimpleArc_src : β.toSimpleArc SimpleArc.src = β.verts 0 := β.param_src
+
+/-- The `toSimpleArc` target endpoint is the last vertex. -/
+theorem toSimpleArc_tgt :
+    β.toSimpleArc SimpleArc.tgt = β.verts (Fin.last β.numSegs) := β.param_tgt
+
 end PolyArc
 
 /-! ## §L3 sub-node 2 — the tapered collar tube

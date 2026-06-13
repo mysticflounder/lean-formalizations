@@ -360,9 +360,16 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
      `consecutive_meet` / non-adjacent via `nonadjacent_disjoint`). Coercion
      `PolyArc.toSimpleArc : SimpleArc Plane`.
    - (c) **Carrier relation PROVEN:** `range_toSimpleArc : Set.range β.toSimpleArc =
-     β.carrier` (via `segCarrier_subset_range_param`). *Still TODO for sub-node 1:*
-     the `arcInterior`/endpoint-set relations (relate `arcInterior β.toSimpleArc` to
-     the open segments / interior vertices and the two endpoints `src`/`tgt`).
+     β.carrier` (via `segCarrier_subset_range_param`).
+   - (d) **Endpoint values PROVEN (2026-06-13, sorry-free, axiom-clean):**
+     `paramRaw_zero`/`paramRaw_one` (`paramRaw 0 = verts 0`, `paramRaw 1 = verts (last)`
+     — at the endpoints the ramps collapse via `paramRaw_collapse_of`), and the
+     `SimpleArc`-endpoint forms `param_src`/`param_tgt`, `toSimpleArc_src`/`toSimpleArc_tgt`.
+     These bridge the `ArcInRegion` frontier hypotheses (stated for `β.toSimpleArc`'s
+     `src`/`tgt`) to the PL collar's `verts 0 ∈ Rᶜ` / `verts (last) ∈ Rᶜ` (`hsrc0`/`hsrcL`).
+     *Still TODO for sub-node 1:* the full `arcInterior β.toSimpleArc` set-characterization
+     (relate it to the open segments / interior vertices), needed to pick the spine
+     `S = arcInterior` in the collar instantiation.
 2. **The collar `T`**: open, connected, `arcInterior β ⊆ T ⊆ R`.
    **DONE 2026-06-02, sorry-free, axiom-clean `[propext, Classical.choice,
    Quot.sound]`.** Construction settled on the cleaner **tapered tube**
