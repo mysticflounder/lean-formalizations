@@ -4042,7 +4042,7 @@ private theorem
             c₁ c₂ hc hpred₁ hpred₂)
 
 private theorem
-    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderReverse_next_block_of_choose_splitPool_eq
+    stComponentDrawing_prefixPermute_exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_choose_splitPool_eq
     (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
     (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
     {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
@@ -4051,6 +4051,10 @@ private theorem
     (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
     (π : Equiv.Perm (Fin (stComponentDrawing P L S E hE C).numEdges))
     {a : ℕ}
+    (Sₑ :
+      Set
+        (residualMap (stComponentDrawing P L S E hE C)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Edge)
     (T :
       SimpleGraph
         (residualMap (stComponentDrawing P L S E hE C)
@@ -4061,7 +4065,7 @@ private theorem
     (hTsub :
       T ≤
         (residualMap (stComponentDrawing P L S E hE C)
-          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).faceGraph)
+          (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).faceGraphOnEdgeSet Sₑ)
     {l :
       List
         (residualMap (stComponentDrawing P L S E hE C)
@@ -4077,10 +4081,10 @@ private theorem
       π (Fin.castLE hblock (Fin.natAdd a j)) =
         residualMapEdgeEquiv (stComponentDrawing P L S E hE C)
           (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)
-          (CombinatorialMap.faceEdgeOfLeafOrderReverse
+          (CombinatorialMap.faceEdgeOfLeafOrderOnEdgeSetReverse
             (residualMap (stComponentDrawing P L S E hE C)
               (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
-            T hTsub parent hparent j))
+            Sₑ T hTsub parent hparent j))
     (i j : Fin (l.length - 1))
     (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
     (hm : a + i.1 ≤ ((stComponentDrawing P L S E hE C).permuteEdges π).numEdges)
@@ -4118,10 +4122,10 @@ private theorem
       ∀ d : Fin (stComponentDrawing P L S E hE C).numEdges × Bool,
         (residualMap (stComponentDrawing P L S E hE C)
           (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).Edge_mk d =
-            (CombinatorialMap.faceEdgeOfLeafOrderReverse
+            (CombinatorialMap.faceEdgeOfLeafOrderOnEdgeSetReverse
               (residualMap (stComponentDrawing P L S E hE C)
                 (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C))
-              T hTsub parent hparent j) →
+              Sₑ T hTsub parent hparent j) →
         ∀ {p₁ p₂ : ℝ × ℝ}
           (hpnew₁ :
             ((((stComponentDrawing P L S E hE C).permuteEdges π).prefixEdges
@@ -4205,8 +4209,8 @@ private theorem
       edgeSetDrawing_arcsJoinEndpoints (G := G₀) (hE := hEc)
         (stMultigraph_arcsJoinEndpoints P L)
   exact
-    G.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
-      π hjoin hARRG T hTsub parent hparent hblock hπcotree i j hprefix
+    G.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
+      π hjoin hARRG Sₑ T hTsub parent hparent hblock hπcotree i j hprefix
       hm hm' hm'' hARR hARR' hARR'' s₁ s₂ hs hsame hvertex hcoverage
       (by
         intro d hd p₁ p₂ hpnew₁ hpnew₂ hpother₁ hpother₂ hcase hp₁ hp₂

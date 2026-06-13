@@ -1080,6 +1080,45 @@ theorem residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool
       (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
       T hTsub hl_nodup parent hparent i j hprefix label hlabel hadj
 
+/-- Reverse cotree face-label transport on a residual map prefix.
+
+This is the residual-map packaging of the generic reverse leaf-peeling label
+transport lemma from `VertexGraph.lean`: once a label is constant across the
+adjacent pairs inside the next unpeeled reverse prefix, it is constant on that
+whole prefix. -/
+theorem residualMap_prefixStep_faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent
+    (m : ℕ) (hm : m ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (T : SimpleGraph (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    [DecidableEq (residualMap (G.prefixEdges m hm) hARR).dual.Vertex]
+    {l : List (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hl_nodup : l.Nodup)
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap (G.prefixEdges m hm) hARR).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (i : Fin (l.length - 1))
+    {β : Type*} (label : (residualMap (G.prefixEdges m hm) hARR).Face → β)
+    (hadj : ∀ ⦃u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex⦄,
+      u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset →
+      T.Adj u v →
+      s(u, v) ≠
+        s(l[(Fin.rev i).1 + 1]'(by omega),
+          parent ((Fin.rev i).1 + 1) (by omega) (by omega)) →
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+        label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v))
+    {u v : (residualMap (G.prefixEdges m hm) hARR).dual.Vertex}
+    (hu : u ∈ (l.take ((Fin.rev i).1 + 1)).toFinset)
+    (hv : v ∈ (l.take ((Fin.rev i).1 + 1)).toFinset) :
+    label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) u) =
+      label (dualVertexEquivFace (residualMap (G.prefixEdges m hm) hARR) v) := by
+  simpa using
+    (CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent
+      (M := residualMap (G.prefixEdges m hm) hARR) T hl_nodup parent hparent i
+      label hadj hu hv)
+
 /-- Representative-invariant reverse cotree split-pool label transport.
 
 The selector `faceEdgeOfLeafOrderReverse` names an unoriented edge class.  This
@@ -5343,6 +5382,59 @@ theorem DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_bl
         ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
           T hTsub parent hparent j) := hlast
 
+/-- Consecutive carried-cotree block positions.
+
+The carried (`faceGraphOnEdgeSet S`) analogue of
+`permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block`: if `j` is the next
+reverse leaf-peeling index after `i`, then the edge at prefix position
+`a + i + 1` is the carried reverse-cotree edge selected by `j`.  This is the
+selector the tree/cotree position permutation actually uses, so it is the form
+consumed by the cotree block step. -/
+theorem DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block
+    (G : DrawnMultigraph) (hARRG : ArcsRotationRegular G)
+    {a : ℕ} (π : Equiv.Perm (Fin G.numEdges))
+    (S : Set (residualMap G hARRG).Edge)
+    (T : SimpleGraph (residualMap G hARRG).dual.Vertex)
+    [DecidableEq (residualMap G hARRG).dual.Vertex]
+    (hTsub : T ≤ (residualMap G hARRG).faceGraphOnEdgeSet S)
+    {l : List (residualMap G hARRG).dual.Vertex}
+    (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      (residualMap G hARRG).dual.Vertex)
+    (hparent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
+      parent k hk hk' ∈ (l.take k).toFinset ∧
+        T.Adj (l[k]'hk') (parent k hk hk'))
+    (hblock : a + (l.length - 1) ≤ G.numEdges)
+    (hπcotree : ∀ j : Fin (l.length - 1),
+      π (Fin.castLE hblock (Fin.natAdd a j)) =
+        residualMapEdgeEquiv G hARRG
+          ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse
+            S T hTsub parent hparent j))
+    (i j : Fin (l.length - 1))
+    (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
+    (hm' : (a + i.1 + 1) + 1 ≤ (G.permuteEdges π).numEdges) :
+    π (Fin.castLE hm' (Fin.last (a + i.1 + 1))) =
+      residualMapEdgeEquiv G hARRG
+        ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse
+          S T hTsub parent hparent j) := by
+  have hnext : a + j.1 = a + i.1 + 1 :=
+    Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one hprefix
+  have hmj' : a + j.1 + 1 ≤ (G.permuteEdges π).numEdges := by
+    omega
+  have hlast :=
+    G.permuted_prefix_last_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block
+      hARRG π S T hTsub parent hparent hblock hπcotree j hmj'
+  have hfin :
+      Fin.castLE hm' (Fin.last (a + i.1 + 1)) =
+        Fin.castLE hmj' (Fin.last (a + j.1)) := by
+    ext
+    simp [hnext]
+  calc
+    π (Fin.castLE hm' (Fin.last (a + i.1 + 1)))
+        = π (Fin.castLE hmj' (Fin.last (a + j.1))) := congrArg π hfin
+    _ = residualMapEdgeEquiv G hARRG
+        ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse
+          S T hTsub parent hparent j) := hlast
+
 /-- If the next position of a permuted prefix is the residual-map edge class
 represented by `d`, then the two endpoints of that new drawing edge are exactly
 the two anchors of `d` and its opposite dart, up to the orientation of `d`.
@@ -6166,14 +6258,15 @@ This is the witness form of
 once the current prefix already meets every full-map vertex, identifying the
 two chosen predecessor corners in the current split-pool quotient produces the
 actual same-face splice data for the next reverse-cotree edge. -/
-theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
+theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_endpointCoverage_of_current_splitPool_eq
     (G : DrawnMultigraph) (π : Equiv.Perm (Fin G.numEdges))
     (hjoin : G.ArcsJoinEndpoints)
     (hARRG : ArcsRotationRegular G)
     {a : ℕ}
+    (S : Set (residualMap G hARRG).Edge)
     (T : SimpleGraph (residualMap G hARRG).dual.Vertex)
     [DecidableEq (residualMap G hARRG).dual.Vertex]
-    (hTsub : T ≤ (residualMap G hARRG).faceGraph)
+    (hTsub : T ≤ (residualMap G hARRG).faceGraphOnEdgeSet S)
     {l : List (residualMap G hARRG).dual.Vertex}
     (parent : ∀ k : ℕ, (hk : 0 < k) → (hk' : k < l.length) →
       (residualMap G hARRG).dual.Vertex)
@@ -6184,8 +6277,8 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLe
     (hπcotree : ∀ j : Fin (l.length - 1),
       π (Fin.castLE hblock (Fin.natAdd a j)) =
         residualMapEdgeEquiv G hARRG
-          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse
-            T hTsub parent hparent j))
+          ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse
+            S T hTsub parent hparent j))
     (i j : Fin (l.length - 1))
     (hprefix : (Fin.rev j).1 + 2 = (Fin.rev i).1 + 1)
     (hm : a + i.1 ≤ (G.permuteEdges π).numEdges)
@@ -6208,7 +6301,7 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLe
       e ∈ incidentEnds ((G.permuteEdges π).prefixEdges (a + i.1 + 1) hm') (p : ℝ × ℝ))
     (hsplit : ∀ d : Fin G.numEdges × Bool,
       (residualMap G hARRG).Edge_mk d =
-        (residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j →
+        (residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse S T hTsub parent hparent j →
       ∀ {p₁ p₂ : ℝ × ℝ}
         (hpnew₁ :
           (((G.permuteEdges π).prefixEdges ((a + i.1 + 1) + 1) hm'').endpoints
@@ -6274,13 +6367,13 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLe
         (a + i.1 + 1) hm' hm'' hARR' hARR'') := by
   classical
   obtain ⟨d, hd⟩ := Quotient.exists_rep
-    ((residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j)
+    ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse S T hTsub parent hparent j)
   have hπnext :
       π (Fin.castLE hm'' (Fin.last (a + i.1 + 1))) =
         residualMapEdgeEquiv G hARRG
-          ((residualMap G hARRG).faceEdgeOfLeafOrderReverse T hTsub parent hparent j) :=
-    G.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block
-      hARRG π T hTsub parent hparent hblock hπcotree i j hprefix hm''
+          ((residualMap G hARRG).faceEdgeOfLeafOrderOnEdgeSetReverse S T hTsub parent hparent j) :=
+    G.permuted_prefix_next_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block
+      hARRG π S T hTsub parent hparent hblock hπcotree i j hprefix hm''
   have hπd :
       π (Fin.castLE hm'' (Fin.last (a + i.1 + 1))) =
         residualMapEdgeEquiv G hARRG ((residualMap G hARRG).Edge_mk d) := by
