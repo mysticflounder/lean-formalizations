@@ -3996,6 +3996,35 @@ theorem firstMid_notMem_segCarrier (β : PolyArc) {k : Fin β.numSegs} (hk : k �
     have h12 := firstMid_footParam β
     rw [hfoot1] at h12; norm_num at h12
 
+/-- **Uniform region clearance over a compact spine window.**
+
+For a compact set `K` contained in an open region `R` (with nonempty complement),
+the distance to the boundary `infDist y Rᶜ` is bounded below by a single positive
+constant `d`, uniformly over `y ∈ K`.
+
+This is the elementary compactness keystone shared by every `δ₀`-vs-`Rᶜ` budget of
+the collar instantiation: the band foot-window certificate `hRband`, the end-cap
+radius positivities `hSrcRpos`/`hTgtRpos`, the vertex-disk region budget `hρR`, and
+`hmR` all need `δ₀ ≤ ½·infDist · Rᶜ` over a compact carrier window, and they are all
+discharged by choosing `δ₀` below `d/2`.
+
+Proof: `infDist · Rᶜ` is continuous (`continuous_infDist_pt`), so on the compact `K`
+it attains a minimum at some `y₀ ∈ K` (extreme value theorem,
+`IsCompact.exists_isMinOn`); since `y₀ ∈ K ⊆ R` and `Rᶜ` is closed, that minimum is
+strictly positive (`IsClosed.notMem_iff_infDist_pos`).  The empty case returns `1`. -/
+theorem exists_pos_infDist_compl_of_isCompact {R K : Set Plane}
+    (hR : IsOpen R) (hRc : Rᶜ.Nonempty) (hK : IsCompact K) (hKR : K ⊆ R) :
+    ∃ d : ℝ, 0 < d ∧ ∀ y ∈ K, d ≤ Metric.infDist y Rᶜ := by
+  classical
+  rcases K.eq_empty_or_nonempty with hKe | hKne
+  · exact ⟨1, one_pos, fun y hy => absurd (hKe ▸ hy) (by simp)⟩
+  · obtain ⟨y₀, hy₀K, hy₀min⟩ :=
+      hK.exists_isMinOn hKne (Metric.continuous_infDist_pt (Rᶜ)).continuousOn
+    have hpos : 0 < Metric.infDist y₀ Rᶜ :=
+      (hR.isClosed_compl.notMem_iff_infDist_pos hRc).mp
+        (fun h => h (hKR hy₀K))
+    exact ⟨Metric.infDist y₀ Rᶜ, hpos, fun y hy => (isMinOn_iff.mp hy₀min) y hy⟩
+
 /-- A single positive radius `B` below which a witness within `B` of `firstMid β` is
 inside the tube cap, the region clearance, and the separation to every other edge. -/
 theorem exists_firstMid_radius (β : PolyArc) (R : Set Plane) {δ₀ : ℝ} (hδ₀ : 0 < δ₀)

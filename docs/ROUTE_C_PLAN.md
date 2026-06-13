@@ -986,16 +986,29 @@ This **pins, with no slack, the only remaining geometric obligations**:
       (W∩endCap)(opt)`, reusing the `isPreconnected_union_opt` cascade with the clipped-cap
       lemma (3) in place of `convex_endCap*`; overlaps land in `band ⊆ W` (the hO witnesses
       are band points). Then drop `hsub` from `isPreconnected_collarPlus/Minus`.
-* **G4** — every `z ∈ R∖carrier` has its relative component meet `taperedTube∖carrier`
-  (component-boundary-in-carrier topology; tractable, not Jordan-strength).
-* **Collar instantiation** — produce one parameter bundle `(δ₀, α, ρ, S=arcInterior)`
-  simultaneously satisfying P2 (`union_collarPlus_collarMinus`), P3
-  (`exists_collar_disjoint`), P4 (`collar±_nonempty`), the **P5 side-conditions**
-  (`hsub` no-taper containment `δ₀ ≤ ½·infDist over S`; overlap budgets
-  `ρ(succ i) > δ₀+2α·‖edge‖`, which coincide with the existing P2 `hsrc`/`htgt`; `α<1/3`),
-  and **G4**, feeding `exists_twoSidedPartition_of_collar` with `C = β.carrier`. Regime
-  consistency checked on paper: pick `ρ` from P3, then `α` small (`< ρ/maxedge` and
-  `< 1/3`), then `δ₀` small (no-taper + separation).
+* **G4 — DONE (2026-06-13, `PLAssembly.lean`, sorry-free, axiom-clean).** The former
+  G4 reachability condition is **derived internally** by
+  `connectedComponentIn_meets_neighborhood_of_cut` (`PLAssembly.lean:50`): a component
+  `K` of `R∖C` missing `T∖C` is disjoint from the open `T`, so `closure K` misses
+  `R∩C`; then `K` is clopen in the connected `R`, forcing `K = R` — contradiction. It
+  needs only `IsSimplyConnected R` (⇒ connected) + the cover `R∩C ⊆ T`. So
+  `exists_twoSidedPartition_of_collar` no longer takes an `hG4` hypothesis; G4 is not a
+  remaining node.
+* **Collar instantiation — IN PROGRESS (2026-06-13).** Produce one parameter bundle
+  `(δ₀, α, ρ, S)` simultaneously satisfying the ~30 hypotheses of
+  `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
+  (`PLCollarSeparation.lean:260`) — P2/P3/P4 + the P5 sliver budgets — feeding it with
+  `C = β.carrier`, `S = β.carrier`. Regime consistency checked on paper: pick `ρ` from
+  P3, then `α` small (`< ρ/maxedge` and `< 1/3`), then `δ₀` small (no-taper +
+  separation + region clearance). **KEYSTONE DONE:** `exists_pos_infDist_compl_of_isCompact`
+  (`PLArc.lean`, sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`) — for
+  a compact `K ⊆ R` (R open, `Rᶜ` nonempty), `∃ d>0, ∀ y∈K, d ≤ infDist y Rᶜ` (extreme
+  value theorem on the continuous `infDist · Rᶜ` + boundary positivity). This is the
+  single compactness fact every `δ₀ ≤ ½·infDist · Rᶜ` budget (`hRband`, `hSrcRpos`,
+  `hTgtRpos`, `hρR`, `hmR`) reduces to; the discharge picks `δ₀ < d/2` over the compact
+  spine windows. STILL TODO: assemble the full bundle (the band/sep/sliver budgets) into
+  a clean `exists_twoSidedPartition_of_polyArc` taking only the natural geometric inputs
+  (PolyArc, `hturn`, endpoints in `Rᶜ`, interior in `R`, `R` simply connected).
 * **Residual closure (separate, NOT-attempted NO-GO)** — representing an arbitrary
   `SimpleArc` satisfying `ArcInRegion` as a `PolyArc` is Schoenflies-strength. The
   PL route discharges `exists_twoSidedPartition_of_polyArc`; wiring it to the
