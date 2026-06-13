@@ -131,12 +131,30 @@ to a cotree index `j : Fin (lface.length-1)` via `m = a + j.1`, which needs
   repo turns no-crossing straight-line geometry into genus-0 / `a+b=E`**
   (greps over `NoCrossingPairsInEdgeSet`, `genus`, `IsPlanar` producers).
 
-**CONCLUSION:** the cotree `sorry` cannot be closed by formalization-packaging
-of existing lemmas. Closing it requires the genuine remaining theorem:
-**no-crossing straight-line drawing ⇒ genus-0 residual map** (equivalently
-`a+b=numEdges`, the cotree tail is empty). Candidate home: the
-`drawing→genus-0-map bridge` flagged in `CrossingLemma.lean:211` (§4/§6).
-{{NEEDS_ADAM_INPUT}} — confirm the intended genus-0 source before building it.
+**CONCLUSION (literature-grounded — Erickson Lecture 10, Lando–Zvonkin §1.3.3).**
+This is settled-literature formalization, not an open problem, but `hplanar :
+M.IsPlanar` (genus-0) is an **input** in Erickson's tree-cotree development, not
+an output of the insertion induction. Confirmed:
+`card_vertexTreeLeafOrder_add_dualVertexLeafOrder_eq_card_edge` (`VG:847`) — the
+von Staudt count `(V−1)+(F−1)=E` that the cotree tail needs — **takes
+`hplanar : M.IsPlanar` and proves the count by `omega` from `V−E+F=2`.** So
+`a+b=numEdges ⇔ M.IsPlanar`, exactly as traced. The genus-0 precondition for the
+no-crossing residual map must come **geometrically** (Euler's formula for the
+no-crossing straight-line plane embedding — the `drawing→genus-0-map bridge`,
+`CrossingLemma.lean:211`, §4/§6), and **no such producer exists in the repo
+yet**: every `residualMap … IsPlanar` is a `_of_prefix_insertions` consumer, an
+iso/insertion-preservation lemma, or this theorem. The reference doc
+`docs/references/planar-tree-cotree.md` "Still missing" (lines 315–328) names the
+two remaining settled-literature pieces: the **planar-map complement theorem**
+(needs the planar map) and the **residual-map face-stability at later cotree
+steps**.
+
+**NEXT (work the hardest part first):** formalize the geometric genus-0 entry —
+no-crossing straight-line drawing ⇒ `(residualMap …).IsPlanar` (Euler for plane
+graphs) — via the §4/§6 drawing→genus-0 bridge. That `hplanar` unlocks `VG:847`
+(`a+b=numEdges`), which unlocks the cotree index map `m ↦ j`, which lets the
+induction call the two new OnEdgeSet step lemmas (`6e13e51`). The step lemmas are
+ready; the geometric genus-0 is the linchpin.
 
 ---
 
