@@ -97,6 +97,37 @@ Files:
 
 ---
 
+## 0. Status (2026-06-13)
+
+**DONE & building (committed `1ee54b5`):** the OnEdgeSet **sector-sideLabels
+block-step bridge** `DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_faceEdgeOfLeafOrderOnEdgeSetReverse_next_block_of_endpointCoverage_of_sector_sideLabels`
+(`RM:7154`). OnEdgeSet sibling of the unrestricted `RM:6924`: reads the
+edge / position-pin / face-pair off `faceEdgeOfLeafOrderOnEdgeSetReverse_spec`
+(`VG:1577`) and `permuted_prefix_next_eq_faceEdgeOfLeafOrderOnEdgeSetReverse_of_block`
+(`RM:5393`), widens the carried containment via `faceGraphOnEdgeSet_le_faceGraph`
+(`VG:1012`), forwards to the selector-agnostic face-pair lemma `RM:6395`. Body
+is a faithful transform of `RM:6924`'s 4-line proof.
+
+**PARKED (not committed) — ST-layer sideLabels wrapper.** A `stComponentDrawing`
+wrapper mirroring `ST:3710` onto the OnEdgeSet selector + `RM:7154` was written
+and **diff-verified correct** against the working OnEdgeSet `splitPool_eq`
+wrapper — only the heavy sideLabels signature differs. It hits a
+**non-terminating `whnf`** at the OnEdgeSet selector application in `hπcotree`
+(`…:4088:12`), *identical failure at `maxHeartbeats` 200k / 800k / 3.2M* (so
+structural, not budget). Diagnosis: `splitPool_eq`+OnEdgeSet compiles and
+`sideLabels`+`faceGraph` (`ST:3710`) compiles, but `sideLabels`+OnEdgeSet
+together wedge the elaborator on `faceEdgeOfLeafOrderOnEdgeSetReverse Sₑ … T hTsub`.
+Reverted to keep the repo green.
+
+**Next (resumption):** the cotree step does **not** need that ST wrapper — call
+the committed `RM:7154` **directly** from the `Nat.le_induction` (`RM:7154`
+compiles; the pathology is specific to re-wrapping the selector in
+`stComponentDrawing`'s heavy signature). If a wrapper is still wanted, abstract
+the selector behind a `let` or feed a bare-dart pin to dodge the signature-level
+`whnf`. Genuine remaining content unchanged: the cross-map `label` (full
+`residualMap.Face` → prefix split-pool, via the face-merge correspondence) and
+its `hadj` invariant (`VG:2114` shape), then the induction.
+
 ## 0. Status (2026-06-12)
 
 **DONE & building (committed):** the OnEdgeSet cotree-block plumbing. This
