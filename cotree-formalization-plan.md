@@ -97,6 +97,49 @@ Files:
 
 ---
 
+## 0. Status (2026-06-13, later) — CIRCULARITY FOUND in the cotree-tail approach
+
+**SHIPPED & building (committed `6e13e51`):** two OnEdgeSet siblings via the
+proven plain-string transform —
+`exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderOnEdgeSetReverse_block`
+(transform of `RM:7632`) and the **self-contained** cotree step
+`…_block_of_treePrefix_incidence` (transform of `RM:9437`). The self-contained
+one produces `ResidualMapPrefixStepInsertion (G.permuteEdges π) (a+j.1) …`
+directly, discharges coverage internally
+(`incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`), and needs **only**
+the geometric co-faciality `hface` (`Face_mk c₁ = Face_mk c₂`) — **no
+label/hadj/sector** (unlike `RM:7154`). This is the right step lemma to drive
+the induction. Both build (8485 jobs).
+
+**BLOCKER (traced, not asserted):** wiring the induction to the `sorry`
+(`ST:4610`, branch `lvertex.length-1 < m`) requires mapping each `m ∈ [a+1, E-1]`
+to a cotree index `j : Fin (lface.length-1)` via `m = a + j.1`, which needs
+`m < a + b`, i.e. (with `hblock : a+b ≤ E`) the **equality**
+`a + b = numEdges` where `a = lvertex.length-1`, `b = lface.length-1`. But:
+- `a = V_M - 1` (since `residualMapVertexEquivOfIncident : M.Vertex ≃ G.V`),
+  `b = F_M - 1` (`lface.length = card M.dual.Vertex`), `E = E_M`
+  (`residualMap_edge_card`, `RM:7845`). So
+  `a + b = E  ⟺  V_M − E_M + F_M = 2  ⟺  M.IsPlanar` (M is connected:
+  `residualMap_connected`). **The needed equality IS the theorem's conclusion.**
+- The only lemma giving the dual-minus-tree tree structure that would yield it,
+  `faceGraphOnEdgeSet_isTree_of_not_mem_range_vertexLeafOrder` (`VG:1305`),
+  **takes `hplanar : M.IsPlanar` as a hypothesis.** So using it here is circular.
+- The `_of_prefix_insertions` consumers (`EdgeSetDrawing:797/823`,
+  `exists_residualMap_isPlanar_of_prefix_insertions_connected`, `RM:10358`)
+  all *assume* `hstep ∀ m∈[1,E-1]` with `CrossingFree G` in scope — none prove
+  it. So `CrossingFree` is the intended source of genus-0, but **no lemma in the
+  repo turns no-crossing straight-line geometry into genus-0 / `a+b=E`**
+  (greps over `NoCrossingPairsInEdgeSet`, `genus`, `IsPlanar` producers).
+
+**CONCLUSION:** the cotree `sorry` cannot be closed by formalization-packaging
+of existing lemmas. Closing it requires the genuine remaining theorem:
+**no-crossing straight-line drawing ⇒ genus-0 residual map** (equivalently
+`a+b=numEdges`, the cotree tail is empty). Candidate home: the
+`drawing→genus-0-map bridge` flagged in `CrossingLemma.lean:211` (§4/§6).
+{{NEEDS_ADAM_INPUT}} — confirm the intended genus-0 source before building it.
+
+---
+
 ## 0. Status (2026-06-13)
 
 **DONE & building (committed `1ee54b5`):** the OnEdgeSet **sector-sideLabels
