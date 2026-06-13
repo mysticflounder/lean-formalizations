@@ -97,6 +97,52 @@ Files:
 
 ---
 
+## 0. Status (2026-06-13, latest) — INDUCTION LOCKED IN; gap = 2 geometric residuals
+
+**DONE & building (whole project, 8491 jobs).** The cotree branch is wired and
+the shipped `6e13e51` step lemma **fires**. The raw `sorry` at the old `ST:4610`
+is gone; the cotree induction now composes end-to-end. Concretely, in
+`straightLineCanonicalComponentResidualMapPlanarityOfARR` (branch
+`lvertex.length-1 < m`, now ≈ `ST:4650`):
+- a named producer `stComponentDrawing_residualMap_isPlanar_geometricResidual`
+  (`ST:≈4551`, `private`) supplies `(residualMap G hARRG).IsPlanar`;
+- the count `(lvertex.length-1)+(lface.length-1) = G.numEdges` is derived from it
+  via `eulerCharacteristic`/`IsPlanar` + `residualMap_vertex_card_of_incident`,
+  `residualMap_edge_card`, `CombinatorialMap.card_dual_vertex` and `omega`;
+- `obtain ⟨k, hk, rfl⟩ : ∃ k, k < lface.length-1 ∧ m = (lvertex.length-1)+k`
+  substitutes `m`, so the cotree index `j := ⟨k,hk⟩` makes the step lemma's
+  output index `(lvertex.length-1)+j.1` match the goal **definitionally** (no
+  `▸` transport needed — that was the failed approach);
+- the tree-position cast is converted (`Fin.castLE hktree0 i` vs
+  `Fin.castLE hblock (Fin.castAdd …)`, both have val `i.1`, `Fin.ext; simp`);
+- `…_block_of_treePrefix_incidence` (the `6e13e51` self-contained step) is then
+  fired with the in-scope `Tvertex/Tface/π/hπtree'/hπrest/hblock` data.
+
+Axioms of the theorem: `[propext, sorryAx, Classical.choice, Quot.sound]` — core
++ transparent `sorryAx`, no custom axioms. The combinatorial induction is thus
+**verified to compose** (validates the `6e13e51` step lemmas).
+
+**Remaining gap = exactly two documented geometric residuals** (both `sorry`,
+both Jordan-strength, both reducing to the crosscut residual
+`PlaneArcSeparation.exists_twoSidedPartition_of_arc` + an unbuilt region↔face
+correspondence bridge):
+1. **Genus-0 / Euler `V−E+F ≥ 2`** — the producer lemma `ST:≈4551`. The `≤ 2`
+   direction is already proved (`eulerCharacteristic_le_two`); only `≥ 2`
+   (= dual-cotree acyclicity) is geometric.
+2. **Per-step cotree co-faciality / face-stability** — the `hface` argument of the
+   step-lemma call (inline `sorry` in the branch). The two splice corners of
+   cotree edge `j` lie on one residual face. This is the "residual-map
+   face-stability at later cotree steps" item from
+   `docs/references/planar-tree-cotree.md` "Still missing".
+
+This is the architecture Adam chose ("lock in the induction"): keep the
+literature insertion scaffold, isolate the geometry as named/documented
+residuals, do NOT attempt the from-scratch Jordan development inline. Zero-sorry
+closure still awaits residual (1)+(2), i.e. the crosscut theorem (active in the
+`PL*` covering-space files) plus the region↔face bridge.
+
+---
+
 ## 0. Status (2026-06-13, later) — CIRCULARITY FOUND in the cotree-tail approach
 
 **SHIPPED & building (committed `6e13e51`):** two OnEdgeSet siblings via the
