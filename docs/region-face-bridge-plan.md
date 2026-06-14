@@ -516,3 +516,56 @@ strip-separation). Plan:
 **Boundary cases** (z near a shared vertex, foot→0/1): open sectors exclude the corner
 locus (σ=0 there), and near a vertex z is thin to both incident edges — handled by the
 incident corner's structure. No wall, normal formalization.
+
+## 10 · UNION-tube GREEN BASELINE landed (2026-06-14) — `sorry` worklist for the rework
+
+`PLArc.lean` now **compiles green** under the union sector
+(`sectorPlus = vertexPlus ∩ ({δ₀ of i} ∪ {δ₀ of i+1})`); `PLCollarSeparation` (its only
+consumer) builds unchanged — the rework is **fully contained in `PLArc`, no external API
+churn** (verified: no file outside `PLArc` references any changed/removed name). This is a
+*baseline*: the genuinely-union-reworked proofs are explicit `sorry`s with in-line specs, so
+the file gives a build signal and a per-hole worklist instead of a non-compiling 8700-line
+blob. Each `sorry` carries a `-- §9 UNION …` comment stating its goal and route.
+
+**LANDED (proven green, not sorried):**
+- The 4 reverse-glue σ-sign lynchpin lemmas (`vertexPlus/Minus_sideForm_outgoing/incoming_*`).
+- Def + `isOpen_sector*` (union shape); the two `*_subset_stripSupport_union` lemmas.
+- **All 4 reach lemmas** (`overlap_sector{Plus,Minus}_bandStrip{…}_{src,tgt}`) — the union
+  *trivialised* them: the witness is δ₀-close to one incident edge, so sector membership is
+  `⟨hmemV, Or.inl/Or.inr hinf⟩`; `hball`/`ρ`/`hbud` are now redundant (reach for any δ₀>0).
+- Same-vertex / band↔sector angular disjointness (`disjoint_sectorPlus_sectorMinus`,
+  `disjoint_bandStrip{Plus,Minus}_sector{Minus,Plus}_{in,out}going`) — survived via the
+  `hz.1.1 → hz.1` projection reshape (union drops one nesting level).
+- `*_subset_compl_carrier` incident-edge branches; `isPreconnected_collar{Plus,Minus}` +
+  chain assembly (kept valid — `isPreconnected_sector*` no longer needs `0<δ₀`: empty when
+  δ₀≤0, so the hypothesis was dropped and callers are unchanged).
+
+**`sorry` worklist (20 decls) — the remaining union rework, grouped:**
+1. **σ-sign disjointness (the lynchpin's consumers).** `disjoint_sectorPlus_sectorMinus_all`
+   (far pairs |j−k|≥3 via 4-way strip-sep over the union; |j−k|∈{1,2} via the σ-sign lemmas
+   on the shared edge — ADD a per-corner `hturn`); the two
+   `disjoint_stripSupport_sector{Plus,Minus}_nonincident` (RESTATE for `bandStrip` + foot-
+   margin — the `stripSupport` form is too strong now); `disjoint_sectorPlus_sectorMinus_diff`
+   (hypothesis now too weak — likely subsumed by `_all`).
+2. **cap↔sector (8 decls).** `disjoint_{endCap…_sectorMinus, sectorPlus_endCap…}` per-lemmas
+   and their `_all` aggregators — RESTATE with a second-arm (edge `j+1`) budget; separate the
+   cap from BOTH arm strips via `sector*_subset_stripSupport_union`.
+3. **P2 cover (2 decls).** `mem_sectorPlus_or_sectorMinus_of_ball` is **FALSE** under the
+   union (a vertex-ball point need not be δ₀-close to an incident edge) → RETIRE to a
+   `…_of_cornerTube` with the foot-sign split (`footParam∈(0,1) ⇒ band`; `footParam≤0`
+   behind `v` ⇒ both incident `infDist = dist(·,v)`, caught iff `dist(z,v)<δ₀`); the
+   interior-vertex branch of `union_collarPlus_collarMinus` consumes the reworked routing.
+4. **sector connectivity (2 decls).** `isPreconnected_sector{Plus,Minus}` — `vertexPlus`
+   cone ∩ (two strips through the apex `v`); star-connect through the shared apex wedge.
+5. **sector ground-set containment (2 decls).** `sector{Plus,Minus}_subset_taperedTube` —
+   route through the strip (like `bandStrip…_subset_taperedTube`), not the gone vertex ball;
+   budgets `hρδ`/`hρR` become unnecessary.
+6. **`compl_carrier` non-incident branch (2 decls).** separate the two arm strips from the
+   non-incident carrier edge `k` via `disjoint_stripSupport_nonadjacent` (foot-margin/σ-sign
+   for an adjacent arm).
+
+**Handoff note.** Items 1–2 are the load-bearing σ-sign work (the lynchpin is the tool); 3
+is the known P2 rework; 4–6 are localized. None has an identified NO-GO. A filler should work
+hole-by-hole against `lake-build.sh` (no LSP); each `sorry`'s goal is stated in its comment.
+Some statements in items 1–2 need *signature* revision (extra `hturn` / second-arm budget) —
+flagged in-comment — so they are not pure body-fills.
