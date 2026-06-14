@@ -392,3 +392,47 @@ fronts. All file:line verified against the current tree.
   edge — foot ∈ (0,1) ⇒ band; foot ≤ 0 (outer cone behind `v`) ⇒ both incident
   `infDist = dist(·,v)`, captured by corner-tube iff `dist(z,v) < δ₀`; retire
   `mem_sectorPlus_or_sectorMinus_of_ball` (2924) → `_of_cornerTube`.
+
+## 8 · δ₀-tube grind — session 2026-06-14 (cascade GREEN + reach crux diagnosed)
+
+Applied `stash@{1}` (the def surgery), then built the **whole disjointness cascade**
+for the δ₀-tube model. **Validated GREEN** (the entire 3777–4111 region compiles):
+
+- **New helpers** `disjoint_stripSupport_sectorPlus/Minus_nonincident`: a non-incident
+  edge `i ∉ {j,j+1}` is non-adjacent to at least one of the corner's incident edges
+  (incoming `j` or outgoing `j+1`); route through that strip via `hsep`. Replaces the
+  obsolete vertex-ball `disjoint_stripSupport_vertexBall_nonincident`.
+- **7 `_all` aggregators rewritten** ball→strip/budget, dropping the dead `ρ`/`hρsep`:
+  band↔sector (nonincident via the new helpers); sector↔sector (`hballs`→`hsep`+`hδ₀sep`,
+  incoming-of-smaller-corner vs outgoing-of-larger, gap ≥ 2); the 4 cap↔sector
+  (`hballs`→`hbudsrc`/`hbudtgt`; src cap needs the `j=0` outgoing-edge special case,
+  tgt cap always uses the incoming edge `j ≤ numSegs-2`).
+- **Master `disjoint_collarPlus_collarMinus`** dropped `hρsep` (now dead); `hballs`
+  survives only for the two endpoint cap↔cap pairings. Caller updated.
+
+**Reach lemma = the genuine crux** (`overlap_sectorPlus_bandStripPlus_src`, PLArc:6222).
+The δ₀-tube sector additionally needs the witness within δ₀ of the **outgoing** edge i+1.
+The naive on-edge band witness (foot `1−2α` or `1−α`, near `v`) **provably hits a wall
+for gentle corners**: the joint reach `αL·sinφ < δ₀` and band-thinness `hδin`
+(`δ₀ < α·(L²/‖Δ‖₁)·|tanφ|`) reduce to **`|cos φ| < ‖Δ‖₂/‖Δ‖₁`**, which fails when the
+corner turn `φ ≈ 0` and edge `i` is diagonal (`‖Δ‖₂/‖Δ‖₁ → 1/√2`). This *supersedes*
+§7.3's hand-wavy "free bisector witness ⇒ reach reduces to δ₀>0" — that claim was not
+verified and the wall is real for that witness family.
+
+**ROOT CAUSE + FIX LEAD (concrete, not a dead end):** the wall is *entirely* from the
+**`‖Δ‖₁` L1-norm** in `hδin`, which enters via `thin_of_infDist_incoming` (≈PLArc:3284,
+used by `bandStrip_incoming_mem_vertexPlus` 3263). If `thin_of_infDist_incoming` can be
+reproven with **`‖Δ‖₂`** (L2) instead of `‖Δ‖₁`, the joint condition becomes
+`|cos φ| < 1` — true for **every** genuine corner (`φ ∈ (0,π)`, `φ≠0`) — and the wall
+dissolves. {{NEEDS_PROOF}}: verify `thin_of_infDist_incoming` admits the L2 bound
+(depends on whether its `‖Δ‖₁` is a coordinate-wise-essential estimate or a soft
+Cauchy–Schwarz step that tightens to `‖Δ‖₂`). **This is the next action.** If L2 holds,
+the reach goes through with the existing on-edge witness (re-pointed at the δ₀-tube,
+`hbud` δ₀+2αL<ρ replaced by a δ₀-only `2αL·sinφ < δ₀`-type condition); if not,
+the bisector witness must be built and re-analysed against the L2 threshold.
+
+**WIP location:** `stash@{0}` (backup) AND the live working tree (PLArc.lean, +242/−131).
+The cascade is done; remaining errors are all downstream of the reach resolution or
+independent-but-mechanical (`isPreconnected_sector*` convexity 4801/4811,
+`sectorPlus_subset_taperedTube` 8172, the bundle 8634, P2-cover 2946). Do these *after*
+the reach is settled (the reach may change δ₀/α constraints feeding the bundle).
