@@ -1205,6 +1205,81 @@ theorem toSimpleArc_src : β.toSimpleArc SimpleArc.src = β.verts 0 := β.param_
 theorem toSimpleArc_tgt :
     β.toSimpleArc SimpleArc.tgt = β.verts (Fin.last β.numSegs) := β.param_tgt
 
+/-! #### `arcInterior` characterization (sub-node 1, last loose end)
+
+For the collar instantiation we use the spine `S = arcInterior β.toSimpleArc`.  The
+following forward map exhibits an affine point of edge `i` with local coordinate
+`s ∈ [0,1]` as `param t` for `t = (i + s)/numSegs ∈ [0,1]`; if that parameter is
+*strictly* interior (`0 < t < 1`) the point lies in `arcInterior β.toSimpleArc`.
+The three concrete consequences feed the spine-membership budget hypotheses
+(`firstMid`, interior vertices, and forward end-edge `liftPlus` points). -/
+
+/-- **Forward affine-to-parameter map.**  The affine point `(1-s)•verts(castSucc i)
++ s•verts(succ i)` is `param ⟨(i+s)/numSegs, _⟩`. -/
+theorem affineComb_eq_param (i : Fin β.numSegs) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+    (1 - s) • β.verts (Fin.castSucc i) + s • β.verts (Fin.succ i)
+      = β.param ⟨((i : ℝ) + s) / (β.numSegs : ℝ),
+          by
+            have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+              have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+            have hile : (i : ℝ) ≤ (β.numSegs : ℝ) - 1 := by
+              have : (i : ℕ) ≤ β.numSegs - 1 := by have := i.isLt; omega
+              have h2 : ((i : ℕ) : ℝ) ≤ ((β.numSegs - 1 : ℕ) : ℝ) := by exact_mod_cast this
+              rw [Nat.cast_sub (by have := β.numSegs_pos; omega)] at h2; push_cast at h2; linarith
+            constructor
+            · apply div_nonneg _ (le_of_lt hnpos)
+              have : (0 : ℝ) ≤ (i : ℝ) := by positivity
+              linarith
+            · rw [div_le_one hnpos]; linarith⟩ := by
+  have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+    have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+  have hnt : (β.numSegs : ℝ) * (((i : ℝ) + s) / (β.numSegs : ℝ)) = (i : ℝ) + s := by
+    field_simp
+  unfold param
+  rw [show ((⟨((i : ℝ) + s) / (β.numSegs : ℝ), _⟩ : Set.Icc (0 : ℝ) 1) : ℝ)
+        = ((i : ℝ) + s) / (β.numSegs : ℝ) from rfl]
+  exact (β.paramRaw_collapse_of (((i : ℝ) + s) / (β.numSegs : ℝ)) i s hnt hs0 hs1).symm
+
+/-- **Interior affine point lies in `arcInterior`.**  An affine point of edge `i`
+with local coordinate `s ∈ [0,1]` whose global parameter `(i+s)/numSegs` is strictly
+interior is in `arcInterior β.toSimpleArc`. -/
+theorem affineComb_mem_arcInterior (i : Fin β.numSegs) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1)
+    (hlo : 0 < (i : ℝ) + s) (hhi : (i : ℝ) + s < (β.numSegs : ℝ)) :
+    (1 - s) • β.verts (Fin.castSucc i) + s • β.verts (Fin.succ i)
+      ∈ β.toSimpleArc.arcInterior := by
+  have hnpos : (0 : ℝ) < (β.numSegs : ℝ) := by
+    have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
+  set tv : ℝ := ((i : ℝ) + s) / (β.numSegs : ℝ) with htv
+  have htv0 : 0 ≤ tv := by rw [htv]; positivity
+  have htv1 : tv ≤ 1 := by rw [htv, div_le_one hnpos]; linarith
+  have htvlo : 0 < tv := by rw [htv]; positivity
+  have htvhi : tv < 1 := by rw [htv, div_lt_one hnpos]; linarith
+  rw [β.affineComb_eq_param i hs0 hs1]
+  refine ⟨⟨tv, htv0, htv1⟩, ?_, ?_⟩
+  · simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo]; exact ⟨htvlo, htvhi⟩
+  · rfl
+
+/-- Each interior shared vertex `verts (succ i)` (for `i + 1 < numSegs`) lies in
+`arcInterior β.toSimpleArc`.  Realised at the source endpoint of edge `i+1`
+(local coordinate `s = 0`). -/
+theorem vertSucc_mem_arcInterior (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    β.verts (Fin.succ i) ∈ β.toSimpleArc.arcInterior := by
+  set j : Fin β.numSegs := ⟨(i : ℕ) + 1, hi1⟩ with hj
+  have hcs : Fin.castSucc j = Fin.succ i := by
+    apply Fin.ext; simp [hj, Fin.castSucc, Fin.castAdd, Fin.succ]
+  have hpt : β.verts (Fin.succ i)
+      = (1 - (0 : ℝ)) • β.verts (Fin.castSucc j) + (0 : ℝ) • β.verts (Fin.succ j) := by
+    rw [hcs]; simp
+  rw [hpt]
+  refine β.affineComb_mem_arcInterior j (le_refl 0) (by norm_num) ?_ ?_
+  · have : (0 : ℝ) < ((j : ℕ) : ℝ) := by
+      rw [hj]; push_cast; have : (0 : ℕ) < (i : ℕ) + 1 := by omega
+      exact_mod_cast this
+    simpa using this
+  · have hjlt : (j : ℕ) < β.numSegs := j.isLt
+    have hlt : ((j : ℕ) : ℝ) < (β.numSegs : ℝ) := by exact_mod_cast hjlt
+    rw [add_zero]; exact hlt
+
 end PolyArc
 
 /-! ## §L3 sub-node 2 — the tapered collar tube
@@ -5126,6 +5201,71 @@ theorem liftPlus_snd (s t : Plane) (c ε : ℝ) :
 private theorem liftPlus_zero_eq_affineComb (s t : Plane) (c : ℝ) :
     liftPlus s t c 0 = (1 - c) • s + c • t := by
   ext <;> simp [liftPlus, smul_eq_mul]
+
+/-! #### `arcInterior` membership for the collar spine points (deferred from sub-node 1)
+
+`firstMid` and `liftPlus` are defined later in the file than the affine-to-parameter
+forward map, so the three spine-membership facts that depend on them live here.  They
+feed the spine-budget hypotheses `hmS`, `hSrcSpine`, `hTgtSpine` of the collar
+assembly with the spine choice `S = arcInterior β.toSimpleArc`. -/
+
+/-- The first-edge midpoint lies in `arcInterior β.toSimpleArc`. -/
+theorem firstMid_mem_arcInterior (β : PolyArc) :
+    firstMid β ∈ β.toSimpleArc.arcInterior := by
+  have hfm : firstMid β
+      = (1 - (1 / 2 : ℝ)) • β.verts (Fin.castSucc β.firstSeg)
+        + (1 / 2 : ℝ) • β.verts (Fin.succ β.firstSeg) := by
+    rw [firstMid, PolyArc.segSrc, PolyArc.segTgt]
+    have h2 : ((1 - (1 / 2 : ℝ)) : ℝ) = (1 / 2 : ℝ) := by norm_num
+    rw [h2]; ext <;> simp [smul_eq_mul] <;> ring
+  rw [hfm]
+  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolyArc.firstSeg]
+  refine β.affineComb_mem_arcInterior β.firstSeg (by norm_num) (by norm_num) ?_ ?_
+  · rw [hi0]; norm_num
+  · rw [hi0]
+    have : (1 : ℝ) ≤ (β.numSegs : ℝ) := by
+      have := β.numSegs_pos; exact_mod_cast (by omega : 1 ≤ β.numSegs)
+    linarith
+
+/-- A forward interior point `liftPlus s t c 0 = (1-c)•s + c•t` of the first edge,
+for `c ∈ (0,1)`, lies in `arcInterior β.toSimpleArc`. -/
+theorem liftPlus_firstSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
+    liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ β.toSimpleArc.arcInterior := by
+  rw [liftPlus_zero_eq_affineComb, PolyArc.segSrc, PolyArc.segTgt]
+  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolyArc.firstSeg]
+  refine β.affineComb_mem_arcInterior β.firstSeg (le_of_lt hc0) (le_of_lt hc1) ?_ ?_
+  · rw [hi0]; linarith
+  · rw [hi0]
+    have : (1 : ℝ) ≤ (β.numSegs : ℝ) := by
+      have := β.numSegs_pos; exact_mod_cast (by omega : 1 ≤ β.numSegs)
+    linarith
+
+/-- A forward interior point `liftPlus t s c 0 = (1-c)•t + c•s` of the last edge,
+written from its target vertex, for `c ∈ (0,1)`, lies in `arcInterior β.toSimpleArc`. -/
+theorem liftPlus_lastSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
+    liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ β.toSimpleArc.arcInterior := by
+  rw [liftPlus_zero_eq_affineComb]
+  have hrw : (1 - c) • β.segTgt β.lastSeg + c • β.segSrc β.lastSeg
+      = (1 - (1 - c)) • β.verts (Fin.castSucc β.lastSeg)
+        + (1 - c) • β.verts (Fin.succ β.lastSeg) := by
+    rw [PolyArc.segSrc, PolyArc.segTgt]
+    have h : (1 : ℝ) - (1 - c) = c := by ring
+    rw [h]; rw [add_comm]
+  rw [hrw]
+  set s := (1 - c : ℝ) with hsdef
+  have hs0 : 0 ≤ s := by rw [hsdef]; linarith
+  have hs1 : s ≤ 1 := by rw [hsdef]; linarith
+  have hlast : ((β.lastSeg : ℕ) : ℝ) = (β.numSegs : ℝ) - 1 := by
+    have hnpos := β.numSegs_pos
+    rw [PolyArc.lastSeg]
+    rw [show ((⟨β.numSegs - 1, _⟩ : Fin β.numSegs) : ℕ) = β.numSegs - 1 from rfl]
+    rw [Nat.cast_sub (by omega)]; push_cast; ring
+  refine β.affineComb_mem_arcInterior β.lastSeg hs0 hs1 ?_ ?_
+  · rw [hlast, hsdef]
+    have : (1 : ℝ) ≤ (β.numSegs : ℝ) := by
+      have := β.numSegs_pos; exact_mod_cast (by omega : 1 ≤ β.numSegs)
+    linarith
+  · rw [hlast, hsdef]; linarith
 
 theorem footParam_liftPlus {s t : Plane} (h : t ≠ s) (c ε : ℝ) :
     footParam s t (liftPlus s t c ε) = c := by
