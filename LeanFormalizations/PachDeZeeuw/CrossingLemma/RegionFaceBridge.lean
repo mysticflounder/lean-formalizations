@@ -72,6 +72,7 @@ set_option linter.style.longLine false
 namespace CrossingLemma
 
 open CombinatorialMap
+open CombinatorialMap.EdgeInsertion
 open CrossingLemma.PlaneArcSeparation
 
 variable (G : DrawnMultigraph)
@@ -350,5 +351,115 @@ theorem residualMap_prefixStep_cotree_sameFace_of_collar_sides
     (hregion : E.dartRegion d₁ = E.dartRegion d₂) :
     (residualMap G hARR).Face_mk d₁ = (residualMap G hARR).Face_mk d₂ :=
   residualMap_prefixStep_cotree_sameFace_of_twoSidedPartition G E hregion
+
+/-! ## §6  The inductive-step transport of region-separation (plan step 2, step)
+
+This is the genuine structural content of the prefix induction in
+`facePerm_sameCycle_of_sameRegion`: the `region_separates` clause is **preserved
+across a same-face prefix insertion**, with the only per-step geometric input
+being that the successor region assignment factors *injectively* through the
+combinatorial split-pool classes of the inserted-edge face split.
+
+The repo already supplies the combinatorial face-transport
+`residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq` (`RM:844`):
+two successor darts are co-facial iff their `insertedFaceSplitPoolEquiv` images
+agree.  We package the per-step geometry as a pair: a `splitPool` class function
+on successor darts whose equality matches successor face equality, and an
+*injective* `poolRegion` realising each class as a plane region.  Then
+region-separation at level `m+1` is purely combinatorial:
+`region eq ⇒ pool eq ⇒ face eq`.
+
+`splitPool`/`poolRegion` are abstract here (the geometry that builds them — the
+new arc's two sides plus the old regions — is the concurrent track); but the
+*reduction* of the successor Edmonds direction to the predecessor one is proved
+sorry-free.  This is what makes the inductive skeleton of step 2 real rather
+than a renamed axiom: the base case (`edmondsCompatibleOfCardFaceOne`) is
+unconditional, and each step is this transport. -/
+
+/-- **Region-separation transports across a same-face prefix insertion.**
+
+Hypotheses (all combinatorial except the two abstract per-step inputs):
+* `hc`, `hsame`, `hvertex`: the predecessor same-face insertion data at corners
+  `c₁ ≠ c₂` (exactly `ResidualMapPrefixStepInsertion.sameFace`'s payload);
+* `splitPool`, `hpool`: a class function on successor darts such that successor
+  *face* equality is equivalent to `splitPool` equality — supplied for the
+  concrete split-pool equiv by
+  `residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`;
+* `dartRegion'`, `poolRegion`, `hfactor`, `hinj`: the per-step geometry — the
+  successor region of each dart factors as `poolRegion (splitPool d)` with
+  `poolRegion` injective.
+
+Conclusion: the successor region assignment separates successor faces — i.e. the
+successor `region_separates` clause holds. -/
+theorem region_separates_prefixStep_sameFace
+    {P : Type*}
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    {c₁ c₂ : Fin m × Bool} (_hc : c₁ ≠ c₂)
+    (_hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (splitPool : (Fin (m + 1) × Bool) → P)
+    (hpool : ∀ x y : Fin (m + 1) × Bool,
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk x =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk y ↔
+      splitPool x = splitPool y)
+    (dartRegion' : (Fin (m + 1) × Bool) → Set (ℝ × ℝ))
+    (poolRegion : P → Set (ℝ × ℝ))
+    (hfactor : ∀ d, dartRegion' d = poolRegion (splitPool d))
+    (hinj : Function.Injective poolRegion)
+    (d₁ d₂ : Fin (m + 1) × Bool) (hregion : dartRegion' d₁ = dartRegion' d₂) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle d₁ d₂ := by
+  -- region eq ⇒ poolRegion (pool d₁) = poolRegion (pool d₂) ⇒ pool d₁ = pool d₂.
+  rw [hfactor d₁, hfactor d₂] at hregion
+  have hpooleq : splitPool d₁ = splitPool d₂ := hinj hregion
+  -- pool eq ⇒ successor face eq ⇒ successor SameCycle.
+  have hface :
+      (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk d₁ =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').Face_mk d₂ :=
+    (hpool d₁ d₂).mpr hpooleq
+  exact Quotient.eq''.mp hface
+
+/-- **Per-step `splitPool` from the concrete split-pool equiv (PROVEN).**
+
+Instantiates `region_separates_prefixStep_sameFace`'s abstract `splitPool`/`hpool`
+with the genuine `insertedFaceSplitPoolEquiv` of the inserted-edge face split,
+discharging `hpool` from
+`residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq` (`RM:844`).
+The remaining per-step input is only `poolRegion`/`hfactor`/`hinj` (the geometry
+that each successor dart's region is the plane realisation of its split-pool
+class, injectively) — this is the irreducible content the concurrent geometric
+track supplies. -/
+theorem region_separates_prefixStep_sameFace_concrete
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    {c₁ c₂ : Fin m × Bool} (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex :
+      (prefixStepDartEquiv m).permCongr
+        (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+          (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm)
+    (dartRegion' : (Fin (m + 1) × Bool) → Set (ℝ × ℝ))
+    (poolRegion :
+      ({f : (residualMap (G.prefixEdges m hm) hARR).Face //
+          f ≠ (residualMap (G.prefixEdges m hm) hARR).Face_mk c₁} ⊕ Fin 2) →
+        Set (ℝ × ℝ))
+    (hfactor : ∀ d, dartRegion' d =
+      poolRegion
+        (insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+          ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+            ((prefixStepDartEquiv m).symm d))))
+    (hinj : Function.Injective poolRegion)
+    (d₁ d₂ : Fin (m + 1) × Bool) (hregion : dartRegion' d₁ = dartRegion' d₂) :
+    (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle d₁ d₂ := by
+  refine region_separates_prefixStep_sameFace G m hm hm' hARR hARR' hc hsame
+    (splitPool := fun d =>
+      insertedFaceSplitPoolEquiv (residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
+        ((insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).Face_mk
+          ((prefixStepDartEquiv m).symm d)))
+    ?_ dartRegion' poolRegion hfactor hinj d₁ d₂ hregion
+  intro x y
+  exact residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hc hsame hvertex x y
 
 end CrossingLemma
