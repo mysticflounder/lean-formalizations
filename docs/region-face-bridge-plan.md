@@ -436,3 +436,83 @@ The cascade is done; remaining errors are all downstream of the reach resolution
 independent-but-mechanical (`isPreconnected_sector*` convexity 4801/4811,
 `sectorPlus_subset_taperedTube` 8172, the bundle 8634, P2-cover 2946). Do these *after*
 the reach is settled (the reach may change δ₀/α constraints feeding the bundle).
+
+## 9 · §8's fix-lead is DEAD; the intersection-tube walls structurally; pivot to a union tube (2026-06-14, later)
+
+§8's `{{NEEDS_PROOF}}` (tighten `‖Δ‖₁ → ‖Δ‖₂` in `thin_of_infDist_incoming`) is now
+**resolved NEGATIVE — provably impossible** — and the diagnosis sharpened to a
+*structural* wall in the intersection-tube model. Verified by reading, no longer
+conjectural.
+
+**(a) `Plane = ℝ×ℝ` carries the L∞ (sup/max) product metric** (`Prod.dist_eq`), not
+Euclidean. So `Metric.infDist` is the L∞ distance `d∞`.
+
+**(b) The L2 tightening is impossible.** The cross-product identity is
+`|sideForm v b z| = ‖b−v‖₂ · d₂(z, line)` with `d₂` the *Euclidean* perpendicular
+distance. But for every vector `‖x‖∞ ≤ ‖x‖₂`, so `d∞ ≤ d₂` *always*. Hence
+`|sideForm| ≤ ‖Δ‖₂ · d∞` would require `d₂ ≤ d∞` — false. The existing
+`abs_sideForm_le_M_infDist` with `M = ‖Δ‖₁` is in fact the **sharp** bound for this
+metric (`‖Δ‖₂ ≤ ‖Δ‖₁ ≤ √2‖Δ‖₂`). The norm cannot be improved. §8's "wall dissolves"
+lead is dead.
+
+**(c) The wall is structural to intersection-tube + α-margin bands.** Two constraints
+on the single shared `δ₀` at a corner (turn ψ = π−θ, edge length L):
+- **Reach** (`sectorPlus i ∩ bandStripPlus i ≠ ∅`, needed for collar connectivity):
+  `bandStripPlus` forces `footParam ∈ (α,1−α)`, so every band point is `≥ αL` from the
+  shared vertex *along edge i, on the far side of v from the outgoing edge*. For a gentle
+  corner the foot onto edge i+1 falls outside the segment, so
+  `infDist∞(z, edge i+1) ≥ αL − δ₀`; the δ₀-tube sector needs that `< δ₀` ⟹ **δ₀ > αL/2**.
+  (Sharper than §8's `αL·sinφ`: that mis-modelled it as perp-to-*line*; the foot is
+  outside the *segment*, so there is **no sinφ rescue**.)
+- **Adjacent disjointness** (the glue): `thin_of_infDist_incoming`'s sharp `‖Δ‖₁` bound
+  forces **δ₀ < α·|tanψ|·‖Δ‖₂²/‖Δ‖₁**.
+
+For gentle corners `|tanψ|→0` drives δ₀→0 while reach keeps δ₀ ≳ αL > 0. **The α
+cancels** (linear on both sides) — no budget choice closes it. Empty δ₀-window whenever
+`|tanψ| ≲ ‖Δ‖₁/‖Δ‖₂ ∈ [1,√2]`, i.e. for **every turn gentler than ~45°**. The
+intersection-tube model (`sectorPlus = vertexPlus ∩ {δ₀ of i} ∩ {δ₀ of i+1}`) is a
+NO-GO. The doc comment at `sectorPlus` (PLArc:2758) claiming decoupling δ₀ from ρ
+"escapes the wall `L₂² ≤ L₁·L∞`" is right for the disjointness cascade but **the reach
+lemma re-imports the wall**.
+
+**(d) Decision (Adam, 2026-06-14): switch to the UNION tube.**
+`sectorPlus = vertexPlus ∩ ({δ₀ of edge i} ∪ {δ₀ of edge i+1})`. The reach wall is
+entirely from the *intersection* demanding a band-overlap point (near one edge) also be
+near the other; the union drops that. Reach: a band-i point is δ₀-close to edge i, so the
+`{δ₀ of i}` disjunct holds — any δ₀ > 0 works.
+
+**(e) Gate VERIFIED — consecutive sector⁺/sector⁻ disjointness CLOSES.** Worry: under a
+union each sector is a *two-strip* set, so strip-separation no longer isolates sectors
+sharing edge i+1; disjointness must come from the **angular sign on the shared edge**,
+and `reflexSector` is an OR that does not obviously pin it. **Resolved** via the existing
+`overlap_mem_convexSector_iff` / `overlap_mem_reflexSector_iff` (+ `_incoming`,
+PLArc:1959–2033): on a thin overlap with positive foot, the reflex OR **collapses** to
+the single thin-edge sign (`pos_turn_sideForm_of_overlap` kills the other disjunct). Then
+with σ := `sideForm(v_{i+1}, v_{i+2}, z)` on the shared edge:
+- `z ∈ sectorPlus_i` (thin to edge i+1 as *outgoing*, interior foot) ⟹ **σ > 0** in
+  *both* τ_i>0 (convex) and τ_i<0 (reflex) cases — the τ-selection and convex/reflex sign
+  exactly compensate;
+- `z ∈ sectorMinus_{i+1}` (thin to edge i+1 as *incoming*) ⟹ **σ < 0** in both cases.
+
+Contradiction. **Orientation coherence**: the collar sign on *any* edge is +1 on the +
+side and −1 on the − side, independent of corner type. Gate passes → **GO**.
+
+**(f) Rework scope (obstruction-free, multi-session).** The union breaks the green
+cascade's single-strip subset lemmas (`sectorPlus_subset_stripSupport_incoming =
+fun _ hz => hz.1.2` etc. — now a two-strip union) and complicates *all* sector
+disjointness (closest strip-pair of two unions can be adjacent, not just for consecutive
+corners — gap-2 sectors meeting at a shared vertex also need the σ-sign argument, not
+strip-separation). Plan:
+  1. **Lynchpin first** (hardest): a reverse-glue σ-sign lemma packaging (e) —
+     `z ∈ sectorPlus/Minus_i ∧ thin to a shared edge ∧ interior foot ⟹ definite σ sign`
+     — built on the existing `overlap_mem_*_iff` lemmas.
+  2. New sector def (union); re-prove the subset lemmas as "in stripSupport_i ∪
+     stripSupport_{i+1}" + the σ-sign lemma.
+  3. Re-prove the disjointness aggregators: far pairs via strip-separation (unchanged
+     idea, now over the union), adjacent/shared-vertex pairs via the σ-sign lemma.
+  4. Reach lemmas: drop ρ/`hbud`, conclude union-tube membership (trivial — band point is
+     δ₀-close to its own edge).
+  5. Downstream connectivity / cover / bundle, then green build → COMMIT.
+**Boundary cases** (z near a shared vertex, foot→0/1): open sectors exclude the corner
+locus (σ=0 there), and near a vertex z is thin to both incident edges — handled by the
+incident corner's structure. No wall, normal formalization.
