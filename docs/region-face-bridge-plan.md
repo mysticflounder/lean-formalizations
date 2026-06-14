@@ -237,16 +237,35 @@ to a **per-cotree-step** datum + a one-face base:
 **Remaining for Target 1 (per-step geometric discharge, no longer the iteration):**
 instantiate the five abstract hypotheses of `regionSeparates_prefix_of_crosscut`
 / `edmondsCompatibleAtPrefix` for the *actual* geometry —
-- `dr := fun m hm d => regionAt (prefixEdges m hm) R₀ (dartAnchor … d)`;
-- `hcard1` ← `RM:8990` on the spanning-tree prefix (direct);
-- `hcomp`, `hconst` — direct facts about `regionAt ∘ dartAnchor`;
+- `dr` — **NOT `regionAt ∘ dartAnchor`** (degenerate: `dartAnchor d ∈ G.V` lies on
+  an arc endpoint ⇒ `∈ arcUnion` ⇒ `∉ drawingComplementIn` ⇒
+  `regionAt … (dartAnchor d) = ∅`; confirmed Agent §7.1). Instead
+  `dr m hm d := regionAt (prefixEdges m hm) R₀ (dartSectorPoint … d)` where
+  `dartSectorPoint` is a **new** off-vertex sector witness: the vertex
+  `v = dartAnchor d`, the first-crossing direction of `d`, and that of its
+  `vertexRotation`-successor, give a `vertexPlus a v b ∩ ball v ε` wedge; the
+  point lands in `drawingComplementIn` for ε small (a new membership lemma). **No
+  existing dart→sector-point function** (`sectorPlus` is per-`PolyArc`-segment, not
+  per-incident-arc). Keep `dr` abstract in `EdmondsConstruction`; instantiate it in
+  a **downstream file importing `PLArc`**.
+- `hcard1` ← `RM:8990` on the spanning-tree prefix (direct, bridge-side).
+- `hcomp` — `rfl` modulo the `dartSectorPoint ∈ drawingComplementIn` membership lemma.
+- `hconst` — **NOT residual-side-only** (correction): needs a complement-connector
+  (a thin collar strip alongside the edge joining the two corners' sector points
+  around the same face), so it pulls in PL/collar geometry. Driving lemmas:
+  `dartAnchor_residualMap_vertexPerm` (RMP:371), `residualMap_edgePerm_apply`
+  (RMP:391), `residualMap_vertexPerm_apply_of_mem` (RMP:379), `facePerm_eq`
+  (Basic:70), `regionAt_eq_of_mem_isPreconnected` (RFB:127). Tractable (single
+  same-face connectivity, no Euler increment) but genuine geometry.
 - each `PrefixStepCrosscutData` ← the cotree edge's two-sided partition realised as
-  an injective `poolRegion` — **this is the only piece needing Target 2's
-  output** (`exists_twoSidedPartition_of_polyArc`).
+  an injective `poolRegion` — **needs Target 2's output**
+  (`exists_twoSidedPartition_of_polyArc`).
 The iteration being closed, what was the "risk-bearing novel content" is now the
-*statement* of the per-edge crosscut, i.e. Target 2 + the `regionAt ∘ dartAnchor`
-plumbing. **Buildable against abstract per-edge crosscut data** — confirmed by the
-landed file; does NOT need Target 2 *proven*, only its per-edge statement.
+`dartSectorPoint` + its membership/connector geometry (`dr`/`hcomp`/`hconst`) plus
+Target 2 (`PrefixStepCrosscutData`). **Buildable against abstract per-edge crosscut
+data** — confirmed by the landed file; does NOT need Target 2 *proven*, only its
+per-edge statement. Note `dr`/`hcomp`/`hconst` are sector-geometry, not pure
+residual-side plumbing — they belong in the downstream PL-importing file.
 
 ### 6.3 REMAINING TARGET 2 (Track B) — `exists_twoSidedPartition_of_polyArc`
 The PL crosscut for straight segments. The existing collar machinery is
@@ -261,8 +280,10 @@ transcript)**: ~200 line-references, **15–20 proof rewrites**:
   `mem_sectorPlus_or_sectorMinus_of_ball` (2924),
   `disjoint_sectorPlus_sectorMinus_diff/_all` (3456/3795), `isOpen_sector*`
   (2816), `isPreconnected_collarPlus/Minus` (5070/7707) `hO1/hO2` overlaps.
-- SURVIVES (angle-only): `disjoint_sectorPlus_sectorMinus` (3089),
-  `sectorPlus_subset_compl_carrier` (8289).
+- SURVIVES (angle-only): `disjoint_sectorPlus_sectorMinus` (3089). **Correction
+  (§7.3):** `sectorPlus_subset_compl_carrier` (8289) survives only in its
+  *incident-edge* sub-cases; its *nonincident* branch (8323) is ball-load-bearing
+  and needs the strip-disjointness rewrite (`disjoint_stripSupport_nonadjacent`).
 - DEEP obstruction (paper-resolved, not yet Lean): **P2-cover rework** — the
   existing `taperedTube_subset_midBands_union_disks` routes near-vertex points
   into a large disk a corner-tube can't capture; fix = split foot∈(0,1)→band vs
@@ -281,3 +302,93 @@ novel content — attack it first**; if it closes against abstract crosscuts, th
 goal reduces to the known-tractable Target-2 grind. Final wiring (steps 5–6):
 instantiate Target 1's hypotheses with Target 2, then `ST:4713` via Lemma B and
 `ST:4562` via `RM:10358`; `#print axioms` ST (target: drop `sorryAx`).
+
+---
+
+## 7. Three-agent intel (2026-06-14, read-only) — `dr` design, ST wiring, Target-2 gate
+
+Iteration landed (§6.2); three read-only agents then mapped the three remaining
+fronts. All file:line verified against the current tree.
+
+### 7.1 `dr` faced-point design (the real `dartRegion`)
+- `regionAt ∘ dartAnchor` is **degenerate** — see §6.2 correction. The faced point
+  must be **off the vertex**, in the angular sector between the dart's two
+  consecutive incident arcs.
+- **No existing dart→sector-point function.** `sectorPlus`/`vertexPlus`
+  (PLArc:2752/2384) are per-`PolyArc`-*segment*, and there is **no bridge** from a
+  `DrawnMultigraph`'s `G.arc e` to the `PolyArc` collar machinery. The load-bearing
+  new object is `dartSectorPoint` (vertex + first-crossing dirs of `d` and of its
+  `vertexRotation`-successor ⇒ `vertexPlus a v b ∩ ball v ε`) + membership lemma
+  `dartSectorPoint ∈ drawingComplementIn` (ARR first-crossing + finitely many arcs
+  ⇒ small wedge off `v` misses `arcUnion`). This is genuine PL/angular geometry.
+- Decision: keep `dr` abstract in `EdmondsConstruction.lean` (already so);
+  instantiate it `regionAt … (dartSectorPoint …)` in a **downstream file importing
+  `PLArc`**, leaving the landed file untouched. `hcomp` then `rfl`-trivial modulo
+  membership; `hconst` needs a same-face collar-strip connector (driving lemmas in
+  §6.2). Anchor index: `dartAnchor` RM:47, `vertexRotation` CrossingLemma.lean:574,
+  `incidentEnds` CL:350, `convexSector_nonempty` PLArc:214.
+
+### 7.2 ST consumer wiring (both sorries live in `hstep`'s cotree branch)
+- **Entanglement:** main thm `straightLineCanonicalComponentResidualMapPlanarityOfARR`
+  (ST:4571) gets `IsPlanar` from `exists_residualMap_isPlanar_of_prefix_insertions_connected`
+  (RM:10358) at ST:4714–4719, fed `hstep` (ST:4616–4713). The residual-1 lemma
+  (decl ST:4551) is consumed at **exactly one site** (ST:4655), purely as a
+  *counting* device: its `IsPlanar` → Euler → `hcount` → the cotree index `j`.
+  Both sorries sit inside `hstep`'s cotree branch — they are **one task: fix
+  `hstep`.** RM:10358's other hyps (`hjoin`/`hconn`/`hv`/`hARR` family) are already
+  in scope (ST:4716–4719); only `hstep`'s sorries block it.
+- **De-circularize residual-1:** derive `hcount` **combinatorially** — tree prefix
+  has `card Face = 1` (RM:8990); each cotree step splits one face (`+1`, via RM:844
+  / the sameFace step) ⇒ `card Face = lface.length` ⇒
+  `(lvertex.length−1)+(lface.length−1) = numEdges`, **no planarity assumed**. Then
+  the residual-1 lemma is dead weight — re-prove it as a corollary of the main thm,
+  or delete. **TODO (not yet written):** the packaged `card Face = lface.length`
+  face-count-increment induction (only the 1-face base RM:8990 + per-step RM:844
+  exist).
+- **Residual-2 discharge** (goal at ST:4713 = `Face_mk c₁.1 = Face_mk c₂.1` over
+  `(G.permuteEdges π).prefixEdges (a+j.1) hm`, with `a = lvertex.length−1`,
+  `a+j.1 = m`):
+  ```
+  Quotient.sound (regionSeparates_prefix_of_crosscut
+    (G := G.permuteEdges π) (start := lvertex.length-1) hARRprefix dr hcard1
+    hstepCrosscut (n := a+j.1) hstartn hm c₁.1 c₂.1 hregion)
+  ```
+  Type-aligns **at the prefix level** (no `permuteEdges` transport — instantiate
+  the bridge's `G := G.permuteEdges π`, `n := a+j.1`). `c₁.1, c₂.1 : Fin (a+j.1) ×
+  Bool` are the incident-end projections.
+- **The one real call-site obligation:** identify the `hface`-bound `c₁,c₂`
+  (arbitrary incident ends + rotation-match RM:9737–9758) with the crosscut
+  datum's *specific* corners, to get `hregion : dr (a+j.1) hm c₁.1 = … c₂.1`.
+  Bridge-side/combinatorial, but non-mechanical.
+- **Prereq step 0:** ST does **not** import the bridge yet (and uses none of its
+  API); add `import …CrossingLemma.EdmondsConstruction` to ST.
+
+### 7.3 Target-2 gate verdict: **GO** (`exists_twoSidedPartition_of_polyArc`)
+- **OLD ball sector: provably UNSAT.** The collision is in
+  `isPreconnected_collarPlus_of_sliver_budgets` (PLArc:8667), which for an interior
+  vertex carries both `hρδ : ρ(succ i) ≤ δ₀` (8695) and
+  `htgt : δ₀+2αL < ρ(succ i)` (8700) ⇒ `2αL < 0`. (Matches the machine-verified
+  `False`-from-bundle finding.)
+- **NEW δ₀-corner-tube sector: jointly SATISFIABLE** (concrete assignment given) —
+  **but with a subtlety**: reusing the *narrowed band* foot witness (`1−2α`) in the
+  rewritten `overlap_…_src/tgt` reintroduces the wall (`‖Δ‖₁·‖Δ‖∞/‖Δ‖₂² < 1/4`,
+  impossible by `l1_linf ≥ l2sq`). **Resolution:** the corner-tube admits a **free
+  off-edge witness** along the bisector toward `v`, decoupling δ₀ from `αL` ⇒ Group
+  B reduces to `δ₀ > 0`. SAT holds; the redefinition is sound.
+- **Two residual PROOF obligations** (not satisfiability obstructions): {{NEEDS_PROOF}}
+  (i) the δ₀-only (ε-free) witness reconstruction in `overlap_sectorPlus_bandStripPlus_src/tgt`
+  (PLArc:6111/6171) — genuine proof, not signature surgery; (ii) a new
+  `infDist_segment_eq_dist_endpoint_of_footParam_le_zero` lemma for the P2-cover
+  outer-cone branch.
+- **`stash@{0}` = first third done** (+102/−69, PLArc.lean only, up to ~3700): new
+  `sectorPlus/Minus` defs, `isOpen_sector*`, `collar*` call sites,
+  `disjoint_sectorPlus_sectorMinus` + `_diff`, the adjacent band↔sector glue, the 4
+  endcap↔sector lemmas (ball→infDist-budget). **Missing:** reach lemmas (6111/6171),
+  P2-cover (2505/2924/2956), `isPreconnected_sectorPlus/Minus` (4690/4697, **need a
+  new `0 < δ₀` hyp**), `sectorPlus_subset_taperedTube` (8061), the bundle (8667),
+  and PLCollarSeparation (151/260). Do **not** `git stash pop` blind — re-apply
+  selectively after the def surgery.
+- **P2-cover rework confirmed:** split near-vertex points by foot sign on the near
+  edge — foot ∈ (0,1) ⇒ band; foot ≤ 0 (outer cone behind `v`) ⇒ both incident
+  `infDist = dist(·,v)`, captured by corner-tube iff `dist(z,v) < δ₀`; retire
+  `mem_sectorPlus_or_sectorMinus_of_ball` (2924) → `_of_cornerTube`.
