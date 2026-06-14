@@ -204,7 +204,7 @@ shape). Build green at HEAD-equivalent.
 - The hard Edmonds direction is honestly **isolated** into the
   `EdmondsCompatible.region_separates` structure field — not sorried, not faked.
 
-### 6.2 REMAINING TARGET 1 (Track A, the conceptual heart) — concrete `EdmondsCompatible`
+### 6.2 TARGET 1 (Track A, the conceptual heart) — concrete `EdmondsCompatible`
 Build a concrete `EdmondsCompatible G hARR R₀` for the *actual* `residualMap`
 from `ArcsRotationRegular`, by cotree-prefix induction. Three fields:
 - `dartRegion` — assign each dart the complement component its splice corner
@@ -215,9 +215,38 @@ from `ArcsRotationRegular`, by cotree-prefix induction. Three fields:
 - `region_separates` (hard half) — discharged by the **proven** base case
   (`edmondsCompatibleOfCardFaceOne`) + inductive transport (§6.1), where the
   per-step split consumes the inserted cotree edge's two-sided partition.
-**Buildable now against abstract per-edge `∃ U V, IsTwoSidedPartition` +
-sector→side containment hypotheses** — does NOT need Target 2 *proven*, only its
-statement. This is the risk-bearing piece (attack first per hardest-first).
+
+**LANDED (the iteration, commit pending) — `EdmondsConstruction.lean`, axiom-clean
+(`propext`/`Classical.choice`/`Quot.sound`; no `sorryAx`).** The cotree-prefix
+induction is proved sorry-free, reducing the **global** `region_separates` clause
+to a **per-cotree-step** datum + a one-face base:
+- `PrefixStepCrosscutData` — the per-step abstract crosscut bundle: exactly the
+  inputs of `region_separates_prefixStep_sameFace_concrete` *minus* the
+  predecessor co-faciality `hsame` (the induction derives it from the predecessor
+  region-separation) and the successor region assignment (the supplied family
+  `dr`). Fields: `c₁ c₂`, `hc`, `hregion` (abstract "same region before"),
+  `hvertex`, `poolRegion` (the two crosscut sides on split-pool classes), `hinj`,
+  `hfactor`.
+- `regionSeparates_prefix_of_crosscut` — the `Nat.le_induction` (mirrors the
+  planarity induction `RM:1779`) chaining the **proven** per-step transport from
+  the card-1 base (`facePerm_sameCycle_of_card_face_eq_one` ← `RM:8990`) to every
+  prefix level. **This is the genuine new content of Target 1.**
+- `edmondsCompatibleAtPrefix` — packages region-separation + the region family
+  `dr` + `hcomp` + `hconst` into an `EdmondsCompatible` at every prefix level.
+
+**Remaining for Target 1 (per-step geometric discharge, no longer the iteration):**
+instantiate the five abstract hypotheses of `regionSeparates_prefix_of_crosscut`
+/ `edmondsCompatibleAtPrefix` for the *actual* geometry —
+- `dr := fun m hm d => regionAt (prefixEdges m hm) R₀ (dartAnchor … d)`;
+- `hcard1` ← `RM:8990` on the spanning-tree prefix (direct);
+- `hcomp`, `hconst` — direct facts about `regionAt ∘ dartAnchor`;
+- each `PrefixStepCrosscutData` ← the cotree edge's two-sided partition realised as
+  an injective `poolRegion` — **this is the only piece needing Target 2's
+  output** (`exists_twoSidedPartition_of_polyArc`).
+The iteration being closed, what was the "risk-bearing novel content" is now the
+*statement* of the per-edge crosscut, i.e. Target 2 + the `regionAt ∘ dartAnchor`
+plumbing. **Buildable against abstract per-edge crosscut data** — confirmed by the
+landed file; does NOT need Target 2 *proven*, only its per-edge statement.
 
 ### 6.3 REMAINING TARGET 2 (Track B) — `exists_twoSidedPartition_of_polyArc`
 The PL crosscut for straight segments. The existing collar machinery is
