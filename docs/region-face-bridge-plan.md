@@ -177,3 +177,78 @@ between the geometry (`PAS`/`PLC`) and the consumer (`ST`).
 - The hard, novel sub-problem: **step 2** — tractable via the prefix-induction
   structure (base `RM:8990`, step `RM:1757`) but a multi-session lemma, the
   conceptual heart. Do not assume the Edmonds bijection is free.
+
+---
+
+## 6. Execution status (2026-06-13) — three-agent results
+
+Three import-disjoint agents ran on the warm cache. Net: the problem is now a
+**proven, axiom-clean bridge backbone + two precisely-typed remaining targets**.
+Neither ST sorry is closed yet; both targets are de-risked (no NO-GO, clear
+shape). Build green at HEAD-equivalent.
+
+### 6.1 LANDED — bridge backbone (commits `2909bb6`, `15de041`)
+`RegionFaceBridge.lean`, 19 decls, **zero `sorry`/`admit`, axiom-clean**
+(`propext`/`Classical.choice`/`Quot.sound`; no `sorryAx` leak — Lemma B takes
+`IsTwoSidedPartition` as a *hypothesis*, never calls the `PAS:377` sorry):
+- `residualFaceRegion` (step 1) + representative-independence — PROVEN.
+- `facePerm_sameCycle_of_card_face_eq_one` / `edmondsCompatibleOfCardFaceOne`
+  (step-2 **base case**, tree prefix 1-face) — PROVEN unconditionally.
+- step-2 **inductive transport**: `region_separates` preserved across a
+  same-face prefix insertion via `RM:844`
+  (`residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`),
+  instantiating the genuine `insertedFaceSplitPoolEquiv` — PROVEN.
+- `sameRegion_of_facePerm_sameCycle` (converse) — PROVEN.
+- Lemma B `residualMap_prefixStep_cotree_sameFace_of_twoSidedPartition`
+  (+`_of_collar_sides`, step 4) — PROVEN against abstract `IsTwoSidedPartition`.
+- The hard Edmonds direction is honestly **isolated** into the
+  `EdmondsCompatible.region_separates` structure field — not sorried, not faked.
+
+### 6.2 REMAINING TARGET 1 (Track A, the conceptual heart) — concrete `EdmondsCompatible`
+Build a concrete `EdmondsCompatible G hARR R₀` for the *actual* `residualMap`
+from `ArcsRotationRegular`, by cotree-prefix induction. Three fields:
+- `dartRegion` — assign each dart the complement component its splice corner
+  (`dartAnchor`) faces (candidate: `regionAt G R₀ (dartAnchor …)`).
+- `dartRegion_isComponent` — each is a genuine `drawingComplementIn` component.
+- `face_constant` (easy half) — invariant under `facePerm` (walking a face stays
+  on one region's boundary).
+- `region_separates` (hard half) — discharged by the **proven** base case
+  (`edmondsCompatibleOfCardFaceOne`) + inductive transport (§6.1), where the
+  per-step split consumes the inserted cotree edge's two-sided partition.
+**Buildable now against abstract per-edge `∃ U V, IsTwoSidedPartition` +
+sector→side containment hypotheses** — does NOT need Target 2 *proven*, only its
+statement. This is the risk-bearing piece (attack first per hardest-first).
+
+### 6.3 REMAINING TARGET 2 (Track B) — `exists_twoSidedPartition_of_polyArc`
+The PL crosscut for straight segments. The existing collar machinery is
+**vacuous** (`sectorPlus/Minus := ball(verts, ρ)` forces unsatisfiable budgets
+`ρ ≤ δ₀` ∧ `δ₀+2αL < ρ`). Fix = redefine sector as δ₀-corner-tube overlap
+`vertexPlus ∩ {infDist · (segCarrier i) < δ₀} ∩ {infDist · (segCarrier i+1) < δ₀}`
+(δ₀-governed, ρ-untied). Validated on paper (Agent-X, WIP in `git stash@{0}`,
+recall nthdegree `mem2`). **Impact map (mapping agent, full report in session
+transcript)**: ~200 line-references, **15–20 proof rewrites**:
+- BREAKS (ball load-bearing): `sectorPlus_subset_taperedTube` (PLArc:8061),
+  `overlap_sectorPlus_bandStripPlus_src/tgt` (6111/6171),
+  `mem_sectorPlus_or_sectorMinus_of_ball` (2924),
+  `disjoint_sectorPlus_sectorMinus_diff/_all` (3456/3795), `isOpen_sector*`
+  (2816), `isPreconnected_collarPlus/Minus` (5070/7707) `hO1/hO2` overlaps.
+- SURVIVES (angle-only): `disjoint_sectorPlus_sectorMinus` (3089),
+  `sectorPlus_subset_compl_carrier` (8289).
+- DEEP obstruction (paper-resolved, not yet Lean): **P2-cover rework** — the
+  existing `taperedTube_subset_midBands_union_disks` routes near-vertex points
+  into a large disk a corner-tube can't capture; fix = split foot∈(0,1)→band vs
+  outer-cone-behind-vertex→corner-tube (both `infDist` to incident edges = `dist`
+  to shared vertex `v`, captured iff `dist(z,v) < δ₀`).
+- Helper keystones still valid: `exists_delta_corner_confine` (PLArc:2635),
+  `exists_pos_infDist_compl_of_isCompact` (3999).
+- Public `exists_twoSidedPartition_of_arc` (PAS:377) stays sorried (general
+  Schoenflies NO-GO); `_of_polyArc` is the new public PL entry to build.
+
+### 6.4 Sequencing
+Target 1 and Target 2 are **independent until final wiring** (Target 1 builds
+against Target 2's *statement*, mirroring Agent-Y's abstract Lemma B). Per
+hardest-first: **Target 1 (concrete `EdmondsCompatible`) is the risk-bearing,
+novel content — attack it first**; if it closes against abstract crosscuts, the
+goal reduces to the known-tractable Target-2 grind. Final wiring (steps 5–6):
+instantiate Target 1's hypotheses with Target 2, then `ST:4713` via Lemma B and
+`ST:4562` via `RM:10358`; `#print axioms` ST (target: drop `sorryAx`).
