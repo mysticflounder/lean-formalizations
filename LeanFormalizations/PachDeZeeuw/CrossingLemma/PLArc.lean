@@ -1280,6 +1280,38 @@ theorem vertSucc_mem_arcInterior (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.
     have hlt : ((j : ℕ) : ℝ) < (β.numSegs : ℝ) := by exact_mod_cast hjlt
     rw [add_zero]; exact hlt
 
+/-- `arcInterior β.toSimpleArc ⊆ β.carrier`: the interior is a subset of the full
+range, which is the carrier. -/
+theorem arcInterior_subset_carrier : β.toSimpleArc.arcInterior ⊆ β.carrier := by
+  rw [← β.range_toSimpleArc]
+  rintro z ⟨p, _, rfl⟩
+  exact ⟨p, rfl⟩
+
+/-- The source endpoint `verts 0` is not in `arcInterior β.toSimpleArc`: it is
+`param src` (`t = 0`), and `param` is injective, so any interior preimage would be
+the endpoint parameter `0 ∉ (0,1)`. -/
+theorem verts_zero_notMem_arcInterior : β.verts 0 ∉ β.toSimpleArc.arcInterior := by
+  rintro ⟨p, hp, hpeq⟩
+  have hsrc : β.param SimpleArc.src = β.verts 0 := β.param_src
+  have : β.toSimpleArc p = β.toSimpleArc SimpleArc.src := by
+    rw [hpeq]; exact hsrc.symm
+  have hpe : p = SimpleArc.src := β.injective_param this
+  rw [hpe] at hp
+  simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo, SimpleArc.src] at hp
+  exact absurd hp.1 (by norm_num)
+
+/-- The target endpoint `verts (last)` is not in `arcInterior β.toSimpleArc`. -/
+theorem verts_last_notMem_arcInterior :
+    β.verts (Fin.last β.numSegs) ∉ β.toSimpleArc.arcInterior := by
+  rintro ⟨p, hp, hpeq⟩
+  have htgt : β.param SimpleArc.tgt = β.verts (Fin.last β.numSegs) := β.param_tgt
+  have : β.toSimpleArc p = β.toSimpleArc SimpleArc.tgt := by
+    rw [hpeq]; exact htgt.symm
+  have hpe : p = SimpleArc.tgt := β.injective_param this
+  rw [hpe] at hp
+  simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo, SimpleArc.tgt] at hp
+  exact absurd hp.2 (by norm_num)
+
 end PolyArc
 
 /-! ## §L3 sub-node 2 — the tapered collar tube
@@ -5266,6 +5298,139 @@ theorem liftPlus_lastSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) 
       have := β.numSegs_pos; exact_mod_cast (by omega : 1 ≤ β.numSegs)
     linarith
   · rw [hlast, hsdef]; linarith
+
+/-- **`hSband` for `S = arcInterior`.**  A point of edge `i` with foot parameter
+strictly in `(0,1)` lies in `arcInterior β.toSimpleArc`.  (Reconstruct the segment
+point from its foot parameter, then apply `affineComb_mem_arcInterior`.) -/
+theorem segCarrier_foot_interior_mem_arcInterior (β : PolyArc) (i : Fin β.numSegs)
+    {y : Plane} (hy : y ∈ β.segCarrier i)
+    (hfoot : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Ioo (0 : ℝ) 1) :
+    y ∈ β.toSimpleArc.arcInterior := by
+  have hts : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
+  obtain ⟨a, b, ha, hb, hab, rfl⟩ := hy
+  have hrw : a • β.segSrc i + b • β.segTgt i = (1 - b) • β.segSrc i + b • β.segTgt i := by
+    rw [show a = 1 - b by linarith]
+  rw [hrw] at hfoot ⊢
+  rw [footParam_affineComb hts b] at hfoot
+  rw [Set.mem_Ioo] at hfoot
+  rw [PolyArc.segSrc, PolyArc.segTgt]
+  refine β.affineComb_mem_arcInterior i hb (by linarith) ?_ ?_
+  · have : (0 : ℝ) ≤ (i : ℝ) := by positivity
+    linarith [hfoot.1]
+  · have hile : (i : ℝ) ≤ (β.numSegs : ℝ) - 1 := by
+      have : (i : ℕ) ≤ β.numSegs - 1 := by have := i.isLt; omega
+      have h2 : ((i : ℕ) : ℝ) ≤ ((β.numSegs - 1 : ℕ) : ℝ) := by exact_mod_cast this
+      rw [Nat.cast_sub (by have := β.numSegs_pos; omega)] at h2; push_cast at h2; linarith
+    linarith [hfoot.2]
+
+/-- **`hSrcNear` for `S = arcInterior`.**  An interior arc point `p` within `D` of the
+source endpoint must lie on the first edge with a small forward foot parameter.  The
+separation budget `hSep` (the endpoint is `≥ D` from every non-incident edge) excludes
+all other edges; the foot bound comes from `dist p (verts 0) = foot · ‖edge‖`. -/
+theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
+    (hp : p ∈ β.toSimpleArc.arcInterior)
+    (hSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
+      D ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
+    (hcSrc : D ≤ cSrc * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg))
+    (hpD : dist p (β.verts 0) < D) :
+    p ∈ β.segCarrier β.firstSeg ∧
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc := by
+  have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
+  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  obtain ⟨i, hpi⟩ := hpc
+  have hfirst : i = β.firstSeg := by
+    by_contra hne
+    have hi0 : (i : ℕ) ≠ 0 := fun h => hne (Fin.ext (by simp [PolyArc.firstSeg, h]))
+    have hge : D ≤ Metric.infDist (β.verts 0) (β.segCarrier i) := hSep i hi0
+    have hle : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) p :=
+      Metric.infDist_le_dist_of_mem hpi
+    rw [dist_comm] at hpD
+    linarith
+  subst hfirst
+  have hsv : β.segSrc β.firstSeg = β.verts 0 := by
+    rw [PolyArc.segSrc]
+    have : (Fin.castSucc β.firstSeg : Fin (β.numSegs + 1)) = 0 :=
+      Fin.ext (by simp [PolyArc.firstSeg])
+    rw [this]
+  have hts : β.segTgt β.firstSeg ≠ β.segSrc β.firstSeg := β.segTgt_ne_segSrc β.firstSeg
+  have hdpos : 0 < dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) :=
+    dist_pos.mpr (Ne.symm hts)
+  refine ⟨hpi, ?_⟩
+  obtain ⟨a, b, ha, hb, hab, hpeq⟩ := hpi
+  have hfoot : footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p = b := by
+    rw [← hpeq, show a = 1 - b from by linarith]; exact footParam_affineComb hts b
+  -- distance to the source vertex is `b · ‖edge‖`
+  have hdist : dist p (β.verts 0) = b * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) := by
+    rw [← hsv, ← hpeq, dist_affineComb_src hab, abs_of_nonneg hb,
+      dist_comm (β.segTgt β.firstSeg) (β.segSrc β.firstSeg)]
+  rw [hfoot, Set.mem_Ioc]
+  refine ⟨?_, ?_⟩
+  · rcases eq_or_lt_of_le hb with hb0 | hb0
+    · exfalso
+      apply β.verts_zero_notMem_arcInterior
+      have hpv : p = β.verts 0 := by
+        rw [← hpeq, ← hb0, show a = 1 - (0:ℝ) from by linarith, hsv]; simp
+      rwa [hpv] at hp
+    · exact hb0
+  · -- `b · ‖edge‖ = dist p (verts 0) < D ≤ cSrc · ‖edge‖`, so `b ≤ cSrc`
+    have hbd : b * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < D := by
+      rw [← hdist]; exact hpD
+    nlinarith [hcSrc, hbd, hdpos]
+
+/-- **`hTgtNear` for `S = arcInterior`.**  Symmetric to `arcInterior_near_src` at the
+target endpoint, with the last edge oriented from its target vertex. -/
+theorem arcInterior_near_tgt (β : PolyArc) {D cTgt : ℝ} {p : Plane}
+    (hp : p ∈ β.toSimpleArc.arcInterior)
+    (hSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
+      D ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
+    (hcTgt : D ≤ cTgt * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg))
+    (hpD : dist p (β.verts (Fin.last β.numSegs)) < D) :
+    p ∈ β.segCarrier β.lastSeg ∧
+      footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt := by
+  have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
+  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  obtain ⟨i, hpi⟩ := hpc
+  have hlastv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
+    rw [PolyArc.segTgt]; congr 1; apply Fin.ext
+    have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]; omega
+  have hlast : i = β.lastSeg := by
+    by_contra hne
+    have hilast : (i : ℕ) ≠ β.numSegs - 1 :=
+      fun h => hne (Fin.ext (by simp [PolyArc.lastSeg, h]))
+    have hge : D ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) :=
+      hSep i hilast
+    have hle : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
+        ≤ dist (β.verts (Fin.last β.numSegs)) p := Metric.infDist_le_dist_of_mem hpi
+    rw [dist_comm] at hpD
+    linarith
+  subst hlast
+  have hts : β.segSrc β.lastSeg ≠ β.segTgt β.lastSeg := Ne.symm (β.segTgt_ne_segSrc β.lastSeg)
+  have hdpos : 0 < dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) :=
+    dist_pos.mpr (β.segTgt_ne_segSrc β.lastSeg)
+  -- reconstruct `p = a•segSrc + b•segTgt = b•segTgt + a•segSrc`, foot from target `= a`
+  refine ⟨hpi, ?_⟩
+  obtain ⟨a, b, ha, hb, hab, hpeq⟩ := hpi
+  have hpeq' : p = b • β.segTgt β.lastSeg + a • β.segSrc β.lastSeg := by
+    rw [← hpeq]; rw [add_comm]
+  have hba : b + a = 1 := by linarith
+  have hfoot : footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p = a := by
+    rw [hpeq', show b = 1 - a from by linarith]; exact footParam_affineComb hts a
+  have hdist : dist p (β.verts (Fin.last β.numSegs))
+      = a * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) := by
+    rw [← hlastv, hpeq', dist_affineComb_src hba, abs_of_nonneg ha,
+      dist_comm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)]
+  rw [hfoot, Set.mem_Ioc]
+  refine ⟨?_, ?_⟩
+  · rcases eq_or_lt_of_le ha with ha0 | ha0
+    · exfalso
+      apply β.verts_last_notMem_arcInterior
+      have hpv : p = β.verts (Fin.last β.numSegs) := by
+        rw [hpeq', ← ha0, show b = 1 - (0:ℝ) from by linarith, hlastv]; simp
+      rwa [hpv] at hp
+    · exact ha0
+  · have had : a * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) < D := by
+      rw [← hdist]; exact hpD
+    nlinarith [hcTgt, had, hdpos]
 
 theorem footParam_liftPlus {s t : Plane} (h : t ≠ s) (c ε : ℝ) :
     footParam s t (liftPlus s t c ε) = c := by
