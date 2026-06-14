@@ -1001,21 +1001,55 @@ This **pins, with no slack, the only remaining geometric obligations**:
   needs only `IsSimplyConnected R` (⇒ connected) + the cover `R∩C ⊆ T`. So
   `exists_twoSidedPartition_of_collar` no longer takes an `hG4` hypothesis; G4 is not a
   remaining node.
-* **Collar instantiation — IN PROGRESS (2026-06-13).** Produce one parameter bundle
-  `(δ₀, α, ρ, S)` simultaneously satisfying the ~30 hypotheses of
+* **arcInterior characterization — DONE (2026-06-13, sub-node-1's last loose end;
+  `PLArc.lean`, sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`,
+  commits `e8bd8b0` + `01bafe1`).** The spine is `S = arcInterior β.toSimpleArc`. Forward
+  map `affineComb_eq_param` + strict-interior membership `affineComb_mem_arcInterior`;
+  the spine-point consequences `firstMid_mem_arcInterior` (⇒ `hmS`),
+  `vertSucc_mem_arcInterior` (interior shared vertices, ⇒ `hvertexS`),
+  `liftPlus_firstSeg/lastSeg_mem_arcInterior` (forward end-edge points, ⇒
+  `hSrcSpine`/`hTgtSpine`); `arcInterior_subset_carrier`; `verts_zero/last_notMem_arcInterior`
+  (endpoints excluded via `param` injectivity); `segCarrier_foot_interior_mem_arcInterior`
+  (⇒ `hSband`); `arcInterior_near_src/tgt` (an interior arc point within `D` of an endpoint
+  must sit on the incident edge with a small forward foot, via the endpoint-edge separation
+  budget + `dist = foot·‖edge‖`; ⇒ `hSrcNear`/`hTgtNear`). So the **spine-membership** half
+  of the collar bundle is fully dischargeable with `S = arcInterior`.
+
+* **Collar instantiation — BLOCKED (2026-06-13): the assembly target's hypothesis bundle
+  is PROVABLY UNSATISFIABLE for any arc with an interior vertex (`numSegs ≥ 2`); the sole
+  P5 lemma re-imports the `L₂² ≤ L₁·L∞` wall.  Machine-checked.**  Producing the
+  `(δ₀, α, ρ, S)` bundle for
   `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
-  (`PLCollarSeparation.lean:260`) — P2/P3/P4 + the P5 sliver budgets — feeding it with
-  `C = β.carrier`, `S = β.carrier`. Regime consistency checked on paper: pick `ρ` from
-  P3, then `α` small (`< ρ/maxedge` and `< 1/3`), then `δ₀` small (no-taper +
-  separation + region clearance). **KEYSTONE DONE:** `exists_pos_infDist_compl_of_isCompact`
-  (`PLArc.lean`, sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`) — for
-  a compact `K ⊆ R` (R open, `Rᶜ` nonempty), `∃ d>0, ∀ y∈K, d ≤ infDist y Rᶜ` (extreme
-  value theorem on the continuous `infDist · Rᶜ` + boundary positivity). This is the
-  single compactness fact every `δ₀ ≤ ½·infDist · Rᶜ` budget (`hRband`, `hSrcRpos`,
-  `hTgtRpos`, `hρR`, `hmR`) reduces to; the discharge picks `δ₀ < d/2` over the compact
-  spine windows. STILL TODO: assemble the full bundle (the band/sep/sliver budgets) into
-  a clean `exists_twoSidedPartition_of_polyArc` taking only the natural geometric inputs
-  (PolyArc, `hturn`, endpoints in `Rᶜ`, interior in `R`, `R` simply connected).
+  (`PLCollarSeparation.lean:260`) **requires proving `False`**:
+  - `hρδ` (`ρ(succ i) ≤ δ₀`) is forced by P5's `sectorPlus_subset_taperedTube`
+    (`PLArc.lean:8064`): the sector is the *metric disk* `ball(verts(succ i), ρ(succ i))`
+    intersected with `vertexPlus`, and to lie in the tube (a union of balls of radius
+    `≤ δ₀`) its radius must satisfy `ρ ≤ δ₀`.
+  - `hsrc` (`δ₀ + 2α·L_i < ρ(castSucc i)`) is forced by P5's band↔sector overlap
+    `overlap_sectorPlus_bandStripPlus_src` (`PLArc.lean:6115`): the overlap witness sits at
+    distance `≈ 2α·L_i` from the vertex along the band and must be inside the sector disk.
+  - For every interior vertex these collide on the **same** `ρ`-entry
+    (`Fin.succ i₀ = Fin.castSucc i₁`), giving `δ₀ < δ₀ + 2α·L < ρ ≤ δ₀`.  *(Verified: a
+    Lean proof of `False` from `hα`, `hsrc`, `hρδ`, `numSegs ≥ 2` compiles.)*
+  - The base `isPreconnected_collarPlus` (`PLArc.lean:5070`) carries the **same** conflict
+    (`hsectorW` vs `hO1`/`hO2`); it is the only assembled P5 route.
+  - The collision is **unconditional** (angle-independent): chaining with `hband`
+    (`M_i·δ₀ < α·P_i`) gives `α·L_i < ρ ≤ δ₀ < α·P_i/M_i`, i.e.
+    `L_i < P_i/M_i = ‖Δ‖₂²/‖Δ‖₁ ≤ ‖Δ‖_∞ = L_i` — the sup-metric `L₂² ≤ L₁·L∞` wall (§6,
+    line 567), here machine-confirmed as a standalone Lean lemma.
+  - **Root cause:** the §6 "wall dissolved (2026-06-03)" resolution converted the
+    **disjointness glue (P3)** to the angle-free `thin_of_infDist_*` form, but the **P5
+    sector-in-tube containment** still uses the *metric disk* `ball(verts, ρ)` — the
+    `sectorPlus`/`collarPlus` definitions (`PLArc.lean:2752`/`2789`) were never converted to
+    the δ₀-controlled corner-tube-overlap form, so the wall remains live there.
+  **Fix path (NOT attempted, out of this node's scope):** redefine `sectorPlus`/`sectorMinus`
+  as a δ₀-corner-tube-overlap `{infDist z (edge i) < δ₀} ∩ {infDist z (edge i+1) < δ₀} ∩
+  vertexPlus` (the free-`δ₀` vertex region of §6 line 576, controlled by `δ₀`, not by a disk
+  radius `ρ` pinned both `≤ δ₀` and `> δ₀ + 2α·L`), then reprove P2/P3/P5 for the new sector.
+  This is a redefinition of the collar's vertex piece, not a budget choice.
+  **KEYSTONE STILL VALID:** `exists_pos_infDist_compl_of_isCompact` (`PLArc.lean`,
+  axiom-clean) — the region-clearance fact every `δ₀ ≤ ½·infDist · Rᶜ` budget reduces to;
+  it remains the right tool once the sector redefinition lands.
 * **Residual closure (separate, NOT-attempted NO-GO)** — representing an arbitrary
   `SimpleArc` satisfying `ArcInRegion` as a `PolyArc` is Schoenflies-strength. The
   PL route discharges `exists_twoSidedPartition_of_polyArc`; wiring it to the
