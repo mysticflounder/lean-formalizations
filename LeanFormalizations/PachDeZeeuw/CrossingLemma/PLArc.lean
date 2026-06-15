@@ -2852,6 +2852,67 @@ noncomputable def sectorMinus (β : PolyArc) (δ₀ : ℝ)
     ∩ ({z | Metric.infDist z (β.segCarrier i) < δ₀}
         ∪ {z | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀})
 
+/-- **Clipped positive sector** (collar-facing).  The union `sectorPlus` reaches the full length
+of each incident edge's `δ₀`-tube — including the arc endpoints `verts 0`/`verts last` on `∂R`,
+where the tapered tube vanishes, so the raw sector is *not* tube-contained there.  This
+collar-facing variant clips each strip arm by a `footParam` margin `α`, trimming only the FAR
+(non-shared) end of each arm — incoming edge `i` (shared vertex at foot `1`) keeps `α < foot`,
+outgoing edge `i+1` (shared vertex at foot `0`) keeps `foot < 1 − α` — preserving the shared-corner
+reach.  `sectorPlusClipped ⊆ sectorPlus`, so every `sectorPlus` disjointness lemma transfers to
+the clipped piece via `Disjoint.mono`. -/
+noncomputable def sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
+  vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+    ∩ ( ({z | Metric.infDist z (β.segCarrier i) < δ₀}
+            ∩ {z | α < footParam (β.segSrc i) (β.segTgt i) z})
+        ∪ ({z | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z | footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z
+                < 1 - α}))
+
+/-- **Clipped negative sector** (collar-facing).  See `sectorPlusClipped`. -/
+noncomputable def sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
+  vertexMinus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+    ∩ ( ({z | Metric.infDist z (β.segCarrier i) < δ₀}
+            ∩ {z | α < footParam (β.segSrc i) (β.segTgt i) z})
+        ∪ ({z | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z | footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z
+                < 1 - α}))
+
+/-- The clipped positive sector sits inside the unclipped one (drop the `footParam` constraints). -/
+theorem sectorPlusClipped_subset_sectorPlus (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ sectorPlus β δ₀ i hi1 := by
+  rintro z ⟨hzV, hz⟩
+  exact ⟨hzV, hz.imp (fun h => h.1) (fun h => h.1)⟩
+
+/-- The clipped negative sector sits inside the unclipped one. -/
+theorem sectorMinusClipped_subset_sectorMinus (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ sectorMinus β δ₀ i hi1 := by
+  rintro z ⟨hzV, hz⟩
+  exact ⟨hzV, hz.imp (fun h => h.1) (fun h => h.1)⟩
+
+/-- The clipped positive sector is open. -/
+theorem isOpen_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    IsOpen (sectorPlusClipped β δ₀ α i hi1) :=
+  (isOpen_vertexPlus _ _ _).inter
+    (((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).inter
+        (isOpen_lt continuous_const (continuous_footParam _ _))).union
+      ((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).inter
+        (isOpen_lt (continuous_footParam _ _) continuous_const)))
+
+/-- The clipped negative sector is open. -/
+theorem isOpen_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    IsOpen (sectorMinusClipped β δ₀ α i hi1) :=
+  (isOpen_vertexMinus _ _ _).inter
+    (((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).inter
+        (isOpen_lt continuous_const (continuous_footParam _ _))).union
+      ((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).inter
+        (isOpen_lt (continuous_footParam _ _) continuous_const)))
+
 /-- Positive end cap at the source endpoint `verts 0` (edge `firstSeg`, foot `> 0`). -/
 noncomputable def endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   Metric.ball (β.verts 0) (ρ 0)

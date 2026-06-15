@@ -569,3 +569,40 @@ is the known P2 rework; 4–6 are localized. None has an identified NO-GO. A fil
 hole-by-hole against `lake-build.sh` (no LSP); each `sorry`'s goal is stated in its comment.
 Some statements in items 1–2 need *signature* revision (extra `hturn` / second-arm budget) —
 flagged in-comment — so they are not pure body-fills.
+
+## §11 — Arc-endpoint containment blocker + clipped-sector resolution (2026-06-14)
+
+While filling item 5, the `sector*_subset_taperedTube` `sorry` was found to be **genuinely
+false**, not a body-fill — the §10 "route via strip" note under-estimated it. The fix is a new
+collar-facing **clipped sector** def. Decision recorded in nthdegree
+(`01KV4XMHHZA6FKC03FPYK80KGD`).
+
+**The blocker (verified).** `vertexPlus` is an *unbounded* wedge, so `sectorPlus`'s strip arm
+runs the full incident edge down to the arc endpoints `verts 0` / `verts last`, which sit on
+`∂R` where the tapered tube radius `min δ₀ (½·infDist Rᶜ)` → 0. So the raw union sector pokes
+*outside* the tube at the two arc-endpoint corners (`i=0` incoming arm; `i=numSegs−2` outgoing
+arm), and `sectorPlus_subset_taperedTube` (PLArc:8619) cannot hold. The wedge provably reaches
+`verts0`: `τ·sideForm(verts1,verts2,verts0) = τ² > 0` (via `sideForm_cyclic`), so the wedge's
+second half-plane condition holds there. A parameter-free or fixed foot margin provably fails
+(the margin must scale with `α`); shrinking `δ₀` doesn't help (the taper is a ratio, always wins
+at the frontier).
+
+**Fix — keep `sectorPlus` (arity 3, unclipped); add `sectorPlusClipped` (arity 4, `+α`).** A
+per-arm asymmetric `footParam` clip trims only the FAR (non-shared) end of each arm —
+incoming edge `i` (shared vertex at foot 1) keeps `α < foot`; outgoing edge `i+1` (shared vertex
+at foot 0) keeps `foot < 1−α` — preserving the shared-corner reach (the union's purpose).
+`collarPlus`/`collarMinus` switch to the clipped sector. Bridges:
+- `sectorPlusClipped ⊆ sectorPlus` ⇒ **every `sectorPlus` disjointness lemma (items 1–2) feeds
+  the clipped collar UNCHANGED via `Disjoint.mono`** — so the disjointness worklist is unaffected
+  and was handed to a worktree agent against the arity-3 def.
+- containment `sectorPlusClipped ⊆ tube`: now provable (witness `foot > α/2 > 0` ⇒ interior
+  carrier ⇒ R-bound; the `foot ≳ 1−α/2` / past-`v` range uses the shared-vertex budget).
+- `isPreconnected (sectorPlusClipped)`: apex hub near `v` survives the clip (`foot_i ≈ 1 > α`,
+  `foot_{i+1} ≈ 0 < 1−α`).
+- cover: the trimmed far-tip is ceded to the adjacent corner's sector (its other arm keeps that
+  edge's shared-vertex end) or to the end cap (arc endpoints) — the P2 cover lemma (item 3).
+
+**Status.** Landed: `sectorPlusClipped`/`sectorMinusClipped` defs + `isOpen` + the two
+`⊆ sectorPlus` bridges. Remaining clip-core (mine, regions disjoint from the disjointness agent):
+clipped containment, `isPreconnected_collar` rework to the clipped piece, overlap/`compl_carrier`,
+collar-def switch, cover. The arity-3 disjointness block (3549–4049) is untouched by this.
