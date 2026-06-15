@@ -10476,6 +10476,241 @@ theorem sectorMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 
       -- non-adjacent to `k` (band foot-margin / σ-sign for the adjacent-arm sub-case).
       sorry
 
+/-- **Clipped sector containment off the carrier (positive side).**
+
+The CLIP closes the non-incident `k ∉ {i, i+1}` case the unclipped `sectorPlus_subset_compl_carrier`
+leaves open.  A clipped point sits in ONE arm: the incoming arm (δ₀-thin to edge `i`, foot `> α`)
+or the outgoing arm (δ₀-thin to edge `i+1`, foot `< 1−α`).  For `z` also on edge `k`:
+* **Non-adjacent** (index distance of the arm's edge and `k` is `≥ 2`): `z` is `δsep`-close to both
+  (`infDist z (segCarrier k) = 0`, the arm gives `< δ₀ ≤ δsep`) → `hsep`.
+* **Adjacent** (incoming arm with `k = i−1`, or outgoing arm with `k = i+2`): the arm's edge and `k`
+  share a vertex; the corner confinement `hconf` plus the Lipschitz budget `hLr` push the foot
+  toward the shared vertex (`< α` for incoming via `footParam_lt_of_confined_src`, `> 1−α` for
+  outgoing via `footParam_gt_of_confined_tgt`), contradicting the clip's margin.  Mirrors agent D's
+  `disjoint_sectorPlusClipped_sectorMinusClipped_all` adjacent-corner geometry. -/
+theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+    (hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
+      Metric.infDist w (β.segCarrier a) < δsep →
+      Metric.infDist w (β.segCarrier b) < δsep → False)
+    (r : Fin β.numSegs → ℝ)
+    (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
+      Metric.infDist z (β.segCarrier e) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(e : ℕ) + 1, he1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ e)) < r e)
+    (hLr : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs),
+      (|(β.segTgt e).1 - (β.segSrc e).1| + |(β.segTgt e).2 - (β.segSrc e).2|)
+          / dotp (β.segTgt e - β.segSrc e) (β.segTgt e - β.segSrc e) * r e ≤ α ∧
+      (|(β.segTgt ⟨(e : ℕ) + 1, he1⟩).1 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).1|
+          + |(β.segTgt ⟨(e : ℕ) + 1, he1⟩).2 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).2|)
+          / dotp (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩)
+                 (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩) * r e ≤ α)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨k, hzk⟩
+  obtain ⟨hzV, harm⟩ := hz
+  have hzU :
+      z ∈ convexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+        ∪ reflexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := by
+    rw [vertexPlus] at hzV
+    split_ifs at hzV
+    · exact Or.inl hzV
+    · exact Or.inr hzV
+  by_cases hki : (k : ℕ) = (i : ℕ)
+  · have hkeq : k = i := Fin.ext hki
+    rw [hkeq, PolyArc.segCarrier] at hzk
+    exact (segment_av_subset_compl_sectors
+      (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
+  · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
+    · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
+      rw [hkeq, PolyArc.segCarrier] at hzk
+      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
+        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+      rw [hcs] at hzk
+      exact (segment_vb_subset_compl_sectors
+        (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
+    · -- §9 UNION REWORK, CLIP-CLOSED.  `z` is on edge `k` (k ∉ {i, i+1}) → `infDist = 0`.
+      have hk0 : Metric.infDist z (β.segCarrier k) = 0 := Metric.infDist_zero_of_mem hzk
+      rcases harm with hin | hout
+      · -- INCOMING arm: δ₀-thin to edge `i`, foot `> α`.
+        obtain ⟨hiδ, hfoot⟩ := hin
+        rw [Set.mem_setOf_eq] at hfoot
+        by_cases hadj : (k : ℕ) + 1 = (i : ℕ)
+        · -- ADJACENT: k = i−1.  Corner `e = k`, edges k and k+1 = i share verts(succ k) = segSrc i.
+          have he1 : (k : ℕ) + 1 < β.numSegs := by have := i.isLt; omega
+          have hki' : (⟨(k : ℕ) + 1, he1⟩ : Fin β.numSegs) = i := Fin.ext (by simpa using hadj)
+          have hzkstrip : Metric.infDist z (β.segCarrier k) < δ₀ := by rw [hk0]; exact hδ₀
+          have hiclose : Metric.infDist z (β.segCarrier ⟨(k : ℕ) + 1, he1⟩) < δ₀ := by
+            rw [hki']; exact hiδ
+          have hconf' : dist z (β.verts (Fin.succ k)) < r k := hconf k he1 hzkstrip hiclose
+          -- segSrc i = verts(succ k): castSucc i = succ k as Fin (numSegs+1).
+          have hsv : β.segSrc i = β.verts (Fin.succ k) := by
+            have hidx : (Fin.castSucc i : Fin (β.numSegs + 1)) = Fin.succ k :=
+              Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
+            rw [PolyArc.segSrc, hidx]
+          have hne : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
+          have hbud : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+              / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * r k ≤ α := by
+            have := (hLr k he1).2; rwa [hki'] at this
+          have hfoot_lt : footParam (β.segSrc i) (β.segTgt i) z < α :=
+            footParam_lt_of_confined_src hne hsv hbud hconf'
+          linarith
+        · -- NON-ADJACENT: index distance of edges `i` and `k` is ≥ 2 → `hsep`.
+          have hiclose : Metric.infDist z (β.segCarrier i) < δsep := lt_of_lt_of_le hiδ hδ₀sep
+          have hkclose : Metric.infDist z (β.segCarrier k) < δsep := by rw [hk0]; exact hδsep
+          rcases lt_or_gt_of_ne hki with hlt | hgt
+          · exact hsep k i (by omega) z hkclose hiclose
+          · exact hsep i k (by omega) z hiclose hkclose
+      · -- OUTGOING arm: δ₀-thin to edge `i+1`, foot `< 1−α`.
+        obtain ⟨hi1δ, hfoot⟩ := hout
+        rw [Set.mem_setOf_eq] at hfoot
+        by_cases hadj : (k : ℕ) = (i : ℕ) + 2
+        · -- ADJACENT: k = i+2.  Corner `e = i+1`, edges i+1 and (i+1)+1 = k share verts(succ(i+1)).
+          have hival : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
+          have he1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1 < β.numSegs := by
+            rw [hival]; have := k.isLt; omega
+          have hk' : (⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩ : Fin β.numSegs) = k :=
+            Fin.ext (by simp only [Fin.val_mk]; omega)
+          have hcareq : β.segCarrier ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩
+              = β.segCarrier k := congrArg β.segCarrier hk'
+          have hzkstrip : Metric.infDist z (β.segCarrier
+              ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩) < δ₀ := by
+            rw [hcareq, hk0]; exact hδ₀
+          have hconf' : dist z (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) <
+              r ⟨(i : ℕ) + 1, hi1⟩ :=
+            hconf ⟨(i : ℕ) + 1, hi1⟩ he1 hi1δ hzkstrip
+          have hne : β.segTgt ⟨(i : ℕ) + 1, hi1⟩ ≠ β.segSrc ⟨(i : ℕ) + 1, hi1⟩ :=
+            β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+          have htv : β.segTgt ⟨(i : ℕ) + 1, hi1⟩ = β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩) := rfl
+          have hfoot_gt : 1 - α < footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+              (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z :=
+            footParam_gt_of_confined_tgt hne htv (hLr ⟨(i : ℕ) + 1, hi1⟩ he1).1 hconf'
+          linarith
+        · -- NON-ADJACENT: index distance of edges `i+1` and `k` is ≥ 2 → `hsep`.
+          have hi1close : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δsep :=
+            lt_of_lt_of_le hi1δ hδ₀sep
+          have hkclose : Metric.infDist z (β.segCarrier k) < δsep := by rw [hk0]; exact hδsep
+          have hkval1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
+          rcases lt_or_gt_of_ne hki1 with hlt | hgt
+          · exact hsep k ⟨(i : ℕ) + 1, hi1⟩ (by rw [hkval1]; omega) z hkclose hi1close
+          · exact hsep ⟨(i : ℕ) + 1, hi1⟩ k (by rw [hkval1]; omega) z hi1close hkclose
+
+/-- **Clipped sector containment off the carrier (negative side).**  See
+`sectorPlusClipped_subset_compl_carrier`; the only difference is the `vertexMinus` τ-branch. -/
+theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+    (hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
+      Metric.infDist w (β.segCarrier a) < δsep →
+      Metric.infDist w (β.segCarrier b) < δsep → False)
+    (r : Fin β.numSegs → ℝ)
+    (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
+      Metric.infDist z (β.segCarrier e) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(e : ℕ) + 1, he1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ e)) < r e)
+    (hLr : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs),
+      (|(β.segTgt e).1 - (β.segSrc e).1| + |(β.segTgt e).2 - (β.segSrc e).2|)
+          / dotp (β.segTgt e - β.segSrc e) (β.segTgt e - β.segSrc e) * r e ≤ α ∧
+      (|(β.segTgt ⟨(e : ℕ) + 1, he1⟩).1 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).1|
+          + |(β.segTgt ⟨(e : ℕ) + 1, he1⟩).2 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).2|)
+          / dotp (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩)
+                 (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩) * r e ≤ α)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ (β.carrier)ᶜ := by
+  intro z hz
+  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rintro ⟨k, hzk⟩
+  obtain ⟨hzV, harm⟩ := hz
+  have hzU :
+      z ∈ convexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+        ∪ reflexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := by
+    rw [vertexMinus] at hzV
+    split_ifs at hzV
+    · exact Or.inr hzV
+    · exact Or.inl hzV
+  by_cases hki : (k : ℕ) = (i : ℕ)
+  · have hkeq : k = i := Fin.ext hki
+    rw [hkeq, PolyArc.segCarrier] at hzk
+    exact (segment_av_subset_compl_sectors
+      (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
+  · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
+    · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
+      rw [hkeq, PolyArc.segCarrier] at hzk
+      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
+        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+      rw [hcs] at hzk
+      exact (segment_vb_subset_compl_sectors
+        (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
+    · -- §9 UNION REWORK, CLIP-CLOSED.  `z` is on edge `k` (k ∉ {i, i+1}) → `infDist = 0`.
+      have hk0 : Metric.infDist z (β.segCarrier k) = 0 := Metric.infDist_zero_of_mem hzk
+      rcases harm with hin | hout
+      · -- INCOMING arm: δ₀-thin to edge `i`, foot `> α`.
+        obtain ⟨hiδ, hfoot⟩ := hin
+        rw [Set.mem_setOf_eq] at hfoot
+        by_cases hadj : (k : ℕ) + 1 = (i : ℕ)
+        · -- ADJACENT: k = i−1.  Corner `e = k`, edges k and k+1 = i share verts(succ k) = segSrc i.
+          have he1 : (k : ℕ) + 1 < β.numSegs := by have := i.isLt; omega
+          have hki' : (⟨(k : ℕ) + 1, he1⟩ : Fin β.numSegs) = i := Fin.ext (by simpa using hadj)
+          have hzkstrip : Metric.infDist z (β.segCarrier k) < δ₀ := by rw [hk0]; exact hδ₀
+          have hiclose : Metric.infDist z (β.segCarrier ⟨(k : ℕ) + 1, he1⟩) < δ₀ := by
+            rw [hki']; exact hiδ
+          have hconf' : dist z (β.verts (Fin.succ k)) < r k := hconf k he1 hzkstrip hiclose
+          have hsv : β.segSrc i = β.verts (Fin.succ k) := by
+            have hidx : (Fin.castSucc i : Fin (β.numSegs + 1)) = Fin.succ k :=
+              Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
+            rw [PolyArc.segSrc, hidx]
+          have hne : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
+          have hbud : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+              / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * r k ≤ α := by
+            have := (hLr k he1).2; rwa [hki'] at this
+          have hfoot_lt : footParam (β.segSrc i) (β.segTgt i) z < α :=
+            footParam_lt_of_confined_src hne hsv hbud hconf'
+          linarith
+        · -- NON-ADJACENT: index distance of edges `i` and `k` is ≥ 2 → `hsep`.
+          have hiclose : Metric.infDist z (β.segCarrier i) < δsep := lt_of_lt_of_le hiδ hδ₀sep
+          have hkclose : Metric.infDist z (β.segCarrier k) < δsep := by rw [hk0]; exact hδsep
+          rcases lt_or_gt_of_ne hki with hlt | hgt
+          · exact hsep k i (by omega) z hkclose hiclose
+          · exact hsep i k (by omega) z hiclose hkclose
+      · -- OUTGOING arm: δ₀-thin to edge `i+1`, foot `< 1−α`.
+        obtain ⟨hi1δ, hfoot⟩ := hout
+        rw [Set.mem_setOf_eq] at hfoot
+        by_cases hadj : (k : ℕ) = (i : ℕ) + 2
+        · -- ADJACENT: k = i+2.  Corner `e = i+1`, edges i+1 and (i+1)+1 = k share verts(succ(i+1)).
+          have hival : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
+          have he1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1 < β.numSegs := by
+            rw [hival]; have := k.isLt; omega
+          have hk' : (⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩ : Fin β.numSegs) = k :=
+            Fin.ext (by simp only [Fin.val_mk]; omega)
+          have hcareq : β.segCarrier ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩
+              = β.segCarrier k := congrArg β.segCarrier hk'
+          have hzkstrip : Metric.infDist z (β.segCarrier
+              ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩) < δ₀ := by
+            rw [hcareq, hk0]; exact hδ₀
+          have hconf' : dist z (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) <
+              r ⟨(i : ℕ) + 1, hi1⟩ :=
+            hconf ⟨(i : ℕ) + 1, hi1⟩ he1 hi1δ hzkstrip
+          have hne : β.segTgt ⟨(i : ℕ) + 1, hi1⟩ ≠ β.segSrc ⟨(i : ℕ) + 1, hi1⟩ :=
+            β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+          have htv : β.segTgt ⟨(i : ℕ) + 1, hi1⟩ = β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩) := rfl
+          have hfoot_gt : 1 - α < footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+              (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z :=
+            footParam_gt_of_confined_tgt hne htv (hLr ⟨(i : ℕ) + 1, hi1⟩ he1).1 hconf'
+          linarith
+        · -- NON-ADJACENT: index distance of edges `i+1` and `k` is ≥ 2 → `hsep`.
+          have hi1close : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δsep :=
+            lt_of_lt_of_le hi1δ hδ₀sep
+          have hkclose : Metric.infDist z (β.segCarrier k) < δsep := by rw [hk0]; exact hδsep
+          have hkval1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
+          rcases lt_or_gt_of_ne hki1 with hlt | hgt
+          · exact hsep k ⟨(i : ℕ) + 1, hi1⟩ (by rw [hkval1]; omega) z hkclose hi1close
+          · exact hsep ⟨(i : ℕ) + 1, hi1⟩ k (by rw [hkval1]; omega) z hi1close hkclose
+
 /-- **Band containment in the clipped collar ground set (positive side).** -/
 theorem bandStripPlus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
     {α δ₀ δsep : ℝ} (i : Fin β.numSegs)
