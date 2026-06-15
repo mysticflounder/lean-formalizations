@@ -4054,22 +4054,60 @@ theorem disjoint_sectorPlus_sectorMinus_all (β : PolyArc) {δ₀ δsep : ℝ} (
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
       Metric.infDist z (β.segCarrier b) < δsep → False)
+    (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
+      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
     (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs) :
     Disjoint (sectorPlus β δ₀ j hj1) (sectorMinus β δ₀ k hk1) := by
-  -- §9 UNION REWORK — the load-bearing sector↔sector disjointness.  Three regimes in
-  -- `j` vs `k`:
-  --  • same corner `j = k`: `disjoint_sectorPlus_sectorMinus β δ₀ j hj1` (angular, proven).
-  --  • far corners `|j − k| ≥ 3`: all four arm-strip pairs {j,j+1}×{k,k+1} are non-adjacent,
-  --    so `disjoint_stripSupport_nonadjacent` + `sectorPlus/Minus_subset_stripSupport_union`
-  --    (4-way `Disjoint.mono` over the union) separates them.
-  --  • adjacent / gap-2 corners `|j − k| ∈ {1,2}` (sharing an edge, or arms one apart):
-  --    strip separation FAILS — disjointness comes from the **σ-sign on the shared edge**.
-  --    A `sectorPlus` point thin to the shared edge with interior foot has `σ > 0`
-  --    (`vertexPlus_sideForm_outgoing_pos` / `_incoming_pos`); a `sectorMinus` point thin to
-  --    the same edge has `σ < 0` (`vertexMinus_sideForm_outgoing_neg` / `_incoming_neg`).
-  --    Contradiction.  The interior-foot + thin-overlap facts are derivable from the union
-  --    membership and the corner structure (needs `hturn` per corner; ADD that hypothesis).
-  sorry
+  -- §9 UNION REWORK — the load-bearing sector↔sector disjointness.  SIGNATURE REVISION:
+  -- added `hturn` (per-corner turn nonzero) for the σ-sign sub-cases.  Regimes in `j` vs `k`:
+  --  • same corner `j = k`: `disjoint_sectorPlus_sectorMinus` (angular, proven).  CLOSED.
+  --  • far corners (closest arm pair at index distance ≥ 2): the 4-way strip separation
+  --    `disjoint_sectorPlus_sectorMinus_diff` closes.  CLOSED.
+  --  • adjacent / gap-2 corners (some arm pair shares the SHARED EDGE between the two
+  --    corners): strip separation FAILS.  Disjointness comes from the σ-sign on the shared
+  --    edge — a `sectorPlus` point thin to it has σ>0, a `sectorMinus` point thin to it has
+  --    σ<0.  BLOCKED: the σ-sign lemmas (`vertexPlus/Minus_sideForm_*`) require a thinness
+  --    hypothesis `hthin`, which `thin_of_infDist_*` produces ONLY from an interior FOOT
+  --    bound `α ≤ footParam …` on the shared edge.  A union-sector point carries
+  --    `infDist · (shared edge) < δ₀` but NO foot bound, and the foot can be arbitrarily
+  --    close to the shared vertex (where thinness degenerates) — so `hthin` is not derivable
+  --    from the hypotheses available here.  See final report.
+  have hsep' : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
+      Metric.infDist z (β.segCarrier a) < δ₀ →
+      Metric.infDist z (β.segCarrier b) < δ₀ → False :=
+    fun a b hab z hza hzb => hsep a b hab z (lt_of_lt_of_le hza hδ₀sep)
+      (lt_of_lt_of_le hzb hδ₀sep)
+  have hjval : ((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) = (j : ℕ) + 1 := rfl
+  have hkval : ((⟨(k : ℕ) + 1, hk1⟩ : Fin β.numSegs) : ℕ) = (k : ℕ) + 1 := rfl
+  rcases lt_trichotomy (j : ℕ) (k : ℕ) with hjk | hjkeq | hjk
+  · -- j < k
+    by_cases hfar : (j : ℕ) + 1 + 1 < (k : ℕ)
+    · -- closest arm pair (j+1 vs k) at index distance ≥ 2: 4-way strip separation.
+      exact disjoint_sectorPlus_sectorMinus_diff β δ₀ j k hj1 hk1
+        (disjoint_stripSupport_nonadjacent β hsep' j k (by omega))
+        (disjoint_stripSupport_nonadjacent β hsep' j ⟨(k : ℕ) + 1, hk1⟩ (by rw [hkval]; omega))
+        (disjoint_stripSupport_nonadjacent β hsep' ⟨(j : ℕ) + 1, hj1⟩ k (by rw [hjval]; omega))
+        (disjoint_stripSupport_nonadjacent β hsep' ⟨(j : ℕ) + 1, hj1⟩ ⟨(k : ℕ) + 1, hk1⟩
+          (by rw [hjval, hkval]; omega))
+    · -- k ∈ {j+1, j+2}: shared-edge σ-sign regime.  BLOCKED.
+      sorry
+  · -- j = k: angular opposite-sign clash.
+    have hjkF : j = k := Fin.ext hjkeq
+    subst hjkF
+    exact disjoint_sectorPlus_sectorMinus β δ₀ j hj1
+  · -- k < j
+    by_cases hfar : (k : ℕ) + 1 + 1 < (j : ℕ)
+    · -- closest arm pair (k+1 vs j) at index distance ≥ 2: 4-way strip separation.
+      exact disjoint_sectorPlus_sectorMinus_diff β δ₀ j k hj1 hk1
+        (disjoint_stripSupport_nonadjacent β hsep' k j (by omega)).symm
+        (disjoint_stripSupport_nonadjacent β hsep' ⟨(k : ℕ) + 1, hk1⟩ j
+          (by rw [hkval]; omega)).symm
+        (disjoint_stripSupport_nonadjacent β hsep' k ⟨(j : ℕ) + 1, hj1⟩
+          (by rw [hjval]; omega)).symm
+        (disjoint_stripSupport_nonadjacent β hsep' ⟨(k : ℕ) + 1, hk1⟩ ⟨(j : ℕ) + 1, hj1⟩
+          (by rw [hjval, hkval]; omega)).symm
+    · -- j ∈ {k+1, k+2}: shared-edge σ-sign regime.  BLOCKED.
+      sorry
 
 /-- **Source `+` cap ↔ band⁻, all band indices.**  Own edge → sign clash; else the
 endpoint-edge budget. -/
@@ -4257,7 +4295,7 @@ theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ 
         hpj hmk
     · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
       exact Set.disjoint_left.mp
-        (disjoint_sectorPlus_sectorMinus_all β hδ₀sep hsep j k hj1 hk1) hpj hmk
+        (disjoint_sectorPlus_sectorMinus_all β hδ₀sep hsep hτ j k hj1 hk1) hpj hmk
     · exact Set.disjoint_left.mp
         (disjoint_sectorPlus_endCapSrcMinus_all β ρ hbudsrc j hj1) hpj hm
     · exact Set.disjoint_left.mp
