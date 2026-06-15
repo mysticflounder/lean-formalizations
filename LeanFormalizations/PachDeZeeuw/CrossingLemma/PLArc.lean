@@ -4855,14 +4855,400 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorPlus β δ₀ i hi1) := by
-  sorry
+  rcases lt_or_ge 0 δ₀ with hδpos | hδnonpos
+  · set a : Plane := β.segSrc i with ha
+    set v : Plane := β.segTgt i with hv
+    set b : Plane := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+    have hτne : cornerTurn a v b ≠ 0 := by
+      simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
+    have hτ : sideForm a v b ≠ 0 := by
+      simpa [cornerTurn] using hτne
+    have hτ' : sideForm v b a ≠ 0 := by
+      rw [← sideForm_cyclic a v b]
+      exact hτ
+    have hstripConv_i : Convex ℝ (stripSupport β δ₀ i) := by
+      have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+      have hEq : stripSupport β δ₀ i = Metric.thickening δ₀ (β.segCarrier i) := by
+        ext z
+        rw [stripSupport, Metric.mem_thickening_iff_infDist_lt hne]
+        rfl
+      rw [hEq]
+      exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+    have hstripConv_i1 : Convex ℝ (stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+      have hne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+        ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+      have hEq :
+          stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩
+            = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
+        ext z
+        rw [stripSupport, Metric.mem_thickening_iff_infDist_lt hne]
+        rfl
+      rw [hEq]
+      exact
+        (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+          (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
+    rcases lt_or_gt_of_ne hτne with hneg | hpos
+    · set P : Plane := (3 : ℝ) • v - a - b with hP
+      set ε : ℝ := δ₀ / (dist P v + 1) with hε
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hden : 0 < dist P v + 1 := by
+        have hPnonneg : 0 ≤ dist P v := dist_nonneg
+        nlinarith
+      have hεpos : 0 < ε := by
+        rw [hε]
+        exact div_pos hδpos hden
+      have hptv : pt - v = ε • (P - v) := by
+        rw [hpt]
+        module
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq, hε, div_mul_eq_mul_div, mul_div_assoc]
+        have hratio : dist P v / (dist P v + 1) < 1 := by
+          have hden' : 0 < dist P v + 1 := by
+            have hPnonneg : 0 ≤ dist P v := dist_nonneg
+            nlinarith
+          exact (div_lt_iff₀ hden').2 (by linarith)
+        have hmul : δ₀ * (dist P v / (dist P v + 1)) < δ₀ := by
+          simpa using (mul_lt_mul_of_pos_left hratio hδpos)
+        exact hmul
+      have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact right_mem_segment ℝ _ _
+      have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact left_mem_segment ℝ _ _
+      have hPa : sideForm a v P = - sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hPb : sideForm v b P = - sideForm v b a := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
+          cornerTurn]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : cornerTurn a v b * sideForm v b pt < 0 := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb,
+          cornerTurn, sideForm_cyclic a v b]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpiece_i : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ i) := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        exact IsPreconnected.union pt ⟨hptA, hptstrip_i⟩ ⟨hptB, hptstrip_i⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
+      have hpiece_i1 : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        exact IsPreconnected.union pt ⟨hptA, hptstrip_i1⟩ ⟨hptB, hptstrip_i1⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
+      have hpt_vertex : pt ∈ vertexPlus a v b := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector]
+        exact Or.inl hptA
+      rw [sectorPlus, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt
+        ⟨hpt_vertex, hptstrip_i⟩ ⟨hpt_vertex, hptstrip_i1⟩ hpiece_i hpiece_i1
+    · set P : Plane := a + b - v with hP
+      set ε : ℝ := δ₀ / (dist P v + 1) with hε
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hden : 0 < dist P v + 1 := by
+        have hPnonneg : 0 ≤ dist P v := dist_nonneg
+        nlinarith
+      have hεpos : 0 < ε := by
+        rw [hε]
+        exact div_pos hδpos hden
+      have hptv : pt - v = ε • (P - v) := by
+        rw [hpt]
+        module
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq, hε, div_mul_eq_mul_div, mul_div_assoc]
+        have hratio : dist P v / (dist P v + 1) < 1 := by
+          have hden' : 0 < dist P v + 1 := by
+            have hPnonneg : 0 ≤ dist P v := dist_nonneg
+            nlinarith
+          exact (div_lt_iff₀ hden').2 (by linarith)
+        have hmul : δ₀ * (dist P v / (dist P v + 1)) < δ₀ := by
+          simpa using (mul_lt_mul_of_pos_left hratio hδpos)
+        exact hmul
+      have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact right_mem_segment ℝ _ _
+      have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact left_mem_segment ℝ _ _
+      have hPa : sideForm a v P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hPb : sideForm v b P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
+          cornerTurn]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : 0 < cornerTurn a v b * sideForm v b pt := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb,
+          cornerTurn, sideForm_cyclic a v b]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexPlus a v b := by
+        rw [vertexPlus, if_pos hpos, convexSector]
+        exact ⟨hptA, hptB⟩
+      have hpiece_i : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ i) := by
+        rw [vertexPlus, if_pos hpos]
+        exact ((convex_convexSector a v b).inter hstripConv_i).isPreconnected
+      have hpiece_i1 : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+        rw [vertexPlus, if_pos hpos]
+        exact ((convex_convexSector a v b).inter hstripConv_i1).isPreconnected
+      rw [sectorPlus, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt
+        ⟨hpt_vertex, hptstrip_i⟩ ⟨hpt_vertex, hptstrip_i1⟩ hpiece_i hpiece_i1
+  · rw [sectorPlus]
+    have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
+      ext z
+      constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz
+        simpa using hz
+    have hstrip_i1 :
+        {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
+      ext z
+      constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) :=
+          Metric.infDist_nonneg
+        nlinarith
+      · intro hz
+        simpa using hz
+    rw [hstrip_i, hstrip_i1, Set.union_empty, Set.inter_empty]
+    exact isPreconnected_empty
 
 /-- The negative vertex sector is preconnected.  See `isPreconnected_sectorPlus`. -/
 theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorMinus β δ₀ i hi1) := by
-  sorry
+  rcases lt_or_ge 0 δ₀ with hδpos | hδnonpos
+  · set a : Plane := β.segSrc i with ha
+    set v : Plane := β.segTgt i with hv
+    set b : Plane := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+    have hτne : cornerTurn a v b ≠ 0 := by
+      simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
+    have hτ : sideForm a v b ≠ 0 := by
+      simpa [cornerTurn] using hτne
+    have hτ' : sideForm v b a ≠ 0 := by
+      rw [← sideForm_cyclic a v b]
+      exact hτ
+    have hstripConv_i : Convex ℝ (stripSupport β δ₀ i) := by
+      have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+      have hEq : stripSupport β δ₀ i = Metric.thickening δ₀ (β.segCarrier i) := by
+        ext z
+        rw [stripSupport, Metric.mem_thickening_iff_infDist_lt hne]
+        rfl
+      rw [hEq]
+      exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+    have hstripConv_i1 : Convex ℝ (stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+      have hne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+        ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+      have hEq :
+          stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩
+            = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
+        ext z
+        rw [stripSupport, Metric.mem_thickening_iff_infDist_lt hne]
+        rfl
+      rw [hEq]
+      exact
+        (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+          (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
+    rcases lt_or_gt_of_ne hτne with hneg | hpos
+    · set P : Plane := a + b - v with hP
+      set ε : ℝ := δ₀ / (dist P v + 1) with hε
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hden : 0 < dist P v + 1 := by
+        have hPnonneg : 0 ≤ dist P v := dist_nonneg
+        nlinarith
+      have hεpos : 0 < ε := by
+        rw [hε]
+        exact div_pos hδpos hden
+      have hptv : pt - v = ε • (P - v) := by
+        rw [hpt]
+        module
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq, hε, div_mul_eq_mul_div, mul_div_assoc]
+        have hratio : dist P v / (dist P v + 1) < 1 := by
+          have hden' : 0 < dist P v + 1 := by
+            have hPnonneg : 0 ≤ dist P v := dist_nonneg
+            nlinarith
+          exact (div_lt_iff₀ hden').2 (by linarith)
+        have hmul : δ₀ * (dist P v / (dist P v + 1)) < δ₀ := by
+          simpa using (mul_lt_mul_of_pos_left hratio hδpos)
+        exact hmul
+      have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact right_mem_segment ℝ _ _
+      have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact left_mem_segment ℝ _ _
+      have hPa : sideForm a v P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hPb : sideForm v b P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
+          cornerTurn]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : 0 < cornerTurn a v b * sideForm v b pt := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb,
+          cornerTurn, sideForm_cyclic a v b]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexMinus a v b := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le), convexSector]
+        exact ⟨hptA, hptB⟩
+      have hpiece_i : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ i) := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le)]
+        exact ((convex_convexSector a v b).inter hstripConv_i).isPreconnected
+      have hpiece_i1 : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le)]
+        exact ((convex_convexSector a v b).inter hstripConv_i1).isPreconnected
+      rw [sectorMinus, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt
+        ⟨hpt_vertex, hptstrip_i⟩ ⟨hpt_vertex, hptstrip_i1⟩ hpiece_i hpiece_i1
+    · set P : Plane := (3 : ℝ) • v - a - b with hP
+      set ε : ℝ := δ₀ / (dist P v + 1) with hε
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hden : 0 < dist P v + 1 := by
+        have hPnonneg : 0 ≤ dist P v := dist_nonneg
+        nlinarith
+      have hεpos : 0 < ε := by
+        rw [hε]
+        exact div_pos hδpos hden
+      have hptv : pt - v = ε • (P - v) := by
+        rw [hpt]
+        module
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq, hε, div_mul_eq_mul_div, mul_div_assoc]
+        have hratio : dist P v / (dist P v + 1) < 1 := by
+          have hden' : 0 < dist P v + 1 := by
+            have hPnonneg : 0 ≤ dist P v := dist_nonneg
+            nlinarith
+          exact (div_lt_iff₀ hden').2 (by linarith)
+        have hmul : δ₀ * (dist P v / (dist P v + 1)) < δ₀ := by
+          simpa using (mul_lt_mul_of_pos_left hratio hδpos)
+        exact hmul
+      have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact right_mem_segment ℝ _ _
+      have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
+        rw [stripSupport]
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier]
+        exact left_mem_segment ℝ _ _
+      have hPa : sideForm a v P = - sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hPb : sideForm v b P = - sideForm v b a := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        ring
+      have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
+          cornerTurn]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : cornerTurn a v b * sideForm v b pt < 0 := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb,
+          cornerTurn, sideForm_cyclic a v b]
+        ring_nf
+        nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexMinus a v b := by
+        rw [vertexMinus, if_pos hpos, reflexSector]
+        exact Or.inl hptA
+      have hpiece_i : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ i) := by
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        exact IsPreconnected.union pt ⟨hptA, hptstrip_i⟩ ⟨hptB, hptstrip_i⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
+      have hpiece_i1 : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        exact IsPreconnected.union pt ⟨hptA, hptstrip_i1⟩ ⟨hptB, hptstrip_i1⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
+      rw [sectorMinus, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt
+        ⟨hpt_vertex, hptstrip_i⟩ ⟨hpt_vertex, hptstrip_i1⟩ hpiece_i hpiece_i1
+  · rw [sectorMinus]
+    have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
+      ext z
+      constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz
+        simpa using hz
+    have hstrip_i1 :
+        {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
+      ext z
+      constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) :=
+          Metric.infDist_nonneg
+        nlinarith
+      · intro hz
+        simpa using hz
+    rw [hstrip_i, hstrip_i1, Set.union_empty, Set.inter_empty]
+    exact isPreconnected_empty
 
 /-- The positive source end cap is convex. -/
 theorem convex_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
