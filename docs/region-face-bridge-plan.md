@@ -688,3 +688,45 @@ master/`exists_corner_delta` plumbing recipe is in the nthdegree decision memory
 (`01KV5BX1SF...`). Sorry budget: 13 -> retire false-tube x2 + sorried aggregators x6 + `mem_..._of_ball` x1
 + unclipped `compl_carrier` x2 (replaced by green clipped) => target ~2 sorries (union disk-routing ~3160,
 plus the unclipped-`compl_carrier` line if not deleted).
+
+## §14 — Phase 2 COMPLETE (2026-06-15) — collar flipped to clipped sectors, GREEN
+
+The big-bang flip landed: `PLArc.lean` builds GREEN (`LAKE_EXIT=0`) with **exactly one `sorry`**
+(`union_collarPlus_collarMinus` interior-vertex disk-routing, ~3140 — the designated keep). Commit
+`58e0a98`, fast-forwarded onto `152619c`; diffstat **149 insertions / 425 deletions**, only `PLArc.lean`.
+
+**Axiom-clean (verified by `#print axioms`, not just claimed):** `disjoint_collarPlus_collarMinus`,
+`exists_collar_disjoint`, `isPreconnected_collarPlus` each report exactly
+`[propext, Classical.choice, Quot.sound]` — no `sorryAx`. The flipped collar chain is sorry-clean; the
+lone remaining `sorry` lives only in the downstream cover.
+
+**What changed:**
+- `collarPlus`/`collarMinus`/`collarChainPlus`/`collarChainMinus` (+ `iUnion_collarChain*`, `isOpen_collar*`)
+  now use `sectorPlusClipped β δ₀ α`/`sectorMinusClipped β δ₀ α` instead of the unclipped union sectors.
+- Master `disjoint_collarPlus_collarMinus` grew by 5 hyps (`r`/`hconf`/`hLr`/`hballSrc`/`hballTgt`); its
+  sector-touching branches route into the proven clipped aggregators (sector×sector, cap×sector) and into
+  the proven *unclipped* band×sector leaves via the `sectorClipped_subset_sector` bridge + `Disjoint.mono`.
+- `exists_corner_delta` now **exposes `r` in its `∃`** and appends the confinement + two Lipschitz conjuncts
+  (E/F/G, all already proven internally); `exists_collar_disjoint` `choose`s `rfun`, extends the `M5` min
+  with `α/L_firstSeg`, `α/L_lastSeg`, and supplies the master's new hyps. No new geometry.
+- `isPreconnected_collar{Plus,Minus}` and `isPreconnected_collarChain{Plus,Minus}` gained `(hα)(hα1)` and
+  use `isPreconnected_sectorPlusClipped`/`Minus`.
+
+**OPEN-ISSUE resolution (the §13 window-gap).** Rather than bridge `foot ∈ (1-a/2, 1]` inside the wrapper,
+the sliver wrappers `isPreconnected_collar{Plus,Minus}_of_sliver_budgets` now take the clipped sector
+ground-containment as a **direct hypothesis**
+`hsectorW : ∀ i hi1, sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier` (plus `hα1 : α < 1`).
+The window/confinement obligation is therefore discharged **at the call site** (the ST/Target-1 consumer)
+via the proven `sectorPlusClipped_subset_taperedTube_diff_carrier` — the natural home for the concrete
+geometry. This is the binding constraint the downstream map independently flagged; the direct-hyp design
+sidesteps it cleanly. The band keeps its original `hSband`/`hRband` (`Icc(a/2)(1-a/2)`), unchanged.
+
+**Retired (deleted, zero live references):** `mem_sectorPlus_or_sectorMinus_of_ball`;
+`disjoint_sectorPlus_sectorMinus_all`; the 4 unclipped sector↔cap aggregators; `sector{Plus,Minus}_subset_taperedTube`
+(the false/sorried tube lemmas); `sector{Plus,Minus}_subset_compl_carrier` (unclipped, replaced by clipped);
+`sector{Plus,Minus}_subset_taperedTube_diff_carrier` + the 2 dead `..._of_sliver_budgets` bridge lemmas. The
+4 `sector*_subset_collar*` bridge lemmas were flipped to clipped (still live).
+
+**Next:** post-flip Target-1 phase — see `ws:target1-map`. The remaining cover `sorry` (~3140) and the
+downstream `exists_twoSidedPartition_of_polyArc` packaging + `dartSectorPoint` + EC instantiation are the
+path to discharging the two ST cotree-theorem sorries.
