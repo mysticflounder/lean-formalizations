@@ -648,3 +648,43 @@ raw `setOf` memberships (`z ∈ {z | …}`), which `linarith` will NOT read — 
 cells, the new clipped aggregators for degenerate); retire the false unclipped `sector*_subset_taperedTube`;
 clipped-direct `sector*Clipped_subset_compl_carrier`; cover rework (`mem_…_of_ball` → `_of_cornerTube`,
 disk-routing into the clipped sector union).
+
+## §13 — Integration restructured into Phase 1 (additive) + Phase 2 (big-bang flip) (2026-06-15)
+
+Reading every consumer of the collar defs showed step-7 integration is an **atomic serial def-switch**:
+`collarPlus`/`collarMinus` feed master / cover / `exists_collar_disjoint` / sliver wrappers
+simultaneously, so the file is broken until the *entire* flip lands — there is no green-verifiable island
+for a parallel agent **except support lemmas that do not reference the collar**. So the work split:
+
+**Phase 1 — additive support lemmas (green-incremental, parallelizable). DONE, merged to main, green.**
+- Clipped overlap witnesses x4 (`overlap_sectorPlusClipped_bandStripPlus_src/tgt`,
+  `overlap_sectorMinusClipped_bandStripMinus_src/tgt`) — same witness as the unclipped twins; the foot-clip
+  falls out of the existing `hfoot` since `1-2a > a` and `2a < 1-a` under `hα3`.
+- Clipped off-carrier x2 (`sector{Plus,Minus}Clipped_subset_compl_carrier`) — **non-incident case fully
+  closed, no sorry, axiom-clean** (`propext, Classical.choice, Quot.sound`). Adjacent sub-cases
+  (incoming arm `k=i-1`, outgoing arm `k=i+2`) close via `footParam_lt_of_confined_src` /
+  `footParam_gt_of_confined_tgt` fed by a confinement budget; signature carries the **agent-D budget family**
+  `(hα)(hd0)(hdsep)(hd0sep)(hsep)(r)(hconf)(hLr)`.
+- Clipped `diff_carrier` x2 (`sector*Clipped_subset_taperedTube_diff_carrier`) — thin combinator of the
+  clipped tube lemma (window-style `hsmall_*`/`hS_*`/`hR_*`) and the clipped off-carrier lemma.
+
+**Two Phase-2 simplifications found:**
+1. `exists_corner_delta` (~5430) **already computes** `r := a/(1+Lc+Lc1)`, `hLcr`/`hLc1r` (the Lipschitz
+   budgets) and `hconf` (via `exists_delta_corner_confine`) internally — used and discarded. So the master's
+   new `r`/`hconf`/`hLr` are obtained by *exposing them in `exists_corner_delta`'s existential* and threading
+   through `exists_collar_disjoint`. **No new geometry.**
+2. The cover `union_collarPlus_collarMinus` (~3099) **typechecks unchanged** after the flip: band-point and
+   endpoint cases route into the band/cap components (clip-independent); the only sector-touching case is
+   already the `sorry` at ~3160. `mem_sectorPlus_or_sectorMinus_of_ball` (~3081) is a false, unused lemma —
+   just delete it (-1 sorry).
+
+**Phase-2 OPEN ISSUE (flag for the flip):** the clipped tube lemma needs `hR_in`/`hS_in` over the foot
+window `Icc(a/2) 1` (carrier points up to the shared vertex `verts(succ i)`), but the sliver wrapper's
+`hRband` only covers `Icc(a/2)(1-a/2)`. The wrapper rewiring must **bridge the gap foot in (1-a/2, 1]** near
+the shared vertex (via the vertex R-budget `hρR` + a closeness argument, or by widening `hRband`).
+
+**Phase 2 — the big-bang flip (serial, NEXT, fresh window):** full edit list + the
+master/`exists_corner_delta` plumbing recipe is in the nthdegree decision memory linked from `ws:next`
+(`01KV5BX1SF...`). Sorry budget: 13 -> retire false-tube x2 + sorried aggregators x6 + `mem_..._of_ball` x1
++ unclipped `compl_carrier` x2 (replaced by green clipped) => target ~2 sorries (union disk-routing ~3160,
+plus the unclipped-`compl_carrier` line if not deleted).

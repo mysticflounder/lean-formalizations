@@ -11053,6 +11053,95 @@ theorem sectorMinus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Pl
   exact ⟨sectorMinus_subset_taperedTube β R S δ₀ ρ i hi1 hvS hρδ hρR hz,
     sectorMinus_subset_compl_carrier β ρ hδsep hsep hρsep i hi1 hz⟩
 
+/-- **Clipped sector containment in the collar ground set (positive side).**  Combines the
+clipped tube-containment (`sectorPlusClipped_subset_taperedTube`, window-style `S`/`R` data) with
+the clipped off-carrier lemma (`sectorPlusClipped_subset_compl_carrier`, confinement budget).  The
+union of the two lemmas' hypotheses; the collar-facing replacement for the unclipped
+`sectorPlus_subset_taperedTube_diff_carrier`. -/
+theorem sectorPlusClipped_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) * δ₀ ≤ α / 2)
+    (hS_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 → y ∈ S)
+    (hR_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    (hS_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → y ∈ S)
+    (hR_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    {δsep : ℝ} (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
+      Metric.infDist w (β.segCarrier a) < δsep →
+      Metric.infDist w (β.segCarrier b) < δsep → False)
+    (r : Fin β.numSegs → ℝ)
+    (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
+      Metric.infDist z (β.segCarrier e) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(e : ℕ) + 1, he1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ e)) < r e)
+    (hLr : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs),
+      (|(β.segTgt e).1 - (β.segSrc e).1| + |(β.segTgt e).2 - (β.segSrc e).2|)
+          / dotp (β.segTgt e - β.segSrc e) (β.segTgt e - β.segSrc e) * r e ≤ α ∧
+      (|(β.segTgt ⟨(e : ℕ) + 1, he1⟩).1 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).1|
+          + |(β.segTgt ⟨(e : ℕ) + 1, he1⟩).2 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).2|)
+          / dotp (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩)
+                 (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩) * r e ≤ α) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier := by
+  intro z hz
+  exact ⟨sectorPlusClipped_subset_taperedTube β R S δ₀ α i hi1 hα hsmall_in hsmall_out
+      hS_in hR_in hS_out hR_out hz,
+    sectorPlusClipped_subset_compl_carrier β hα hδ₀ hδsep hδ₀sep hsep r hconf hLr i hi1 hz⟩
+
+/-- **Clipped sector containment in the collar ground set (negative side).**  See
+`sectorPlusClipped_subset_taperedTube_diff_carrier`. -/
+theorem sectorMinusClipped_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+    (δ₀ α : ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) * δ₀ ≤ α / 2)
+    (hS_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 → y ∈ S)
+    (hR_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    (hS_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → y ∈ S)
+    (hR_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    {δsep : ℝ} (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
+      Metric.infDist w (β.segCarrier a) < δsep →
+      Metric.infDist w (β.segCarrier b) < δsep → False)
+    (r : Fin β.numSegs → ℝ)
+    (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
+      Metric.infDist z (β.segCarrier e) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(e : ℕ) + 1, he1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ e)) < r e)
+    (hLr : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs),
+      (|(β.segTgt e).1 - (β.segSrc e).1| + |(β.segTgt e).2 - (β.segSrc e).2|)
+          / dotp (β.segTgt e - β.segSrc e) (β.segTgt e - β.segSrc e) * r e ≤ α ∧
+      (|(β.segTgt ⟨(e : ℕ) + 1, he1⟩).1 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).1|
+          + |(β.segTgt ⟨(e : ℕ) + 1, he1⟩).2 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).2|)
+          / dotp (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩)
+                 (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩) * r e ≤ α) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier := by
+  intro z hz
+  exact ⟨sectorMinusClipped_subset_taperedTube β R S δ₀ α i hi1 hα hsmall_in hsmall_out
+      hS_in hR_in hS_out hR_out hz,
+    sectorMinusClipped_subset_compl_carrier β hα hδ₀ hδsep hδ₀sep hsep r hconf hLr i hi1 hz⟩
+
 /-- A positive vertex sector that lies in the clipped collar ground is contained
 in the positive collar side.
 
