@@ -8158,6 +8158,130 @@ theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSeg
     ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
       hside⟩, hinf⟩⟩
 
+/-- **Clipped hO1.** The *clipped* vertex sector at `verts (i+1)` meets band `i` (incoming edge).
+Same witness as `overlap_sectorPlus_bandStripPlus_src`; the foot-clip `α < footParam` holds since
+the witness sits at `footParam = 1 − 2α > α` (from `α < 1/3`). -/
+theorem overlap_sectorPlusClipped_bandStripPlus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    (sectorPlusClipped β δ₀ α i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hav : v ≠ a := β.segTgt_ne_segSrc i
+  have hDpos : 0 < dotp (v - a) (v - a) := dotp_self_pos hav
+  have heq : dotp (a - v) (a - v) = dotp (v - a) (v - a) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  have hbva : sideForm b v a ≠ 0 := by
+    have he : sideForm b v a = - sideForm a v b := by simp only [sideForm]; ring
+    rw [he]; simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm b v a| := abs_pos.mpr hbva
+  set ε := min (δ₀ / (dist a v + 1)) (2 * α * |sideForm b v a| / (|dotp (v - b) (a - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have hb1 : ε * (dist a v + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - b) (a - v)| + 1) ≤ 2 * α * |sideForm b v a| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist a v < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus a v (1 - 2 * α) ε with hz
+  have hfoot : footParam a v z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hav (1 - 2 * α) ε
+  have hside : 0 < sideForm a v z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hDpos
+  have hGval : dotp (z - v) (a - v) = 2 * α * dotp (a - v) (a - v) := by
+    rw [hz, dotp_liftPlus_sub_tgt, show (1 : ℝ) - (1 - 2 * α) = 2 * α from by ring]
+  have hG : 0 < dotp (z - v) (a - v) := by rw [hGval, heq]; positivity
+  have hmemV : z ∈ vertexPlus a v b := by
+    refine mem_vertexPlus_of_incoming hturn hG ?_ hside
+    have hsva : |sideForm v a z| = ε * dotp (v - a) (v - a) := by
+      rw [sideForm_swap a v z, hz, sideForm_liftPlus, abs_neg, abs_mul,
+        abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsva, hGval, heq]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist a v := by
+      have h := dist_liftPlus_tgt_le a v (1 - 2 * α) ε
+      have he : |1 - (1 - 2 * α)| = 2 * α := by
+        rw [show 1 - (1 - 2 * α) = 2 * α from by ring, abs_of_nonneg (by linarith)]
+      rw [he, abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier i) < δ₀ := by
+    have h := infDist_liftPlus_le_segment a v (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier i = segment ℝ a v from rfl]
+    linarith [h, hεL]
+  -- §9 UNION (clipped): incoming arm; foot-clip `α < footParam = 1 − 2α` holds via `hα3`.
+  exact ⟨z, ⟨hmemV, Or.inl ⟨hinf,
+      by show α < footParam (β.segSrc i) (β.segTgt i) z; rw [hfoot]; linarith⟩⟩,
+    ⟨⟨by show footParam a v z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
+/-- **Clipped hO2.** The *clipped* vertex sector at `verts (i+1)` meets band `i+1` (outgoing edge).
+Same witness as `overlap_sectorPlus_bandStripPlus_tgt`; the foot-clip `footParam < 1 − α` holds
+since the witness sits at `footParam = 2α < 1 − α` (from `α < 1/3`). -/
+theorem overlap_sectorPlusClipped_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+      < ρ (Fin.succ i)) :
+    (sectorPlusClipped β δ₀ α i hi1 ∩ bandStripPlus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hsvb : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = v := rfl
+  rw [hsvb] at hbud
+  have hbv : b ≠ v := β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+  have hDpos : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  have havb : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm a v b| := abs_pos.mpr havb
+  set ε := min (δ₀ / (dist v b + 1)) (2 * α * |sideForm a v b| / (|dotp (v - a) (b - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have hb1 : ε * (dist v b + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - a) (b - v)| + 1) ≤ 2 * α * |sideForm a v b| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist v b < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus v b (2 * α) ε with hz
+  have hfoot : footParam v b z = 2 * α := by rw [hz]; exact footParam_liftPlus hbv (2 * α) ε
+  have hside : 0 < sideForm v b z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hDpos
+  have hGval : dotp (z - v) (b - v) = 2 * α * dotp (b - v) (b - v) := by
+    rw [hz, dotp_liftPlus_sub_src]
+  have hG : 0 < dotp (z - v) (b - v) := by rw [hGval]; positivity
+  have hmemV : z ∈ vertexPlus a v b := by
+    refine mem_vertexPlus_of_outgoing hturn hG ?_ hside
+    have hsvb' : |sideForm v b z| = ε * dotp (b - v) (b - v) := by
+      rw [hz, sideForm_liftPlus, abs_mul, abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsvb', hGval]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist v b := by
+      have h := dist_liftPlus_src_le v b (2 * α) ε
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), abs_of_nonneg hεpos.le] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+    have h := infDist_liftPlus_le_segment v b (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) ε
+    rw [abs_of_nonneg hεpos.le] at h
+    rw [hz, show β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ = segment ℝ v b from rfl]
+    linarith [h, hεL]
+  -- §9 UNION (clipped): outgoing arm; foot-clip `footParam = 2α < 1 − α` holds via `hα3`.
+  have hclip : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z < 1 - α := by
+    rw [hsvb, ← hb, hfoot]; linarith
+  exact ⟨z, ⟨hmemV, Or.inr ⟨hinf, hclip⟩⟩,
+    ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
 /-! ### P5⁻ — the negative collar (mirror of the positive side) -/
 
 /-- **Local overlap of the source-negative cap slices from slice nonemptiness.**
@@ -9983,6 +10107,134 @@ theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numS
   -- §9 UNION: `δ₀`-close to outgoing edge `i+1` ⇒ right (`stripSupport (i+1)`) disjunct of
   -- the union sector; `hball`/`ρ`/`hbud` now redundant (reach holds for any `δ₀ > 0`).
   exact ⟨z, ⟨hmemV, Or.inr hinf⟩,
+    ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
+/-- **Clipped hO1⁻.** The *clipped* vertex sector at `verts (i+1)` meets band `i` (incoming, minus
+side).  Same witness as `overlap_sectorMinus_bandStripMinus_src`; foot-clip `α < footParam = 1 − 2α`
+holds via `α < 1/3`. -/
+theorem overlap_sectorMinusClipped_bandStripMinus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
+    (sectorMinusClipped β δ₀ α i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hav : v ≠ a := β.segTgt_ne_segSrc i
+  have hDpos : 0 < dotp (v - a) (v - a) := dotp_self_pos hav
+  have heq : dotp (a - v) (a - v) = dotp (v - a) (v - a) := by
+    simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
+  have hbva : sideForm b v a ≠ 0 := by
+    have he : sideForm b v a = - sideForm a v b := by simp only [sideForm]; ring
+    rw [he]; simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm b v a| := abs_pos.mpr hbva
+  set ε := min (δ₀ / (dist a v + 1)) (2 * α * |sideForm b v a| / (|dotp (v - b) (a - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hb1 : ε * (dist a v + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - b) (a - v)| + 1) ≤ 2 * α * |sideForm b v a| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist a v < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus a v (1 - 2 * α) (-ε) with hz
+  have hfoot : footParam a v z = 1 - 2 * α := by
+    rw [hz]; exact footParam_liftPlus hav (1 - 2 * α) (-ε)
+  have hside : sideForm a v z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hDpos; nlinarith
+  have hGval : dotp (z - v) (a - v) = 2 * α * dotp (a - v) (a - v) := by
+    rw [hz, dotp_liftPlus_sub_tgt, show (1 : ℝ) - (1 - 2 * α) = 2 * α from by ring]
+  have hG : 0 < dotp (z - v) (a - v) := by rw [hGval, heq]; positivity
+  have hmemV : z ∈ vertexMinus a v b := by
+    refine mem_vertexMinus_of_incoming hturn hG ?_ hside
+    have hsva : |sideForm v a z| = ε * dotp (v - a) (v - a) := by
+      rw [sideForm_swap a v z, abs_neg, hz, sideForm_liftPlus, abs_mul, abs_neg,
+        abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsva, hGval, heq]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist a v := by
+      have h := dist_liftPlus_tgt_le a v (1 - 2 * α) (-ε)
+      have he : |1 - (1 - 2 * α)| = 2 * α := by
+        rw [show 1 - (1 - 2 * α) = 2 * α from by ring, abs_of_nonneg (by linarith)]
+      rw [he, haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier i) < δ₀ := by
+    have h := infDist_liftPlus_le_segment a v (by linarith : (0:ℝ) ≤ 1 - 2 * α)
+      (by linarith : (1 - 2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier i = segment ℝ a v from rfl]
+    linarith [h, hεL]
+  -- §9 UNION (clipped): incoming arm; foot-clip `α < footParam = 1 − 2α` holds via `hα3`.
+  exact ⟨z, ⟨hmemV, Or.inl ⟨hinf,
+      by show α < footParam (β.segSrc i) (β.segTgt i) z; rw [hfoot]; linarith⟩⟩,
+    ⟨⟨by show footParam a v z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
+      hside⟩, hinf⟩⟩
+
+/-- **Clipped hO2⁻.** The *clipped* vertex sector at `verts (i+1)` meets band `i+1` (outgoing, minus
+side).  Same witness as `overlap_sectorMinus_bandStripMinus_tgt`; foot-clip `footParam = 2α < 1 − α`
+holds via `α < 1/3`. -/
+theorem overlap_sectorMinusClipped_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+    {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
+    (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
+    (hbud : δ₀ + 2 * α * dist (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
+      < ρ (Fin.succ i)) :
+    (sectorMinusClipped β δ₀ α i hi1 ∩ bandStripMinus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty := by
+  set a := β.segSrc i with ha
+  set v := β.segTgt i with hv
+  set b := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+  have hsvb : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = v := rfl
+  rw [hsvb] at hbud
+  have hbv : b ≠ v := β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩
+  have hDpos : 0 < dotp (b - v) (b - v) := dotp_self_pos hbv
+  have havb : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hturn
+  have hCpos : 0 < |sideForm a v b| := abs_pos.mpr havb
+  set ε := min (δ₀ / (dist v b + 1)) (2 * α * |sideForm a v b| / (|dotp (v - a) (b - v)| + 1))
+    with hε
+  have hεpos : 0 < ε := by rw [hε]; exact lt_min (by positivity) (by positivity)
+  have haε : |(-ε)| = ε := by rw [abs_neg, abs_of_pos hεpos]
+  have hb1 : ε * (dist v b + 1) ≤ δ₀ :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_left _ _)
+  have hb2 : ε * (|dotp (v - a) (b - v)| + 1) ≤ 2 * α * |sideForm a v b| :=
+    (le_div_iff₀ (by positivity)).mp (by rw [hε]; exact min_le_right _ _)
+  have hεL : ε * dist v b < δ₀ := by nlinarith [hb1, hεpos]
+  set z := liftPlus v b (2 * α) (-ε) with hz
+  have hfoot : footParam v b z = 2 * α := by rw [hz]; exact footParam_liftPlus hbv (2 * α) (-ε)
+  have hside : sideForm v b z < 0 := by
+    rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hDpos; nlinarith
+  have hGval : dotp (z - v) (b - v) = 2 * α * dotp (b - v) (b - v) := by
+    rw [hz, dotp_liftPlus_sub_src]
+  have hG : 0 < dotp (z - v) (b - v) := by rw [hGval]; positivity
+  have hmemV : z ∈ vertexMinus a v b := by
+    refine mem_vertexMinus_of_outgoing hturn hG ?_ hside
+    have hsvb' : |sideForm v b z| = ε * dotp (b - v) (b - v) := by
+      rw [hz, sideForm_liftPlus, abs_mul, abs_neg, abs_of_pos hεpos, abs_of_pos hDpos]
+    rw [hsvb', hGval]
+    nlinarith [mul_le_mul_of_nonneg_right hb2 hDpos.le, mul_pos hεpos hDpos]
+  have hball : z ∈ Metric.ball (β.verts (Fin.succ i)) (ρ (Fin.succ i)) := by
+    have hvc : β.verts (Fin.succ i) = v := rfl
+    rw [Metric.mem_ball, hvc]
+    have hd : dist z v ≤ (2 * α + ε) * dist v b := by
+      have h := dist_liftPlus_src_le v b (2 * α) (-ε)
+      rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * α), haε] at h
+      rw [hz]; exact h
+    nlinarith [hd, hbud, hεL]
+  have hinf : Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+    have h := infDist_liftPlus_le_segment v b (by linarith : (0:ℝ) ≤ 2 * α)
+      (by linarith : (2 * α : ℝ) ≤ 1) (-ε)
+    rw [haε] at h
+    rw [hz, show β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ = segment ℝ v b from rfl]
+    linarith [h, hεL]
+  -- §9 UNION (clipped): outgoing arm; foot-clip `footParam = 2α < 1 − α` holds via `hα3`.
+  have hclip : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z < 1 - α := by
+    rw [hsvb, ← hb, hfoot]; linarith
+  exact ⟨z, ⟨hmemV, Or.inr ⟨hinf, hclip⟩⟩,
     ⟨⟨by show footParam v b z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith,
       hside⟩, hinf⟩⟩
 
