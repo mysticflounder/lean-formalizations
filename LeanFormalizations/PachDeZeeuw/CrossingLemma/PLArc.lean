@@ -4173,10 +4173,20 @@ theorem disjoint_endCapSrcPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numS
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
     Disjoint (endCapSrcPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: cap↔sector now needs separation from BOTH arm strips (incoming `j`,
-  -- outgoing `j+1`); `hbudsrc` already covers every edge `≠ 0`, so it can feed both budgets
-  -- via `sectorMinus_subset_stripSupport_union` once the per-lemma is reworked.
-  sorry
+  -- §9 UNION REWORK: cap↔sector needs separation from BOTH arm strips (incoming `j`,
+  -- outgoing `j+1`).  `hbudsrc` covers every edge `≠ 0`, feeding both leaf budgets when
+  -- `j ≠ 0`.  When `j = 0` the INCOMING arm IS edge `0` (which carries `verts 0`), so the
+  -- cap-disk budget on edge `0` is impossible (`infDist (verts 0) (segCarrier 0) = 0`) and
+  -- the leaf cannot apply.  That sub-case requires the σ-sign on edge `0` (cap is `+`, a
+  -- `−`-sector point thin to edge `0` is `−`), but the σ-sign thinness needs an interior
+  -- FOOT bound on edge `0` that the cap (only `foot > 0`, disk radius unconstrained) does
+  -- not supply — and it is FALSE for a large disk reaching the `verts 1` end of edge `0`.
+  -- BLOCKED without an extra disk-smallness hypothesis (`ρ 0 ≤ (1−α)·‖edge 0‖`, available
+  -- in the master via `hballs` but not threaded here).  See final report.
+  by_cases hj0 : (j : ℕ) = 0
+  · sorry
+  · exact disjoint_endCapSrcPlus_sectorMinus β ρ j hj1 (hbudsrc j hj0)
+      (hbudsrc ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ 0; omega))
 
 /-- **Target `+` cap ↔ sector⁻, all sector indices (δ₀-tube model).**  The corner's
 incoming edge `j ≤ numSegs-2` never carries `verts (last)`, so the cap-disk/strip budget
@@ -4188,9 +4198,16 @@ theorem disjoint_endCapTgtPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numS
         ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
     (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
     Disjoint (endCapTgtPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: separate the tgt cap from both arm strips; `hbudtgt` covers every
-  -- edge `≠ numSegs−1`.  See `disjoint_endCapSrcPlus_sectorMinus_all`.
-  sorry
+  -- §9 UNION REWORK: separate the tgt cap from both arm strips.  The incoming arm `j`
+  -- (`j ≤ numSegs−2 ≠ numSegs−1`) always has a `hbudtgt` budget.  The outgoing arm `j+1`
+  -- has one when `j+1 ≠ numSegs−1`.  When `j+1 = numSegs−1` (`= lastSeg`, which carries
+  -- `verts last`), the budget on edge `j+1` is impossible and the leaf cannot apply; that
+  -- sub-case needs the σ-sign on `lastSeg` whose thinness wants an interior foot bound the
+  -- cap (foot `< 1`, disk radius unconstrained) does not supply.  BLOCKED.  See final report.
+  by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
+  · sorry
+  · refine disjoint_endCapTgtPlus_sectorMinus β ρ j hj1 (hbudtgt j (by omega)) ?_
+    exact hbudtgt ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ β.numSegs - 1; exact hjlast)
 
 /-- **sector⁺ ↔ source `−` cap, all sector indices (δ₀-tube model).** -/
 theorem disjoint_sectorPlus_endCapSrcMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
@@ -4199,9 +4216,13 @@ theorem disjoint_sectorPlus_endCapSrcMinus_all (β : PolyArc) (ρ : Fin (β.numS
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
     Disjoint (sectorPlus β δ₀ j hj1) (endCapSrcMinus β ρ) := by
-  -- §9 UNION REWORK: separate the sector from the src cap across both arm strips.
-  -- See `disjoint_endCapSrcPlus_sectorMinus_all`.
-  sorry
+  -- §9 UNION REWORK: as `disjoint_endCapSrcPlus_sectorMinus_all`.  `j ≠ 0` via the leaf
+  -- (both budgets from `hbudsrc`); `j = 0` BLOCKED (σ-sign on edge 0 needs an interior
+  -- foot bound the cap does not supply).  See final report.
+  by_cases hj0 : (j : ℕ) = 0
+  · sorry
+  · exact disjoint_sectorPlus_endCapSrcMinus β ρ j hj1 (hbudsrc j hj0)
+      (hbudsrc ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ 0; omega))
 
 /-- **sector⁺ ↔ target `−` cap, all sector indices (δ₀-tube model).** -/
 theorem disjoint_sectorPlus_endCapTgtMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
@@ -4211,9 +4232,13 @@ theorem disjoint_sectorPlus_endCapTgtMinus_all (β : PolyArc) (ρ : Fin (β.numS
         ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
     (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
     Disjoint (sectorPlus β δ₀ j hj1) (endCapTgtMinus β ρ) := by
-  -- §9 UNION REWORK: separate the sector from the tgt cap across both arm strips.
-  -- See `disjoint_endCapSrcPlus_sectorMinus_all`.
-  sorry
+  -- §9 UNION REWORK: as `disjoint_endCapTgtPlus_sectorMinus_all`.  `j+1 ≠ numSegs−1` via
+  -- the leaf (both budgets from `hbudtgt`); `j+1 = numSegs−1` BLOCKED (σ-sign on `lastSeg`
+  -- needs an interior foot bound the cap does not supply).  See final report.
+  by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
+  · sorry
+  · refine disjoint_sectorPlus_endCapTgtMinus β ρ j hj1 (hbudtgt j (by omega)) ?_
+    exact hbudtgt ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ β.numSegs - 1; exact hjlast)
 
 /-! #### P3 disjointness — the master assembly.
 
