@@ -197,11 +197,6 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
       sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hsectorWMinus : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (hvertexS : ∀ i : Fin β.numSegs, β.verts (Fin.succ i) ∈ S)
-    (hρδ : ∀ i : Fin β.numSegs, ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ∀ i : Fin β.numSegs,
-      ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2)
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
@@ -246,11 +241,11 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
     hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ hα hα2 hmS hmR
     hturn hband hsrc htgt hballV hballSrc hballTgt hdisj ?_ ?_ hcover
   · exact isPreconnected_collarPlus_of_sliver_budgets β R S ρ hturn hδ hα hα3 hα1 hsectorWPlus
-      hδ₀sep hsep hadj_tgt hadj_src hsmall hSband hRband hρsep hvertexS hρδ hρR
+      hδ₀sep hsep hadj_tgt hadj_src hsmall hSband hRband
       hsrc htgt hSrcSep hSrcSpine hSrcNear hρ0 hSrcRpos hSrcSliver
       hTgtSep hTgtSpine hTgtNear hρL hTgtRpos hTgtSliver
   · exact isPreconnected_collarMinus_of_sliver_budgets β R S ρ hturn hδ hα hα3 hα1 hsectorWMinus
-      hδ₀sep hsep hadj_tgt hadj_src hsmall hSband hRband hρsep hvertexS hρδ hρR
+      hδ₀sep hsep hadj_tgt hadj_src hsmall hSband hRband
       hsrc htgt hSrcSep hSrcSpine hSrcNear hρ0 hSrcRpos hSrcSliver
       hTgtSep hTgtSpine hTgtNear hρL hTgtRpos hTgtSliver
 
@@ -311,11 +306,6 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
       sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hsectorWMinus : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (hvertexS : ∀ i : Fin β.numSegs, β.verts (Fin.succ i) ∈ S)
-    (hρδ : ∀ i : Fin β.numSegs, ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ∀ i : Fin β.numSegs,
-      ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2)
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
@@ -356,8 +346,7 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
     exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides
       β ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ hα hα2 hα3 hmS hmR
       hturn hband hsrc htgt hballV hballSrc hballTgt hdisj hδ₀sep hsep
-      hadj_tgt hadj_src hsmall hSband hRband hsectorWPlus hsectorWMinus hρsep
-      hvertexS hρδ hρR hSrcSep
+      hadj_tgt hadj_src hsmall hSband hRband hsectorWPlus hsectorWMinus hSrcSep
       hSrcSpine hSrcNear hρ0 hSrcRpos hSrcSliver hTgtSep hTgtSpine hTgtNear
       hρL hTgtRpos hTgtSliver hcover
   exact ⟨U, V, hUV⟩

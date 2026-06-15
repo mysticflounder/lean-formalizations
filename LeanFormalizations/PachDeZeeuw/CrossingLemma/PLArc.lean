@@ -10987,11 +10987,6 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
     (hRband : ∀ i : Fin β.numSegs, ∀ y ∈ β.segCarrier i,
       footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) (1 - α / 2) →
       δ₀ ≤ Metric.infDist y Rᶜ / 2)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (hvertexS : ∀ i : Fin β.numSegs, β.verts (Fin.succ i) ∈ S)
-    (hρδ : ∀ i : Fin β.numSegs, ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ∀ i : Fin β.numSegs,
-      ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2)
     (hsrc : ∀ i : Fin β.numSegs,
       δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
     (htgt : ∀ i : Fin β.numSegs,
@@ -11091,11 +11086,6 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
     (hRband : ∀ i : Fin β.numSegs, ∀ y ∈ β.segCarrier i,
       footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) (1 - α / 2) →
       δ₀ ≤ Metric.infDist y Rᶜ / 2)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (hvertexS : ∀ i : Fin β.numSegs, β.verts (Fin.succ i) ∈ S)
-    (hρδ : ∀ i : Fin β.numSegs, ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ∀ i : Fin β.numSegs,
-      ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2)
     (hsrc : ∀ i : Fin β.numSegs,
       δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
     (htgt : ∀ i : Fin β.numSegs,
