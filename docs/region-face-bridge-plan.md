@@ -730,3 +730,45 @@ sidesteps it cleanly. The band keeps its original `hSband`/`hRband` (`Icc(a/2)(1
 **Next:** post-flip Target-1 phase — see `ws:target1-map`. The remaining cover `sorry` (~3140) and the
 downstream `exists_twoSidedPartition_of_polyArc` packaging + `dartSectorPoint` + EC instantiation are the
 path to discharging the two ST cotree-theorem sorries.
+
+## §15 Target-1 phase, session 2026-06-15 (regression fix · binder cleanup · the endpoint-cap wall and its single-segment resolution)
+
+**Regression found + fixed (merged, main `4a38faa`).** The §14 clip-core flip changed PLArc's sliver-wrapper
+signatures (`isPreconnected_collar{Plus,Minus}_of_sliver_budgets` gained `hα1`, `hsectorW`) but its "green"
+was only the *targeted* PLArc build (8476 jobs) — it never rebuilt `PLCollarSeparation`, which consumes those
+wrappers via `CrossingLemma.lean`. So the **full `lake build` (default target `LeanFormalizations`) was RED**
+on the pushed `4c56c72`. Fix: forward `hα1` (derived locally from `hα2`) + `hsectorWPlus`/`hsectorWMinus` to
+the call-sites in PLC:151/265. Full lib build now GREEN. *Lesson: after a def-signature flip, build the default
+target (or all reverse-importers), not just the touched file's target.*
+
+**4 dead binders dropped (merged, main `2b783d4`).** `isPreconnected_collar{Plus,Minus}_of_sliver_budgets` and
+PLC:151/265 carried 4 provably-unused budget binders — `hρsep`, `hvertexS`, `hρδ`, `hρR` (the deferred §14
+"wart"). Removing them cleared the wart **and** resolved a latent inconsistency: `hρδ` (`ρ(succ i) ≤ δ₀`)
+directly contradicts the live `htgt` (`δ₀+2α·dist < ρ(succ i)`), which had made the sliver-budget bundle
+unsatisfiable (provable but uninstantiable).
+
+**The endpoint-cap wall (verified) and why it does NOT block the goal.** Attempting
+`exists_twoSidedPartition_of_polyArc` for a *general multi-segment* PolyArc hits a genuine inconsistency at the
+source/target endpoints: the cap radius `ρ 0` must reach `footParam = 2α` to connect to the band
+(`overlap_endCapSrcPlus_bandStripPlus`, PLArc:7866) yet stay `foot < α` for cap↔SECTOR disjointness
+(`disjoint_sectorPlusClipped_endCapSrcMinus_all`, PLArc:4740, hyp `(‖Δ‖₁/dotp)·ρ0 ≤ α`). On `ℝ×ℝ`,
+`dist=‖Δ‖∞`, `dotp(Δ,Δ)=‖Δ‖₂²`, `‖Δ‖₂² ≤ ‖Δ‖₁‖Δ‖∞`, so the two collapse to `2x < x` — impossible. (For
+convex corners side-separation would dissolve it; for reflex corners the foot bound is genuinely needed.)
+**But sectors require `numSegs ≥ 2`.** The region↔face crosscut is the inserted graph edge itself
+(RFB:309-314), straight ⇒ `arcToPolyArc`/`straightPolyArc` give `numSegs = 1`, where there are no sectors and
+every `collar±` disjointness is Plus-vs-Minus **by side** (`sideForm>0` vs `<0` w.r.t. the one edge). Adam
+confirmed the crosscut is a single straight chord, so the wall is **vacuous for the actual application**.
+
+**Resolution path (in progress).** Build `exists_twoSidedPartition_of_straightArc` (single-segment) feeding
+`exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides` (PLC:41) — which takes `hdisj`,
+`hTp_pre`, `hTm_pre` *directly*, so the contradictory cap-foot budget (which lived only in the disjointness
+master `exists_collar_disjoint`) is never incurred. Choose δ₀ small, `ρ ∈ (δ₀+2αL, L]`; prove `hdisj` by
+side-separation (`collarPlus ⊆ {sideForm>0}`, `collarMinus ⊆ {sideForm<0}`). The over-general multi-segment
+collar is simply over-built for ST.
+
+**Step-3 `dartSectorPoint` (held, not merged).** `DartSectorPoint.lean` (branch `worktree-agent-a22f148e…`,
+commit `8e9b364`): the `arcToPolyArc`/`straightPolyArc` bridge is solid and sorry-free. But `dartSectorPoint`
+was built from a too-weak `∃ p, p ∈ drawingComplementIn …`, so the candidate `dr := regionAt ∘ dartSectorPoint`
+**cannot satisfy `hconst`** (EC:203-204, `dr (facePerm d) = dr d`). Redesign needed (design pass pending): the
+point must sit in the wedge at the dart's anchor and be FACE-determined, with a `facePerm`-invariance lemma;
+the genuine "wedge ⊆ R₀ and misses the finite prefix arc union" geometry stays a flagged obligation.
