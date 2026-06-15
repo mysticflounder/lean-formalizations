@@ -5505,6 +5505,472 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
     rw [hstrip_i, hstrip_i1, Set.union_empty, Set.inter_empty]
     exact isPreconnected_empty
 
+/-- The clipped positive vertex sector is preconnected.  Mirrors `isPreconnected_sectorPlus`,
+but each strip arm is intersected with a convex `footParam` half-plane that trims the FAR end of
+the arm.  The apex hub `pt`, built near the shared vertex `v`, still lands in both clipped arms:
+on edge `i` (vertex foot `1`) `footParam pt = 1 − ε·(1 − footParam P) > α`, and on edge `i+1`
+(vertex foot `0`) `footParam pt = ε·footParam P < 1 − α`, for the (suitably small) apex weight `ε`. -/
+theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α) (hα1 : α < 1)
+    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
+    IsPreconnected (sectorPlusClipped β δ₀ α i hi1) := by
+  rcases lt_or_ge 0 δ₀ with hδpos | hδnonpos
+  · set a : Plane := β.segSrc i with ha
+    set v : Plane := β.segTgt i with hv
+    set b : Plane := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+    -- the outgoing edge's endpoints (its source IS the shared vertex `v`)
+    set sj : Plane := β.segSrc ⟨(i : ℕ) + 1, hi1⟩ with hsj
+    have hvj : sj = v := by
+      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      rw [hsj, PolyArc.segSrc, hidx, hv, PolyArc.segTgt]
+    have hne_i : v ≠ a := β.segTgt_ne_segSrc i
+    have hτne : cornerTurn a v b ≠ 0 := by
+      simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
+    have hτ : sideForm a v b ≠ 0 := by
+      simpa [cornerTurn] using hτne
+    have hτ' : sideForm v b a ≠ 0 := by
+      rw [← sideForm_cyclic a v b]; exact hτ
+    -- convexity of the two foot half-planes (the new clip constraints)
+    have hfootConv_i : Convex ℝ {z : Plane | α < footParam a v z} := convex_footParam_gt a v α
+    have hfootConv_j : Convex ℝ {z : Plane | footParam sj b z < 1 - α} :=
+      convex_footParam_lt sj b (1 - α)
+    have hstripConv_i : Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} := by
+      have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+      have hEq : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
+          = Metric.thickening δ₀ (β.segCarrier i) := by
+        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+      rw [hEq]; exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+    have hstripConv_j :
+        Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} := by
+      have hne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+        ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+      have hEq : {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+          = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
+        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+      rw [hEq]
+      exact (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+        (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
+    -- choose the apex direction `P` per branch; the apex weight `ε` is shared machinery
+    rcases lt_or_gt_of_ne hτne with hneg | hpos
+    · -- reflex `vertexPlus` branch: `P` reflects to keep `pt` on the reflex side
+      set P : Plane := (3 : ℝ) • v - a - b with hP
+      obtain ⟨ε, hεpos, hεstrip, hεfi, hεfj⟩ :
+          ∃ ε : ℝ, 0 < ε ∧ ε * dist P v < δ₀ ∧
+            ε * (1 - footParam a v P) < 1 - α ∧ ε * footParam sj b P < 1 - α := by
+        set M : ℝ := |footParam a v P| + |footParam sj b P| + 1 with hM
+        have hMpos : 0 < M := by
+          have := abs_nonneg (footParam a v P); have := abs_nonneg (footParam sj b P)
+          rw [hM]; linarith
+        have hdpv : (0 : ℝ) ≤ dist P v := dist_nonneg
+        have h1mα : (0 : ℝ) < 1 - α := by linarith
+        have hdenpos : (0 : ℝ) < dist P v + M + 1 := by linarith
+        have hμpos0 : (0 : ℝ) < min δ₀ (1 - α) := lt_min hδpos h1mα
+        have hεpos0 : (0 : ℝ) < min δ₀ (1 - α) / (dist P v + M + 1) := div_pos hμpos0 hdenpos
+        refine ⟨min δ₀ (1 - α) / (dist P v + M + 1), hεpos0, ?_, ?_, ?_⟩
+        · rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_left δ₀ (1 - α)) hdpv,
+            mul_pos hδpos hMpos]
+        · have h1 : (1 : ℝ) - footParam a v P ≤ M := by
+            rw [hM]; have := neg_le_abs (footParam a v P); have := abs_nonneg (footParam sj b P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h1 hμpos0.le]
+        · have h2 : footParam sj b P ≤ M := by
+            rw [hM]; have := le_abs_self (footParam sj b P); have := abs_nonneg (footParam a v P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h2 hμpos0.le]
+      have hptv : (1 - ε) • v + ε • P - v = ε • (P - v) := by module
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hpt, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq]; exact hεstrip
+      have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+      have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+      -- the apex satisfies the two foot clips
+      have hfoot_i : α < footParam a v pt := by
+        rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
+        nlinarith [hεfi]
+      have hfoot_j : footParam sj b pt < 1 - α := by
+        rw [hpt, footParam_affineComb_pt sj b v P (by ring : (1 - ε) + ε = 1), hvj,
+          footParam_src, ← hvj]
+        nlinarith [hεfj]
+      have hPa : sideForm a v P = - sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hPb : sideForm v b P = - sideForm v b a := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : cornerTurn a v b * sideForm v b pt < 0 := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb, cornerTurn,
+          sideForm_cyclic a v b]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexPlus a v b := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector]; exact Or.inl hptA
+      have hpiece_i : IsPreconnected (vertexPlus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        refine IsPreconnected.union pt ⟨hptA, hptstrip_i, hfoot_i⟩ ⟨hptB, hptstrip_i, hfoot_i⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
+            (hstripConv_i.inter hfootConv_i)).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter
+            (hstripConv_i.inter hfootConv_i)).isPreconnected
+      have hpiece_j : IsPreconnected (vertexPlus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z : Plane | footParam sj b z < 1 - α})) := by
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+          Set.union_inter_distrib_right]
+        refine IsPreconnected.union pt ⟨hptA, hptstrip_j, hfoot_j⟩ ⟨hptB, hptstrip_j, hfoot_j⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
+            (hstripConv_j.inter hfootConv_j)).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter
+            (hstripConv_j.inter hfootConv_j)).isPreconnected
+      rw [sectorPlusClipped, ← ha, ← hv, ← hb, ← hsj, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt ⟨hpt_vertex, hptstrip_i, hfoot_i⟩
+        ⟨hpt_vertex, hptstrip_j, hfoot_j⟩ hpiece_i hpiece_j
+    · -- convex `vertexPlus` branch
+      set P : Plane := a + b - v with hP
+      obtain ⟨ε, hεpos, hεstrip, hεfi, hεfj⟩ :
+          ∃ ε : ℝ, 0 < ε ∧ ε * dist P v < δ₀ ∧
+            ε * (1 - footParam a v P) < 1 - α ∧ ε * footParam sj b P < 1 - α := by
+        set M : ℝ := |footParam a v P| + |footParam sj b P| + 1 with hM
+        have hMpos : 0 < M := by
+          have := abs_nonneg (footParam a v P); have := abs_nonneg (footParam sj b P)
+          rw [hM]; linarith
+        have hdpv : (0 : ℝ) ≤ dist P v := dist_nonneg
+        have h1mα : (0 : ℝ) < 1 - α := by linarith
+        have hdenpos : (0 : ℝ) < dist P v + M + 1 := by linarith
+        have hμpos0 : (0 : ℝ) < min δ₀ (1 - α) := lt_min hδpos h1mα
+        have hεpos0 : (0 : ℝ) < min δ₀ (1 - α) / (dist P v + M + 1) := div_pos hμpos0 hdenpos
+        refine ⟨min δ₀ (1 - α) / (dist P v + M + 1), hεpos0, ?_, ?_, ?_⟩
+        · rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_left δ₀ (1 - α)) hdpv,
+            mul_pos hδpos hMpos]
+        · have h1 : (1 : ℝ) - footParam a v P ≤ M := by
+            rw [hM]; have := neg_le_abs (footParam a v P); have := abs_nonneg (footParam sj b P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h1 hμpos0.le]
+        · have h2 : footParam sj b P ≤ M := by
+            rw [hM]; have := le_abs_self (footParam sj b P); have := abs_nonneg (footParam a v P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h2 hμpos0.le]
+      have hptv : (1 - ε) • v + ε • P - v = ε • (P - v) := by module
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hpt, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq]; exact hεstrip
+      have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+      have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+      have hfoot_i : α < footParam a v pt := by
+        rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
+        nlinarith [hεfi]
+      have hfoot_j : footParam sj b pt < 1 - α := by
+        rw [hpt, footParam_affineComb_pt sj b v P (by ring : (1 - ε) + ε = 1), hvj,
+          footParam_src, ← hvj]
+        nlinarith [hεfj]
+      have hPa : sideForm a v P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hPb : sideForm v b P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : 0 < cornerTurn a v b * sideForm v b pt := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb, cornerTurn,
+          sideForm_cyclic a v b]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexPlus a v b := by
+        rw [vertexPlus, if_pos hpos, convexSector]; exact ⟨hptA, hptB⟩
+      have hpiece_i : IsPreconnected (vertexPlus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
+        rw [vertexPlus, if_pos hpos]
+        exact ((convex_convexSector a v b).inter (hstripConv_i.inter hfootConv_i)).isPreconnected
+      have hpiece_j : IsPreconnected (vertexPlus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z : Plane | footParam sj b z < 1 - α})) := by
+        rw [vertexPlus, if_pos hpos]
+        exact ((convex_convexSector a v b).inter (hstripConv_j.inter hfootConv_j)).isPreconnected
+      rw [sectorPlusClipped, ← ha, ← hv, ← hb, ← hsj, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt ⟨hpt_vertex, hptstrip_i, hfoot_i⟩
+        ⟨hpt_vertex, hptstrip_j, hfoot_j⟩ hpiece_i hpiece_j
+  · rw [sectorPlusClipped]
+    have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
+      ext z; constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz; simpa using hz
+    have hstrip_j :
+        {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
+      ext z; constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz; simpa using hz
+    rw [hstrip_i, hstrip_j, Set.empty_inter, Set.empty_inter, Set.union_empty, Set.inter_empty]
+    exact isPreconnected_empty
+
+/-- The clipped negative vertex sector is preconnected.  See `isPreconnected_sectorPlusClipped`. -/
+theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α) (hα1 : α < 1)
+    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
+    IsPreconnected (sectorMinusClipped β δ₀ α i hi1) := by
+  rcases lt_or_ge 0 δ₀ with hδpos | hδnonpos
+  · set a : Plane := β.segSrc i with ha
+    set v : Plane := β.segTgt i with hv
+    set b : Plane := β.segTgt ⟨(i : ℕ) + 1, hi1⟩ with hb
+    set sj : Plane := β.segSrc ⟨(i : ℕ) + 1, hi1⟩ with hsj
+    have hvj : sj = v := by
+      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
+        Fin.ext (by simp [Fin.val_succ])
+      rw [hsj, PolyArc.segSrc, hidx, hv, PolyArc.segTgt]
+    have hne_i : v ≠ a := β.segTgt_ne_segSrc i
+    have hτne : cornerTurn a v b ≠ 0 := by
+      simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
+    have hτ : sideForm a v b ≠ 0 := by
+      simpa [cornerTurn] using hτne
+    have hτ' : sideForm v b a ≠ 0 := by
+      rw [← sideForm_cyclic a v b]; exact hτ
+    have hfootConv_i : Convex ℝ {z : Plane | α < footParam a v z} := convex_footParam_gt a v α
+    have hfootConv_j : Convex ℝ {z : Plane | footParam sj b z < 1 - α} :=
+      convex_footParam_lt sj b (1 - α)
+    have hstripConv_i : Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} := by
+      have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+      have hEq : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
+          = Metric.thickening δ₀ (β.segCarrier i) := by
+        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+      rw [hEq]; exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
+    have hstripConv_j :
+        Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} := by
+      have hne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+        ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+      have hEq : {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+          = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
+        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+      rw [hEq]
+      exact (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+        (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
+    rcases lt_or_gt_of_ne hτne with hneg | hpos
+    · -- convex `vertexMinus` branch (`if_neg`)
+      set P : Plane := a + b - v with hP
+      obtain ⟨ε, hεpos, hεstrip, hεfi, hεfj⟩ :
+          ∃ ε : ℝ, 0 < ε ∧ ε * dist P v < δ₀ ∧
+            ε * (1 - footParam a v P) < 1 - α ∧ ε * footParam sj b P < 1 - α := by
+        set M : ℝ := |footParam a v P| + |footParam sj b P| + 1 with hM
+        have hMpos : 0 < M := by
+          have := abs_nonneg (footParam a v P); have := abs_nonneg (footParam sj b P)
+          rw [hM]; linarith
+        have hdpv : (0 : ℝ) ≤ dist P v := dist_nonneg
+        have h1mα : (0 : ℝ) < 1 - α := by linarith
+        have hdenpos : (0 : ℝ) < dist P v + M + 1 := by linarith
+        have hμpos0 : (0 : ℝ) < min δ₀ (1 - α) := lt_min hδpos h1mα
+        have hεpos0 : (0 : ℝ) < min δ₀ (1 - α) / (dist P v + M + 1) := div_pos hμpos0 hdenpos
+        refine ⟨min δ₀ (1 - α) / (dist P v + M + 1), hεpos0, ?_, ?_, ?_⟩
+        · rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_left δ₀ (1 - α)) hdpv,
+            mul_pos hδpos hMpos]
+        · have h1 : (1 : ℝ) - footParam a v P ≤ M := by
+            rw [hM]; have := neg_le_abs (footParam a v P); have := abs_nonneg (footParam sj b P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h1 hμpos0.le]
+        · have h2 : footParam sj b P ≤ M := by
+            rw [hM]; have := le_abs_self (footParam sj b P); have := abs_nonneg (footParam a v P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h2 hμpos0.le]
+      have hptv : (1 - ε) • v + ε • P - v = ε • (P - v) := by module
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hpt, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq]; exact hεstrip
+      have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+      have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+      have hfoot_i : α < footParam a v pt := by
+        rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
+        nlinarith [hεfi]
+      have hfoot_j : footParam sj b pt < 1 - α := by
+        rw [hpt, footParam_affineComb_pt sj b v P (by ring : (1 - ε) + ε = 1), hvj,
+          footParam_src, ← hvj]
+        nlinarith [hεfj]
+      have hPa : sideForm a v P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hPb : sideForm v b P = sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : 0 < cornerTurn a v b * sideForm v b pt := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb, cornerTurn,
+          sideForm_cyclic a v b]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexMinus a v b := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le), convexSector]; exact ⟨hptA, hptB⟩
+      have hpiece_i : IsPreconnected (vertexMinus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le)]
+        exact ((convex_convexSector a v b).inter (hstripConv_i.inter hfootConv_i)).isPreconnected
+      have hpiece_j : IsPreconnected (vertexMinus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z : Plane | footParam sj b z < 1 - α})) := by
+        rw [vertexMinus, if_neg (not_lt.mpr hneg.le)]
+        exact ((convex_convexSector a v b).inter (hstripConv_j.inter hfootConv_j)).isPreconnected
+      rw [sectorMinusClipped, ← ha, ← hv, ← hb, ← hsj, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt ⟨hpt_vertex, hptstrip_i, hfoot_i⟩
+        ⟨hpt_vertex, hptstrip_j, hfoot_j⟩ hpiece_i hpiece_j
+    · -- reflex `vertexMinus` branch (`if_pos`)
+      set P : Plane := (3 : ℝ) • v - a - b with hP
+      obtain ⟨ε, hεpos, hεstrip, hεfi, hεfj⟩ :
+          ∃ ε : ℝ, 0 < ε ∧ ε * dist P v < δ₀ ∧
+            ε * (1 - footParam a v P) < 1 - α ∧ ε * footParam sj b P < 1 - α := by
+        set M : ℝ := |footParam a v P| + |footParam sj b P| + 1 with hM
+        have hMpos : 0 < M := by
+          have := abs_nonneg (footParam a v P); have := abs_nonneg (footParam sj b P)
+          rw [hM]; linarith
+        have hdpv : (0 : ℝ) ≤ dist P v := dist_nonneg
+        have h1mα : (0 : ℝ) < 1 - α := by linarith
+        have hdenpos : (0 : ℝ) < dist P v + M + 1 := by linarith
+        have hμpos0 : (0 : ℝ) < min δ₀ (1 - α) := lt_min hδpos h1mα
+        have hεpos0 : (0 : ℝ) < min δ₀ (1 - α) / (dist P v + M + 1) := div_pos hμpos0 hdenpos
+        refine ⟨min δ₀ (1 - α) / (dist P v + M + 1), hεpos0, ?_, ?_, ?_⟩
+        · rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_left δ₀ (1 - α)) hdpv,
+            mul_pos hδpos hMpos]
+        · have h1 : (1 : ℝ) - footParam a v P ≤ M := by
+            rw [hM]; have := neg_le_abs (footParam a v P); have := abs_nonneg (footParam sj b P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h1 hμpos0.le]
+        · have h2 : footParam sj b P ≤ M := by
+            rw [hM]; have := le_abs_self (footParam sj b P); have := abs_nonneg (footParam a v P)
+            linarith
+          rw [div_mul_eq_mul_div, div_lt_iff₀ hdenpos]
+          nlinarith [mul_le_mul_of_nonneg_right (min_le_right δ₀ (1 - α)) hMpos.le,
+            mul_pos h1mα (show (0 : ℝ) < dist P v + 1 by linarith),
+            mul_le_mul_of_nonneg_left h2 hμpos0.le]
+      have hptv : (1 - ε) • v + ε • P - v = ε • (P - v) := by module
+      set pt : Plane := (1 - ε) • v + ε • P with hpt
+      have hdist : dist pt v < δ₀ := by
+        have hdistEq : dist pt v = ε * dist P v := by
+          rw [dist_eq_norm, hpt, hptv, norm_smul, Real.norm_eq_abs, abs_of_pos hεpos, ← dist_eq_norm]
+        rw [hdistEq]; exact hεstrip
+      have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+      have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
+        refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
+        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+      have hfoot_i : α < footParam a v pt := by
+        rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
+        nlinarith [hεfi]
+      have hfoot_j : footParam sj b pt < 1 - α := by
+        rw [hpt, footParam_affineComb_pt sj b v P (by ring : (1 - ε) + ε = 1), hvj,
+          footParam_src, ← hvj]
+        nlinarith [hεfj]
+      have hPa : sideForm a v P = - sideForm a v b := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hPb : sideForm v b P = - sideForm v b a := by
+        rw [hP]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+      have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
+        rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
+      have hptB : cornerTurn a v b * sideForm v b pt < 0 := by
+        rw [hpt, sideForm_affineComb v b v P (by ring), sideForm_left_endpoint, hPb, cornerTurn,
+          sideForm_cyclic a v b]
+        ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ']
+      have hpt_vertex : pt ∈ vertexMinus a v b := by
+        rw [vertexMinus, if_pos hpos, reflexSector]; exact Or.inl hptA
+      have hpiece_i : IsPreconnected (vertexMinus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+        refine IsPreconnected.union pt ⟨hptA, hptstrip_i, hfoot_i⟩ ⟨hptB, hptstrip_i, hfoot_i⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
+            (hstripConv_i.inter hfootConv_i)).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter
+            (hstripConv_i.inter hfootConv_i)).isPreconnected
+      have hpiece_j : IsPreconnected (vertexMinus a v b ∩
+          ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
+            ∩ {z : Plane | footParam sj b z < 1 - α})) := by
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+        refine IsPreconnected.union pt ⟨hptA, hptstrip_j, hfoot_j⟩ ⟨hptB, hptstrip_j, hfoot_j⟩
+          ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
+            (hstripConv_j.inter hfootConv_j)).isPreconnected
+          ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter
+            (hstripConv_j.inter hfootConv_j)).isPreconnected
+      rw [sectorMinusClipped, ← ha, ← hv, ← hb, ← hsj, Set.inter_union_distrib_left]
+      exact IsPreconnected.union pt ⟨hpt_vertex, hptstrip_i, hfoot_i⟩
+        ⟨hpt_vertex, hptstrip_j, hfoot_j⟩ hpiece_i hpiece_j
+  · rw [sectorMinusClipped]
+    have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
+      ext z; constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz; simpa using hz
+    have hstrip_j :
+        {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
+      ext z; constructor
+      · intro hz
+        rw [Set.mem_setOf_eq] at hz
+        have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
+        nlinarith
+      · intro hz; simpa using hz
+    rw [hstrip_i, hstrip_j, Set.empty_inter, Set.empty_inter, Set.union_empty, Set.inter_empty]
+    exact isPreconnected_empty
+
 /-- The positive source end cap is convex. -/
 theorem convex_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Convex ℝ (endCapSrcPlus β ρ) := by
