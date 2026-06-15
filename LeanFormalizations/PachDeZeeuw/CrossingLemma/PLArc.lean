@@ -8898,6 +8898,171 @@ theorem sectorMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ :
   -- incident edges); the vertex-ball budgets `hρδ`/`hρR` become unnecessary.
   sorry
 
+/-- **Clipped sector containment (positive side).**  Each clipped arm routes through its
+carrier foot-point exactly like `bandStripPlus_subset_taperedTube`, but with an ASYMMETRIC
+safe window.  The incoming arm (edge `i`, clipped `α < foot`) admits foot-points in
+`[α/2, 1]`: the lower end follows from the clip (Lipschitz keeps `foot y > α − α/2 = α/2`),
+the upper end is the interior shared vertex `verts (i+1)` (NEVER an arc endpoint, since
+`0 < i+1 < numSegs`).  The outgoing arm (edge `i+1`, clipped `foot < 1−α`) admits
+`[0, 1−α/2]`.  The OPEN window end is supplied by `footParam_mem_Icc_of_mem_segment`
+(a carrier point has foot in `[0,1]`).  Unlike the false unclipped `sectorPlus_subset_taperedTube`,
+no vertex-ball budget is needed — the clip keeps every foot-point off the tube-vanishing
+arc endpoints. -/
+theorem sectorPlusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) * δ₀ ≤ α / 2)
+    (hS_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 → y ∈ S)
+    (hR_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    (hS_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → y ∈ S)
+    (hR_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → δ₀ ≤ Metric.infDist y Rᶜ / 2) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  have h2 := hz.2
+  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq] at h2
+  rcases h2 with ⟨hstrip, hfootz⟩ | ⟨hstrip, hfootz⟩
+  · -- incoming arm: δ₀-close to edge `i` with `α < foot i`
+    have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+    obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+    have hKnonneg : 0 ≤ (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) :=
+      div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+        (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc i)))
+    have hb : |footParam (β.segSrc i) (β.segTgt i) z - footParam (β.segSrc i) (β.segTgt i) y|
+        ≤ α / 2 :=
+      le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc i) y z)
+        (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg)
+          hsmall_in)
+    obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+    have hfy_seg : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (0 : ℝ) 1 :=
+      footParam_mem_Icc_of_mem_segment (β.segTgt_ne_segSrc i) hyseg
+    have hfy : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 :=
+      ⟨by linarith, hfy_seg.2⟩
+    have hyS : y ∈ S := hS_in y hyseg hfy
+    have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 := hR_in y hyseg hfy
+    rw [taperedTube]
+    refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+    rw [Metric.mem_ball, min_eq_left hyR]
+    exact hyz
+  · -- outgoing arm: δ₀-close to edge `i+1` with `foot (i+1) < 1 − α`
+    have hsegne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+      ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+    obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+    have hKnonneg : 0 ≤ (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) :=
+      div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+        (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩)))
+    have hb : |footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z
+          - footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y|
+        ≤ α / 2 :=
+      le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩) y z)
+        (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg)
+          hsmall_out)
+    obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+    have hfy_seg : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+        ∈ Set.Icc (0 : ℝ) 1 :=
+      footParam_mem_Icc_of_mem_segment (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩) hyseg
+    have hfy : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+        ∈ Set.Icc 0 (1 - α / 2) :=
+      ⟨hfy_seg.1, by linarith⟩
+    have hyS : y ∈ S := hS_out y hyseg hfy
+    have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 := hR_out y hyseg hfy
+    rw [taperedTube]
+    refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+    rw [Metric.mem_ball, min_eq_left hyR]
+    exact hyz
+
+/-- **Clipped sector containment (negative side).**  Identical to the positive side: the
+proof reads only the strip-union component `hz.2` (the vertex wedge is irrelevant to tube
+containment).  See `sectorPlusClipped_subset_taperedTube`. -/
+theorem sectorMinusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
+    (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) * δ₀ ≤ α / 2)
+    (hS_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 → y ∈ S)
+    (hR_in : ∀ y ∈ β.segCarrier i,
+        footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 →
+        δ₀ ≤ Metric.infDist y Rᶜ / 2)
+    (hS_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → y ∈ S)
+    (hR_out : ∀ y ∈ β.segCarrier ⟨(i : ℕ) + 1, hi1⟩,
+        footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+          ∈ Set.Icc 0 (1 - α / 2) → δ₀ ≤ Metric.infDist y Rᶜ / 2) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ := by
+  intro z hz
+  have h2 := hz.2
+  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq] at h2
+  rcases h2 with ⟨hstrip, hfootz⟩ | ⟨hstrip, hfootz⟩
+  · have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+    obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+    have hKnonneg : 0 ≤ (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
+        / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) :=
+      div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+        (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc i)))
+    have hb : |footParam (β.segSrc i) (β.segTgt i) z - footParam (β.segSrc i) (β.segTgt i) y|
+        ≤ α / 2 :=
+      le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc i) y z)
+        (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg)
+          hsmall_in)
+    obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+    have hfy_seg : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (0 : ℝ) 1 :=
+      footParam_mem_Icc_of_mem_segment (β.segTgt_ne_segSrc i) hyseg
+    have hfy : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Icc (α / 2) 1 :=
+      ⟨by linarith, hfy_seg.2⟩
+    have hyS : y ∈ S := hS_in y hyseg hfy
+    have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 := hR_in y hyseg hfy
+    rw [taperedTube]
+    refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+    rw [Metric.mem_ball, min_eq_left hyR]
+    exact hyz
+  · have hsegne : (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩).Nonempty :=
+      ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+    obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
+    have hKnonneg : 0 ≤ (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
+          + |(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).2 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).2|)
+        / dotp (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
+               (β.segTgt ⟨(i : ℕ) + 1, hi1⟩ - β.segSrc ⟨(i : ℕ) + 1, hi1⟩) :=
+      div_nonneg (add_nonneg (abs_nonneg _) (abs_nonneg _))
+        (le_of_lt (dotp_self_pos (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩)))
+    have hb : |footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) z
+          - footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y|
+        ≤ α / 2 :=
+      le_trans (abs_footParam_sub_le (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩) y z)
+        (le_trans (mul_le_mul_of_nonneg_left (le_of_lt (by rwa [dist_comm] at hyz)) hKnonneg)
+          hsmall_out)
+    obtain ⟨hb1, hb2⟩ := abs_le.mp hb
+    have hfy_seg : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+        ∈ Set.Icc (0 : ℝ) 1 :=
+      footParam_mem_Icc_of_mem_segment (β.segTgt_ne_segSrc ⟨(i : ℕ) + 1, hi1⟩) hyseg
+    have hfy : footParam (β.segSrc ⟨(i : ℕ) + 1, hi1⟩) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) y
+        ∈ Set.Icc 0 (1 - α / 2) :=
+      ⟨hfy_seg.1, by linarith⟩
+    have hyS : y ∈ S := hS_out y hyseg hfy
+    have hyR : δ₀ ≤ Metric.infDist y Rᶜ / 2 := hR_out y hyseg hfy
+    rw [taperedTube]
+    refine Set.mem_iUnion₂.mpr ⟨y, hyS, ?_⟩
+    rw [Metric.mem_ball, min_eq_left hyR]
+    exact hyz
+
 /-- **Band containment (positive side).**  A positive band-strip point lies in the tapered
 tube.  The strip certificate gives a carrier witness `y` within `δ₀` (sup metric) of `z`; the
 Lipschitz bound on `footParam` (`abs_footParam_sub_le`) and the smallness hypothesis `hsmall`
