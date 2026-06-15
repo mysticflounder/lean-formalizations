@@ -606,3 +606,45 @@ at foot 0) keeps `foot < 1−α` — preserving the shared-corner reach (the uni
 `⊆ sectorPlus` bridges. Remaining clip-core (mine, regions disjoint from the disjointness agent):
 clipped containment, `isPreconnected_collar` rework to the clipped piece, overlap/`compl_carrier`,
 collar-def switch, cover. The arity-3 disjointness block (3549–4049) is untouched by this.
+
+## §12 — Clip-core execution (2026-06-15): mono-fails correction, step 1 GREEN, parallel dispatch
+
+**Correction to §11's mono claim.** §11 asserted *every* `sectorPlus` disjointness lemma transfers
+to the clipped collar via `Disjoint.mono`. That is true only for the NON-degenerate cells (same
+corner, far corners ≥2 apart, nonincident bands). The prior disjointness agent established that the
+**6 degenerate sub-cases are genuinely FALSE for the unclipped sectors** (near the shared vertex the
+two opposite-sign wedges overlap), so `Disjoint.mono` cannot transfer them — they must be proven
+**clipped-direct**, where the clip's foot bounds on the shared edge supply the missing certificate.
+The 6 live at the `sector↔sector |j−k|∈{1,2}` aggregator (2 sorries) and the 4 `cap↔sector` arc-endpoint
+arms.
+
+**Step 1 — clipped containment — DONE (commit `71f1b93`, build green, 8476 jobs).**
+`sectorPlusClipped_subset_taperedTube` + `sectorMinusClipped_subset_taperedTube`. The proof routes
+each clipped arm through its carrier foot-point exactly like `bandStripPlus_subset_taperedTube`, but
+with an **asymmetric safe window** instead of a vertex-ball budget: incoming arm `[α/2, 1]` (the upper
+end is the interior shared vertex `verts(i+1)`, NEVER an arc endpoint since `0 < i+1 < numSegs`),
+outgoing arm `[0, 1−α/2]`. The OPEN window end is closed by `footParam_mem_Icc_of_mem_segment` (a
+carrier point has foot in `[0,1]`). Hypotheses per arm: a Lipschitz budget `hsmall_*`, and
+`hS_*`/`hR_*` over the asymmetric window. The clip keeps every foot-point off the tube-vanishing arc
+endpoints, so the false unclipped `sectorPlus_subset_taperedTube` is simply retired (deleted in
+integration). **Subtlety learned:** after `rcases` of the clip disjuncts, the strip/foot facts stay
+raw `setOf` memberships (`z ∈ {z | …}`), which `linarith` will NOT read — coerce first with
+`simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq] at h2`.
+
+**Parallel dispatch (worktree agents, additive, disjoint regions):**
+- **Agent P** — `isPreconnected_sectorPlusClipped`/`Minus` (step 2): extend the `isPreconnected_sectorPlus`
+  apex-hub proof with the convex foot half-plane factor; apex near `v` satisfies the clip for small ε.
+  Added hyps `0 < α`, `α < 1`.
+- **Agent D** — clipped degenerate disjointness aggregators (step 5):
+  `disjoint_sectorPlusClipped_sectorMinusClipped_all` + 4 `cap↔clipped-sector`. Per-combo recipe:
+  index-distance ≥2 arm pairs → `hsep`; adjacent-edge combos → corner-confinement (`not_mem_adjacent_band_strip*`
+  pattern) + the clip foot bound; the single shared-edge combo (k=j+1) → σ-sign
+  (`vertexPlus_sideForm_outgoing_pos` vs `vertexMinus_sideForm_incoming_neg` on the same edge).
+
+**Integration (mine, serial, after P+D land):** swap `sectorPlus→sectorPlusClipped` in `collarPlus`,
+`collarChainPlus` (and Minus); rewire `isPreconnected_collarChainPlus`/`isPreconnected_collarPlus`/`Minus`
++ `_of_sliver_budgets` (`hsectorW`→clipped containment with the new window hyps; `isPreconnected_sector*`→clipped;
+`hO1`/`hO2`→clipped overlap); rewire master `disjoint_collarPlus_collarMinus` (mono for non-degenerate
+cells, the new clipped aggregators for degenerate); retire the false unclipped `sector*_subset_taperedTube`;
+clipped-direct `sector*Clipped_subset_compl_carrier`; cover rework (`mem_…_of_ball` → `_of_cornerTube`,
+disk-routing into the clipped sector union).
