@@ -3548,16 +3548,23 @@ theorem infDist_lt_of_mem_vertexBall (β : PolyArc) (j : Fin β.numSegs)
 the two vertex balls (a `ρ` budget). -/
 theorem disjoint_sectorPlus_sectorMinus_diff (β : PolyArc) (δ₀ : ℝ)
     (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs)
-    (hsupp : Disjoint (stripSupport β δ₀ j) (stripSupport β δ₀ k)) :
+    (hjj : Disjoint (stripSupport β δ₀ j) (stripSupport β δ₀ k))
+    (hjk : Disjoint (stripSupport β δ₀ j) (stripSupport β δ₀ ⟨(k : ℕ) + 1, hk1⟩))
+    (hj1k : Disjoint (stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩) (stripSupport β δ₀ k))
+    (hj1k1 : Disjoint (stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩)
+                      (stripSupport β δ₀ ⟨(k : ℕ) + 1, hk1⟩)) :
     Disjoint (sectorPlus β δ₀ j hj1) (sectorMinus β δ₀ k hk1) := by
-  -- §9 UNION REWORK: hypothesis now TOO WEAK.  Under the union sector,
-  -- `sectorPlus j ⊆ stripSupport j ∪ stripSupport (j+1)` (both arms), so a single
-  -- `Disjoint (stripSupport j) (stripSupport k)` no longer separates the sectors.
-  -- This helper needs the 4-way strip-disjointness (all of {j,j+1}×{k,k+1}); the
-  -- adjacent/shared-edge sub-cases (|j−k| ≤ 2) route through the σ-sign lynchpin
-  -- (`vertexPlus/Minus_sideForm_*`), not strip separation.  Likely superseded by
-  -- `disjoint_sectorPlus_sectorMinus_all`; revisit signature when reworking that.
-  sorry
+  -- §9 UNION REWORK: under the union sector, `sectorPlus j ⊆ strip j ∪ strip (j+1)` and
+  -- `sectorMinus k ⊆ strip k ∪ strip (k+1)`, so a single strip-disjointness is too weak;
+  -- the 4-way strip-disjointness across {j,j+1}×{k,k+1} separates the two unions.
+  have hUnion :
+      Disjoint (stripSupport β δ₀ j ∪ stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩)
+        (stripSupport β δ₀ k ∪ stripSupport β δ₀ ⟨(k : ℕ) + 1, hk1⟩) :=
+    Set.disjoint_union_left.mpr
+      ⟨Set.disjoint_union_right.mpr ⟨hjj, hjk⟩,
+       Set.disjoint_union_right.mpr ⟨hj1k, hj1k1⟩⟩
+  exact hUnion.mono (sectorPlus_subset_stripSupport_union β δ₀ j hj1)
+    (sectorMinus_subset_stripSupport_union β δ₀ k hk1)
 
 /-- **Non-incident band ↔ sector disjointness.**  Edge `i` is not incident to the
 sector's vertex `verts (j+1)` (`(i:ℕ) ∉ {j, j+1}`).  Reduces (via the strip support and
@@ -3761,42 +3768,73 @@ theorem disjoint_endCapTgtMinus_bandStripPlus_nonincident (β : PolyArc)
 budget. -/
 theorem disjoint_endCapSrcPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
-    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j)) :
+    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j))
+    (hbudget1 : ρ 0 + δ₀
+      ≤ Metric.infDist (β.verts 0) (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩)) :
     Disjoint (endCapSrcPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: `sectorMinus j ⊆ stripSupport j ∪ stripSupport (j+1)`, so the single
-  -- edge-`j` budget `hbudget` no longer suffices; the cap must be separated from BOTH arms.
-  -- Add an edge-`(j+1)` budget and separate via `sectorMinus_subset_stripSupport_union` +
-  -- `disjoint_vertexBall_stripSupport_of_budget` on each strip.
-  sorry
+  -- §9 UNION REWORK: `sectorMinus j ⊆ stripSupport j ∪ stripSupport (j+1)`, so separate the
+  -- cap-disk `ball(verts 0, ρ 0)` from BOTH arm strips via the two budgets.
+  have hdisj :
+      Disjoint (Metric.ball (β.verts 0) (ρ 0))
+        (stripSupport β δ₀ j ∪ stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩) :=
+    Set.disjoint_union_right.mpr
+      ⟨disjoint_vertexBall_stripSupport_of_budget β j hbudget,
+       disjoint_vertexBall_stripSupport_of_budget β ⟨(j : ℕ) + 1, hj1⟩ hbudget1⟩
+  exact hdisj.mono (fun _ hz => hz.1.1)
+    (sectorMinus_subset_stripSupport_union β δ₀ j hj1)
 
 /-- Target `+` cap ↔ a sector, an `infDist` budget. -/
 theorem disjoint_endCapTgtPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
-      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j)) :
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j))
+    (hbudget1 : ρ (Fin.last β.numSegs) + δ₀
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩)) :
     Disjoint (endCapTgtPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: add an edge-`(j+1)` budget; separate the cap from both arms via
-  -- `sectorMinus_subset_stripSupport_union`.  See `disjoint_endCapSrcPlus_sectorMinus`.
-  sorry
+  -- §9 UNION REWORK: separate the tgt cap-disk from BOTH arm strips via the two budgets.
+  have hdisj :
+      Disjoint (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))
+        (stripSupport β δ₀ j ∪ stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩) :=
+    Set.disjoint_union_right.mpr
+      ⟨disjoint_vertexBall_stripSupport_of_budget β j hbudget,
+       disjoint_vertexBall_stripSupport_of_budget β ⟨(j : ℕ) + 1, hj1⟩ hbudget1⟩
+  exact hdisj.mono (fun _ hz => hz.1.1)
+    (sectorMinus_subset_stripSupport_union β δ₀ j hj1)
 
 /-- A sector ↔ source `−` cap, an `infDist` budget. -/
 theorem disjoint_sectorPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
-    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j)) :
+    (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j))
+    (hbudget1 : ρ 0 + δ₀
+      ≤ Metric.infDist (β.verts 0) (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩)) :
     Disjoint (sectorPlus β δ₀ j hj1) (endCapSrcMinus β ρ) := by
-  -- §9 UNION REWORK: add an edge-`(j+1)` budget; separate the cap from both arms via
-  -- `sectorPlus_subset_stripSupport_union`.  See `disjoint_endCapSrcPlus_sectorMinus`.
-  sorry
+  -- §9 UNION REWORK: separate the src cap-disk from BOTH arm strips, then flip sides.
+  have hdisj :
+      Disjoint (Metric.ball (β.verts 0) (ρ 0))
+        (stripSupport β δ₀ j ∪ stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩) :=
+    Set.disjoint_union_right.mpr
+      ⟨disjoint_vertexBall_stripSupport_of_budget β j hbudget,
+       disjoint_vertexBall_stripSupport_of_budget β ⟨(j : ℕ) + 1, hj1⟩ hbudget1⟩
+  exact (hdisj.mono (fun _ hz => hz.1.1)
+    (sectorPlus_subset_stripSupport_union β δ₀ j hj1)).symm
 
 /-- A sector ↔ target `−` cap, an `infDist` budget. -/
 theorem disjoint_sectorPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
-      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j)) :
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j))
+    (hbudget1 : ρ (Fin.last β.numSegs) + δ₀
+      ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier ⟨(j : ℕ) + 1, hj1⟩)) :
     Disjoint (sectorPlus β δ₀ j hj1) (endCapTgtMinus β ρ) := by
-  -- §9 UNION REWORK: add an edge-`(j+1)` budget; separate the cap from both arms via
-  -- `sectorPlus_subset_stripSupport_union`.  See `disjoint_endCapSrcPlus_sectorMinus`.
-  sorry
+  -- §9 UNION REWORK: separate the tgt cap-disk from BOTH arm strips, then flip sides.
+  have hdisj :
+      Disjoint (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))
+        (stripSupport β δ₀ j ∪ stripSupport β δ₀ ⟨(j : ℕ) + 1, hj1⟩) :=
+    Set.disjoint_union_right.mpr
+      ⟨disjoint_vertexBall_stripSupport_of_budget β j hbudget,
+       disjoint_vertexBall_stripSupport_of_budget β ⟨(j : ℕ) + 1, hj1⟩ hbudget1⟩
+  exact (hdisj.mono (fun _ hz => hz.1.1)
+    (sectorPlus_subset_stripSupport_union β δ₀ j hj1)).symm
 
 /-! #### P3 — the per-cell "all indices" lemmas.
 
