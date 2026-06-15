@@ -2943,7 +2943,7 @@ noncomputable def collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   (taperedTube R S δ₀ \ β.carrier) ∩
     ( (⋃ i, bandStripPlus β α δ₀ i)
-      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
       ∪ endCapSrcPlus β ρ
       ∪ endCapTgtPlus β ρ )
 
@@ -2952,7 +2952,7 @@ noncomputable def collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   (taperedTube R S δ₀ \ β.carrier) ∩
     ( (⋃ i, bandStripMinus β α δ₀ i)
-      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+      ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
       ∪ endCapSrcMinus β ρ
       ∪ endCapTgtMinus β ρ )
 
@@ -3012,7 +3012,7 @@ theorem isOpen_collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
   refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcPlus β ρ)).union
     (isOpen_endCapTgtPlus β ρ)
   · exact isOpen_iUnion (fun i => isOpen_bandStripPlus β α δ₀ i)
-  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorPlus β δ₀ i hi1))
+  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorPlusClipped β δ₀ α i hi1))
 
 /-- **P1⁻ (open).** -/
 theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
@@ -3021,7 +3021,7 @@ theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
   refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcMinus β ρ)).union
     (isOpen_endCapTgtMinus β ρ)
   · exact isOpen_iUnion (fun i => isOpen_bandStripMinus β α δ₀ i)
-  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorMinus β δ₀ i hi1))
+  · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorMinusClipped β δ₀ α i hi1))
 
 /-! ### P2 (union) — `collarPlus ∪ collarMinus = taperedTube R S δ₀ ∖ carrier`
 
@@ -3074,26 +3074,6 @@ theorem mem_openSegment_of_sideForm_zero_ball' {s t z : Plane} (h : t ≠ s)
   · rw [sideForm_swap, hz, neg_zero]
   · rw [footParam_swap_eq h]; linarith
   · rwa [dist_comm s t] at hball
-
-/-- **Interior-vertex routing.**  An off-carrier point in the disk of the shared vertex
-`segTgt i` (radius below both incident edge lengths) lands in `sectorPlus` or
-`sectorMinus`. -/
-theorem mem_sectorPlus_or_sectorMinus_of_ball (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
-    (hra : ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segSrc i))
-    (hrb : ρ (Fin.succ i) ≤ dist (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
-    {z : Plane} (hzC : z ∉ β.carrier)
-    (hzball : z ∈ Metric.ball (β.segTgt i) (ρ (Fin.succ i))) :
-    z ∈ sectorPlus β δ₀ i hi1 ∨ z ∈ sectorMinus β δ₀ i hi1 := by
-  -- §9 / §7.3 UNION REWORK — RETIRE this lemma → `mem_sectorPlus_or_sectorMinus_of_cornerTube`.
-  -- FALSE as stated under the union sector: a point in `ball v (ρ (succ i))` off the carrier
-  -- need not be `δ₀`-close to EITHER incident edge (when `ρ > δ₀`), so it can land in
-  -- `vertexPlus` yet outside `stripSupport i ∪ stripSupport (i+1)`, i.e. outside the union
-  -- sector.  The P2-cover interior-vertex routing must instead split by the near-edge foot
-  -- sign: `footParam ∈ (0,1) ⇒ band`, `footParam ≤ 0` (outer cone behind `v`) ⇒ both incident
-  -- `infDist = dist(·,v)`, captured by the corner-tube disjunct iff `dist(z,v) < δ₀`.
-  sorry
 
 /-- **P2 (union).** -/
 theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
@@ -4107,69 +4087,6 @@ theorem disjoint_sectorPlus_bandStripMinus_all (β : PolyArc)
     · exact (disjoint_stripSupport_sectorPlus_nonincident β hδ₀sep hsep hadj_tgt hadj_src
         i j hj1 hij hij1).symm
 
-/-- **sector⁺ ↔ sector⁻, all index pairs (δ₀-tube model).**  Same vertex → opposite-sign
-clash; different corners `j ≠ k` → the incoming strip of the smaller corner and the
-outgoing strip of the larger corner are governed by edges at index distance `≥ 2`, so
-`hsep` separates them. -/
-theorem disjoint_sectorPlus_sectorMinus_all (β : PolyArc) {δ₀ δsep : ℝ} (hδ₀sep : δ₀ ≤ δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δsep →
-      Metric.infDist z (β.segCarrier b) < δsep → False)
-    (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
-      cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
-    (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs) :
-    Disjoint (sectorPlus β δ₀ j hj1) (sectorMinus β δ₀ k hk1) := by
-  -- §9 UNION REWORK — the load-bearing sector↔sector disjointness.  SIGNATURE REVISION:
-  -- added `hturn` (per-corner turn nonzero) for the σ-sign sub-cases.  Regimes in `j` vs `k`:
-  --  • same corner `j = k`: `disjoint_sectorPlus_sectorMinus` (angular, proven).  CLOSED.
-  --  • far corners (closest arm pair at index distance ≥ 2): the 4-way strip separation
-  --    `disjoint_sectorPlus_sectorMinus_diff` closes.  CLOSED.
-  --  • adjacent / gap-2 corners (some arm pair shares the SHARED EDGE between the two
-  --    corners): strip separation FAILS.  Disjointness comes from the σ-sign on the shared
-  --    edge — a `sectorPlus` point thin to it has σ>0, a `sectorMinus` point thin to it has
-  --    σ<0.  BLOCKED: the σ-sign lemmas (`vertexPlus/Minus_sideForm_*`) require a thinness
-  --    hypothesis `hthin`, which `thin_of_infDist_*` produces ONLY from an interior FOOT
-  --    bound `α ≤ footParam …` on the shared edge.  A union-sector point carries
-  --    `infDist · (shared edge) < δ₀` but NO foot bound, and the foot can be arbitrarily
-  --    close to the shared vertex (where thinness degenerates) — so `hthin` is not derivable
-  --    from the hypotheses available here.  See final report.
-  have hsep' : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δ₀ →
-      Metric.infDist z (β.segCarrier b) < δ₀ → False :=
-    fun a b hab z hza hzb => hsep a b hab z (lt_of_lt_of_le hza hδ₀sep)
-      (lt_of_lt_of_le hzb hδ₀sep)
-  have hjval : ((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) = (j : ℕ) + 1 := rfl
-  have hkval : ((⟨(k : ℕ) + 1, hk1⟩ : Fin β.numSegs) : ℕ) = (k : ℕ) + 1 := rfl
-  rcases lt_trichotomy (j : ℕ) (k : ℕ) with hjk | hjkeq | hjk
-  · -- j < k
-    by_cases hfar : (j : ℕ) + 1 + 1 < (k : ℕ)
-    · -- closest arm pair (j+1 vs k) at index distance ≥ 2: 4-way strip separation.
-      exact disjoint_sectorPlus_sectorMinus_diff β δ₀ j k hj1 hk1
-        (disjoint_stripSupport_nonadjacent β hsep' j k (by omega))
-        (disjoint_stripSupport_nonadjacent β hsep' j ⟨(k : ℕ) + 1, hk1⟩ (by rw [hkval]; omega))
-        (disjoint_stripSupport_nonadjacent β hsep' ⟨(j : ℕ) + 1, hj1⟩ k (by rw [hjval]; omega))
-        (disjoint_stripSupport_nonadjacent β hsep' ⟨(j : ℕ) + 1, hj1⟩ ⟨(k : ℕ) + 1, hk1⟩
-          (by rw [hjval, hkval]; omega))
-    · -- k ∈ {j+1, j+2}: shared-edge σ-sign regime.  BLOCKED.
-      sorry
-  · -- j = k: angular opposite-sign clash.
-    have hjkF : j = k := Fin.ext hjkeq
-    subst hjkF
-    exact disjoint_sectorPlus_sectorMinus β δ₀ j hj1
-  · -- k < j
-    by_cases hfar : (k : ℕ) + 1 + 1 < (j : ℕ)
-    · -- closest arm pair (k+1 vs j) at index distance ≥ 2: 4-way strip separation.
-      exact disjoint_sectorPlus_sectorMinus_diff β δ₀ j k hj1 hk1
-        (disjoint_stripSupport_nonadjacent β hsep' k j (by omega)).symm
-        (disjoint_stripSupport_nonadjacent β hsep' ⟨(k : ℕ) + 1, hk1⟩ j
-          (by rw [hkval]; omega)).symm
-        (disjoint_stripSupport_nonadjacent β hsep' k ⟨(j : ℕ) + 1, hj1⟩
-          (by rw [hjval]; omega)).symm
-        (disjoint_stripSupport_nonadjacent β hsep' ⟨(k : ℕ) + 1, hk1⟩ ⟨(j : ℕ) + 1, hj1⟩
-          (by rw [hjval, hkval]; omega)).symm
-    · -- j ∈ {k+1, k+2}: shared-edge σ-sign regime.  BLOCKED.
-      sorry
-
 /-- **Source `+` cap ↔ band⁻, all band indices.**  Own edge → sign clash; else the
 endpoint-edge budget. -/
 theorem disjoint_endCapSrcPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
@@ -4224,82 +4141,6 @@ private theorem succ_ne_last_of_lt (β : PolyArc) {j : Fin β.numSegs}
   have := congrArg Fin.val h
   simp [Fin.val_succ, Fin.val_last] at this
   omega
-
-/-- **Source `+` cap ↔ sector⁻, all sector indices (δ₀-tube model).**  The corner's
-incoming edge `j` carries `verts 0` only when `j = 0`; otherwise the cap-disk/strip budget
-separates.  For `j = 0` route through the outgoing edge `j+1 = 1`, which avoids `verts 0`. -/
-theorem disjoint_endCapSrcPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δ₀ : ℝ}
-    (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
-      ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
-    Disjoint (endCapSrcPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: cap↔sector needs separation from BOTH arm strips (incoming `j`,
-  -- outgoing `j+1`).  `hbudsrc` covers every edge `≠ 0`, feeding both leaf budgets when
-  -- `j ≠ 0`.  When `j = 0` the INCOMING arm IS edge `0` (which carries `verts 0`), so the
-  -- cap-disk budget on edge `0` is impossible (`infDist (verts 0) (segCarrier 0) = 0`) and
-  -- the leaf cannot apply.  That sub-case requires the σ-sign on edge `0` (cap is `+`, a
-  -- `−`-sector point thin to edge `0` is `−`), but the σ-sign thinness needs an interior
-  -- FOOT bound on edge `0` that the cap (only `foot > 0`, disk radius unconstrained) does
-  -- not supply — and it is FALSE for a large disk reaching the `verts 1` end of edge `0`.
-  -- BLOCKED without an extra disk-smallness hypothesis (`ρ 0 ≤ (1−α)·‖edge 0‖`, available
-  -- in the master via `hballs` but not threaded here).  See final report.
-  by_cases hj0 : (j : ℕ) = 0
-  · sorry
-  · exact disjoint_endCapSrcPlus_sectorMinus β ρ j hj1 (hbudsrc j hj0)
-      (hbudsrc ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ 0; omega))
-
-/-- **Target `+` cap ↔ sector⁻, all sector indices (δ₀-tube model).**  The corner's
-incoming edge `j ≤ numSegs-2` never carries `verts (last)`, so the cap-disk/strip budget
-separates. -/
-theorem disjoint_endCapTgtPlus_sectorMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δ₀ : ℝ}
-    (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
-      ρ (Fin.last β.numSegs) + δ₀
-        ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
-    Disjoint (endCapTgtPlus β ρ) (sectorMinus β δ₀ j hj1) := by
-  -- §9 UNION REWORK: separate the tgt cap from both arm strips.  The incoming arm `j`
-  -- (`j ≤ numSegs−2 ≠ numSegs−1`) always has a `hbudtgt` budget.  The outgoing arm `j+1`
-  -- has one when `j+1 ≠ numSegs−1`.  When `j+1 = numSegs−1` (`= lastSeg`, which carries
-  -- `verts last`), the budget on edge `j+1` is impossible and the leaf cannot apply; that
-  -- sub-case needs the σ-sign on `lastSeg` whose thinness wants an interior foot bound the
-  -- cap (foot `< 1`, disk radius unconstrained) does not supply.  BLOCKED.  See final report.
-  by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
-  · sorry
-  · refine disjoint_endCapTgtPlus_sectorMinus β ρ j hj1 (hbudtgt j (by omega)) ?_
-    exact hbudtgt ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ β.numSegs - 1; exact hjlast)
-
-/-- **sector⁺ ↔ source `−` cap, all sector indices (δ₀-tube model).** -/
-theorem disjoint_sectorPlus_endCapSrcMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δ₀ : ℝ}
-    (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
-      ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
-    Disjoint (sectorPlus β δ₀ j hj1) (endCapSrcMinus β ρ) := by
-  -- §9 UNION REWORK: as `disjoint_endCapSrcPlus_sectorMinus_all`.  `j ≠ 0` via the leaf
-  -- (both budgets from `hbudsrc`); `j = 0` BLOCKED (σ-sign on edge 0 needs an interior
-  -- foot bound the cap does not supply).  See final report.
-  by_cases hj0 : (j : ℕ) = 0
-  · sorry
-  · exact disjoint_sectorPlus_endCapSrcMinus β ρ j hj1 (hbudsrc j hj0)
-      (hbudsrc ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ 0; omega))
-
-/-- **sector⁺ ↔ target `−` cap, all sector indices (δ₀-tube model).** -/
-theorem disjoint_sectorPlus_endCapTgtMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δ₀ : ℝ}
-    (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
-      ρ (Fin.last β.numSegs) + δ₀
-        ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) :
-    Disjoint (sectorPlus β δ₀ j hj1) (endCapTgtMinus β ρ) := by
-  -- §9 UNION REWORK: as `disjoint_endCapTgtPlus_sectorMinus_all`.  `j+1 ≠ numSegs−1` via
-  -- the leaf (both budgets from `hbudtgt`); `j+1 = numSegs−1` BLOCKED (σ-sign on `lastSeg`
-  -- needs an interior foot bound the cap does not supply).  See final report.
-  by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
-  · sorry
-  · refine disjoint_sectorPlus_endCapTgtMinus β ρ j hj1 (hbudtgt j (by omega)) ?_
-    exact hbudtgt ⟨(j : ℕ) + 1, hj1⟩ (by show (j : ℕ) + 1 ≠ β.numSegs - 1; exact hjlast)
 
 /-! #### P3 disjointness — clipped sector aggregators (collar-facing union model).
 
@@ -4977,7 +4818,28 @@ edge separation at width `δsep` dominating both `δ₀` and every disk radius),
 `hballs` (pairwise-disjoint vertex/endpoint disks), and `hbudsrc`/`hbudtgt` (endpoint disks
 separated from non-incident edges). -/
 theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α δsep : ℝ}
-    (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
+    (r : Fin β.numSegs → ℝ)
+    (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
+      Metric.infDist z (β.segCarrier e) < δ₀ →
+      Metric.infDist z (β.segCarrier ⟨(e : ℕ) + 1, he1⟩) < δ₀ →
+      dist z (β.verts (Fin.succ e)) < r e)
+    (hLr : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs),
+      (|(β.segTgt e).1 - (β.segSrc e).1| + |(β.segTgt e).2 - (β.segSrc e).2|)
+          / dotp (β.segTgt e - β.segSrc e) (β.segTgt e - β.segSrc e) * r e ≤ α ∧
+      (|(β.segTgt ⟨(e : ℕ) + 1, he1⟩).1 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).1|
+          + |(β.segTgt ⟨(e : ℕ) + 1, he1⟩).2 - (β.segSrc ⟨(e : ℕ) + 1, he1⟩).2|)
+          / dotp (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩)
+                 (β.segTgt ⟨(e : ℕ) + 1, he1⟩ - β.segSrc ⟨(e : ℕ) + 1, he1⟩) * r e ≤ α)
+    (hballSrc : (|(β.segTgt β.firstSeg).1 - (β.segSrc β.firstSeg).1|
+        + |(β.segTgt β.firstSeg).2 - (β.segSrc β.firstSeg).2|)
+        / dotp (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
+               (β.segTgt β.firstSeg - β.segSrc β.firstSeg) * ρ 0 ≤ α)
+    (hballTgt : (|(β.segTgt β.lastSeg).1 - (β.segSrc β.lastSeg).1|
+        + |(β.segTgt β.lastSeg).2 - (β.segSrc β.lastSeg).2|)
+        / dotp (β.segTgt β.lastSeg - β.segSrc β.lastSeg)
+               (β.segTgt β.lastSeg - β.segSrc β.lastSeg) * ρ (Fin.last β.numSegs) ≤ α)
+    (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
       Metric.infDist z (β.segCarrier b) < δsep → False)
@@ -5028,7 +4890,7 @@ theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ 
       exact Set.disjoint_left.mp
         (disjoint_bandStripPlus_sectorMinus_all β hα hδ₀sep hsep hadj_tgt hadj_src
           hτ hδin hδout i k hk1)
-        hpi hmk
+        hpi (sectorMinusClipped_subset_sectorMinus β δ₀ α k hk1 hmk)
     · exact Set.disjoint_left.mp
         (disjoint_endCapSrcMinus_bandStripPlus_all β ρ hbudsrc i).symm hpi hm
     · exact Set.disjoint_left.mp
@@ -5039,21 +4901,22 @@ theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ 
       exact Set.disjoint_left.mp
         (disjoint_sectorPlus_bandStripMinus_all β hα hδ₀sep hsep hadj_tgt hadj_src
           hτ hδin hδout k j hj1)
-        hpj hmk
+        (sectorPlusClipped_subset_sectorPlus β δ₀ α j hj1 hpj) hmk
     · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
       exact Set.disjoint_left.mp
-        (disjoint_sectorPlus_sectorMinus_all β hδ₀sep hsep hτ j k hj1 hk1) hpj hmk
+        (disjoint_sectorPlusClipped_sectorMinusClipped_all β hα hδ₀sep hsep hτ r hconf hLr
+          hδout hδin j k hj1 hk1) hpj hmk
     · exact Set.disjoint_left.mp
-        (disjoint_sectorPlus_endCapSrcMinus_all β ρ hbudsrc j hj1) hpj hm
+        (disjoint_sectorPlusClipped_endCapSrcMinus_all β ρ hα hbudsrc hballSrc j hj1) hpj hm
     · exact Set.disjoint_left.mp
-        (disjoint_sectorPlus_endCapTgtMinus_all β ρ hbudtgt j hj1) hpj hm
+        (disjoint_sectorPlusClipped_endCapTgtMinus_all β ρ hα hbudtgt hballTgt j hj1) hpj hm
   · rcases hM with ((hm | hm) | hm) | hm
     · obtain ⟨k, hmk⟩ := Set.mem_iUnion.mp hm
       exact Set.disjoint_left.mp
         (disjoint_endCapSrcPlus_bandStripMinus_all β ρ hbudsrc k) hp hmk
     · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
       exact Set.disjoint_left.mp
-        (disjoint_endCapSrcPlus_sectorMinus_all β ρ hbudsrc k hk1) hp hmk
+        (disjoint_endCapSrcPlus_sectorMinusClipped_all β ρ hα hbudsrc hballSrc k hk1) hp hmk
     · exact Set.disjoint_left.mp (disjoint_endCapSrcPlus_endCapSrcMinus β ρ) hp hm
     · exact Set.disjoint_left.mp
         (disjoint_endCapSrc_endCapTgt β ρ (hballs 0 (Fin.last β.numSegs) h0last)) hp hm
@@ -5063,7 +4926,7 @@ theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ 
         (disjoint_endCapTgtPlus_bandStripMinus_all β ρ hbudtgt k) hp hmk
     · obtain ⟨k, hk1, hmk⟩ := Set.mem_iUnion₂.mp hm
       exact Set.disjoint_left.mp
-        (disjoint_endCapTgtPlus_sectorMinus_all β ρ hbudtgt k hk1) hp hmk
+        (disjoint_endCapTgtPlus_sectorMinusClipped_all β ρ hα hbudtgt hballTgt k hk1) hp hmk
     · exact Set.disjoint_left.mp
         (disjoint_endCapSrcMinus_endCapTgtPlus β ρ (hballs 0 (Fin.last β.numSegs) h0last)).symm
         hp hm
@@ -5431,7 +5294,7 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
     (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
       cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
     (c : Fin β.numSegs) :
-    ∃ δ : ℝ, 0 < δ ∧ ∀ (hc1 : (c : ℕ) + 1 < β.numSegs) (δ₀ : ℝ), 0 < δ₀ → δ₀ ≤ δ →
+    ∃ (δ r : ℝ), 0 < δ ∧ ∀ (hc1 : (c : ℕ) + 1 < β.numSegs) (δ₀ : ℝ), 0 < δ₀ → δ₀ ≤ δ →
       (∀ z : Plane, z ∈ edgeBandMid (β.segSrc c) (β.segTgt c) α →
         Metric.infDist z (β.segCarrier c) < δ₀ →
         Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ → False) ∧
@@ -5448,7 +5311,16 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
               + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segTgt c).2|) * δ₀
         < |sideForm (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩)|
           * (α * dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c)
-                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c))) := by
+                     (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segTgt c))) ∧
+      (∀ z : Plane, Metric.infDist z (β.segCarrier c) < δ₀ →
+        Metric.infDist z (β.segCarrier ⟨(c : ℕ) + 1, hc1⟩) < δ₀ →
+        dist z (β.verts (Fin.succ c)) < r) ∧
+      (|(β.segTgt c).1 - (β.segSrc c).1| + |(β.segTgt c).2 - (β.segSrc c).2|)
+          / dotp (β.segTgt c - β.segSrc c) (β.segTgt c - β.segSrc c) * r ≤ α ∧
+      (|(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).1 - (β.segSrc ⟨(c : ℕ) + 1, hc1⟩).1|
+          + |(β.segTgt ⟨(c : ℕ) + 1, hc1⟩).2 - (β.segSrc ⟨(c : ℕ) + 1, hc1⟩).2|)
+          / dotp (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segSrc ⟨(c : ℕ) + 1, hc1⟩)
+                 (β.segTgt ⟨(c : ℕ) + 1, hc1⟩ - β.segSrc ⟨(c : ℕ) + 1, hc1⟩) * r ≤ α := by
   by_cases hc1 : (c : ℕ) + 1 < β.numSegs
   · have hva : β.segTgt c ≠ β.segSrc c := β.segTgt_ne_segSrc c
     have hcc1 : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segSrc ⟨(c : ℕ) + 1, hc1⟩ :=
@@ -5506,7 +5378,7 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
     have hKδout : Kout * (Mout / (Kout + 1)) < Mout := by
       rw [← mul_div_assoc, div_lt_iff₀ (by linarith : (0 : ℝ) < Kout + 1)]
       nlinarith [hMoutpos, hKoutnn]
-    refine ⟨min δconf (min (Min / (Kin + 1)) (Mout / (Kout + 1))),
+    refine ⟨min δconf (min (Min / (Kin + 1)) (Mout / (Kout + 1))), r,
       lt_min hδconfpos (lt_min (div_pos hMinpos (by linarith)) (div_pos hMoutpos (by linarith))),
       ?_⟩
     intro hc1' δ₀ h0 hle
@@ -5515,7 +5387,7 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
       le_trans hle (le_trans (min_le_right _ _) (min_le_left _ _))
     have hleout : δ₀ ≤ Mout / (Kout + 1) :=
       le_trans hle (le_trans (min_le_right _ _) (min_le_right _ _))
-    refine ⟨?_, ?_, ?_, ?_⟩
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · intro z hmid hzi hzi1
       refine not_mem_adjacent_band_strip β c hc1 (fun w hwi hwi1 =>
         hconf w (lt_of_lt_of_le hwi hleconf) (lt_of_lt_of_le hwi1 hleconf)) ?_ hmid hzi hzi1
@@ -5528,7 +5400,11 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
       exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left hlein hKinnn) hKδin
     · rw [← hKoutdef, ← hMoutdef]
       exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left hleout hKoutnn) hKδout
-  · exact ⟨1, one_pos, fun h => absurd h hc1⟩
+    · intro z hzi hzi1
+      exact hconf z (lt_of_lt_of_le hzi hleconf) (lt_of_lt_of_le hzi1 hleconf)
+    · exact hLcr
+    · exact hLc1r
+  · exact ⟨1, 1, one_pos, fun h => absurd h hc1⟩
 
 /-! #### P3 existence — the global assembly.
 
@@ -5546,7 +5422,7 @@ theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα 
     ∃ (δ₀ : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ), 0 < δ₀ ∧ (∀ p, 0 < ρ p) ∧
       Disjoint (collarPlus β R S δ₀ α ρ) (collarMinus β R S δ₀ α ρ) := by
   classical
-  choose δfun hδfunpos hδfunprop using exists_corner_delta β hα hturn
+  choose δfun rfun hδfunpos hδfunprop using exists_corner_delta β hα hturn
   obtain ⟨δsep, hδseppos, hsep⟩ := exists_delta_nonadjacent_tube_sep β
   obtain ⟨ρ₀, hρ₀pos, hballs0⟩ := exists_pos_disk_radius β
   obtain ⟨dsrc, hdsrcpos, hsrcsep⟩ := exists_pos_src_edge_sep β
@@ -5556,26 +5432,60 @@ theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα 
   set δcorner := Finset.univ.inf' hne δfun with hδcdef
   have hδcornerpos : 0 < δcorner := by
     rw [hδcdef, Finset.lt_inf'_iff]; exact fun c _ => hδfunpos c
-  set M5 := min δcorner (min δsep (min (dsrc / 2) (min (dtgt / 2) ρ₀))) with hM5def
+  set LfirstSeg := (|(β.segTgt β.firstSeg).1 - (β.segSrc β.firstSeg).1|
+      + |(β.segTgt β.firstSeg).2 - (β.segSrc β.firstSeg).2|)
+      / dotp (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
+             (β.segTgt β.firstSeg - β.segSrc β.firstSeg) with hLfsdef
+  set LlastSeg := (|(β.segTgt β.lastSeg).1 - (β.segSrc β.lastSeg).1|
+      + |(β.segTgt β.lastSeg).2 - (β.segSrc β.lastSeg).2|)
+      / dotp (β.segTgt β.lastSeg - β.segSrc β.lastSeg)
+             (β.segTgt β.lastSeg - β.segSrc β.lastSeg) with hLlsdef
+  have hLfspos : 0 < LfirstSeg :=
+    div_pos (segDir_l1_pos β β.firstSeg) (dotp_self_pos (β.segTgt_ne_segSrc β.firstSeg))
+  have hLlspos : 0 < LlastSeg :=
+    div_pos (segDir_l1_pos β β.lastSeg) (dotp_self_pos (β.segTgt_ne_segSrc β.lastSeg))
+  set M5 := min δcorner (min δsep (min (dsrc / 2) (min (dtgt / 2)
+      (min ρ₀ (min (α / LfirstSeg) (α / LlastSeg)))))) with hM5def
   have hM5pos : 0 < M5 := by
     rw [hM5def]
     exact lt_min hδcornerpos (lt_min hδseppos
-      (lt_min (by linarith) (lt_min (by linarith) hρ₀pos)))
+      (lt_min (by linarith) (lt_min (by linarith)
+        (lt_min hρ₀pos (lt_min (div_pos hα hLfspos) (div_pos hα hLlspos))))))
   have h1 : M5 ≤ δcorner := min_le_left _ _
   have h2 : M5 ≤ δsep := le_trans (min_le_right _ _) (min_le_left _ _)
   have h3 : M5 ≤ dsrc / 2 :=
     le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
   have h4 : M5 ≤ dtgt / 2 := le_trans (min_le_right _ _)
     (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))
-  have h5 : M5 ≤ ρ₀ := le_trans (min_le_right _ _)
-    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
+  have h5 : M5 ≤ ρ₀ := le_trans (min_le_right _ _) (le_trans (min_le_right _ _)
+    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))))
+  have h6 : M5 ≤ α / LfirstSeg := le_trans (min_le_right _ _) (le_trans (min_le_right _ _)
+    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _)
+      (le_trans (min_le_right _ _) (min_le_left _ _)))))
+  have h7 : M5 ≤ α / LlastSeg := le_trans (min_le_right _ _) (le_trans (min_le_right _ _)
+    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _)
+      (le_trans (min_le_right _ _) (min_le_right _ _)))))
   refine ⟨M5 / 2, fun _ => M5 / 2, by linarith, fun _ => by linarith, ?_⟩
   have ht_δfun : ∀ c : Fin β.numSegs, M5 / 2 ≤ δfun c := by
     intro c
     have : δcorner ≤ δfun c := Finset.inf'_le δfun (Finset.mem_univ c)
     linarith
   have ht_pos : (0 : ℝ) < M5 / 2 := by linarith
-  refine disjoint_collarPlus_collarMinus β R S (fun _ => M5 / 2) hα (by linarith)
+  refine disjoint_collarPlus_collarMinus β R S (fun _ => M5 / 2) hα
+    rfun
+    (fun e he1 {z} hzi hzi1 =>
+      (hδfunprop e he1 (M5 / 2) ht_pos (ht_δfun e)).2.2.2.2.1 z hzi hzi1)
+    (fun e he1 => ⟨(hδfunprop e he1 (M5 / 2) ht_pos (ht_δfun e)).2.2.2.2.2.1,
+      (hδfunprop e he1 (M5 / 2) ht_pos (ht_δfun e)).2.2.2.2.2.2⟩)
+    (by
+      rw [← hLfsdef]
+      have hmul : M5 * LfirstSeg ≤ α := (le_div_iff₀ hLfspos).mp h6
+      nlinarith [hLfspos, hM5pos, hmul])
+    (by
+      rw [← hLlsdef]
+      have hmul : M5 * LlastSeg ≤ α := (le_div_iff₀ hLlspos).mp h7
+      nlinarith [hLlspos, hM5pos, hmul])
+    (by linarith)
     hsep
     (fun c hc1 z hmid hzi hzi1 =>
       (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).1 z hmid hzi hzi1)
@@ -5583,7 +5493,7 @@ theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα 
       (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.1 z hmid hzi hzi1)
     hturn
     (fun c hc1 => (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.2.1)
-    (fun c hc1 => (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.2.2)
+    (fun c hc1 => (hδfunprop c hc1 (M5 / 2) ht_pos (ht_δfun c)).2.2.2.1)
     (fun p q hpq => (hballs0 p q hpq).mono
       (Metric.ball_subset_ball (by linarith)) (Metric.ball_subset_ball (by linarith)))
     (fun i hi => by have := hsrcsep i hi; linarith)
@@ -6893,7 +6803,7 @@ its *successor* connector makes the links overlap consecutively. -/
 noncomputable def collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
   bandStripPlus β α δ₀ i
-    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
     ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtPlus β ρ)
     ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcPlus β ρ)
 
@@ -6901,7 +6811,7 @@ noncomputable def collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → 
 theorem iUnion_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
     (⋃ i, collarChainPlus β ρ δ₀ α i)
       = (⋃ i, bandStripPlus β α δ₀ i)
-        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
         ∪ endCapSrcPlus β ρ ∪ endCapTgtPlus β ρ := by
   ext z
   simp only [collarChainPlus, Set.mem_union, Set.mem_iUnion, exists_prop]
@@ -6938,10 +6848,11 @@ theorem iUnion_prop_pos {α : Type*} {P : Prop} (hP : P) (s : P → Set α) :
 /-- Each positive chain link is preconnected: band `i` together with its (nonempty) connector
 and (nonempty) source cap, each of which meets band `i`. -/
 theorem isPreconnected_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+    (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
     (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorPlus β δ₀ i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
+      (sectorPlusClipped β δ₀ α i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
     (hO3 : (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty)
     (hO4 : (endCapTgtPlus β ρ ∩ bandStripPlus β α δ₀ β.lastSeg).Nonempty)
     (i : Fin β.numSegs) : IsPreconnected (collarChainPlus β ρ δ₀ α i) := by
@@ -6949,19 +6860,19 @@ theorem isPreconnected_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1)
   have hband : IsPreconnected (bandStripPlus β α δ₀ i) :=
     (convex_bandStripPlus β α δ₀ i).isPreconnected
   have hS : IsPreconnected (bandStripPlus β α δ₀ i
-      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1) := by
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1) := by
     refine isPreconnected_union_opt hband ?_ ?_
     · intro hne
       obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
       rw [iUnion_prop_pos hi1]
-      exact isPreconnected_sectorPlus β δ₀ i hi1 (hturn i hi1)
+      exact isPreconnected_sectorPlusClipped β δ₀ α i hi1 hα hα1 (hturn i hi1)
     · intro hne
       obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
       rw [iUnion_prop_pos hi1]
       obtain ⟨y, hy⟩ := hO1 i hi1
       exact ⟨y, hy.2, hy.1⟩
   have hST : IsPreconnected ((bandStripPlus β α δ₀ i
-      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
       ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtPlus β ρ) := by
     refine isPreconnected_union_opt hS ?_ ?_
     · intro hne
@@ -7000,19 +6911,19 @@ then the positive collar is preconnected.  This is the actual collar shape used 
 `collarPlus`: the end caps stay clipped by the ground set instead of being forced into an
 unsatisfiable global subset hypothesis. -/
 theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
-    (ρ : Fin (β.numSegs + 1) → ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
     (hbandW : ∀ i : Fin β.numSegs,
       bandStripPlus β α δ₀ i ⊆ taperedTube R S δ₀ \ β.carrier)
     (hsectorW : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      sectorPlus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
+      sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hSrcPre : IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapSrcPlus β ρ))
     (hTgtPre : IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapTgtPlus β ρ))
     (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorPlus β δ₀ i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
+      (sectorPlusClipped β δ₀ α i hi1 ∩ bandStripPlus β α δ₀ i).Nonempty)
     (hO2 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorPlus β δ₀ i hi1 ∩ bandStripPlus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
+      (sectorPlusClipped β δ₀ α i hi1 ∩ bandStripPlus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
     (hO3 : (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty)
     (hO4 : (endCapTgtPlus β ρ ∩ bandStripPlus β α δ₀ β.lastSeg).Nonempty) :
     IsPreconnected (collarPlus β R S δ₀ α ρ) := by
@@ -7022,8 +6933,8 @@ theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : �
     have hbandEq : W ∩ bandStripPlus β α δ₀ i = bandStripPlus β α δ₀ i := by
       exact Set.inter_eq_right.mpr (by simpa [W] using hbandW i)
     have hsectorEq :
-        W ∩ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1
-          = ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1 := by
+        W ∩ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1
+          = ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1 := by
       ext z
       constructor
       · intro hz
@@ -7055,7 +6966,7 @@ theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : �
     have hchain :
         W ∩ collarChainPlus β ρ δ₀ α i
           = bandStripPlus β α δ₀ i
-              ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+              ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
               ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), W ∩ endCapTgtPlus β ρ)
               ∪ (⋃ (_ : (i : ℕ) = 0), W ∩ endCapSrcPlus β ρ) := by
       rw [collarChainPlus]
@@ -7065,19 +6976,19 @@ theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : �
     have hbandPre : IsPreconnected (bandStripPlus β α δ₀ i) :=
       (convex_bandStripPlus β α δ₀ i).isPreconnected
     have hS : IsPreconnected (bandStripPlus β α δ₀ i
-        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1) := by
+        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1) := by
       refine isPreconnected_union_opt hbandPre ?_ ?_
       · intro hne
         obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
         rw [iUnion_prop_pos hi1]
-        exact isPreconnected_sectorPlus β δ₀ i hi1 (hturn i hi1)
+        exact isPreconnected_sectorPlusClipped β δ₀ α i hi1 hα hα1 (hturn i hi1)
       · intro hne
         obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
         rw [iUnion_prop_pos hi1]
         obtain ⟨y, hy⟩ := hO1 i hi1
         exact ⟨y, hy.2, hy.1⟩
     have hST : IsPreconnected ((bandStripPlus β α δ₀ i
-        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlus β δ₀ i hi1)
+        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
         ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), W ∩ endCapTgtPlus β ρ) := by
       refine isPreconnected_union_opt hS ?_ ?_
       · intro hne
@@ -9678,14 +9589,14 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_sliver_budget
 noncomputable def collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
   bandStripMinus β α δ₀ i
-    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+    ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
     ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtMinus β ρ)
     ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcMinus β ρ)
 
 theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
     (⋃ i, collarChainMinus β ρ δ₀ α i)
       = (⋃ i, bandStripMinus β α δ₀ i)
-        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+        ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
         ∪ endCapSrcMinus β ρ ∪ endCapTgtMinus β ρ := by
   ext z
   simp only [collarChainMinus, Set.mem_union, Set.mem_iUnion, exists_prop]
@@ -9705,10 +9616,11 @@ theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → �
       omega
 
 theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+    (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
     (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorMinus β δ₀ i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
+      (sectorMinusClipped β δ₀ α i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
     (hO3 : (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty)
     (hO4 : (endCapTgtMinus β ρ ∩ bandStripMinus β α δ₀ β.lastSeg).Nonempty)
     (i : Fin β.numSegs) : IsPreconnected (collarChainMinus β ρ δ₀ α i) := by
@@ -9716,19 +9628,19 @@ theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1
   have hband : IsPreconnected (bandStripMinus β α δ₀ i) :=
     (convex_bandStripMinus β α δ₀ i).isPreconnected
   have hS : IsPreconnected (bandStripMinus β α δ₀ i
-      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1) := by
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1) := by
     refine isPreconnected_union_opt hband ?_ ?_
     · intro hne
       obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
       rw [iUnion_prop_pos hi1]
-      exact isPreconnected_sectorMinus β δ₀ i hi1 (hturn i hi1)
+      exact isPreconnected_sectorMinusClipped β δ₀ α i hi1 hα hα1 (hturn i hi1)
     · intro hne
       obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
       rw [iUnion_prop_pos hi1]
       obtain ⟨y, hy⟩ := hO1 i hi1
       exact ⟨y, hy.2, hy.1⟩
   have hST : IsPreconnected ((bandStripMinus β α δ₀ i
-      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+      ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
       ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtMinus β ρ) := by
     refine isPreconnected_union_opt hS ?_ ?_
     · intro hne
@@ -9765,19 +9677,19 @@ theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1
 and vertex sectors lie in the ground set and the two clipped negative end caps are
 preconnected. -/
 theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
-    (ρ : Fin (β.numSegs + 1) → ℝ)
+    (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
     (hbandW : ∀ i : Fin β.numSegs,
       bandStripMinus β α δ₀ i ⊆ taperedTube R S δ₀ \ β.carrier)
     (hsectorW : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      sectorMinus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
+      sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hSrcPre : IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapSrcMinus β ρ))
     (hTgtPre : IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapTgtMinus β ρ))
     (hO1 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorMinus β δ₀ i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
+      (sectorMinusClipped β δ₀ α i hi1 ∩ bandStripMinus β α δ₀ i).Nonempty)
     (hO2 : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
-      (sectorMinus β δ₀ i hi1 ∩ bandStripMinus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
+      (sectorMinusClipped β δ₀ α i hi1 ∩ bandStripMinus β α δ₀ ⟨(i : ℕ) + 1, hi1⟩).Nonempty)
     (hO3 : (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty)
     (hO4 : (endCapTgtMinus β ρ ∩ bandStripMinus β α δ₀ β.lastSeg).Nonempty) :
     IsPreconnected (collarMinus β R S δ₀ α ρ) := by
@@ -9787,8 +9699,8 @@ theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : 
     have hbandEq : W ∩ bandStripMinus β α δ₀ i = bandStripMinus β α δ₀ i := by
       exact Set.inter_eq_right.mpr (by simpa [W] using hbandW i)
     have hsectorEq :
-        W ∩ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1
-          = ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1 := by
+        W ∩ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1
+          = ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1 := by
       ext z
       constructor
       · intro hz
@@ -9820,7 +9732,7 @@ theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : 
     have hchain :
         W ∩ collarChainMinus β ρ δ₀ α i
           = bandStripMinus β α δ₀ i
-              ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+              ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
               ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), W ∩ endCapTgtMinus β ρ)
               ∪ (⋃ (_ : (i : ℕ) = 0), W ∩ endCapSrcMinus β ρ) := by
       rw [collarChainMinus]
@@ -9830,19 +9742,19 @@ theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : 
     have hbandPre : IsPreconnected (bandStripMinus β α δ₀ i) :=
       (convex_bandStripMinus β α δ₀ i).isPreconnected
     have hS : IsPreconnected (bandStripMinus β α δ₀ i
-        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1) := by
+        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1) := by
       refine isPreconnected_union_opt hbandPre ?_ ?_
       · intro hne
         obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
         rw [iUnion_prop_pos hi1]
-        exact isPreconnected_sectorMinus β δ₀ i hi1 (hturn i hi1)
+        exact isPreconnected_sectorMinusClipped β δ₀ α i hi1 hα hα1 (hturn i hi1)
       · intro hne
         obtain ⟨hi1, -⟩ := Set.nonempty_iUnion.mp hne
         rw [iUnion_prop_pos hi1]
         obtain ⟨y, hy⟩ := hO1 i hi1
         exact ⟨y, hy.2, hy.1⟩
     have hST : IsPreconnected ((bandStripMinus β α δ₀ i
-        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinus β δ₀ i hi1)
+        ∪ ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
         ∪ ⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), W ∩ endCapTgtMinus β ρ) := by
       refine isPreconnected_union_opt hS ?_ ?_
       · intro hne
@@ -10247,36 +10159,6 @@ P5 is reproved for `collarPlus`/`collarMinus` *as defined* (keeping the
 is recorded here; the end caps stay clipped and are handled by a dedicated
 preconnectedness lemma. -/
 
-/-- **Sector containment.**  A positive vertex sector sits inside the tapered tube: every
-point is within `ρ (Fin.succ i)` of the interior vertex `verts (i+1) ∈ S`, and that radius
-is below the tube's per-point radius `min δ₀ (½·infDist · Rᶜ)` at that vertex. -/
-theorem sectorPlus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ)
-    (ρ : Fin (β.numSegs + 1) → ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorPlus β δ₀ i hi1 ⊆ taperedTube R S δ₀ := by
-  -- §9 UNION REWORK: the old proof used the sector's vertex ball (`hz.2 : z ∈ ball v (ρ …)`),
-  -- gone under the union.  Now `hz.2 : z ∈ stripSupport i ∪ stripSupport (i+1)` (δ₀-close to an
-  -- incident edge, NOT necessarily the vertex), so route through the strip exactly like
-  -- `bandStripPlus_subset_taperedTube` (the tube already contains δ₀-neighbourhoods of the
-  -- incident edges); the vertex-ball budgets `hρδ`/`hρR` become unnecessary.
-  sorry
-
-/-- **Sector containment (negative side).** -/
-theorem sectorMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ)
-    (ρ : Fin (β.numSegs + 1) → ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorMinus β δ₀ i hi1 ⊆ taperedTube R S δ₀ := by
-  -- §9 UNION REWORK: the old proof used the sector's vertex ball (`hz.2 : z ∈ ball v (ρ …)`),
-  -- gone under the union.  Now `hz.2 : z ∈ stripSupport i ∪ stripSupport (i+1)` (δ₀-close to an
-  -- incident edge, NOT necessarily the vertex), so route through the strip exactly like
-  -- `bandStripPlus_subset_taperedTube` (the tube already contains δ₀-neighbourhoods of the
-  -- incident edges); the vertex-ball budgets `hρδ`/`hρR` become unnecessary.
-  sorry
-
 /-- **Clipped sector containment (positive side).**  Each clipped arm routes through its
 carrier foot-point exactly like `bandStripPlus_subset_taperedTube`, but with an ASYMMETRIC
 safe window.  The incoming arm (edge `i`, clipped `α < foot`) admits foot-points in
@@ -10640,94 +10522,6 @@ theorem bandStripMinus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ
       exact hadj_tgt i hi1 z hz.1.1 hki (by simpa [hkeq] using hkδ₀)
     · exact hsep i k hfar z hiδ hkδ
 
-/-- **Sector containment off the carrier (positive side).**
-
-The sector's own two incident segments are excluded because `vertexPlus` is one of
-the two open corner sectors, both disjoint from those segments. Any nonincident edge
-is separated from the sector's vertex ball by `disjoint_stripSupport_vertexBall_nonincident`. -/
-theorem sectorPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δsep : ℝ} (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
-      Metric.infDist w (β.segCarrier a) < δsep →
-      Metric.infDist w (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
-    sectorPlus β δ₀ i hi1 ⊆ (β.carrier)ᶜ := by
-  intro z hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
-  rintro ⟨k, hzk⟩
-  have hzU :
-      z ∈ convexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
-        ∪ reflexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := by
-    rw [sectorPlus] at hz
-    rw [vertexPlus] at hz
-    split_ifs at hz
-    · exact Or.inl hz.1
-    · exact Or.inr hz.1
-  by_cases hki : (k : ℕ) = (i : ℕ)
-  · have hkeq : k = i := Fin.ext hki
-    rw [hkeq, PolyArc.segCarrier] at hzk
-    exact (segment_av_subset_compl_sectors
-      (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
-  · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
-    · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
-      rw [hkeq, PolyArc.segCarrier] at hzk
-      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
-        Fin.ext (by simp [Fin.val_succ])
-      have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
-        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
-      rw [hcs] at hzk
-      exact (segment_vb_subset_compl_sectors
-        (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
-    · -- §9 UNION REWORK: `k ∉ {i, i+1}` carries `z`, and `z` is in the union sector's two
-      -- arm strips (`hz.2 : z ∈ stripSupport i ∪ stripSupport (i+1)`).  The old proof
-      -- separated the sector's vertex ball from edge `k`; now separate the ARM STRIPS from
-      -- edge `k` via `disjoint_stripSupport_nonadjacent`, routing through whichever arm is
-      -- non-adjacent to `k` (band foot-margin / σ-sign for the adjacent-arm sub-case).
-      sorry
-
-/-- **Sector containment off the carrier (negative side).** -/
-theorem sectorMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
-    {δsep : ℝ} (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
-      Metric.infDist w (β.segCarrier a) < δsep →
-      Metric.infDist w (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
-    sectorMinus β δ₀ i hi1 ⊆ (β.carrier)ᶜ := by
-  intro z hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
-  rintro ⟨k, hzk⟩
-  have hzU :
-      z ∈ convexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
-        ∪ reflexSector (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) := by
-    rw [sectorMinus] at hz
-    rw [vertexMinus] at hz
-    split_ifs at hz
-    · exact Or.inr hz.1
-    · exact Or.inl hz.1
-  by_cases hki : (k : ℕ) = (i : ℕ)
-  · have hkeq : k = i := Fin.ext hki
-    rw [hkeq, PolyArc.segCarrier] at hzk
-    exact (segment_av_subset_compl_sectors
-      (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
-  · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
-    · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
-      rw [hkeq, PolyArc.segCarrier] at hzk
-      have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
-        Fin.ext (by simp [Fin.val_succ])
-      have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
-        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
-      rw [hcs] at hzk
-      exact (segment_vb_subset_compl_sectors
-        (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
-    · -- §9 UNION REWORK: `k ∉ {i, i+1}` carries `z`, and `z` is in the union sector's two
-      -- arm strips (`hz.2 : z ∈ stripSupport i ∪ stripSupport (i+1)`).  The old proof
-      -- separated the sector's vertex ball from edge `k`; now separate the ARM STRIPS from
-      -- edge `k` via `disjoint_stripSupport_nonadjacent`, routing through whichever arm is
-      -- non-adjacent to `k` (band foot-margin / σ-sign for the adjacent-arm sub-case).
-      sorry
-
 /-- **Clipped sector containment off the carrier (positive side).**
 
 The CLIP closes the non-incident `k ∉ {i, i+1}` case the unclipped `sectorPlus_subset_compl_carrier`
@@ -11019,40 +10813,6 @@ theorem bandStripMinus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set
   exact ⟨bandStripMinus_subset_taperedTube β R S δ₀ α i hα hsmall hS hR hz,
     bandStripMinus_subset_compl_carrier β hδ₀ hδ₀sep hsep hadj_tgt hadj_src i hz⟩
 
-/-- **Sector containment in the clipped collar ground set (positive side).** -/
-theorem sectorPlus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
-    (δ₀ : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
-    (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δsep →
-      Metric.infDist z (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorPlus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier := by
-  intro z hz
-  exact ⟨sectorPlus_subset_taperedTube β R S δ₀ ρ i hi1 hvS hρδ hρR hz,
-    sectorPlus_subset_compl_carrier β ρ hδsep hsep hρsep i hi1 hz⟩
-
-/-- **Sector containment in the clipped collar ground set (negative side).** -/
-theorem sectorMinus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
-    (δ₀ : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
-    (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δsep →
-      Metric.infDist z (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorMinus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier := by
-  intro z hz
-  exact ⟨sectorMinus_subset_taperedTube β R S δ₀ ρ i hi1 hvS hρδ hρR hz,
-    sectorMinus_subset_compl_carrier β ρ hδsep hsep hρsep i hi1 hz⟩
-
 /-- **Clipped sector containment in the collar ground set (positive side).**  Combines the
 clipped tube-containment (`sectorPlusClipped_subset_taperedTube`, window-style `S`/`R` data) with
 the clipped off-carrier lemma (`sectorPlusClipped_subset_compl_carrier`, confinement budget).  The
@@ -11152,8 +10912,8 @@ it in `collarPlus`. -/
 theorem sectorPlus_subset_collarPlus_of_subset_ground (β : PolyArc) (R S : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hground : sectorPlus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
-    sectorPlus β δ₀ i hi1 ⊆ collarPlus β R S δ₀ α ρ := by
+    (hground : sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ collarPlus β R S δ₀ α ρ := by
   intro z hz
   refine ⟨hground hz, ?_⟩
   refine Or.inl (Or.inl (Or.inr ?_))
@@ -11164,8 +10924,8 @@ in the negative collar side. -/
 theorem sectorMinus_subset_collarMinus_of_subset_ground (β : PolyArc) (R S : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hground : sectorMinus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
-    sectorMinus β δ₀ i hi1 ⊆ collarMinus β R S δ₀ α ρ := by
+    (hground : sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ collarMinus β R S δ₀ α ρ := by
   intro z hz
   refine ⟨hground hz, ?_⟩
   refine Or.inl (Or.inl (Or.inr ?_))
@@ -11177,8 +10937,8 @@ theorem sectorPlus_subset_of_collarPlus_subset (β : PolyArc) (R S U : Set Plane
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hPlusU : collarPlus β R S δ₀ α ρ ⊆ U)
-    (hground : sectorPlus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
-    sectorPlus β δ₀ i hi1 ⊆ U :=
+    (hground : sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorPlusClipped β δ₀ α i hi1 ⊆ U :=
   (sectorPlus_subset_collarPlus_of_subset_ground β R S δ₀ α ρ i hi1 hground).trans
     hPlusU
 
@@ -11188,46 +10948,10 @@ theorem sectorMinus_subset_of_collarMinus_subset (β : PolyArc) (R S V : Set Pla
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hMinusV : collarMinus β R S δ₀ α ρ ⊆ V)
-    (hground : sectorMinus β δ₀ i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
-    sectorMinus β δ₀ i hi1 ⊆ V :=
+    (hground : sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
+    sectorMinusClipped β δ₀ α i hi1 ⊆ V :=
   (sectorMinus_subset_collarMinus_of_subset_ground β R S δ₀ α ρ i hi1 hground).trans
     hMinusV
-
-/-- Positive vertex sectors are contained in `collarPlus` under the standard
-sliver-budget hypotheses. -/
-theorem sectorPlus_subset_collarPlus_of_sliver_budgets (β : PolyArc) (R S : Set Plane)
-    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
-    (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δsep →
-      Metric.infDist z (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorPlus β δ₀ i hi1 ⊆ collarPlus β R S δ₀ α ρ :=
-  sectorPlus_subset_collarPlus_of_subset_ground β R S δ₀ α ρ i hi1
-    (sectorPlus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep hsep hρsep
-      i hi1 hvS hρδ hρR)
-
-/-- Negative vertex sectors are contained in `collarMinus` under the standard
-sliver-budget hypotheses. -/
-theorem sectorMinus_subset_collarMinus_of_sliver_budgets (β : PolyArc) (R S : Set Plane)
-    (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ) {δsep : ℝ}
-    (hδsep : 0 < δsep)
-    (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
-      Metric.infDist z (β.segCarrier a) < δsep →
-      Metric.infDist z (β.segCarrier b) < δsep → False)
-    (hρsep : ∀ p : Fin (β.numSegs + 1), ρ p ≤ δsep)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
-    (hvS : β.verts (Fin.succ i) ∈ S)
-    (hρδ : ρ (Fin.succ i) ≤ δ₀)
-    (hρR : ρ (Fin.succ i) ≤ Metric.infDist (β.verts (Fin.succ i)) Rᶜ / 2) :
-    sectorMinus β δ₀ i hi1 ⊆ collarMinus β R S δ₀ α ρ :=
-  sectorMinus_subset_collarMinus_of_subset_ground β R S δ₀ α ρ i hi1
-    (sectorMinus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep hsep hρsep
-      i hi1 hvS hρδ hρR)
 
 /-- **Negative clipped-collar preconnectedness from sliver-budget end-cap inputs.**
 
@@ -11240,7 +10964,9 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
-    (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3) (hα1 : α < 1)
+    (hsectorW : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -11306,22 +11032,20 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)) :
     IsPreconnected (collarMinus β R S δ₀ α ρ) := by
   have hδsep : 0 < δsep := lt_of_lt_of_le hδ₀ hδ₀sep
-  refine isPreconnected_collarMinus β R S ρ hturn ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  refine isPreconnected_collarMinus β R S ρ hα hα1 hturn ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
   · intro i
     exact bandStripMinus_subset_taperedTube_diff_carrier β R S i hδ₀ hδ₀sep
       hsep hadj_tgt hadj_src hα (hsmall i) (hSband i) (hRband i)
-  · intro i hi1
-    exact sectorMinus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep
-      hsep hρsep i hi1 (hvertexS i) (hρδ i) (hρR i)
+  · exact hsectorW
   · exact isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_sliver_budget
       β R S ρ hSrcSep hSrcSpine hSrcNear hδ₀ hρ0 hSrcRpos hSrcSliver
   · exact isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_sliver_budget
       β R S ρ hTgtSep hTgtSpine hTgtNear hδ₀ hρL hTgtRpos hTgtSliver
   · intro i hi1
-    exact overlap_sectorMinus_bandStripMinus_src β ρ hδ₀ hα hα3 i hi1
+    exact overlap_sectorMinusClipped_bandStripMinus_src β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (htgt i)
   · intro i hi1
-    exact overlap_sectorMinus_bandStripMinus_tgt β ρ hδ₀ hα hα3 i hi1
+    exact overlap_sectorMinusClipped_bandStripMinus_tgt β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcMinus_bandStripMinus β ρ hδ₀ hα hα3
       (by simpa [PolyArc.firstSeg] using hsrc β.firstSeg)
@@ -11344,7 +11068,9 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
-    (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
+    (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3) (hα1 : α < 1)
+    (hsectorW : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
+      sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -11410,22 +11136,20 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)) :
     IsPreconnected (collarPlus β R S δ₀ α ρ) := by
   have hδsep : 0 < δsep := lt_of_lt_of_le hδ₀ hδ₀sep
-  refine isPreconnected_collarPlus β R S ρ hturn ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  refine isPreconnected_collarPlus β R S ρ hα hα1 hturn ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
   · intro i
     exact bandStripPlus_subset_taperedTube_diff_carrier β R S i hδ₀ hδ₀sep
       hsep hadj_tgt hadj_src hα (hsmall i) (hSband i) (hRband i)
-  · intro i hi1
-    exact sectorPlus_subset_taperedTube_diff_carrier β R S δ₀ ρ hδsep
-      hsep hρsep i hi1 (hvertexS i) (hρδ i) (hρR i)
+  · exact hsectorW
   · exact isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_sliver_budget
       β R S ρ hSrcSep hSrcSpine hSrcNear hδ₀ hρ0 hSrcRpos hSrcSliver
   · exact isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_sliver_budget
       β R S ρ hTgtSep hTgtSpine hTgtNear hδ₀ hρL hTgtRpos hTgtSliver
   · intro i hi1
-    exact overlap_sectorPlus_bandStripPlus_src β ρ hδ₀ hα hα3 i hi1
+    exact overlap_sectorPlusClipped_bandStripPlus_src β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (htgt i)
   · intro i hi1
-    exact overlap_sectorPlus_bandStripPlus_tgt β ρ hδ₀ hα hα3 i hi1
+    exact overlap_sectorPlusClipped_bandStripPlus_tgt β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcPlus_bandStripPlus β ρ hδ₀ hα hα3
       (by simpa [PolyArc.firstSeg] using hsrc β.firstSeg)
