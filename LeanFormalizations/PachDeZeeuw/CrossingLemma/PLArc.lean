@@ -3181,6 +3181,111 @@ theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
       · exact Or.inr ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hneg⟩⟩
       · exact Or.inl ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hpos⟩⟩
 
+/-- **P2 (union), single-segment (`numSegs = 1`) — `sorry`-free.**
+
+Identical to `union_collarPlus_collarMinus` but for a one-segment arc.  The general
+proof carries a `sorry` in its *interior-vertex disk* branch (the disk-cover rework is
+the open multi-segment obligation, `union_collarPlus_collarMinus` §9/§7.3).  For
+`numSegs = 1` there are **no** interior vertices, so that branch is vacuous: the disk
+disjunct demands a `j : Fin (β.numSegs + 1)` with `0 < (j : ℕ) < β.numSegs = 1`, which
+`omega` refutes.  Every other branch (band / source-endpoint / target-endpoint) is
+copied verbatim from the general proof, so this lemma's axiom closure is the Lean core
+only — feeding it (rather than the general lemma) is what keeps the single-segment
+two-sided-partition theorem `sorryAx`-free. -/
+theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolyArc) (h1 : β.numSegs = 1)
+    (R S : Set Plane)
+    (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
+    (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
+    {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
+    (hband : ∀ i : Fin β.numSegs,
+      (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|) * δ₀
+        < α * dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i))
+    (hsrc : ∀ i : Fin β.numSegs,
+      δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
+    (htgt : ∀ i : Fin β.numSegs,
+      δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
+    (hballSrc : ρ 0 ≤ dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg))
+    (hballTgt : ρ (Fin.last β.numSegs)
+      ≤ dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)) :
+    collarPlus β R S δ₀ α ρ ∪ collarMinus β R S δ₀ α ρ
+      = taperedTube R S δ₀ \ β.carrier := by
+  apply Set.Subset.antisymm
+  · exact Set.union_subset (fun _ hz => hz.1) (fun _ hz => hz.1)
+  · intro z hzG
+    obtain ⟨hzT, hzC⟩ := hzG
+    have hcov := taperedTube_subset_midBands_union_disks β R S hS hsrc0 hsrcL ρ
+      (by linarith : (0 : ℝ) < 2 * α)
+      (fun i => by rw [show 2 * α / 2 = α from by ring]; exact hband i)
+      hsrc htgt hzT
+    rcases hcov with ⟨i, hzb, hinfd⟩ | ⟨j, hj0, hjlt, hzball⟩
+      | ⟨hzball, hpinch⟩ | ⟨hzball, hpinch⟩
+    · -- band point
+      rw [show 2 * α / 2 = α from by ring] at hzb
+      have hts := β.segTgt_ne_segSrc i
+      have hbm : α < footParam (β.segSrc i) (β.segTgt i) z
+          ∧ footParam (β.segSrc i) (β.segTgt i) z < 1 - α := by
+        have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
+      have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨i, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        rw [← edgeBand_inter_sideForm_zero_eq_openSegment hts]
+        exact ⟨show footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo (0 : ℝ) 1 from
+          Set.mem_Ioo.mpr ⟨by linarith [hbm.1], by linarith [hbm.2]⟩, h0⟩
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · refine Or.inr ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ ?_))⟩
+        exact Set.mem_iUnion.mpr ⟨i, ⟨hzb, hneg⟩, hinfd⟩
+      · refine Or.inl ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ ?_))⟩
+        exact Set.mem_iUnion.mpr ⟨i, ⟨hzb, hpos⟩, hinfd⟩
+    · -- interior-vertex disk: VACUOUS for `numSegs = 1` (no `0 < j < 1`).
+      exact absurd hjlt (by omega)
+    · -- source endpoint
+      have hfs : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) = β.firstSeg := rfl
+      rw [hfs] at hpinch
+      have hts := β.segTgt_ne_segSrc β.firstSeg
+      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+      have hsf0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        apply mem_openSegment_of_sideForm_zero_ball hts h0 hpinch
+        have hd : dist z (β.segSrc β.firstSeg) < ρ 0 := by
+          rw [hsv]; exact Metric.mem_ball.mp hzball
+        exact lt_of_lt_of_le hd hballSrc
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · exact Or.inr ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hneg⟩)⟩
+      · exact Or.inl ⟨⟨hzT, hzC⟩,
+          Set.mem_union_left _ (Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hpos⟩)⟩
+    · -- target endpoint
+      have hls : (⟨β.numSegs - 1, by have := β.numSegs_pos; omega⟩ : Fin β.numSegs)
+          = β.lastSeg := rfl
+      rw [hls] at hpinch
+      have hts := β.segTgt_ne_segSrc β.lastSeg
+      have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
+        rw [PolyArc.segTgt]; congr 1
+        apply Fin.ext
+        simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+      have hsf0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z ≠ 0 := by
+        intro h0
+        apply hzC; rw [PolyArc.carrier]
+        refine Set.mem_iUnion.mpr ⟨β.lastSeg, ?_⟩
+        rw [PolyArc.segCarrier]
+        apply openSegment_subset_segment ℝ _ _
+        apply mem_openSegment_of_sideForm_zero_ball' hts h0 hpinch
+        have hd : dist z (β.segTgt β.lastSeg) < ρ (Fin.last β.numSegs) := by
+          rw [htv]; exact Metric.mem_ball.mp hzball
+        exact lt_of_lt_of_le hd hballTgt
+      rcases lt_or_gt_of_ne hsf0 with hneg | hpos
+      · exact Or.inr ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hneg⟩⟩
+      · exact Or.inl ⟨⟨hzT, hzC⟩, Set.mem_union_right _ ⟨⟨hzball, hpinch⟩, hpos⟩⟩
+
 /-! #### P3 disjointness — the clean (sign / same-locus) cases.
 
 The full `collarPlus ∩ collarMinus = ∅` is a case bash over which geometric locus each
