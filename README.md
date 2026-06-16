@@ -16,6 +16,12 @@ reduction for #98; an abandoned counterexample-path encoding for #96) are
 **not** included here. What is kept is the *general* mathematics that stands on
 its own.
 
+The `LinearAlgebra/Matrix/GeneralLinearGroup/` material is salvaged from a
+stalled FLT pull request (a good-prime Hecke-operator decomposition): the
+FLT-specific automorphic-form machinery stays in FLT, but the general
+`Matrix.GeneralLinearGroup` constructions and 2×2 matrix identities, which carry
+no domain-specific hypothesis, are re-extracted here mathlib-only.
+
 ## Status legend
 
 | Mark | Meaning |
@@ -185,6 +191,23 @@ now-dormant Erdős-Problem-96 formalization). All headlines axiom-clean.
   `UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`), with a
   `SimpleConvexPolygon`-indexed restatement. Axiom-clean.
 
+### `LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities
+
+General `Matrix.GeneralLinearGroup` constructions over an arbitrary commutative
+ring, salvaged from the (stalled) FLT good-prime Hecke-operator decomposition.
+Mathlib-staging: the statements carry no domain-specific hypothesis. All
+headlines axiom-clean.
+
+- **`Defs.lean`** (Bryan Wang) — the invertible diagonal matrix attached to a
+  vector of units (`Matrix.GeneralLinearGroup.diagonal`); the `2 × 2` unipotent
+  `!![1, t; 0, 1]` (`Matrix.GeneralLinearGroup.GL2.unipotent`) with its defining
+  equation (`unipotent_def`), inverse (`unipotent_inv`), and additive composition
+  law (`unipotent_mul`).
+- **`Hecke.lean`** — four pure-`CommRing` 2×2 identities: the upper-unipotent and
+  swap row operations (`upper_unipotent_mul_matrix`, `swap_mul_matrix`) and the
+  determinants of the unipotent and swap general-linear elements
+  (`unipotent_det_eq_one`, `swap_det_eq_neg_one`).
+
 ### Reproduce the verification
 
 ```bash
@@ -212,6 +235,12 @@ import LeanFormalizations
 #print axioms SimpleGraph.IsTree.exists_leaf_insertion_order
 #print axioms SimpleGraph.IsTree.parentEdgeEquiv
 #print axioms unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
+#print axioms Matrix.GeneralLinearGroup.diagonal
+#print axioms Matrix.GeneralLinearGroup.GL2.unipotent
+#print axioms Matrix.GeneralLinearGroup.GL2.upper_unipotent_mul_matrix
+#print axioms Matrix.GeneralLinearGroup.GL2.swap_mul_matrix
+#print axioms Matrix.GeneralLinearGroup.GL2.unipotent_det_eq_one
+#print axioms Matrix.GeneralLinearGroup.GL2.swap_det_eq_neg_one
 EOF
 ```
 
@@ -444,6 +473,7 @@ LeanFormalizations/
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem ✅
+  LinearAlgebra/Matrix/GeneralLinearGroup/  -- diagonal, 2×2 unipotent, generic matrix identities ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
     Bezout.lean                             -- Bézout finite-intersection bound ✅

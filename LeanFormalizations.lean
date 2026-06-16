@@ -52,6 +52,13 @@ import LeanFormalizations.PachDeZeeuw.ComponentSplit
 import LeanFormalizations.PachDeZeeuw
 import LeanFormalizations.PachDeZeeuw.IncidenceAssembly
 
+-- General linear group: the invertible diagonal matrix (Bryan Wang) and the 2×2
+-- unipotent element plus the generic 2×2 matrix/determinant identities used in
+-- Hecke double-coset arguments (Adam McKenna). Salvaged from the FLT good-prime
+-- Hecke-operator decomposition; mathlib-staging, complete and axiom-clean.
+import LeanFormalizations.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import LeanFormalizations.LinearAlgebra.Matrix.GeneralLinearGroup.Hecke
+
 -- Vendored, frozen Erdős problem statements (verbatim from formal-conjectures,
 -- Apache 2.0) hosted for cross-version reference; see LeanFormalizations.FormalConjectures.
 import LeanFormalizations.FormalConjectures

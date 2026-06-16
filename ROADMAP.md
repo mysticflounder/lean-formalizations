@@ -130,3 +130,20 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   `hδ_le` in `graph_high_degree_subset_lb`, `hB` near line 2226 — left as-is,
   unrelated to the deprecation.)
 - [ ] Open mathlib PR(s) once audit + namespacing are settled.
+
+## General linear group salvage (from stalled FLT PR)
+
+- [x] **Extract the general `Matrix.GeneralLinearGroup` nugget from the FLT
+  good-prime Hecke decomposition** (2026-06-16) — two mathlib-only files under
+  `LinearAlgebra/Matrix/GeneralLinearGroup/`: `Defs.lean` (`diagonal`,
+  `GL2.unipotent` + lemmas; **Bryan Wang**) and `Hecke.lean` (four 2×2
+  matrix/determinant identities; **Adam McKenna**). Module-system syntax stripped
+  to repo convention (`import Mathlib`, plain namespaces). Builds clean, all 9
+  decls `#print axioms`-clean (`propext`, `Classical.choice`, `Quot.sound`). The
+  FLT-specific Hecke-algebra machinery stays in the FLT fork PR — only the
+  domain-agnostic GL₂ matrix facts are re-homed here.
+- [ ] **mathlib novelty/dedup check before any mathlib PR** — `diagonal`,
+  `GL2.unipotent`, `swap`-det facts must be confirmed not already upstream in
+  v4.30.0 (the FLT source carries a `-- TODO ... might have just landed in
+  mathlib` note on `unipotent`). 2×2-specific lemmas may also draw a
+  "generalize or it's derivable" response; decide framing before opening.
