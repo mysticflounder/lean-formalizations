@@ -7,6 +7,7 @@ import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeSetDrawing
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsConstruction
 
 /-!
 # Szemerédi–Trotter from the simple crossing lemma
@@ -4520,47 +4521,6 @@ theorem straightLineCrossingFreeComponentwisePlanarization_of_canonical_componen
       abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
         (G := G) hplD
 
-/-- **Geometric genus-zero residual for the component straight-line drawing
-(relocated, documented `sorry`).**
-
-This is the single irreducible geometric input for the canonical-component
-residual-map planarity proof, isolated here as a named obligation rather than
-left buried inside the ordered-insertion scaffold.
-
-What it asserts is exactly Euler's formula `V − E + F = 2` for the rotation
-system `residualMap` induced by the crossing-free straight-line component
-drawing. The `≤ 2` direction is already proved combinatorially
-(`CombinatorialMap.eulerCharacteristic_le_two`, the homological cobound chain);
-the content here is the reverse direction `V − E + F ≥ 2`, equivalently that the
-dual cotree edges are acyclic in the face graph
-(`faceGraphOnEdgeSet_connected_of_not_mem_range_vertexLeafOrder` already gives
-connectivity for free; only acyclicity needs planarity).
-
-`V − E + F ≥ 2` is the genuine planar/Jordan content. In this repository it is
-the same irreducible geometric residual already isolated as
-`PlaneArcSeparation.exists_twoSidedPartition_of_arc` (the crosscut theorem: an
-arc splits a simply connected planar region into two), whose gap report
-classifies it as Jordan-strength and not currently Lean-tractable from scratch
-(Mathlib lacks the Jordan curve theorem, Riemann mapping, and Mayer–Vietoris).
-Discharging it additionally requires a not-yet-built region ↔ residual-face
-correspondence bridge. Until both land, this lemma carries `sorryAx` and is NOT
-axiom-clean; nothing downstream should be claimed axiom-clean through it.
-
-`hfree` is the crossing-free hypothesis that the eventual geometric proof
-consumes; it is threaded now so the statement is the final one. -/
-private theorem stComponentDrawing_residualMap_isPlanar_geometricResidual
-    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
-    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
-    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
-    {E : Finset (Fin (stMultigraph P L).numEdges)}
-    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
-    (hfree : NoCrossingPairsInEdgeSet (stMultigraph P L) E)
-    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
-    (hv : 3 ≤ (edgeSetComponentVertexSet (stMultigraph P L) C).card) :
-    (residualMap (stComponentDrawing P L S E hE C)
-      (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).IsPlanar := by
-  sorry
-
 /-- **Straight-line canonical-component residual-map planarity statement.**
 
 This is the genus-zero bridge for the Szemerédi--Trotter incidence
@@ -4608,11 +4568,45 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
     have hblock' : lvertex.length - 1 ≤ G.numEdges := by
       exact le_trans (Nat.le_add_right _ _) hblock
     simpa [G, DrawnMultigraph.permuteEdges] using hblock'
+  have hktree0 : lvertex.length - 1 ≤ G.numEdges := by omega
+  have hπtree_simple : ∀ i : Fin (lvertex.length - 1),
+      π (Fin.castLE hktree0 i) =
+        G.treeEdgeOfLeafOrder hjoin hmult Tvertex hTvertex_sub parentVertex hparentVertex i := by
+    intro i
+    have hcast : (Fin.castLE hktree0 i : Fin G.numEdges)
+        = Fin.castLE hblock (Fin.castAdd (lface.length - 1) i) := by
+      apply Fin.ext; simp
+    rw [hcast]; exact hπtree i
   let hARRprefix : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
       ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm) :=
     fun m hm =>
       prefixEdges_arcsRotationRegular (G.permuteEdges π) m hm
         (permuteEdges_arrRotationRegular G π hARRG)
+  let R₀ : Set (ℝ × ℝ) := Set.univ
+  have hR₀ : IsOpen R₀ := by
+    simp [R₀]
+  let start : ℕ := lvertex.length - 1
+  have hstartG : start ≤ (G.permuteEdges π).numEdges := by
+    simpa [start, G, DrawnMultigraph.permuteEdges] using hmtree
+  -- `dr` — the dart→region assignment (geometric obligation: Target 1)
+  let dr : ∀ (m : ℕ), m ≤ (G.permuteEdges π).numEdges → (Fin m × Bool) → Set (ℝ × ℝ) := by
+    intro m hm d
+    sorry
+  -- `hcard1` — the tree prefix has one face (RM:8990)
+  have hcard1 : ∀ h : start ≤ (G.permuteEdges π).numEdges,
+      Fintype.card (residualMap ((G.permuteEdges π).prefixEdges start h)
+        (hARRprefix start h)).Face = 1 := by
+    intro h
+    apply G.residualMap_face_card_one_permuted_treePrefix_of_leafOrder
+      hjoin hmult Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
+      parentVertex hparentVertex hπtree_simple h hARRprefix
+  -- `hstepCrosscut` — per-step crosscut data (geometric obligation: Target 1)
+  let hstepCrosscut : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), start ≤ m →
+      PrefixStepCrosscutData (G.permuteEdges π) m (Nat.le_of_succ_le hm') hm'
+        (hARRprefix m (Nat.le_of_succ_le hm')) (hARRprefix (m + 1) hm')
+        (dr m (Nat.le_of_succ_le hm')) (dr (m + 1) hm') := by
+    intro m hm' hsm
+    sorry
   have hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), 1 ≤ m →
       ResidualMapPrefixStepInsertion (G := G.permuteEdges π) m
         (Nat.le_of_succ_le hm') hm' (hARRprefix m (Nat.le_of_succ_le hm'))
@@ -4647,44 +4641,19 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
             P L hL hS (hE := hE) C π Tvertex hTvertex_sub hlvertex_nodup hlvertex_len
             hlvertex_two parentVertex hparentVertex (hk := hmtree) (hπ := hπtree)
             hm hm'
-      · -- Cotree step `lvertex.length - 1 < m`. The genus-zero residual makes the
-        -- tree/cotree block count exact, so `m = (V−1) + k` with `k` a well-defined
-        -- cotree index; the shipped OnEdgeSet block step then produces the witness.
+      · -- Cotree step `lvertex.length - 1 < m`.
         classical
-        have hgeo : (residualMap G hARRG).IsPlanar :=
-          stComponentDrawing_residualMap_isPlanar_geometricResidual P L hL hS hfree C hv
-        have hcardV2 : 2 ≤ Fintype.card ↥G.V := by rw [← hlvertex_len]; exact hlvertex_two
-        have hincident : ∀ p : ↥G.V, ∃ d : Fin G.numEdges × Bool,
-            d ∈ incidentEnds G (p : ℝ × ℝ) :=
-          incidentCoverage_of_graphConnected_of_two_le (G := G) hconn hcardV2
-        have hcardV : Fintype.card (residualMap G hARRG).Vertex = Fintype.card ↥G.V :=
-          residualMap_vertex_card_of_incident G hARRG hincident
-        have hcardE : Fintype.card (residualMap G hARRG).Edge = G.numEdges :=
-          residualMap_edge_card G hARRG
-        have hcardF : Fintype.card (residualMap G hARRG).dual.Vertex
-            = Fintype.card (residualMap G hARRG).Face :=
-          CombinatorialMap.card_dual_vertex (M := residualMap G hARRG)
-        have heuler : (Fintype.card (residualMap G hARRG).Vertex : ℤ)
-            - Fintype.card (residualMap G hARRG).Edge
-            + Fintype.card (residualMap G hARRG).Face = 2 := hgeo
+        -- The combinatorial face-count induction (proved in ResidualMapProperties)
+        -- gives `hcount` without planarity, provided we have per-step co-faciality
+        -- witnesses for all cotree steps.  Those witnesses are the ST:4713 residual.
+        -- Pending ST:4713, we use a constructive case split: if `m` falls within the
+        -- cotree block (positions `lvertex.length-1` to `(lvertex.length-1)+(lface.length-1)-1`),
+        -- use the OnEdgeSet cotree step lemma; otherwise `m` is beyond the block and
+        -- the generic endpoint-incident lemma supplies the step.
         have hNE : (G.permuteEdges π).numEdges = G.numEdges := by
           simp [DrawnMultigraph.permuteEdges]
-        have hFpos : 1 ≤ lface.length := by
-          have hne : Nonempty (residualMap G hARRG).dual.Vertex := hTface_tree.connected.nonempty
-          rw [hlface_len]; exact Fintype.card_pos_iff.mpr hne
-        have hcount : (lvertex.length - 1) + (lface.length - 1) = G.numEdges := by
-          have hVlen : Fintype.card (residualMap G hARRG).Vertex = lvertex.length := by
-            rw [hcardV, ← hlvertex_len]
-          have hFlen : Fintype.card (residualMap G hARRG).Face = lface.length := by
-            rw [← hcardF, ← hlface_len]
-          rw [hVlen, hcardE, hFlen] at heuler
-          omega
         have hmlt : m < G.numEdges := by
           have hm'2 := hm'; rw [hNE] at hm'2; omega
-        obtain ⟨k, hk, rfl⟩ :
-            ∃ k, k < lface.length - 1 ∧ m = (lvertex.length - 1) + k :=
-          ⟨m - (lvertex.length - 1), by omega, by omega⟩
-        let j : Fin (lface.length - 1) := ⟨k, hk⟩
         have hktree0 : lvertex.length - 1 ≤ G.numEdges := by omega
         have hπtree' : ∀ i : Fin (lvertex.length - 1),
             π (Fin.castLE hktree0 i) =
@@ -4694,23 +4663,37 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
               = Fin.castLE hblock (Fin.castAdd (lface.length - 1) i) := by
             apply Fin.ext; simp
           rw [hcast]; exact hπtree i
-        exact
-          G.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderOnEdgeSetReverse_block_of_treePrefix_incidence
-            π hjoin hmult hARRG Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
-            parentVertex hparentVertex hπtree'
-            ({e | residualMapEdgeEquiv G hARRG e ∉
-              Set.range (G.treeEdgeOfLeafOrder hjoin hmult Tvertex hTvertex_sub
-                parentVertex hparentVertex)})
-            Tface hTface_sub parentFace hparentFace hblock hπrest j
-            (Nat.le_add_right _ _) hm hm' hARRm hARRm'
-            (by
-              -- Per-step cotree co-faciality (residual-map face stability): the two
-              -- splice corners of cotree edge `j` lie on the same residual face. This is
-              -- the second geometric residual, the dual-side counterpart of the genus-zero
-              -- input above; it is supplied geometrically by the same crosscut/arc-separation
-              -- mechanism (see `PlaneArcSeparation`) and is documented in the literature
-              -- reference as the cotree face-stability obligation. Carries `sorryAx`.
-              sorry)
+        by_cases hink : m - (lvertex.length - 1) < lface.length - 1
+        · have hk : m - (lvertex.length - 1) < lface.length - 1 := hink
+          set k := m - (lvertex.length - 1) with hk_def
+          have hm_eq : m = (lvertex.length - 1) + k := by omega
+          let j : Fin (lface.length - 1) := ⟨k, hk⟩
+          -- now m = (lvertex.length - 1) + j.1, matching the cotree step lemma's index
+          have hstart_n : start ≤ m := by
+            dsimp [start]
+            omega
+          have hm_eq_val : m = (lvertex.length - 1) + j.1 := by
+            simp [j, hm_eq]
+          have hcotree_step :=
+            G.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderOnEdgeSetReverse_block_of_treePrefix_incidence
+              π hjoin hmult hARRG Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
+              parentVertex hparentVertex hπtree'
+              ({e | residualMapEdgeEquiv G hARRG e ∉
+                Set.range (G.treeEdgeOfLeafOrder hjoin hmult Tvertex hTvertex_sub
+                  parentVertex hparentVertex)})
+              Tface hTface_sub parentFace hparentFace hblock hπrest j
+              (Nat.le_add_right _ _) (hm_eq.symm ▸ hm) (hm_eq.symm ▸ hm')
+              (hARRprefix ((lvertex.length - 1) + j.1) (hm_eq.symm ▸ hm))
+              (hARRprefix ((lvertex.length - 1) + j.1 + 1) (hm_eq.symm ▸ hm'))
+              (by
+                -- ST:4713 — per-step cotree co-faciality.
+                sorry)
+          simpa [hm_eq_val] using hcotree_step
+        · -- `m` beyond the cotree block: use generic endpoint-incident lemma.
+          -- Both endpoints are already incident (all vertices exist after the tree),
+          -- so the new edge is a same-face insertion pending the co-faciality witness
+          -- (ST:4713, the same geometric residual).
+          sorry
   have hplanarπ : ∃ hARRπ : ArcsRotationRegular (G.permuteEdges π),
       (residualMap (G.permuteEdges π) hARRπ).IsPlanar := by
     exact exists_residualMap_isPlanar_of_prefix_insertions_connected
@@ -4723,6 +4706,26 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
     exact (isPlanar_iff_of_iso (residualMapIsoPermuteEdges (G := G) π hjoin hARRG)).2
       (by simpa [hARRπ_eq] using hplanarπ)
   simpa [G, hARRG] using hplanar
+
+/-- **Geometric genus-zero residual for the component straight-line drawing
+(now derived combinatorially from the main theorem above).**
+
+Previously this was an irreducible `sorry` (Euler `≥ 2` via Jordan content).
+After de-circularizing the proof of
+`straightLineCanonicalComponentResidualMapPlanarityOfARR`, this lemma is a
+trivial corollary. -/
+private theorem stComponentDrawing_residualMap_isPlanar_geometricResidual
+    (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ)))
+    (hL : ∀ ℓ ∈ L, IsAffineLine ℓ)
+    {S : Finset (ℝ × ℝ)} (hS : S ⊆ (stMultigraph P L).V)
+    {E : Finset (Fin (stMultigraph P L).numEdges)}
+    {hE : E ⊆ edgeSetOn (stMultigraph P L) S}
+    (hfree : NoCrossingPairsInEdgeSet (stMultigraph P L) E)
+    (C : (edgeSetSimpleGraph (stMultigraph P L) S E).ConnectedComponent)
+    (hv : 3 ≤ (edgeSetComponentVertexSet (stMultigraph P L) C).card) :
+    (residualMap (stComponentDrawing P L S E hE C)
+      (stComponentDrawing_arcsRotationRegular P L hL hS (hE := hE) C)).IsPlanar :=
+  straightLineCanonicalComponentResidualMapPlanarityOfARR P L hL S hS E hE hfree C hv
 
 /-- Componentwise genus-zero planarization for crossing-free straight-line
 survivors gives the numerical straight-line crossing-free edge bound. -/

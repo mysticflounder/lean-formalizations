@@ -10351,6 +10351,139 @@ theorem DrawnMultigraph.exists_treeCotreePositionPermutation_of_graphConnected
   · intro j
     simpa [f, g] using hπcotree j
 
+/-- Face count is preserved under a `CombinatorialMap.Iso`. -/
+theorem card_face_of_iso {D D' : Type*} [Fintype D] [Fintype D']
+    {M : CombinatorialMap D} {M' : CombinatorialMap D'}
+    (f : CombinatorialMap.Iso M M') :
+    Fintype.card M'.Face = Fintype.card M.Face := by
+  have hface : f.toEquiv.permCongr M.facePerm = M'.facePerm := f.permCongr_facePerm
+  simpa [CombinatorialMap.Face, hface] using
+    Fintype.card_congr (quotientSameCycleEquivOfPermCongr f.toEquiv M.facePerm)
+
+/-- Face count after a same-face prefix step insertion: face count increases by one. -/
+theorem card_face_residualMap_prefixStep_sameFace
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (c₁ c₂ : Fin m × Bool) (hc : c₁ ≠ c₂)
+    (hsame : (residualMap (G.prefixEdges m hm) hARR).facePerm.SameCycle c₁ c₂)
+    (hvertex : (prefixStepDartEquiv m).permCongr
+      (insertedEdgeMap (residualMap (G.prefixEdges m hm) hARR) c₁ c₂).vertexPerm =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    Fintype.card (residualMap (G.prefixEdges (m + 1) hm') hARR').Face =
+      Fintype.card (residualMap (G.prefixEdges m hm) hARR).Face + 1 := by
+  let M : CombinatorialMap (Fin m × Bool) := residualMap (G.prefixEdges m hm) hARR
+  let M' : CombinatorialMap (Fin (m + 1) × Bool) := residualMap (G.prefixEdges (m + 1) hm') hARR'
+  let iso := insertedEdgeMapIsoOfPrefixStepVertexPerm
+    (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
+  have hFinserted : Fintype.card (insertedEdgeMap M c₁ c₂).Face =
+      Fintype.card M.Face + 1 :=
+    (card_face_insertedEdgeMap M c₁ c₂ hc).1 hsame
+  have hiso : Fintype.card (insertedEdgeMap M c₁ c₂).Face =
+      Fintype.card M'.Face :=
+    (card_face_of_iso iso).symm
+  rw [hiso] at hFinserted
+  simpa [M, M'] using hFinserted
+
+/-- Face count after a leaf prefix step insertion: face count is unchanged. -/
+theorem card_face_residualMap_prefixStep_leaf
+    (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
+    (hARR : ArcsRotationRegular (G.prefixEdges m hm))
+    (hARR' : ArcsRotationRegular (G.prefixEdges (m + 1) hm'))
+    (b : Bool) (c : Fin m × Bool)
+    (hvertex : (prefixStepDartEquiv m).permCongr
+      (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c b).vertexPerm =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm) :
+    Fintype.card (residualMap (G.prefixEdges (m + 1) hm') hARR').Face =
+      Fintype.card (residualMap (G.prefixEdges m hm) hARR).Face := by
+  let M : CombinatorialMap (Fin m × Bool) := residualMap (G.prefixEdges m hm) hARR
+  let M' : CombinatorialMap (Fin (m + 1) × Bool) := residualMap (G.prefixEdges (m + 1) hm') hARR'
+  have hFleaf : Fintype.card M'.Face = Fintype.card M.Face := by
+    cases b with
+    | false =>
+      let iso := insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
+        (G := G) m hm hm' hARR hARR' false c hvertex
+      have hcard : Fintype.card (insertedLeafEdgeMap M c).Face =
+          Fintype.card M.Face := card_face_insertedLeafEdgeMap M c
+      have hiso : Fintype.card M'.Face =
+          Fintype.card (insertedLeafEdgeMap M c).Face := by
+        simpa [M', insertedLeafEdgeMapAt_false] using card_face_of_iso iso
+      calc
+        Fintype.card M'.Face = Fintype.card (insertedLeafEdgeMap M c).Face := hiso
+        _ = Fintype.card M.Face := hcard
+    | true =>
+      let iso := insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
+        (G := G) m hm hm' hARR hARR' true c hvertex
+      let e : (Fin m × Bool ⊕ Fin 2) ≃ (Fin m × Bool ⊕ Fin 2) :=
+        (Equiv.refl (Fin m × Bool)).sumCongr (Equiv.swap (0 : Fin 2) 1)
+      have hvertex' :
+          e.permCongr (insertedLeafEdgeMap M c).vertexPerm =
+            (insertedLeafEdgeMapAt M c true).vertexPerm := by
+        simpa [e] using leafDartSwap_permCongr_insertedLeafVertexPerm (M := M) c
+      have hedge' :
+          e.permCongr (insertedLeafEdgeMap M c).edgePerm =
+            (insertedLeafEdgeMapAt M c true).edgePerm := by
+        simpa [e] using leafDartSwap_permCongr_insertedLeafEdgePerm (M := M)
+      let swapIso : CombinatorialMap.Iso (insertedLeafEdgeMap M c)
+          (insertedLeafEdgeMapAt M c true) :=
+        isoOfPermCongrOfVertexEdge e hvertex' hedge'
+      have hFleafSwap : Fintype.card (insertedLeafEdgeMapAt M c true).Face =
+          Fintype.card (insertedLeafEdgeMap M c).Face :=
+        card_face_of_iso swapIso
+      have hcard : Fintype.card (insertedLeafEdgeMap M c).Face =
+          Fintype.card M.Face := card_face_insertedLeafEdgeMap M c
+      calc
+        Fintype.card M'.Face = Fintype.card (insertedLeafEdgeMapAt M c true).Face :=
+          card_face_of_iso iso
+        _ = Fintype.card (insertedLeafEdgeMap M c).Face := hFleafSwap
+        _ = Fintype.card M.Face := hcard
+  simpa [M, M'] using hFleaf
+
+/-- Face count through prefix insertions: induction from a starting level.
+Given insertion witnesses at every step from `start` onward with a base face count
+of 1 at `start`, and assuming all steps after `start` are same-face insertions
+(not leaf), the face count at any later prefix level `n` is 1 plus the number of
+steps from `start` to `n`. -/
+theorem card_face_residualMap_of_prefix_insertions_from
+    (start : ℕ) (hstartG : start ≤ G.numEdges)
+    (hARR : ∀ (m : ℕ) (hm : m ≤ G.numEdges),
+      ArcsRotationRegular (G.prefixEdges m hm))
+    (hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges), start ≤ m →
+      ResidualMapPrefixStepInsertion (G := G) m (Nat.le_of_succ_le hm') hm'
+        (hARR m (Nat.le_of_succ_le hm')) (hARR (m + 1) hm'))
+    (hcardStart : Fintype.card
+      (residualMap (G.prefixEdges start hstartG) (hARR start hstartG)).Face = 1)
+    (hall_sameFace : ∀ (m : ℕ) (hm' : m + 1 ≤ G.numEdges) (hsm : start ≤ m),
+      ∃ c₁ c₂ hc hsame hvertex,
+        hstep m hm' hsm = ResidualMapPrefixStepInsertion.sameFace c₁ c₂ hc hsame hvertex)
+    (n : ℕ) (hstartn : start ≤ n) (hn : n ≤ G.numEdges) :
+    Fintype.card (residualMap (G.prefixEdges n hn) (hARR n hn)).Face = 1 + (n - start) := by
+  -- The G.prefixEdges at identical m with different bound proofs are equal (proof irrelevance).
+  have hprefix_eq (m : ℕ) (hm hm' : m ≤ G.numEdges) : G.prefixEdges m hm = G.prefixEdges m hm' :=
+    congrArg (fun (h : m ≤ G.numEdges) => G.prefixEdges m h) (Subsingleton.elim hm hm')
+  let P (k : ℕ) : Prop :=
+    ∀ (hk : k ≤ G.numEdges),
+      Fintype.card (residualMap (G.prefixEdges k hk) (hARR k hk)).Face = 1 + (k - start)
+  have hbase : P start := by
+    intro hk'
+    have heqG : G.prefixEdges start hk' = G.prefixEdges start hstartG := hprefix_eq start hk' hstartG
+    have hcardCopy : Fintype.card (residualMap (G.prefixEdges start hk') (hARR start hk')).Face =
+        Fintype.card (residualMap (G.prefixEdges start hstartG) (hARR start hstartG)).Face := by
+      cases heqG
+      rfl
+    rw [hcardCopy, hcardStart, Nat.sub_self, add_zero]
+  have hstep' : ∀ (k : ℕ), start ≤ k → P k → P (k + 1) := by
+    intro k hsk hPk hk'
+    have hk : k ≤ G.numEdges := Nat.le_of_succ_le hk'
+    have hFk := hPk hk
+    have hdata := hstep k hk' hsk
+    rcases hall_sameFace k hk' hsk with ⟨c₁, c₂, hc, hsame, hvertex, _hcase⟩
+    have hcard_same := card_face_residualMap_prefixStep_sameFace G k hk hk'
+      (hARR k hk) (hARR (k + 1) hk') c₁ c₂ hc hsame hvertex
+    rw [hcard_same, hFk]
+    omega
+  exact Nat.le_induction hbase hstep' n hstartn hn
+
 /-- Connected drawings with at least three listed vertices satisfy the
 nonempty-edge hypothesis needed by the ordered insertion induction. Thus
 prefix-step insertion witnesses for every step after the first edge produce a
