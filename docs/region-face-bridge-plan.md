@@ -759,7 +759,7 @@ convex corners side-separation would dissolve it; for reflex corners the foot bo
 every `collar±` disjointness is Plus-vs-Minus **by side** (`sideForm>0` vs `<0` w.r.t. the one edge). Adam
 confirmed the crosscut is a single straight chord, so the wall is **vacuous for the actual application**.
 
-**Resolution path (in progress).** Build `exists_twoSidedPartition_of_straightArc` (single-segment) feeding
+**Resolution path (→ §16: DONE/MERGED).** Build `exists_twoSidedPartition_of_straightArc` (single-segment) feeding
 `exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides` (PLC:41) — which takes `hdisj`,
 `hTp_pre`, `hTm_pre` *directly*, so the contradictory cap-foot budget (which lived only in the disjointness
 master `exists_collar_disjoint`) is never incurred. Choose δ₀ small, `ρ ∈ (δ₀+2αL, L]`; prove `hdisj` by
@@ -772,3 +772,48 @@ was built from a too-weak `∃ p, p ∈ drawingComplementIn …`, so the candida
 **cannot satisfy `hconst`** (EC:203-204, `dr (facePerm d) = dr d`). Redesign needed (design pass pending): the
 point must sit in the wedge at the dart's anchor and be FACE-determined, with a `facePerm`-invariance lemma;
 the genuine "wedge ⊆ R₀ and misses the finite prefix arc union" geometry stays a flagged obligation.
+**→ §16: straightArc now MERGED; design pass DONE and concluded the standalone `dartSectorPoint` decomposition
+is wrong (abstract leaf ruled out). This paragraph is superseded.**
+
+## §16 straightArc MERGED + Step-3 design pass DONE (2026-06-15, later)
+
+**`exists_twoSidedPartition_of_straightArc` MERGED + independently verified (main `d8e5f5c`).** The §15
+"resolution path (in progress)" is done. Cherry-picked from the agent worktree (`e0cb5be`) onto main (the
+agent branched from `2b783d4`, before the `b42473d` doc commit, so no pure ff). Independently verified — not on
+the agent's say-so: scope = `PLCollarSeparation.lean` + `PLArc.lean` only (+507/−0); `CrossingLemma` build
+GREEN (8475 jobs); `#print axioms exists_twoSidedPartition_of_straightArc` = `[propext, Classical.choice,
+Quot.sound]` — **no `sorryAx`**. Deviation (sound): rather than route through PLC:41 (which transitively hits
+the pre-existing `union_collarPlus_collarMinus` sorry at PLArc~3140), it adds a `numSegs = 1` verbatim copy
+`union_collarPlus_collarMinus_of_numSegs_one` (interior-vertex disk branch vacuous — `omega` kills `0 < j < 1`)
+plus a clean entry point `…_of_numSegs_one`, and proves `hdisj` by side-separation
+(`collarPlus ⊆ {sideForm>0}`, `collarMinus ⊆ {sideForm<0}`). *Minor wart:* the `straightArc` docstring says it
+routes via `…_of_collar_of_sliver_budgets`, but the actual `exact` correctly uses `…_of_numSegs_one`.
+
+**Step-3 `dartSectorPoint` design pass COMPLETE — two findings (supersedes §15's "held / design pass pending").**
+
+1. **`hconst` is solved by SHAPE, not by geometry.** Make the region family **face-indexed**:
+   `dr m hm d := regionAt R₀ (faceSectorPoint (Face_mk d))`. Then `hconst` (EC:203, `dr (facePerm d) = dr d`)
+   is a **one-line `congrArg`** of `CombinatorialMap.faceMk_facePerm` (`EulerBound.lean:71`,
+   `Face_mk (facePerm d) = Face_mk d`) — **zero geometry**. The codebase already leans face-indexed:
+   `residualFaceRegion = Quotient.liftOn dartRegion` (RFB:232), `residualFaceRegion_mk … = dartRegion d := rfl`
+   (RFB:240). Agent-B's real flaw was indexing `exists_dartSectorPoint` by the **dart** `d`, not the **face**
+   `Face_mk d` (two darts of one face → two unrelated `Classical.choose` points → `hconst` unprovable). This
+   face-indexed SHAPE is **permanent**.
+
+2. **The leaf `faceSectorPoint` is NOT free — it is forced by the crosscut.** `PrefixStepCrosscutData.hfactor`
+   (EC:124-128) pins `dr_{m+1} d = poolRegion(splitClass d)`, and `hinj` (EC:119) makes `poolRegion`
+   **injective**, so `dr_{m+1}` must take **distinct** values on distinct split-pool classes ⇒ `faceSectorPoint`
+   is forced (up to `regionAt`) to be **poolRegion-derived**, not an abstract per-face `Classical.choose`.
+   (Sanity check: a constant/abstract `faceSectorPoint` collapses `dr`, which is incompatible with an injective
+   `poolRegion`.) **Consequence:** the standalone abstract `dartSectorPoint` scaffold (Agent-B's `a22f148e`
+   file) is the **wrong decomposition**. `dr` must be built **inductively from the per-step crosscut
+   partitions** — the just-merged straightArc partition is the per-step geometric input feeding `poolRegion`:
+   `straightArc partition (DONE) → poolRegion per cotree step → dr level m+1 from poolRegion split of level m →
+   hconst/hcomp/hstep consistent together`. This **supersedes** the dart-indexed `dr := regionAt ∘
+   dartSectorPoint` design in §6.2/§7.1 (kept there as historical record). Stored: nthdegree decision
+   `01KV6HQR75KPNXBNTA6HCG3ES5`.
+
+**OPEN (Adam's call — unresolved).** Ordering: (A) build `dr`-from-crosscut directly (Step-5
+`PrefixStepCrosscutData`/`poolRegion`), dropping the standalone Step-3; or (B) build an abstract face-indexed
+scaffold first as an intermediate type-checking milestone (leaf rebuilt at Step-5). Adam replied "just report,
+I'll decide" — no path chosen yet.
