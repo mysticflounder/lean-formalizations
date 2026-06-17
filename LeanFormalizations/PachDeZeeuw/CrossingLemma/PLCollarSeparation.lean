@@ -769,19 +769,175 @@ theorem exists_twoSidedPartition_prefixStep
       IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
       IsTwoSidedPartition
         (regionMinusArc R ((straightPolyArc p₁ p₂ hne).toSimpleArc)) U V := by
-  -- Construct R as an open strip around the straight segment (p₁, p₂).
-  -- Let the segment length L = dist p₁ p₂ > 0.  Choose a perpendicular
-  -- direction n of unit length.  For ε = L/6, define
-  --   R := {p₁ + t·(p₂-p₁) + s·ε·n ∣ 0 < t < 1, -1 < s < 1}
-  -- This is an open, convex (hence simply connected) tubular neighbourhood
-  -- of the open segment, with endpoints p₁, p₂ excluded.
-  --
-  -- {{NEEDS_PROOF}} — the tube construction requires:
-  --   1. IsOpen R (affine image of open rectangle; use IsOpen.image_of_isOpenMap)
-  --   2. IsSimplyConnected R (open convex set in ℝ²; use homeomorphism to ℝ²)
-  --   3. p₁ ∈ Rᶜ, p₂ ∈ Rᶜ (endpoints at t=0, t=1 are excluded)
-  --   4. Discharge the ~30 collar hypotheses of
-  --      exists_twoSidedPartition_of_straightArc (analytic estimates).
-  sorry
+  set β := straightPolyArc p₁ p₂ hne with hβ
+  have h1 : β.numSegs = 1 := by simp [β, straightPolyArc]
+  set L : ℝ := dist p₁ p₂ with hL
+  have hLpos : 0 < L := dist_pos.mpr hne
+  set v : ℝ × ℝ := p₂ - p₁ with hv
+  -- Perpendicular direction w (nonzero because p₁ ≠ p₂)
+  set w : ℝ × ℝ := (-v.2, v.1) with hw
+  have hw_ne_zero : w ≠ 0 := by
+    intro hzero
+    have hz := Prod.ext_iff.mp hzero
+    apply hne
+    have hvzero : v.1 = 0 ∧ v.2 = 0 := by
+      dsimp [w] at hz
+      constructor <;> linarith
+    have hveq : v = 0 := Prod.ext hvzero.1 hvzero.2
+    have hsub : p₂ - p₁ = 0 := by simpa [v] using hveq
+    have heq : p₂ = p₁ := sub_eq_zero.mp hsub
+    exact heq.symm
+  set d : ℝ := ‖w‖ with hd
+  have hdpos : 0 < d := by
+    dsimp [d]
+    have := norm_nonneg w
+    have hzero : ‖w‖ ≠ 0 := mt norm_eq_zero.mp hw_ne_zero
+    positivity
+  -- Unit perpendicular vector n
+  set n : ℝ × ℝ := (d⁻¹ : ℝ) • w with hn
+  -- Open strip half-width
+  set ε : ℝ := L / 6 with hε
+  have hεpos : 0 < ε := div_pos hLpos (by norm_num)
+  -- R is the open strip: affine image of (0,1) × (-1,1)
+  let R : Set (ℝ × ℝ) :=
+    {q | ∃ (t s : ℝ), t ∈ Set.Ioo (0 : ℝ) 1 ∧ s ∈ Set.Ioo (-1 : ℝ) 1 ∧
+      q = p₁ + t • v + s • (ε • n)}
+  -- Basic properties of R
+  have hp₁_notin : p₁ ∉ R := by
+    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
+    have hpar : t = 0 := by
+      -- From q = p₁ = p₁ + t•v + s•ε•n, subtract p₁:
+      -- 0 = t•v + s•ε•n. Take inner product with v:
+      -- 0 = t•(v•v) + s•ε•(n•v). But n•v = 0 (perpendicular).
+      -- So 0 = t•(v•v), and v•v > 0, so t = 0.
+      sorry
+    have htpos : 0 < t := Set.mem_Ioo.mp ht |>.left
+    linarith
+  have hp₂_notin : p₂ ∉ R := by
+    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
+    -- From q = p₂ = p₁ + 1•v + s•ε•n, subtract: v = t•v + s•ε•n
+    -- Take inner prod with v: v•v = t•(v•v), so t = 1.
+    -- But t < 1 (from Ioo), contradiction.
+    sorry
+  -- R is open: image of open set under continuous open map (affine).
+  have hR_open : IsOpen R := by
+    sorry
+  -- R is simply connected: convex → simply connected.
+  have hR_sc : IsSimplyConnected R := by
+    sorry
+  -- Spine S: a "sliver" in the middle of the strip
+  set α : ℝ := 1/6 with hα
+  have hα_pos : 0 < α := by norm_num
+  have hα_lt_third : α < 1/3 := by norm_num
+  set cSrc : ℝ := α / 2 with hcSrc
+  have hcSrc_pos : 0 < cSrc := by dsimp [cSrc]; positivity
+  have hcSrc_le : cSrc ≤ 2 * α := by dsimp [cSrc]; nlinarith
+  set cTgt : ℝ := α / 2 with hcTgt
+  have hcTgt_pos : 0 < cTgt := by dsimp [cTgt]; positivity
+  have hcTgt_le : cTgt ≤ 2 * α := by dsimp [cTgt]; nlinarith
+  set mR : ℝ := ε / 4 with hmR
+  have hmR_pos : 0 < mR := by dsimp [mR]; positivity
+  -- Spine S is a narrower strip, still containing the segment midpoint.
+  let S : Set (ℝ × ℝ) :=
+    {q | ∃ (t s : ℝ), t ∈ Set.Ioo (α : ℝ) (1 - α) ∧ s ∈ Set.Ioo (-(1/2 : ℝ)) (1/2) ∧
+      q = p₁ + t • v + s • (ε • n)}
+  have hS_sub_R : S ⊆ R := by
+    intro q h; rcases h with ⟨t, s, ht, hs, hq⟩
+    refine ⟨t, s, ?_, ?_, hq⟩
+    · -- t ∈ Ioo (α, 1-α) → t ∈ Ioo (0, 1)
+      rcases Set.mem_Ioo.mp ht with ⟨htl, htr⟩
+      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+    · -- s ∈ Ioo (-1/2, 1/2) → s ∈ Ioo (-1, 1)
+      rcases Set.mem_Ioo.mp hs with ⟨hsl, hsr⟩
+      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+  -- Remaining properties: sorried (analytic geometry)
+  have hS_carrier_sub : S ⊆ ((straightPolyArc p₁ p₂ hne)).carrier := by
+    sorry
+  have hS_preconnected : IsPreconnected S := by
+    sorry
+  have hfirstMid : firstMid (straightPolyArc p₁ p₂ hne) ∈ S := by
+    sorry
+  have hSband : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
+      ((straightPolyArc p₁ p₂ hne)).firstSeg,
+      footParam (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).firstSeg)
+        (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).firstSeg) y ∈ Set.Ioo (0 : ℝ) 1 → y ∈ S := by
+    sorry
+  have hRband_lb : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
+      ((straightPolyArc p₁ p₂ hne)).firstSeg,
+      footParam (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).firstSeg)
+        (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).firstSeg) y ∈ Set.Icc (α / 2) (1 - α / 2) →
+      mR ≤ Metric.infDist y Rᶜ := by
+    sorry
+  have hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+      liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).firstSeg)
+        (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0 ∈ S := by
+    sorry
+  have hSrcNear_L : ∀ p ∈ S,
+      dist p ((straightPolyArc p₁ p₂ hne)).src <
+        dist (((straightPolyArc p₁ p₂ hne)).segSrc
+          ((straightPolyArc p₁ p₂ hne)).firstSeg)
+          (((straightPolyArc p₁ p₂ hne)).segTgt
+          ((straightPolyArc p₁ p₂ hne)).firstSeg) →
+      p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
+        ((straightPolyArc p₁ p₂ hne)).firstSeg ∧
+        footParam (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).firstSeg)
+        (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc := by
+    sorry
+  have hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+      0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).firstSeg)
+        (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0) Rᶜ := by
+    sorry
+  have hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+      liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).lastSeg)
+        (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).lastSeg) c 0 ∈ S := by
+    sorry
+  have hTgtNear_L : ∀ p ∈ S,
+      dist p ((straightPolyArc p₁ p₂ hne)).tgt <
+        dist (((straightPolyArc p₁ p₂ hne)).segSrc
+          ((straightPolyArc p₁ p₂ hne)).lastSeg)
+          (((straightPolyArc p₁ p₂ hne)).segTgt
+          ((straightPolyArc p₁ p₂ hne)).lastSeg) →
+      p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
+        ((straightPolyArc p₁ p₂ hne)).lastSeg ∧
+        footParam (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).lastSeg)
+        (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt := by
+    sorry
+  have hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+      0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
+        ((straightPolyArc p₁ p₂ hne)).lastSeg)
+        (((straightPolyArc p₁ p₂ hne)).segSrc
+        ((straightPolyArc p₁ p₂ hne)).lastSeg) c 0) Rᶜ := by
+    sorry
+  have hcover : ∀ δ₀ : ℝ, 0 < δ₀ →
+      R ∩ ((straightPolyArc p₁ p₂ hne)).carrier ⊆ taperedTube R S δ₀ := by
+    sorry
+  -- Assemble and apply the already-proved partition lemma.
+  obtain ⟨U, V, hpart⟩ :=
+    exists_twoSidedPartition_of_straightArc
+      (straightPolyArc p₁ p₂ hne) h1
+      hα_pos hα_lt_third
+      hcSrc_pos hcTgt_pos hcSrc_le hcTgt_le
+      hmR_pos hR_open hR_sc
+      hS_sub_R hS_preconnected hS_carrier_sub
+      hp₁_notin hp₂_notin
+      hfirstMid hSband hRband_lb
+      hSrcSpine hSrcNear_L hSrcRpos
+      hTgtSpine hTgtNear_L hTgtRpos
+      hcover
+  exact ⟨R, U, V, hR_open, hR_sc, hp₁_notin, hp₂_notin, hpart⟩
 
 end CrossingLemma.PlaneArcSeparation
