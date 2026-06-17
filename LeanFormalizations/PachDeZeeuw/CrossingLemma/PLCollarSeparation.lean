@@ -802,16 +802,98 @@ theorem exists_twoSidedPartition_prefixStep
   let R : Set (ℝ × ℝ) :=
     {q | ∃ (t s : ℝ), t ∈ Set.Ioo (0 : ℝ) 1 ∧ s ∈ Set.Ioo (-1 : ℝ) 1 ∧
       q = p₁ + t • v + s • (ε • n)}
-  -- Basic properties of R
+  -- Basic properties
+  have hv_nonzero : v ≠ 0 := by
+    intro hzero
+    have heq : p₂ = p₁ := sub_eq_zero.mp (by simpa [v] using hzero)
+    exact hne heq.symm
+  have h_perp : dotp v n = 0 := by
+    dsimp [n, d]
+    -- dotp v ((‖w‖⁻¹) • w) = (‖w‖⁻¹) • dotp v w
+    -- and dotp v w = dotp (p₂-p₁) (-v.2, v.1) = -(p₂-p₁).1*(p₂-p₁).2 + (p₂-p₁).2*(p₂-p₁).1 = 0
+    calc
+      dotp v ((‖w‖⁻¹ : ℝ) • w) = (‖w‖⁻¹ : ℝ) * dotp v w := by
+        dsimp [dotp]; ring
+      _ = (‖w‖⁻¹ : ℝ) * 0 := by
+        dsimp [w, v, dotp]; ring
+      _ = 0 := by ring
+  have h_dotp_vv_pos : 0 < dotp v v := by
+    dsimp [dotp]
+    have hsum_sq_pos : 0 < v.1 ^ 2 + v.2 ^ 2 := by
+      by_contra hc
+      have hzero : v.1 ^ 2 + v.2 ^ 2 = 0 := by nlinarith
+      apply hv_nonzero
+      have h1 : v.1 = 0 := by nlinarith
+      have h2 : v.2 = 0 := by nlinarith
+      ext <;> assumption
+    -- v.1 * v.1 + v.2 * v.2 = v.1 ^ 2 + v.2 ^ 2
+    nlinarith
+  -- p₁ ∉ R: t would have to be 0 but t ∈ (0,1)
   have hp₁_notin : p₁ ∉ R := by
     intro h; rcases h with ⟨t, s, ht, hs, hq⟩
-    have hpar : t = 0 := by
-      -- From q = p₁ = p₁ + t•v + s•ε•n, subtract p₁:
-      -- 0 = t•v + s•ε•n. Take inner product with v:
-      -- 0 = t•(v•v) + s•ε•(n•v). But n•v = 0 (perpendicular).
-      -- So 0 = t•(v•v), and v•v > 0, so t = 0.
-      sorry
-    have htpos : 0 < t := Set.mem_Ioo.mp ht |>.left
+    -- From hq: p₁ = p₁ + t•v + s•ε•n, so t•v + s•ε•n = 0
+    have hzero_vec : t • v + s • (ε • n) = 0 := by
+      calc
+        t • v + s • (ε • n) = (p₁ + (t • v + s • (ε • n))) - p₁ := by abel
+        _ = (p₁ + t • v + s • (ε • n)) - p₁ := by abel
+        _ = p₁ - p₁ := by rw [← hq]
+        _ = 0 := by simp
+    -- Dot with v: 0 = dotp(v, 0) = dotp(v, t•v + s•ε•n) = t•dotp(v,v) + s•ε•dotp(v,n)
+    -- Since dotp(v,n) = 0, we get t•dotp(v,v) = 0, and dotp(v,v) > 0, so t = 0
+    have hdot : dotp v (t • v + s • (ε • n)) = 0 := by
+      have hx : (t • v + s • (ε • n)).1 = 0 := by simpa using congrArg Prod.fst hzero_vec
+      have hy : (t • v + s • (ε • n)).2 = 0 := by simpa using congrArg Prod.snd hzero_vec
+      dsimp [dotp]
+      calc
+        v.1 * (t • v + s • (ε • n)).1 + v.2 * (t • v + s • (ε • n)).2
+            = v.1 * 0 + v.2 * 0 := by rw [hx, hy]
+        _ = 0 := by ring
+    -- Now expand the dot product algebraically
+    have hdot_expand : dotp v (t • v + s • (ε • n)) = t * dotp v v := by
+      calc
+        dotp v (t • v + s • (ε • n)) = dotp v (t • v) + dotp v (s • (ε • n)) := by
+          dsimp [dotp]; ring
+        _ = t * dotp v v + (s * ε) * dotp v n := by
+          dsimp [dotp]; ring
+        _ = t * dotp v v + (s * ε) * 0 := by rw [h_perp]
+        _ = t * dotp v v := by ring
+    rw [hdot_expand] at hdot
+    have ht_zero : t = 0 := by
+      have : t * dotp v v = 0 := hdot
+      have hpos : dotp v v > 0 := h_dotp_vv_pos
+      nlinarith
+    have htpos : 0 < t := (Set.mem_Ioo.mp ht).left
+    linarith
+  -- p₂ ∉ R: t would have to be 1 but t ∈ (0,1)
+  have hp₂_notin : p₂ ∉ R := by
+    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
+    have ht_lt_one : t < 1 := (Set.mem_Ioo.mp ht).right
+    -- hq : p₂ = p₁ + t•v + s•ε•n
+    -- Since p₂ = p₁ + v, we get v = t•v + s•ε•n, so (1-t)•v = s•ε•n
+    have hp₂_eq_v : p₂ = p₁ + v := by
+      dsimp [v]; abel
+    have h_diff : (1 - t) • v = s • (ε • n) := by
+      rw [hp₂_eq_v] at hq
+      -- From hq : p₁ + v = p₁ + t•v + s•ε•n
+      -- Rearrange: v - t•v = s•ε•n → (1-t)•v = s•ε•n
+      calc
+        (1 - t) • v = v - t • v := by rw [sub_smul, one_smul]
+        _ = (p₁ + v) - (p₁ + t • v) := by abel
+        _ = (p₁ + v) - (p₁ + t • v + s • (ε • n)) + s • (ε • n) := by abel
+        _ = (p₁ + v) - (p₁ + v) + s • (ε • n) := by rw [← hq]
+        _ = s • (ε • n) := by simp
+    -- Dot both sides with v
+    -- dotp(v, (1-t)•v) = dotp(v, s•ε•n)
+    have hdot_diff : dotp v ((1 - t) • v) = dotp v (s • (ε • n)) := by rw [h_diff]
+    -- Expand both sides
+    have hdot_left : dotp v ((1 - t) • v) = (1 - t) * dotp v v := by
+      dsimp [dotp]; ring
+    have hdot_right : dotp v (s • (ε • n)) = s * ε * dotp v n := by
+      dsimp [dotp]; ring
+    rw [hdot_left, hdot_right, h_perp, mul_zero] at hdot_diff
+    have h_one_minus_t_zero : 1 - t = 0 := by
+      have : (1 - t) * dotp v v = 0 := hdot_diff
+      nlinarith
     linarith
   have hp₂_notin : p₂ ∉ R := by
     intro h; rcases h with ⟨t, s, ht, hs, hq⟩
