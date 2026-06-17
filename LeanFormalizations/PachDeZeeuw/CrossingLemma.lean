@@ -28,6 +28,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.RotationCoherence
 -- Region<->face (Edmonds) bridge + concrete EdmondsCompatible iteration:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.RegionFaceBridge
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
 /-!
 # The multigraph crossing lemma

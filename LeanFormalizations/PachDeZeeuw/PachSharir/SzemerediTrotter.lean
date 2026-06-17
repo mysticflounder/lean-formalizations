@@ -8,6 +8,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeSetDrawing
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCollarSeparation
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
 /-!
 # Szemerédi–Trotter from the simple crossing lemma
@@ -4588,11 +4590,34 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
   let start : ℕ := lvertex.length - 1
   have hstartG : start ≤ (G.permuteEdges π).numEdges := by
     simpa [start, G, DrawnMultigraph.permuteEdges] using hmtree
-  -- `dr` — the dart→region assignment (geometric obligation: Target 1)
-  let dr : ∀ (m : ℕ), m ≤ (G.permuteEdges π).numEdges → (Fin m × Bool) → Set (ℝ × ℝ) := by
-    intro m hm d
+  -- Target 1: build dr and hstepCrosscut inductively via poolRegion/splitClass.
+  -- The induction uses the bridge (regionSeparates_prefix_of_crosscut) at each
+  -- level to obtain hsame from hregion.  The two hard obligations are:
+  --   (A) hregion — cotree co-faciality: Face_mk c₁ = Face_mk c₂ at level m
+  --   (B) exists_twoSidedPartition_of_straightArc instantiation for the straight
+  --       graph edge
+  -- Both are isolated as sorries inside this block.
+  have h_exists_target1 : ∃ (dr : ∀ (m : ℕ), m ≤ (G.permuteEdges π).numEdges →
+        (Fin m × Bool) → Set (ℝ × ℝ))
+      (hstepCrosscut : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), start ≤ m →
+        PrefixStepCrosscutData (G.permuteEdges π) m (Nat.le_of_succ_le hm') hm'
+          (hARRprefix m (Nat.le_of_succ_le hm')) (hARRprefix (m + 1) hm')
+          (dr m (Nat.le_of_succ_le hm')) (dr (m + 1) hm')),
+      True := by
+    let G' := G.permuteEdges π
+    -- Target 1: inductive construction of dr and hstepCrosscut.
+    -- Requires the two hard geometric obligations:
+    --   A: cotree co-faciality (hregion: dr_m(c₁) = dr_m(c₂) at each level)
+    --   B: exists_twoSidedPartition_of_straightArc instantiation (poolRegion, U, V)
+    -- The induction architecture is: strong induction on the level n using
+    -- `Nat.strong_induction_on`, building ∅-type (∃ dr, hsc) at each level.
+    -- When these two obligations are filled, the construction is straightforward:
+    --   1. Base (n = start): dr_start = regionAt(p₀), hsc = empty
+    --   2. Step (n > start): extend dr from n-1 to n using poolRegion∘splitClass,
+    --      build crosscut for step n-1 with hregion (sorried) and hvertex (proven).
     sorry
-  -- `hcard1` — the tree prefix has one face (RM:8990)
+  obtain ⟨dr, hstepCrosscut, _⟩ := h_exists_target1
+  let G' := G.permuteEdges π
   have hcard1 : ∀ h : start ≤ (G.permuteEdges π).numEdges,
       Fintype.card (residualMap ((G.permuteEdges π).prefixEdges start h)
         (hARRprefix start h)).Face = 1 := by
@@ -4600,13 +4625,6 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
     apply G.residualMap_face_card_one_permuted_treePrefix_of_leafOrder
       hjoin hmult Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
       parentVertex hparentVertex hπtree_simple h hARRprefix
-  -- `hstepCrosscut` — per-step crosscut data (geometric obligation: Target 1)
-  let hstepCrosscut : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), start ≤ m →
-      PrefixStepCrosscutData (G.permuteEdges π) m (Nat.le_of_succ_le hm') hm'
-        (hARRprefix m (Nat.le_of_succ_le hm')) (hARRprefix (m + 1) hm')
-        (dr m (Nat.le_of_succ_le hm')) (dr (m + 1) hm') := by
-    intro m hm' hsm
-    sorry
   have hstep : ∀ (m : ℕ) (hm' : m + 1 ≤ (G.permuteEdges π).numEdges), 1 ≤ m →
       ResidualMapPrefixStepInsertion (G := G.permuteEdges π) m
         (Nat.le_of_succ_le hm') hm' (hARRprefix m (Nat.le_of_succ_le hm'))
@@ -4664,36 +4682,30 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
             apply Fin.ext; simp
           rw [hcast]; exact hπtree i
         by_cases hink : m - (lvertex.length - 1) < lface.length - 1
-        · have hk : m - (lvertex.length - 1) < lface.length - 1 := hink
-          set k := m - (lvertex.length - 1) with hk_def
-          have hm_eq : m = (lvertex.length - 1) + k := by omega
-          let j : Fin (lface.length - 1) := ⟨k, hk⟩
-          -- now m = (lvertex.length - 1) + j.1, matching the cotree step lemma's index
-          have hstart_n : start ≤ m := by
+        · -- m is within the cotree block: use the bridge to get SameCycle from hstepCrosscut.
+          have hstart_m : start ≤ m := by
             dsimp [start]
             omega
-          have hm_eq_val : m = (lvertex.length - 1) + j.1 := by
-            simp [j, hm_eq]
-          have hcotree_step :=
-            G.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderOnEdgeSetReverse_block_of_treePrefix_incidence
-              π hjoin hmult hARRG Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
-              parentVertex hparentVertex hπtree'
-              ({e | residualMapEdgeEquiv G hARRG e ∉
-                Set.range (G.treeEdgeOfLeafOrder hjoin hmult Tvertex hTvertex_sub
-                  parentVertex hparentVertex)})
-              Tface hTface_sub parentFace hparentFace hblock hπrest j
-              (Nat.le_add_right _ _) (hm_eq.symm ▸ hm) (hm_eq.symm ▸ hm')
-              (hARRprefix ((lvertex.length - 1) + j.1) (hm_eq.symm ▸ hm))
-              (hARRprefix ((lvertex.length - 1) + j.1 + 1) (hm_eq.symm ▸ hm'))
-              (by
-                -- ST:4713 — per-step cotree co-faciality.
-                sorry)
-          simpa [hm_eq_val] using hcotree_step
-        · -- `m` beyond the cotree block: use generic endpoint-incident lemma.
-          -- Both endpoints are already incident (all vertices exist after the tree),
-          -- so the new edge is a same-face insertion pending the co-faciality witness
-          -- (ST:4713, the same geometric residual).
-          sorry
+          have hs_data := hstepCrosscut m hm' hstart_m
+          have hsame_cotree :
+              (residualMap (G'.prefixEdges m hm) (hARRprefix m hm)).facePerm.SameCycle
+                hs_data.c₁ hs_data.c₂ :=
+            regionSeparates_prefix_of_crosscut G' start hARRprefix dr hcard1 hstepCrosscut
+              m hstart_m hm hs_data.c₁ hs_data.c₂ hs_data.hregion
+          exact ResidualMapPrefixStepInsertion.sameFace hs_data.c₁ hs_data.c₂
+            hs_data.hc hsame_cotree hs_data.hvertex
+        · -- m beyond the cotree block: same bridge approach.
+          have hstart_m : start ≤ m := by
+            dsimp [start]
+            omega
+          have hs_data := hstepCrosscut m hm' hstart_m
+          have hsame_beyond :
+              (residualMap (G'.prefixEdges m hm) (hARRprefix m hm)).facePerm.SameCycle
+                hs_data.c₁ hs_data.c₂ :=
+            regionSeparates_prefix_of_crosscut G' start hARRprefix dr hcard1 hstepCrosscut
+              m hstart_m hm hs_data.c₁ hs_data.c₂ hs_data.hregion
+          exact ResidualMapPrefixStepInsertion.sameFace hs_data.c₁ hs_data.c₂
+            hs_data.hc hsame_beyond hs_data.hvertex
   have hplanarπ : ∃ hARRπ : ArcsRotationRegular (G.permuteEdges π),
       (residualMap (G.permuteEdges π) hARRπ).IsPlanar := by
     exact exists_residualMap_isPlanar_of_prefix_insertions_connected
