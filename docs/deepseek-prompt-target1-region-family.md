@@ -106,3 +106,86 @@ face, so `dr start` is unconstrained. For each cotree step `m → m+1`:
 - `regionSeparates_prefix_of_crosscut`, `edmondsCompatibleAtPrefix` —
   EdmondsConstruction.lean:148 / :194 (the iteration harness consuming your data).
 - `IsTwoSidedPartition` fields — PlaneArcSeparation.lean:100.
+
+---
+
+## ADDENDUM (2026-06-16) — the two REAL geometric obligations; blocker corrections
+
+You reported two "topological blockers." Audit: one is a freebie, the other was
+mis-scoped into a **false** statement. Read this before scoping any sorries.
+
+### Correction 1 — `IsOpen (regionAt …)` is a one-liner, not a Mathlib gap
+
+Mathlib **has** `IsOpen.connectedComponentIn` (LocallyConnectedSpace;
+`Mathlib/Topology/Connected/LocallyConnected.lean:70`). `ℝ × ℝ` is a
+`LocallyConnectedSpace`. So (verified compiling):
+
+```lean
+theorem isOpen_regionAt (G : DrawnMultigraph) {R₀ : Set (ℝ × ℝ)}
+    (hR₀ : IsOpen R₀) (p : ℝ × ℝ) : IsOpen (regionAt G R₀ p) :=
+  (isOpen_drawingComplementIn G hR₀).connectedComponentIn
+```
+
+Add it to `RegionFaceBridge.lean` and move on. (Process note: "Mathlib lacks X"
+needs a `grep` of `.lake/packages/mathlib/` before it counts as a blocker.)
+
+### Correction 2 — DO NOT prove or sorry `IsSimplyConnected (regionAt p)`. It is FALSE.
+
+The faces here are **not** disks. The design works inside a fixed open **disk**
+`R₀` (to avoid sphere compactification, see `region-face-bridge-plan.md` §4).
+`hcard1` says the spanning-tree prefix has **one** face `= R₀ ∖ tree`, which is
+**annular** (`π₁ = ℤ`, a loop around the tree) — not simply connected. The outer
+face is never a disk either. Sorrying `IsSimplyConnected (regionAt p)` scaffolds a
+false lemma — the forbidden "false foundation."
+
+`IsSimplyConnected R` in `exists_twoSidedPartition_of_straightArc` is **not about
+the face**. Its `R` is a simply-connected **tube** around the arc (the arc's
+endpoints lie in `Rᶜ`; the SC hypothesis is consumed once at the `id : R→R` lift,
+per `ROUTE_C_PLAN.md` tapered-tube design). A tube is simply connected **by
+construction**. Do not conflate the tube `R` with the global face `regionAt p`.
+
+### Obligation A — tube instantiation + collar discharge (heavy-mechanical PL)
+
+Construct the SC tube and discharge the ~30 collar hypotheses of
+`exists_twoSidedPartition_of_straightArc` (itself sorry-free):
+
+```lean
+theorem exists_twoSidedPartition_prefixStep
+    (G : DrawnMultigraph) (m : ℕ) (hm' : m + 1 ≤ G.numEdges)
+    (p₁ p₂ : ℝ × ℝ)
+    (hp : (G.prefixEdges (m + 1) hm').endpoints (Fin.last m) = (p₁, p₂))
+    (hne : p₁ ≠ p₂) :
+    ∃ R U V : Set (ℝ × ℝ),
+      IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
+      IsTwoSidedPartition
+        (CrossingLemma.PlaneArcSeparation.regionMinusArc R
+          (straightPolyArc p₁ p₂ hne).toSimpleArc) U V := by
+  sorry  -- build tube R; discharge collar hyps; apply exists_twoSidedPartition_of_straightArc
+```
+
+Here `IsSimplyConnected R` is TRUE (R is the tube you build) — not a face-disk claim.
+
+### Obligation B — local→global gluing (the conceptual crux; still Jordan-free)
+
+The tube gives two **local** sides `U, V` of the arc. `poolRegion` needs two
+**distinct global** complement-components, matched to the combinatorial split-pool
+classes `inr 0 / inr 1`, with old faces filling `inl`. From Obligation A's local
+partition + the inductive `dr` at level `m`, produce
+`poolRegion`/`hinj`/`hfactor` (and `hregion`):
+
+```lean
+-- inl ⟨f,_⟩ ↦ residualFaceRegion (level m) f
+-- inr 0 ↦ (global region containing U),  inr 1 ↦ (global region containing V)
+-- hinj    : U-region ≠ V-region ≠ each old region
+-- hfactor : dr (m+1) d = poolRegion (insertedFaceSplitPoolEquiv … d)
+-- hregion : dr m c₁ = dr m c₂  (crossing-free segment lies in ONE region)
+```
+
+This is `connectedComponentIn` plumbing + the crossing-free hypothesis — **not**
+Jordan. It is the heart of the Edmonds direction (combinatorial split ⟺ geometric
+side) and is the real remaining math.
+
+### Net
+- `isOpen_regionAt`: do it (freebie).
+- `IsSimplyConnected (regionAt p)`: FALSE — never sorry it.
+- Remaining: Obligation A (heavy-mechanical) + Obligation B (the crux). Both Jordan-free.
