@@ -987,6 +987,21 @@ This **pins, with no slack, the only remaining geometric obligations**:
         (unverified); or (iii) re-index to make the cover range coincide with the lift regime.
         Resolving this is the true remaining crux of the clipped cap — do NOT claim B done until
         the cover range and the overlap regime are reconciled.
+      - **RESOLVED (2026-06-17), option (iii) re-index via OPEN range.** The whole src/tgt ×
+        plus/minus cap chain was switched from the closed foot range `Ioc 0 c_max` to the OPEN
+        range `Ioo 0 c_max` (engine `isPreconnected_cap_inter_ball_cover_Ioo` +
+        `local_overlap_of_continuous_nonempty_slices_on`/`_Ioo`). The pathological boundary
+        slice is exactly `c = c_max` (centre at distance `c_max·dist = ρ₀+δ₀` from the endpoint,
+        whose `δ₀`-capped ball only TOUCHES the cap boundary → empty). Cap-tube witnesses have
+        foot **strictly** `< c_max` (`arcInterior_near_src/tgt` now return the strict `Ioo`
+        bound — the proof already proved strict `b < cSrc`), so the open range still covers
+        `tube ∩ cap`, while every interior slice `c < c_max` strictly overlaps the cap (sliver
+        budget `c·dist < ρ₀+δ₀` holds strictly). `exists_twoSidedPartition_of_straightArc` was
+        redesigned with internal `c_max = (ρ₀+δ₀)/L`; its near-source hypothesis is now the
+        SATISFIABLE relation "near-source spine pts are forward first-edge pts with `dist = foot·L`"
+        (replacing the unsatisfiable `foot ≤ cSrc ≤ 2α` at radius `L` that made the lemma vacuous).
+        Non-vacuity witnessed by the sorry-free, axiom-clean `exists_twoSidedPartition_unitSegment`
+        (R = open sup-ball `ball((1/2,0),1/2)`, S = whole open segment, unit segment).
       - Then `×2` (src/tgt) `×2` (plus/minus) mirrors.
     * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
       (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪

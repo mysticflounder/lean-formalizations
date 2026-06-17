@@ -1,5 +1,30 @@
 # Collar work handoff (2026-06-17)
 
+## UPDATE (2026-06-17, end-cap de-vacuification) — READ FIRST
+
+`exists_twoSidedPartition_of_straightArc` was sorry-free but **vacuous** (its
+hypothesis bundle proved `False`): the clipped end-cap slice cover was indexed over the
+CLOSED foot range `Ioc 0 c_max`, whose boundary slice `c = c_max` is empty, and its
+near-source hypothesis `foot ≤ cSrc ≤ 2α` at radius `L` contradicted `hSband`. This was
+**fixed** by re-indexing the entire src/tgt × plus/minus cap chain to the OPEN range
+`Ioo 0 c_max` (see ROUTE_C_PLAN.md §8(3) "RESOLVED 2026-06-17"). The lemma's interface
+changed:
+
+- `cSrc`/`cTgt` and `hcSrc*` are GONE; the internal slice range is `c_max = (ρ₀+δ₀)/L`.
+- `hSrcSpine`/`hSrcRpos`/`hTgtSpine`/`hTgtRpos` are now over `Ioo 0 1`.
+- `hSrcNear_L`/`hTgtNear_L` now demand the SATISFIABLE geometric relation
+  "near-source spine pts are forward edge pts with `dist = foot·L`" (not the old
+  unsatisfiable foot bound).
+- The SPINE must be the **whole open segment** (the old "middle portion (α,1-α)" S made
+  `hcover` unsatisfiable near the endpoints — this doc's item 5 below already flagged it).
+
+Non-vacuity is now witnessed sorry-free by **`exists_twoSidedPartition_unitSegment`**
+(R = open sup-ball `ball((1/2,0),1/2)`, S = whole open segment, unit segment;
+axiom-clean `[propext, Classical.choice, Quot.sound]`). The general
+`exists_twoSidedPartition_prefixStep` was updated to the new interface; its remaining
+sorries are now on TRUE statements (the analytic R-facts for the parallelogram tube).
+The notes below describe the OLD prefixStep parameters and are partially superseded.
+
 ## What's been done
 
 The tube construction (`exists_twoSidedPartition_prefixStep` in
