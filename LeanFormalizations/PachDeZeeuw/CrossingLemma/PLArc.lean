@@ -6876,6 +6876,28 @@ theorem isPreconnected_cap_inter_ball_cover {cap X : Set Plane} (hcap : Convex �
   exact reflTransGen_meets_of_local_overlap isPreconnected_Ioc
     (fun c => cap ∩ Metric.ball (p c) (r c)) hov hc hc'
 
+/-- **Convex-slice cover ⇒ preconnected (open foot range).**
+
+The `Ioo 0 c_max` companion of `isPreconnected_cap_inter_ball_cover`.  The end-cap
+connectivity uses the *open* foot range `Ioo 0 c_max` rather than the closed `Ioc 0 c_max`
+because the outermost slice `c = c_max` (whose centre sits at distance `c_max·‖edge‖ = ρ 0 + δ₀`
+from the endpoint) only *touches* the cap-ball boundary — its slice is empty.  All interior
+slices `c < c_max` strictly overlap the cap, and tube witnesses of cap points have foot
+*strictly* below `c_max`, so the open range covers exactly the cap-tube intersection while
+keeping every slice nonempty.  `Ioo 0 c_max` is preconnected by `isPreconnected_Ioo`. -/
+theorem isPreconnected_cap_inter_ball_cover_Ioo {cap X : Set Plane} (hcap : Convex ℝ cap)
+    {c_max : ℝ} (p : ℝ → Plane) (r : ℝ → ℝ)
+    (hcover : X = ⋃ c ∈ Set.Ioo (0 : ℝ) c_max, (cap ∩ Metric.ball (p c) (r c)))
+    (hov : ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
+        ((cap ∩ Metric.ball (p c) (r c)) ∩ (cap ∩ Metric.ball (p c') (r c'))).Nonempty) :
+    IsPreconnected X := by
+  rw [hcover]
+  refine IsPreconnected.biUnion_of_reflTransGen
+    (fun c _ => (hcap.inter (convex_ball _ _)).isPreconnected) ?_
+  intro c hc c' hc'
+  exact reflTransGen_meets_of_local_overlap isPreconnected_Ioo
+    (fun c => cap ∩ Metric.ball (p c) (r c)) hov hc hc'
+
 /-- **Linear-chain union.** If `s : Fin n → Set α` has each `s i` preconnected and each
 consecutive pair `s i, s (i+1)` meeting, then `⋃ i, s i` is preconnected. -/
 theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : ℕ}
@@ -7178,7 +7200,7 @@ theorem liftPlus_fst (s t : Plane) (c ε : ℝ) :
 theorem liftPlus_snd (s t : Plane) (c ε : ℝ) :
     (liftPlus s t c ε).2 = (1 - c) * s.2 + c * t.2 + ε * (t.1 - s.1) := rfl
 
-private theorem liftPlus_zero_eq_affineComb (s t : Plane) (c : ℝ) :
+theorem liftPlus_zero_eq_affineComb (s t : Plane) (c : ℝ) :
     liftPlus s t c 0 = (1 - c) • s + c • t := by
   ext <;> simp [liftPlus, smul_eq_mul]
 
@@ -7282,7 +7304,7 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
     (hcSrc : D ≤ cSrc * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg))
     (hpD : dist p (β.verts 0) < D) :
     p ∈ β.segCarrier β.firstSeg ∧
-      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc := by
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc := by
   have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
   rw [PolyArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
@@ -7311,7 +7333,7 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
   have hdist : dist p (β.verts 0) = b * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) := by
     rw [← hsv, ← hpeq, dist_affineComb_src hab, abs_of_nonneg hb,
       dist_comm (β.segTgt β.firstSeg) (β.segSrc β.firstSeg)]
-  rw [hfoot, Set.mem_Ioc]
+  rw [hfoot, Set.mem_Ioo]
   refine ⟨?_, ?_⟩
   · rcases eq_or_lt_of_le hb with hb0 | hb0
     · exfalso
@@ -7320,7 +7342,7 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
         rw [← hpeq, ← hb0, show a = 1 - (0:ℝ) from by linarith, hsv]; simp
       rwa [hpv] at hp
     · exact hb0
-  · -- `b · ‖edge‖ = dist p (verts 0) < D ≤ cSrc · ‖edge‖`, so `b ≤ cSrc`
+  · -- `b · ‖edge‖ = dist p (verts 0) < D ≤ cSrc · ‖edge‖`, so `b < cSrc`
     have hbd : b * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < D := by
       rw [← hdist]; exact hpD
     nlinarith [hcSrc, hbd, hdpos]
@@ -7334,7 +7356,7 @@ theorem arcInterior_near_tgt (β : PolyArc) {D cTgt : ℝ} {p : Plane}
     (hcTgt : D ≤ cTgt * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg))
     (hpD : dist p (β.verts (Fin.last β.numSegs)) < D) :
     p ∈ β.segCarrier β.lastSeg ∧
-      footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt := by
+      footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt := by
   have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
   rw [PolyArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
@@ -7367,7 +7389,7 @@ theorem arcInterior_near_tgt (β : PolyArc) {D cTgt : ℝ} {p : Plane}
       = a * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) := by
     rw [← hlastv, hpeq', dist_affineComb_src hba, abs_of_nonneg ha,
       dist_comm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)]
-  rw [hfoot, Set.mem_Ioc]
+  rw [hfoot, Set.mem_Ioo]
   refine ⟨?_, ?_⟩
   · rcases eq_or_lt_of_le ha with ha0 | ha0
     · exfalso
@@ -7500,12 +7522,12 @@ For a slice family `cap ∩ ball (p c) (r c)` indexed by `c ∈ Ioc 0 c_max`, if
 centre map `p` and radius map `r` are continuous and every slice is nonempty, then
 nearby slices overlap.  The witness is any point of the slice at `c`: openness of
 `{c' | dist w (p c') < r c'}` keeps that same point inside nearby balls. -/
-theorem local_overlap_of_continuous_nonempty_slices
-    {cap : Set Plane} {c_max : ℝ}
+theorem local_overlap_of_continuous_nonempty_slices_on
+    {cap : Set Plane} {t : Set ℝ}
     (p : ℝ → Plane) (r : ℝ → ℝ)
     (hp : Continuous p) (hr : Continuous r)
-    (hne : ∀ c ∈ Set.Ioc (0 : ℝ) c_max, (cap ∩ Metric.ball (p c) (r c)).Nonempty) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    (hne : ∀ c ∈ t, (cap ∩ Metric.ball (p c) (r c)).Nonempty) :
+    ∀ c ∈ t, ∃ ε > 0, ∀ c' ∈ t, |c' - c| < ε →
       ((cap ∩ Metric.ball (p c) (r c)) ∩ (cap ∩ Metric.ball (p c') (r c'))).Nonempty := by
   intro c hc
   rcases hne c hc with ⟨w, hwcap, hwball⟩
@@ -7522,6 +7544,24 @@ theorem local_overlap_of_continuous_nonempty_slices
   refine ⟨w, ⟨hwcap, hwball⟩, ⟨hwcap, ?_⟩⟩
   simpa [U] using hc'U
 
+theorem local_overlap_of_continuous_nonempty_slices
+    {cap : Set Plane} {c_max : ℝ}
+    (p : ℝ → Plane) (r : ℝ → ℝ)
+    (hp : Continuous p) (hr : Continuous r)
+    (hne : ∀ c ∈ Set.Ioc (0 : ℝ) c_max, (cap ∩ Metric.ball (p c) (r c)).Nonempty) :
+    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+      ((cap ∩ Metric.ball (p c) (r c)) ∩ (cap ∩ Metric.ball (p c') (r c'))).Nonempty :=
+  local_overlap_of_continuous_nonempty_slices_on (t := Set.Ioc (0 : ℝ) c_max) p r hp hr hne
+
+theorem local_overlap_of_continuous_nonempty_slices_Ioo
+    {cap : Set Plane} {c_max : ℝ}
+    (p : ℝ → Plane) (r : ℝ → ℝ)
+    (hp : Continuous p) (hr : Continuous r)
+    (hne : ∀ c ∈ Set.Ioo (0 : ℝ) c_max, (cap ∩ Metric.ball (p c) (r c)).Nonempty) :
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
+      ((cap ∩ Metric.ball (p c) (r c)) ∩ (cap ∩ Metric.ball (p c') (r c'))).Nonempty :=
+  local_overlap_of_continuous_nonempty_slices_on (t := Set.Ioo (0 : ℝ) c_max) p r hp hr hne
+
 /-- **Local overlap of the source-positive cap slices from slice nonemptiness.**
 
 This is the flexible version of the source-cap overlap input for
@@ -7530,12 +7570,12 @@ This is the flexible version of the source-cap overlap input for
 the centre and radius functions makes nearby slices overlap automatically. -/
 theorem local_overlap_endCapSrcPlus_of_slice_nonempty
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcPlus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀ (Metric.infDist
           (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2))).Nonempty) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapSrcPlus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -7556,7 +7596,7 @@ theorem local_overlap_endCapSrcPlus_of_slice_nonempty
       (Metric.continuous_infDist_pt (Rᶜ)).comp hp
     simpa [r] using continuous_const.min (hInf.div_const (2 : ℝ))
   simpa [p, r] using
-    local_overlap_of_continuous_nonempty_slices
+    local_overlap_of_continuous_nonempty_slices_Ioo
       (cap := endCapSrcPlus β ρ) (c_max := c_max) p r hp hr hslice
 
 /-- **Source-cap slice nonemptiness from the sliver budget.**
@@ -7673,15 +7713,15 @@ range is nonempty. -/
 theorem nonempty_endCapSrcPlus_slices_of_sliver_budget
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2)) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcPlus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀
@@ -7706,9 +7746,9 @@ Inputs: `δ₀ > 0`, the cap-radius budget `c_max·dist(s,t) < ρ 0`, and radius
 theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapSrcPlus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -7718,7 +7758,8 @@ theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β
             (min δ₀ (Metric.infDist
               (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c' 0) Rᶜ / 2)))).Nonempty := by
   intro c hc
-  obtain ⟨hc0, hcle⟩ := hc
+  obtain ⟨hc0, hclt⟩ := hc
+  have hcle : c ≤ c_max := hclt.le
   set s := β.segSrc β.firstSeg with hs
   set t := β.segTgt β.firstSeg with ht
   have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
@@ -7729,7 +7770,7 @@ theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β
       apply Fin.ext; simp [PolyArc.firstSeg]
     rw [hs, PolyArc.segSrc, hcast]
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
-  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hcle⟩
+  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ 0 - c * dist s t) with hK
   have hKpos : 0 < K := by
     refine lt_min (lt_min hδ₀ (by positivity)) ?_
@@ -7801,13 +7842,13 @@ theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β
 tube witness near the source endpoint comes from the first edge in the same foot window. -/
 theorem taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max) :
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max) :
     taperedTube R S δ₀ ∩ endCapSrcPlus β ρ
-      = ⋃ c ∈ Set.Ioc (0 : ℝ) c_max,
+      = ⋃ c ∈ Set.Ioo (0 : ℝ) c_max,
           endCapSrcPlus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -7830,7 +7871,7 @@ theorem taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
       linarith
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
-    have hc : c ∈ Set.Ioc (0 : ℝ) c_max := by simpa [c, s, t] using hpc
+    have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by simpa [s, t] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
@@ -7862,20 +7903,20 @@ theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ) :
     IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapSrcPlus β ρ) := by
   have hcover := taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapSrcPlus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapSrcPlus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapSrcPlus β ρ)
       (p := fun c => liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -7906,12 +7947,12 @@ theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_slice_nonempt
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcPlus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀ (Metric.infDist
@@ -7920,7 +7961,7 @@ theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_slice_nonempt
   have hcover := taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapSrcPlus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapSrcPlus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapSrcPlus β ρ)
       (p := fun c => liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -7948,16 +7989,16 @@ theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_sliver_budget
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -8310,12 +8351,12 @@ automatically. -/
 theorem local_overlap_endCapSrcMinus_of_slice_nonempty
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcMinus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀ (Metric.infDist
           (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2))).Nonempty) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapSrcMinus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -8336,7 +8377,7 @@ theorem local_overlap_endCapSrcMinus_of_slice_nonempty
       (Metric.continuous_infDist_pt (Rᶜ)).comp hp
     simpa [r] using continuous_const.min (hInf.div_const (2 : ℝ))
   simpa [p, r] using
-    local_overlap_of_continuous_nonempty_slices
+    local_overlap_of_continuous_nonempty_slices_Ioo
       (cap := endCapSrcMinus β ρ) (c_max := c_max) p r hp hr hslice
 
 /-- **Source-negative cap slice nonemptiness from the sliver budget.**
@@ -8453,15 +8494,15 @@ in the range is nonempty. -/
 theorem nonempty_endCapSrcMinus_slices_of_sliver_budget
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2)) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcMinus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀
@@ -8481,9 +8522,9 @@ obtained by a tiny negative lift of the foot-`c` centre. -/
 theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapSrcMinus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -8493,7 +8534,8 @@ theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
             (min δ₀ (Metric.infDist
               (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c' 0) Rᶜ / 2)))).Nonempty := by
   intro c hc
-  obtain ⟨hc0, hcle⟩ := hc
+  obtain ⟨hc0, hclt⟩ := hc
+  have hcle : c ≤ c_max := hclt.le
   set s := β.segSrc β.firstSeg with hs
   set t := β.segTgt β.firstSeg with ht
   have hts : t ≠ s := β.segTgt_ne_segSrc β.firstSeg
@@ -8504,7 +8546,7 @@ theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
       apply Fin.ext; simp [PolyArc.firstSeg]
     rw [hs, PolyArc.segSrc, hcast]
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
-  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hcle⟩
+  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ 0 - c * dist s t) with hK
   have hKpos : 0 < K := by
     refine lt_min (lt_min hδ₀ (by positivity)) ?_
@@ -8587,13 +8629,13 @@ once every tube witness near the source endpoint comes from the first edge in th
 same foot window. -/
 theorem taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max) :
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max) :
     taperedTube R S δ₀ ∩ endCapSrcMinus β ρ
-      = ⋃ c ∈ Set.Ioc (0 : ℝ) c_max,
+      = ⋃ c ∈ Set.Ioo (0 : ℝ) c_max,
           endCapSrcMinus β ρ ∩ Metric.ball
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -8616,7 +8658,7 @@ theorem taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
       linarith
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
-    have hc : c ∈ Set.Ioc (0 : ℝ) c_max := by simpa [c, s, t] using hpc
+    have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by simpa [s, t] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
@@ -8649,20 +8691,20 @@ theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ) :
     IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapSrcMinus β ρ) := by
   have hcover := taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapSrcMinus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapSrcMinus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapSrcMinus β ρ)
       (p := fun c => liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -8691,12 +8733,12 @@ theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_slice_nonemp
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcMinus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
         (min δ₀ (Metric.infDist
@@ -8705,7 +8747,7 @@ theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_slice_nonemp
   have hcover := taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapSrcMinus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapSrcMinus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapSrcMinus β ρ)
       (p := fun c => liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -8731,16 +8773,16 @@ theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_sliver_budge
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -8759,12 +8801,12 @@ centre and radius functions gives local overlap automatically. -/
 theorem local_overlap_endCapTgtMinus_of_slice_nonempty
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtMinus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀ (Metric.infDist
           (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2))).Nonempty) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapTgtMinus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -8785,7 +8827,7 @@ theorem local_overlap_endCapTgtMinus_of_slice_nonempty
       (Metric.continuous_infDist_pt (Rᶜ)).comp hp
     simpa [r] using continuous_const.min (hInf.div_const (2 : ℝ))
   simpa [p, r] using
-    local_overlap_of_continuous_nonempty_slices
+    local_overlap_of_continuous_nonempty_slices_Ioo
       (cap := endCapTgtMinus β ρ) (c_max := c_max) p r hp hr hslice
 
 /-- **Target-negative cap slice nonemptiness from the sliver budget.**
@@ -8909,15 +8951,15 @@ This is the interval package for
 theorem nonempty_endCapTgtMinus_slices_of_sliver_budget
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtMinus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀
@@ -8937,9 +8979,9 @@ theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapTgtMinus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -8949,7 +8991,8 @@ theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
             (min δ₀ (Metric.infDist
               (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c' 0) Rᶜ / 2)))).Nonempty := by
   intro c hc
-  obtain ⟨hc0, hcle⟩ := hc
+  obtain ⟨hc0, hclt⟩ := hc
+  have hcle : c ≤ c_max := hclt.le
   set s := β.segTgt β.lastSeg with hs
   set t := β.segSrc β.lastSeg with ht
   have hts : t ≠ s := by
@@ -8964,7 +9007,7 @@ theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
     simp [PolyArc.lastSeg, Fin.val_last]
     omega
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
-  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hcle⟩
+  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ (Fin.last β.numSegs) - c * dist s t) with hK
   have hKpos : 0 < K := by
     refine lt_min (lt_min hδ₀ (by positivity)) ?_
@@ -9047,14 +9090,14 @@ once every tube witness near the target endpoint comes from the last edge in the
 same reversed foot window. -/
 theorem taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max) :
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max) :
     taperedTube R S δ₀ ∩ endCapTgtMinus β ρ
-      = ⋃ c ∈ Set.Ioc (0 : ℝ) c_max,
+      = ⋃ c ∈ Set.Ioo (0 : ℝ) c_max,
           endCapTgtMinus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -9079,7 +9122,7 @@ theorem taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
       linarith
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
-    have hc : c ∈ Set.Ioc (0 : ℝ) c_max := by simpa [c, s, t] using hpc
+    have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by
       simpa [s, t, PolyArc.segCarrier, segment_symm] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
@@ -9114,22 +9157,22 @@ theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ) :
     IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapTgtMinus β ρ) := by
   have hcover := taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapTgtMinus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapTgtMinus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapTgtMinus β ρ)
       (p := fun c => liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -9159,13 +9202,13 @@ theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_slice_nonemp
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtMinus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀ (Metric.infDist
@@ -9174,7 +9217,7 @@ theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_slice_nonemp
   have hcover := taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapTgtMinus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapTgtMinus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapTgtMinus β ρ)
       (p := fun c => liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -9201,17 +9244,17 @@ theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_sliver_budge
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
@@ -9229,12 +9272,12 @@ overlap automatically. -/
 theorem local_overlap_endCapTgtPlus_of_slice_nonempty
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtPlus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀ (Metric.infDist
           (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2))).Nonempty) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapTgtPlus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -9255,7 +9298,7 @@ theorem local_overlap_endCapTgtPlus_of_slice_nonempty
       (Metric.continuous_infDist_pt (Rᶜ)).comp hp
     simpa [r] using continuous_const.min (hInf.div_const (2 : ℝ))
   simpa [p, r] using
-    local_overlap_of_continuous_nonempty_slices
+    local_overlap_of_continuous_nonempty_slices_Ioo
       (cap := endCapTgtPlus β ρ) (c_max := c_max) p r hp hr hslice
 
 /-- **Target-positive cap slice nonemptiness from the sliver budget.**
@@ -9378,15 +9421,15 @@ theorem nonempty_endCapTgtPlus_slice_of_sliver_budget
 theorem nonempty_endCapTgtPlus_slices_of_sliver_budget
     (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtPlus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀
@@ -9406,9 +9449,9 @@ theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ) :
-    ∀ c ∈ Set.Ioc (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioc (0 : ℝ) c_max, |c' - c| < ε →
+    ∀ c ∈ Set.Ioo (0 : ℝ) c_max, ∃ ε > 0, ∀ c' ∈ Set.Ioo (0 : ℝ) c_max, |c' - c| < ε →
       ((endCapTgtPlus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -9418,7 +9461,8 @@ theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
             (min δ₀ (Metric.infDist
               (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c' 0) Rᶜ / 2)))).Nonempty := by
   intro c hc
-  obtain ⟨hc0, hcle⟩ := hc
+  obtain ⟨hc0, hclt⟩ := hc
+  have hcle : c ≤ c_max := hclt.le
   set s := β.segTgt β.lastSeg with hs
   set t := β.segSrc β.lastSeg with ht
   have hts : t ≠ s := by
@@ -9433,7 +9477,7 @@ theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
     simp [PolyArc.lastSeg, Fin.val_last]
     omega
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
-  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hcle⟩
+  have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ (Fin.last β.numSegs) - c * dist s t) with hK
   have hKpos : 0 < K := by
     refine lt_min (lt_min hδ₀ (by positivity)) ?_
@@ -9520,14 +9564,14 @@ once every tube witness near the target endpoint comes from the last edge in the
 same reversed foot window. -/
 theorem taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
     (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max) :
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max) :
     taperedTube R S δ₀ ∩ endCapTgtPlus β ρ
-      = ⋃ c ∈ Set.Ioc (0 : ℝ) c_max,
+      = ⋃ c ∈ Set.Ioo (0 : ℝ) c_max,
           endCapTgtPlus β ρ ∩ Metric.ball
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
             (min δ₀ (Metric.infDist
@@ -9552,7 +9596,7 @@ theorem taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
       linarith
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
-    have hc : c ∈ Set.Ioc (0 : ℝ) c_max := by simpa [c, s, t] using hpc
+    have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by
       simpa [s, t, PolyArc.segCarrier, segment_symm] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
@@ -9587,22 +9631,22 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ) :
     IsPreconnected ((taperedTube R S δ₀ \ β.carrier) ∩ endCapTgtPlus β ρ) := by
   have hcover := taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapTgtPlus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapTgtPlus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapTgtPlus β ρ)
       (p := fun c => liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -9628,13 +9672,13 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_slice_nonempt
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
-    (hslice : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
+    (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtPlus β ρ ∩ Metric.ball
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
         (min δ₀ (Metric.infDist
@@ -9643,7 +9687,7 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_slice_nonempt
   have hcover := taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
     β R S ρ hspine hnear
   have hpre : IsPreconnected (taperedTube R S δ₀ ∩ endCapTgtPlus β ρ) := by
-    refine isPreconnected_cap_inter_ball_cover (convex_endCapTgtPlus β ρ)
+    refine isPreconnected_cap_inter_ball_cover_Ioo (convex_endCapTgtPlus β ρ)
       (p := fun c => liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
       (r := fun c =>
         min δ₀ (Metric.infDist
@@ -9670,17 +9714,17 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_sliver_budget
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hspine : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) c_max)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max)
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hRpos : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hsliver : ∀ c ∈ Set.Ioc (0 : ℝ) c_max,
+    (hsliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
@@ -11098,16 +11142,16 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
       δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hSrcNear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc)
     (hρ0 : 0 < ρ 0)
-    (hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hSrcSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -11115,17 +11159,17 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
     (hTgtSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hTgtNear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt)
     (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hTgtSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
@@ -11197,16 +11241,16 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
       δ₀ + 2 * α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i))
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hSrcNear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc)
     (hρ0 : 0 < ρ 0)
-    (hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hSrcSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -11214,17 +11258,17 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
     (hTgtSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hTgtNear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt)
     (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hTgtSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist

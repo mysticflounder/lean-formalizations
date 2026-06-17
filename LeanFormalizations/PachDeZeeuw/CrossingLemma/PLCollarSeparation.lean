@@ -256,16 +256,16 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
       sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hSrcNear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc)
     (hρ0 : 0 < ρ 0)
-    (hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hSrcSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -273,17 +273,17 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
     (hTgtSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hTgtNear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt)
     (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hTgtSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
@@ -365,16 +365,16 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
       sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier)
     (hSrcSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
-    (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hSrcNear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc)
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc)
     (hρ0 : 0 < ρ 0)
-    (hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hSrcSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cSrc,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
@@ -382,17 +382,17 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
     (hTgtSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
-    (hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hTgtNear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt)
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt)
     (hρL : 0 < ρ (Fin.last β.numSegs))
-    (hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
-    (hTgtSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSliver : ∀ c ∈ Set.Ioo (0 : ℝ) cTgt,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
@@ -462,6 +462,7 @@ theorem collarMinus_subset_neg_sideForm_of_numSegs_one
   · have hh : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0 := htgt.2
     rwa [hlast] at hh
 
+set_option maxHeartbeats 1600000 in
 /-- **Two-sided partition for a single-segment polygonal crosscut.**
 
 For a `PolyArc` `β` with exactly one segment (`β.numSegs = 1`) the collar
@@ -479,8 +480,6 @@ the internally chosen parameters to
 theorem exists_twoSidedPartition_of_straightArc
     (β : PolyArc) (h1 : β.numSegs = 1) {R S : Set Plane} {α : ℝ}
     (hα : 0 < α) (hα3 : α < 1 / 3)
-    {cSrc cTgt : ℝ} (hcSrcpos : 0 < cSrc) (hcTgtpos : 0 < cTgt)
-    (hcSrc : cSrc ≤ 2 * α) (hcTgt : cTgt ≤ 2 * α)
     {mR : ℝ} (hmRpos : 0 < mR)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -492,23 +491,29 @@ theorem exists_twoSidedPartition_of_straightArc
     (hRband_lb : ∀ y ∈ β.segCarrier β.firstSeg,
       footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) y ∈ Set.Icc (α / 2) (1 - α / 2) →
       mR ≤ Metric.infDist y Rᶜ)
-    (hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    (hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hSrcNear_L : ∀ p ∈ S,
       dist p (β.verts 0) < dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc)
-    (hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+        0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∧
+        dist p (β.verts 0) =
+          footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p *
+            dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg))
+    (hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       0 < Metric.infDist
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ)
-    (hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    (hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hTgtNear_L : ∀ p ∈ S,
       dist p (β.verts (Fin.last β.numSegs)) <
           dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt)
-    (hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+        0 < footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∧
+        dist p (β.verts (Fin.last β.numSegs)) =
+          footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p *
+            dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg))
+    (hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       0 < Metric.infDist
         (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ)
     (hcover : ∀ δ₀ : ℝ, 0 < δ₀ → R ∩ β.carrier ⊆ taperedTube R S δ₀) :
@@ -535,28 +540,41 @@ theorem exists_twoSidedPartition_of_straightArc
     rcases hcoord with h1' | h1'
     · have := abs_pos.mpr h1'; have := abs_nonneg (t.2 - s.2); linarith
     · have := abs_pos.mpr h1'; have := abs_nonneg (t.1 - s.1); linarith
-  -- Internal δ₀ and ρ choices.
-  set δ₀ : ℝ := min (min (L * (1 - 2 * α) / 3) ((α / 2) * dotpst / sum)) (mR / 2) with hδ₀def
+  -- Internal δ₀ and ρ choices.  The `L * (1 - 3 * α) / 3` slot (tighter than the
+  -- former `1 - 2 * α`) guarantees the open slice range `c_max = (ρval + δ₀)/L`
+  -- stays inside the safe foot window `[α/2, 1 - α/2]`, where `hRband_lb` gives the
+  -- per-slice depth used by the sliver budget.
+  set δ₀ : ℝ := min (min (L * (1 - 3 * α) / 3) ((α / 2) * dotpst / sum)) (mR / 2) with hδ₀def
+  have h13 : 0 < 1 - 3 * α := by linarith
   have hδ₀pos : 0 < δ₀ := by
     rw [hδ₀def]
     refine lt_min (lt_min ?_ ?_) ?_
-    · have : 0 < 1 - 2 * α := by linarith
-      positivity
+    · positivity
     · positivity
     · linarith
-  have hδ₀_le1 : δ₀ ≤ L * (1 - 2 * α) / 3 := le_trans (min_le_left _ _) (min_le_left _ _)
+  have hδ₀_le1 : δ₀ ≤ L * (1 - 3 * α) / 3 := le_trans (min_le_left _ _) (min_le_left _ _)
   have hδ₀_le2 : δ₀ ≤ (α / 2) * dotpst / sum := le_trans (min_le_left _ _) (min_le_right _ _)
   have hδ₀_le3 : δ₀ ≤ mR / 2 := min_le_right _ _
   have hδ₀_ltL : δ₀ < L * (1 - 2 * α) := by
-    have h12 : 0 < 1 - 2 * α := by linarith
-    have hpos : 0 < L * (1 - 2 * α) := by positivity
-    linarith [hδ₀_le1]
+    have hpos : 0 < L * (1 - 2 * α) := by have : 0 < 1 - 2 * α := by linarith
+                                          positivity
+    have hmono : L * (1 - 3 * α) / 3 ≤ L * (1 - 2 * α) := by nlinarith [hLpos, hα, h13]
+    linarith [hδ₀_le1, hmono]
   set ρval : ℝ := (δ₀ + 2 * α * L + L) / 2 with hρval
   set ρ : Fin (β.numSegs + 1) → ℝ := fun _ => ρval with hρ
   have hbudget : δ₀ + 2 * α * L < ρval := by rw [hρval]; linarith [hδ₀_ltL]
   have hρLe : ρval ≤ L := by rw [hρval]; linarith [hδ₀_ltL]
-  have hρNear : ρval + δ₀ ≤ L := by rw [hρval]; nlinarith [hδ₀_le1, hLpos, hα]
+  have hρNear : ρval + δ₀ ≤ L := by rw [hρval]; nlinarith [hδ₀_le1, hLpos, hα, h13]
   have hρpos : 0 < ρval := by rw [hρval]; nlinarith [hδ₀pos, hLpos, hα]
+  -- Internal open slice range top: `c_max·L = ρval + δ₀` (the open-interval
+  -- reconciliation of the cap-tube-witness reach and the strict sliver budget).
+  set c_max : ℝ := (ρval + δ₀) / L with hc_max
+  have hc_maxL : c_max * L = ρval + δ₀ := by rw [hc_max]; field_simp
+  have hc_maxpos : 0 < c_max := by rw [hc_max]; positivity
+  -- The slice range sits in the safe foot window, so `hRband_lb` applies on it.
+  have hc_max_safe : c_max ≤ 1 - α / 2 := by
+    rw [hc_max, div_le_iff₀ hLpos]; nlinarith [hδ₀_le1, hLpos, hα, h13]
+  have hc_maxlt1 : c_max < 1 := by linarith [hc_max_safe, hα]
   -- `hsmall` for the unique edge.
   have hsmall_first :
       sum / dotpst * δ₀ ≤ α / 2 := by
@@ -659,7 +677,7 @@ theorem exists_twoSidedPartition_of_straightArc
     have hlb := hRband_lb y hy hfoot
     rw [hδ₀def]
     have : (mR / 2 : ℝ) ≤ Metric.infDist y Rᶜ / 2 := by linarith [hlb]
-    calc min (min (L * (1 - 2 * α) / 3) (α / 2 * dotpst / sum)) (mR / 2)
+    calc min (min (L * (1 - 3 * α) / 3) (α / 2 * dotpst / sum)) (mR / 2)
         ≤ mR / 2 := min_le_right _ _
       _ ≤ Metric.infDist y Rᶜ / 2 := this
   have hsectorWPlus : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
@@ -672,32 +690,61 @@ theorem exists_twoSidedPartition_of_straightArc
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i) := by
     intro i hi0
     exact absurd (hidx i ▸ rfl : (i : ℕ) = 0) hi0
+  -- `hSrcNear` at the cap reach `ρ 0 + δ₀ = c_max·L`.  A near-source spine point is a
+  -- forward first-edge point with `dist = foot·L`, so `foot·L = dist < c_max·L` forces
+  -- `foot < c_max` STRICTLY — the open foot range the Ioo cap cover needs.
   have hSrcNear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
       p ∈ β.segCarrier β.firstSeg ∧
-        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc := by
+        footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) c_max := by
     intro p hp hd
-    refine hSrcNear_L p hp ?_
-    show dist p (β.verts 0) < L
     have hdv : dist p (β.verts 0) < ρval + δ₀ := hd
-    linarith [hdv, hρNear, hδ₀pos]
-  have hSrcSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+    have hdL : dist p (β.verts 0) < L := by linarith [hdv, hρNear, hδ₀pos]
+    obtain ⟨hpseg, hfootpos, hfooteq⟩ := hSrcNear_L p hp hdL
+    refine ⟨hpseg, hfootpos, ?_⟩
+    -- `foot · L = dist p src < ρval + δ₀ = c_max · L`, with `L > 0` ⇒ `foot < c_max`.
+    -- (`hfooteq`'s distance factor is `dist s t`, folded to `L` by the `set`s.)
+    have hfL : footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p * L < c_max * L := by
+      rw [hc_maxL]; linarith [hdv, hfooteq]
+    exact lt_of_mul_lt_mul_right hfL hLpos.le
+  have hSrcSliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) <
         ρ 0 + min δ₀
           (Metric.infDist
             (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ / 2) := by
     intro c hc
-    show c * dist s t < ρval + min δ₀ _
-    rw [← hL]
-    have hcL : c * L ≤ 2 * α * L := by
-      have hcle : c ≤ 2 * α := le_trans hc.2 hcSrc
-      nlinarith [hc.1, hLpos, hcle]
-    have hmin0 : (0 : ℝ) ≤ min δ₀
-        (Metric.infDist (liftPlus s t c 0) Rᶜ / 2) := by
-      refine le_min hδ₀pos.le ?_
-      have := Metric.infDist_nonneg (x := liftPlus s t c 0) (s := Rᶜ)
-      linarith
-    have : 2 * α * L < ρval := by rw [hρval]; linarith [hδ₀pos]
-    linarith [hcL, this, hmin0]
+    obtain ⟨hc0, hclt⟩ := hc
+    show c * L < ρval + min δ₀ (Metric.infDist (liftPlus s t c 0) Rᶜ / 2)
+    have hcLlt : c * L < ρval + δ₀ := by
+      have := mul_lt_mul_of_pos_right hclt hLpos; rwa [hc_maxL] at this
+    rcases lt_or_ge (c * L) ρval with hcase | hcase
+    · -- inner slices: `c·L ≤ ρval < ρval + min(...)` (min > 0 from `hSrcRpos`).
+      have hmin0 : (0 : ℝ) < min δ₀
+          (Metric.infDist (liftPlus s t c 0) Rᶜ / 2) := by
+        refine lt_min hδ₀pos ?_
+        have hRp := hSrcRpos c ⟨hc0, lt_trans hclt hc_maxlt1⟩
+        linarith [hRp]
+      linarith [hcase, hmin0]
+    · -- outer slices: `c·L - ρval < δ₀` and `≤ mR/2 ≤ infDist/2`, so within `min(...)`.
+      have hcsafe : c ∈ Set.Icc (α / 2) (1 - α / 2) := by
+        refine ⟨?_, ?_⟩
+        · -- `c·L > ρval > (L)/2 > (α/2)·L`, so `c > α/2`.
+          have hρhalf : (α / 2) * L < ρval := by rw [hρval]; nlinarith [hδ₀pos, hLpos, hα]
+          have : (α / 2) * L < c * L := by linarith [hcase, hρhalf]
+          exact le_of_lt (lt_of_mul_lt_mul_right this hLpos.le)
+        · linarith [hclt, hc_max_safe]
+      -- depth at the foot-`c` point of the first edge via `hRband_lb`.
+      have hmem : liftPlus s t c 0 ∈ β.segCarrier β.firstSeg :=
+        ⟨1 - c, c, by linarith [hclt, hc_maxlt1], by linarith [hc0], by ring,
+          (liftPlus_zero_eq_affineComb s t c).symm⟩
+      have hfootc : footParam s t (liftPlus s t c 0) = c :=
+        footParam_liftPlus hts c 0
+      have hfootmem : footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) (liftPlus s t c 0)
+          ∈ Set.Icc (α / 2) (1 - α / 2) := by rw [hfootc]; exact hcsafe
+      have hdepth : mR ≤ Metric.infDist (liftPlus s t c 0) Rᶜ :=
+        hRband_lb (liftPlus s t c 0) hmem hfootmem
+      have hmineq : min δ₀ (Metric.infDist (liftPlus s t c 0) Rᶜ / 2) = δ₀ := by
+        apply min_eq_left; linarith [hdepth, hδ₀_le3]
+      rw [hmineq]; exact hcLlt
   have hTgtSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) := by
@@ -705,50 +752,102 @@ theorem exists_twoSidedPartition_of_straightArc
     have : (i : ℕ) = 0 := hidx i ▸ rfl
     rw [this] at hi
     exact absurd (by have := h1; omega : (0 : ℕ) = β.numSegs - 1) hi
+  have htgtdistL : dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) = L := by
+    rw [hlast, dist_comm]
   have hTgtNear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
         ρ (Fin.last β.numSegs) + δ₀ →
       p ∈ β.segCarrier β.lastSeg ∧
-        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt := by
+        footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) c_max := by
     intro p hp hd
-    refine hTgtNear_L p hp ?_
-    show dist p (β.verts (Fin.last β.numSegs)) < dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)
-    rw [hlast, hfirst_dist]
     have hdv : dist p (β.verts (Fin.last β.numSegs)) < ρval + δ₀ := hd
-    linarith [hdv, hρNear, hδ₀pos]
-  have hTgtSliver : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+    have hsegdistL : dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) = L := by
+      rw [dist_comm]; exact htgtdistL
+    have hdL : dist p (β.verts (Fin.last β.numSegs)) <
+        dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) := by
+      rw [hsegdistL]; linarith [hdv, hρNear, hδ₀pos]
+    obtain ⟨hpseg, hfootpos, hfooteq⟩ := hTgtNear_L p hp hdL
+    refine ⟨hpseg, hfootpos, ?_⟩
+    rw [htgtdistL] at hfooteq
+    have hfL : footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p * L < c_max * L := by
+      rw [hc_maxL]; linarith [hdv, hfooteq]
+    exact lt_of_mul_lt_mul_right hfL hLpos.le
+  have hTgtSliver : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) <
         ρ (Fin.last β.numSegs) + min δ₀
           (Metric.infDist
             (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2) := by
     intro c hc
-    show c * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) < ρval + min δ₀ _
-    rw [hlast]
-    have hdistEq : dist (β.segTgt β.firstSeg) (β.segSrc β.firstSeg) = L := by
-      rw [dist_comm, ← hs, ← ht]
-    rw [hdistEq]
-    have hcL : c * L ≤ 2 * α * L := by
-      have hcle : c ≤ 2 * α := le_trans hc.2 hcTgt
-      nlinarith [hc.1, hLpos, hcle]
-    have hmin0 : (0 : ℝ) ≤ min δ₀
-        (Metric.infDist (liftPlus (β.segTgt β.firstSeg) (β.segSrc β.firstSeg) c 0) Rᶜ / 2) := by
-      refine le_min hδ₀pos.le ?_
-      have := Metric.infDist_nonneg
-        (x := liftPlus (β.segTgt β.firstSeg) (β.segSrc β.firstSeg) c 0) (s := Rᶜ)
-      linarith
-    have : 2 * α * L < ρval := by rw [hρval]; linarith [hδ₀pos]
-    linarith [hcL, this, hmin0]
+    obtain ⟨hc0, hclt⟩ := hc
+    rw [htgtdistL]
+    show c * L < ρval + min δ₀
+      (Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)
+    have hcLlt : c * L < ρval + δ₀ := by
+      have := mul_lt_mul_of_pos_right hclt hLpos; rwa [hc_maxL] at this
+    rcases lt_or_ge (c * L) ρval with hcase | hcase
+    · have hmin0 : (0 : ℝ) < min δ₀
+          (Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2) := by
+        refine lt_min hδ₀pos ?_
+        have hRp := hTgtRpos c ⟨hc0, lt_trans hclt hc_maxlt1⟩
+        linarith [hRp]
+      linarith [hcase, hmin0]
+    · -- outer slices: depth via `hRband_lb` on the reversed-edge foot point.
+      have hcsafe1 : α / 2 ≤ c := by
+        have hρhalf : (α / 2) * L < ρval := by rw [hρval]; nlinarith [hδ₀pos, hLpos, hα]
+        have : (α / 2) * L < c * L := by linarith [hcase, hρhalf]
+        exact le_of_lt (lt_of_mul_lt_mul_right this hLpos.le)
+      have hcsafe2 : c ≤ 1 - α / 2 := by linarith [hclt, hc_max_safe]
+      -- `liftPlus (segTgt lastSeg) (segSrc lastSeg) c 0` is the foot-`(1-c)` point of the
+      -- forward edge `s→t`, hence its forward foot `1-c ∈ [α/2, 1-α/2]` lets `hRband_lb` apply.
+      have hpt_eq : liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0
+          = liftPlus s t (1 - c) 0 := by
+        rw [liftPlus_zero_eq_affineComb, liftPlus_zero_eq_affineComb, hlast,
+          show (1 : ℝ) - (1 - c) = c from by ring, add_comm]
+      have hmem' : liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0
+          ∈ β.segCarrier β.firstSeg := by
+        rw [hpt_eq]
+        exact ⟨1 - (1 - c), 1 - c, by linarith [hc0], by linarith [hclt, hc_maxlt1], by ring,
+          (liftPlus_zero_eq_affineComb s t (1 - c)).symm⟩
+      have hfootmem : footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg)
+          (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0)
+          ∈ Set.Icc (α / 2) (1 - α / 2) := by
+        rw [hpt_eq, footParam_liftPlus hts (1 - c) 0]
+        exact ⟨by linarith [hcsafe2], by linarith [hcsafe1]⟩
+      have hdepth : mR ≤ Metric.infDist
+          (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ :=
+        hRband_lb _ hmem' hfootmem
+      have hmineq : min δ₀
+          (Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ / 2)
+          = δ₀ := by
+        apply min_eq_left; linarith [hdepth, hδ₀_le3]
+      rw [hmineq]; exact hcLlt
+  -- Restrict the caller's `Ioo 0 1` spine/depth data to the internal slice range
+  -- `Ioo 0 c_max ⊆ Ioo 0 1` (since `c_max < 1`).
+  have hsub : Set.Ioo (0 : ℝ) c_max ⊆ Set.Ioo (0 : ℝ) 1 :=
+    Set.Ioo_subset_Ioo le_rfl hc_maxlt1.le
+  have hSrcSpine' : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
+      liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S :=
+    fun c hc => hSrcSpine c (hsub hc)
+  have hSrcRpos' : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
+      0 < Metric.infDist (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ :=
+    fun c hc => hSrcRpos c (hsub hc)
+  have hTgtSpine' : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
+      liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S :=
+    fun c hc => hTgtSpine c (hsub hc)
+  have hTgtRpos' : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
+      0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ :=
+    fun c hc => hTgtRpos c (hsub hc)
   -- `P5` (preconnectedness) of each collar side, via the `sorry`-free sliver-budget
   -- collar theorems in `PLArc` (no dependence on the sorried union lemma).
   have hTp_pre : IsPreconnected (collarPlus β R S δ₀ α ρ) :=
     isPreconnected_collarPlus_of_sliver_budgets β R S ρ hturn hδ₀pos hα hα3 hα1
       hsectorWPlus (le_refl δ₀) hsep hadj_tgt hadj_src hsmall hSband' hRband hsrc htgt
-      hSrcSep hSrcSpine hSrcNear hρpos hSrcRpos hSrcSliver hTgtSep hTgtSpine hTgtNear
-      hρpos hTgtRpos hTgtSliver
+      hSrcSep hSrcSpine' hSrcNear hρpos hSrcRpos' hSrcSliver hTgtSep hTgtSpine' hTgtNear
+      hρpos hTgtRpos' hTgtSliver
   have hTm_pre : IsPreconnected (collarMinus β R S δ₀ α ρ) :=
     isPreconnected_collarMinus_of_sliver_budgets β R S ρ hturn hδ₀pos hα hα3 hα1
       hsectorWMinus (le_refl δ₀) hsep hadj_tgt hadj_src hsmall hSband' hRband hsrc htgt
-      hSrcSep hSrcSpine hSrcNear hρpos hSrcRpos hSrcSliver hTgtSep hTgtSpine hTgtNear
-      hρpos hTgtRpos hTgtSliver
+      hSrcSep hSrcSpine' hSrcNear hρpos hSrcRpos' hSrcSliver hTgtSep hTgtSpine' hTgtNear
+      hρpos hTgtRpos' hTgtSliver
   -- Feed the `sorry`-free single-segment entry point.
   exact exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one
     β h1 ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ₀pos hα hα2 hmS hmR
@@ -918,12 +1017,6 @@ theorem exists_twoSidedPartition_prefixStep
       exact Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩
     · -- q = p₁ + t•v = p₁ + t•v + 0•(ε•n)
       dsimp; rw [hq]; simp
-  set cSrc : ℝ := α / 2 with hcSrc
-  have hcSrc_pos : 0 < cSrc := by dsimp [cSrc]; positivity
-  have hcSrc_le : cSrc ≤ 2 * α := by dsimp [cSrc]; nlinarith
-  set cTgt : ℝ := α / 2 with hcTgt
-  have hcTgt_pos : 0 < cTgt := by dsimp [cTgt]; positivity
-  have hcTgt_le : cTgt ≤ 2 * α := by dsimp [cTgt]; nlinarith
   set mR : ℝ := ε / 4 with hmR
   have hmR_pos : 0 < mR := by dsimp [mR]; positivity
   -- Remaining properties: sorried (analytic geometry)
@@ -961,51 +1054,71 @@ theorem exists_twoSidedPartition_prefixStep
         ((straightPolyArc p₁ p₂ hne)).firstSeg) y ∈ Set.Icc (α / 2) (1 - α / 2) →
       mR ≤ Metric.infDist y Rᶜ := by
     sorry
-  have hSrcSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+  have hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
         ((straightPolyArc p₁ p₂ hne)).firstSeg)
         (((straightPolyArc p₁ p₂ hne)).segTgt
         ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0 ∈ S := by
     sorry
   have hSrcNear_L : ∀ p ∈ S,
-      dist p ((straightPolyArc p₁ p₂ hne)).src <
+      dist p (((straightPolyArc p₁ p₂ hne)).verts 0) <
         dist (((straightPolyArc p₁ p₂ hne)).segSrc
           ((straightPolyArc p₁ p₂ hne)).firstSeg)
           (((straightPolyArc p₁ p₂ hne)).segTgt
           ((straightPolyArc p₁ p₂ hne)).firstSeg) →
       p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
         ((straightPolyArc p₁ p₂ hne)).firstSeg ∧
-        footParam (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).firstSeg)
-        (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).firstSeg) p ∈ Set.Ioc (0 : ℝ) cSrc := by
+        0 < footParam (((straightPolyArc p₁ p₂ hne)).segSrc
+          ((straightPolyArc p₁ p₂ hne)).firstSeg)
+          (((straightPolyArc p₁ p₂ hne)).segTgt
+          ((straightPolyArc p₁ p₂ hne)).firstSeg) p ∧
+        dist p (((straightPolyArc p₁ p₂ hne)).verts 0) =
+          footParam (((straightPolyArc p₁ p₂ hne)).segSrc
+            ((straightPolyArc p₁ p₂ hne)).firstSeg)
+            (((straightPolyArc p₁ p₂ hne)).segTgt
+            ((straightPolyArc p₁ p₂ hne)).firstSeg) p *
+            dist (((straightPolyArc p₁ p₂ hne)).segSrc
+              ((straightPolyArc p₁ p₂ hne)).firstSeg)
+              (((straightPolyArc p₁ p₂ hne)).segTgt
+              ((straightPolyArc p₁ p₂ hne)).firstSeg) := by
     sorry
-  have hSrcRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cSrc,
+  have hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
         ((straightPolyArc p₁ p₂ hne)).firstSeg)
         (((straightPolyArc p₁ p₂ hne)).segTgt
         ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0) Rᶜ := by
     sorry
-  have hTgtSpine : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+  have hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
         ((straightPolyArc p₁ p₂ hne)).lastSeg)
         (((straightPolyArc p₁ p₂ hne)).segSrc
         ((straightPolyArc p₁ p₂ hne)).lastSeg) c 0 ∈ S := by
     sorry
   have hTgtNear_L : ∀ p ∈ S,
-      dist p ((straightPolyArc p₁ p₂ hne)).tgt <
+      dist p (((straightPolyArc p₁ p₂ hne)).verts
+          (Fin.last (straightPolyArc p₁ p₂ hne).numSegs)) <
         dist (((straightPolyArc p₁ p₂ hne)).segSrc
           ((straightPolyArc p₁ p₂ hne)).lastSeg)
           (((straightPolyArc p₁ p₂ hne)).segTgt
           ((straightPolyArc p₁ p₂ hne)).lastSeg) →
       p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
         ((straightPolyArc p₁ p₂ hne)).lastSeg ∧
-        footParam (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).lastSeg)
-        (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).lastSeg) p ∈ Set.Ioc (0 : ℝ) cTgt := by
+        0 < footParam (((straightPolyArc p₁ p₂ hne)).segTgt
+          ((straightPolyArc p₁ p₂ hne)).lastSeg)
+          (((straightPolyArc p₁ p₂ hne)).segSrc
+          ((straightPolyArc p₁ p₂ hne)).lastSeg) p ∧
+        dist p (((straightPolyArc p₁ p₂ hne)).verts
+            (Fin.last (straightPolyArc p₁ p₂ hne).numSegs)) =
+          footParam (((straightPolyArc p₁ p₂ hne)).segTgt
+            ((straightPolyArc p₁ p₂ hne)).lastSeg)
+            (((straightPolyArc p₁ p₂ hne)).segSrc
+            ((straightPolyArc p₁ p₂ hne)).lastSeg) p *
+            dist (((straightPolyArc p₁ p₂ hne)).segTgt
+              ((straightPolyArc p₁ p₂ hne)).lastSeg)
+              (((straightPolyArc p₁ p₂ hne)).segSrc
+              ((straightPolyArc p₁ p₂ hne)).lastSeg) := by
     sorry
-  have hTgtRpos : ∀ c ∈ Set.Ioc (0 : ℝ) cTgt,
+  have hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
       0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
         ((straightPolyArc p₁ p₂ hne)).lastSeg)
         (((straightPolyArc p₁ p₂ hne)).segSrc
@@ -1019,7 +1132,6 @@ theorem exists_twoSidedPartition_prefixStep
     exists_twoSidedPartition_of_straightArc
       (straightPolyArc p₁ p₂ hne) h1
       hα_pos hα_lt_third
-      hcSrc_pos hcTgt_pos hcSrc_le hcTgt_le
       hmR_pos hR_open hR_sc
       hS_sub_R hS_preconnected hS_carrier_sub
       hp₁_notin hp₂_notin
