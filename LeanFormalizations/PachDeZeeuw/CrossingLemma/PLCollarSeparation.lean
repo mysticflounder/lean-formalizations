@@ -1141,4 +1141,279 @@ theorem exists_twoSidedPartition_prefixStep
       hcover
   exact ⟨R, U, V, hR_open, hR_sc, hp₁_notin, hp₂_notin, hpart⟩
 
+/-- **Lower bound on the distance to the complement of an open ball.**
+For any `x` in a metric space, `r - dist x c ≤ infDist x (ball c r)ᶜ`.  Reason:
+for any `z ∉ ball c r` we have `dist z c ≥ r`, and the triangle inequality gives
+`dist z c ≤ dist z x + dist x c`, so `dist x z ≥ r - dist x c`. -/
+private theorem infDist_ball_compl_lb {X : Type*} [MetricSpace X] (c : X) (r : ℝ)
+    (x : X) (hne : (Metric.ball c r)ᶜ.Nonempty) :
+    r - dist x c ≤ Metric.infDist x (Metric.ball c r)ᶜ := by
+  rw [Metric.le_infDist hne]
+  intro z hz
+  have hzc : r ≤ dist z c := by
+    rw [Set.mem_compl_iff, Metric.mem_ball, not_lt] at hz; exact hz
+  have htri : dist z c ≤ dist z x + dist x c := dist_triangle z x c
+  rw [dist_comm x z]
+  linarith
+
+/-- **Witness that `exists_twoSidedPartition_of_straightArc` is non-vacuous.**
+
+For the concrete unit segment `[(0,0),(1,0)]`, the open sup-ball
+`R = ball ((1/2,0)) (1/2)` (the open unit square `(0,1)×(-1/2,1/2)`) together with
+the whole open segment as the spine `S` satisfies every collar hypothesis of
+`exists_twoSidedPartition_of_straightArc`, so the two-sided partition of the
+arc-complement exists. -/
+theorem exists_twoSidedPartition_unitSegment :
+    ∃ U V, IsTwoSidedPartition
+      (regionMinusArc (Metric.ball ((1/2, 0) : ℝ × ℝ) (1/2))
+        (straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ)
+          (by simp : ((0,0):ℝ×ℝ) ≠ (1,0))).toSimpleArc)
+      U V := by
+  classical
+  -- The straight one-segment arc and its computed segment data.
+  have hne : ((0,0):ℝ×ℝ) ≠ (1,0) := by simp
+  let β := straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne
+  have hβ : β = straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne := rfl
+  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
+  have hv0 : β.verts 0 = ((0,0) : ℝ × ℝ) := by
+    rw [hβ]; simp [straightPolyArc, PolyArc.verts]
+  have hvL : β.verts (Fin.last β.numSegs) = ((1,0) : ℝ × ℝ) := by
+    show (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).verts
+        (Fin.last (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).numSegs) = _
+    simp [straightPolyArc, PolyArc.verts, Fin.last]
+  have hsrc : β.segSrc β.firstSeg = ((0,0) : ℝ × ℝ) := by
+    rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
+  have htgt : β.segTgt β.firstSeg = ((1,0) : ℝ × ℝ) := by
+    rw [hβ]; simp [straightPolyArc, PolyArc.segTgt, PolyArc.firstSeg, Fin.succ]
+  have hlast : β.lastSeg = β.firstSeg := by
+    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg, hβnum]
+  have hsrcLast : β.segSrc β.lastSeg = ((0,0) : ℝ × ℝ) := by rw [hlast]; exact hsrc
+  have htgtLast : β.segTgt β.lastSeg = ((1,0) : ℝ × ℝ) := by rw [hlast]; exact htgt
+  have hcarr : β.carrier = segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) := by
+    rw [hβ]; exact straightPolyArc_carrier _ _ hne
+  -- The region (open sup-ball = open unit square) and the spine (whole open segment).
+  set R : Set (ℝ × ℝ) := Metric.ball ((1/2, 0) : ℝ × ℝ) (1/2) with hR_def
+  set S : Set (ℝ × ℝ) :=
+    {q : ℝ × ℝ | ∃ c : ℝ, c ∈ Set.Ioo (0:ℝ) 1 ∧
+      q = ((1 - c) • ((0,0):ℝ×ℝ) + c • ((1,0):ℝ×ℝ))} with hS_def
+  set α : ℝ := 1/6 with hα_def
+  set mR : ℝ := 1/12 with hmR_def
+  -- A segment point `(1-c)•(0,0)+c•(1,0)` equals `(c,0)`.
+  have hpt : ∀ c : ℝ, ((1 - c) • ((0,0):ℝ×ℝ) + c • ((1,0):ℝ×ℝ)) = (c, 0) := by
+    intro c; ext <;> simp
+  -- `dist (c,0) (1/2,0) = |c - 1/2|`.
+  have hdist_c : ∀ c : ℝ, dist ((c, 0) : ℝ × ℝ) ((1/2, 0) : ℝ × ℝ) = |c - 1/2| := by
+    intro c
+    rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]
+    simp [abs_nonneg]
+  -- `(c,0) ∈ R ↔ |c - 1/2| < 1/2`.
+  have hmemR : ∀ c : ℝ, ((c, 0) : ℝ × ℝ) ∈ R ↔ |c - 1/2| < 1/2 := by
+    intro c; rw [hR_def, Metric.mem_ball, hdist_c]
+  -- Orientation facts for `footParam`.
+  have hts : ((1,0):ℝ×ℝ) ≠ ((0,0):ℝ×ℝ) := by simp
+  have hst : ((0,0):ℝ×ℝ) ≠ ((1,0):ℝ×ℝ) := hne
+  -- The unique edge's carrier is the closed segment `[(0,0),(1,0)]`.
+  have hsegCarr : β.segCarrier β.firstSeg = segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) := by
+    rw [PolyArc.segCarrier, hsrc, htgt]
+  -- `Rᶜ` is nonempty (the source endpoint lies in it).
+  have hsrc0 : β.verts 0 ∈ Rᶜ := by
+    rw [hv0, Set.mem_compl_iff]
+    have : ((0,0):ℝ×ℝ) = ((0:ℝ), (0:ℝ)) := rfl
+    rw [show ((0,0):ℝ×ℝ) = (((0:ℝ)), (0:ℝ)) from rfl, hmemR 0]
+    norm_num
+  have hRcne : (Rᶜ).Nonempty := ⟨β.verts 0, hsrc0⟩
+  -- `(c,0)` is in the closed segment when `c ∈ [0,1]`.
+  have hseg_of_mem : ∀ c : ℝ, 0 ≤ c → c ≤ 1 →
+      ((c, 0) : ℝ × ℝ) ∈ segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) := by
+    intro c hc0 hc1
+    refine ⟨1 - c, c, by linarith, hc0, by ring, ?_⟩
+    rw [hpt c]
+  -- Inverse: any point of the closed segment is `(b,0)` for some `b ∈ [0,1]`.
+  have hmem_seg : ∀ y : ℝ × ℝ, y ∈ segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) →
+      ∃ b : ℝ, 0 ≤ b ∧ b ≤ 1 ∧ y = (b, 0) := by
+    intro y hy
+    obtain ⟨a, b, ha, hb, hab, rfl⟩ := hy
+    exact ⟨b, hb, by linarith, by ext <;> simp⟩
+  -- A spine point `(c,0)`, `c ∈ (0,1)`, is in `S`.
+  have hSpt : ∀ c : ℝ, c ∈ Set.Ioo (0:ℝ) 1 → ((c, 0) : ℝ × ℝ) ∈ S := by
+    intro c hc; exact ⟨c, hc, by rw [hpt c]⟩
+  -- footParam of a segment point `(c,0)` is `c`.
+  have hfoot_c : ∀ c : ℝ,
+      footParam ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) ((c, 0) : ℝ × ℝ) = c := by
+    intro c
+    have := footParam_affineComb hts c
+    rw [hpt c] at this; exact this
+  -- ============ H3: IsOpen R ============
+  have hR : IsOpen R := Metric.isOpen_ball
+  -- ============ H4: IsSimplyConnected R ============
+  have hRsc : IsSimplyConnected R := by
+    have hC : ContractibleSpace R :=
+      (convex_ball ((1/2,0):ℝ×ℝ) (1/2)).contractibleSpace ⟨(1/2,0), by simp [Metric.mem_ball]⟩
+    exact SimplyConnectedSpace.ofContractible _
+  -- ============ H5,H6: endpoints in Rᶜ ============
+  have hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ := by
+    rw [hvL, Set.mem_compl_iff, show ((1,0):ℝ×ℝ) = (((1:ℝ)), (0:ℝ)) from rfl, hmemR 1]
+    norm_num
+  -- ============ H7: S ⊆ R ============
+  have hSR : S ⊆ R := by
+    rintro q ⟨c, hc, rfl⟩
+    rw [hpt c, hmemR c]
+    rcases hc with ⟨hc0, hc1⟩
+    rw [abs_lt]; constructor <;> linarith
+  -- ============ H8: IsPreconnected S ============
+  have hSpre : IsPreconnected S := by
+    have himg : S = (fun c : ℝ => ((1 - c) • ((0,0):ℝ×ℝ) + c • ((1,0):ℝ×ℝ))) '' Set.Ioo 0 1 := by
+      ext q; constructor
+      · rintro ⟨c, hc, rfl⟩; exact ⟨c, hc, rfl⟩
+      · rintro ⟨c, hc, rfl⟩; exact ⟨c, hc, rfl⟩
+    rw [himg]
+    exact isPreconnected_Ioo.image _ (by fun_prop)
+  -- ============ H9: S ⊆ β.carrier ============
+  have hS_carrier : S ⊆ β.carrier := by
+    rw [hcarr]
+    rintro q ⟨c, hc, rfl⟩
+    exact ⟨1 - c, c, by linarith [hc.1, hc.2], le_of_lt hc.1, by ring, rfl⟩
+  -- ============ H10: firstMid β ∈ S ============
+  have hmS : firstMid β ∈ S := by
+    have hmid : firstMid β = ((1/2 : ℝ), (0:ℝ)) := by
+      rw [firstMid, hsrc, htgt]; norm_num
+    rw [hmid]
+    exact hSpt (1/2) ⟨by norm_num, by norm_num⟩
+  -- ============ H11: hSband ============
+  have hSband : ∀ y ∈ β.segCarrier β.firstSeg,
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) y ∈ Set.Ioo (0 : ℝ) 1 → y ∈ S := by
+    intro y hy hfoot
+    rw [hsegCarr] at hy
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg y hy
+    rw [hsrc, htgt, hfoot_c b] at hfoot
+    exact hSpt b hfoot
+  -- ============ H12: hRband_lb ============
+  have hRband_lb : ∀ y ∈ β.segCarrier β.firstSeg,
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) y ∈ Set.Icc (α / 2) (1 - α / 2) →
+      mR ≤ Metric.infDist y Rᶜ := by
+    intro y hy hfoot
+    rw [hsegCarr] at hy
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg y hy
+    rw [hsrc, htgt, hfoot_c b] at hfoot
+    rcases hfoot with ⟨hflo, hfhi⟩
+    -- α/2 = 1/12, 1 - α/2 = 11/12, so b ∈ [1/12, 11/12].
+    have hblo : (1/12 : ℝ) ≤ b := by rw [hα_def] at hflo; linarith
+    have hbhi : b ≤ (11/12 : ℝ) := by rw [hα_def] at hfhi; linarith
+    have hlb := infDist_ball_compl_lb ((1/2,0):ℝ×ℝ) (1/2) ((b,0):ℝ×ℝ)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_c b] at hlb
+    -- |b - 1/2| ≤ 5/12, so 1/2 - |b - 1/2| ≥ 1/12.
+    have habs : |b - 1/2| ≤ 5/12 := abs_le.mpr ⟨by linarith, by linarith⟩
+    rw [hmR_def, hR_def]; linarith [hlb, habs]
+  -- ============ H13: hSrcSpine ============
+  have hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S := by
+    intro c hc
+    rw [hsrc, htgt, liftPlus_zero_eq_affineComb, hpt c]
+    exact hSpt c hc
+  -- ============ H14: hSrcNear_L ============
+  have hSrcNear_L : ∀ p ∈ S,
+      dist p (β.verts 0) < dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) →
+      p ∈ β.segCarrier β.firstSeg ∧
+        0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∧
+        dist p (β.verts 0) =
+          footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p *
+            dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) := by
+    rintro p ⟨c, hc, rfl⟩ _
+    rw [hpt c, hsrc, htgt, hsegCarr, hv0]
+    refine ⟨hseg_of_mem c (le_of_lt hc.1) (le_of_lt hc.2), ?_, ?_⟩
+    · rw [hfoot_c c]; exact hc.1
+    · rw [hfoot_c c]
+      -- dist (c,0) (0,0) = |c| = c ; dist (0,0) (1,0) = 1 ; c = c * 1.
+      have hd1 : dist ((c,0):ℝ×ℝ) ((0,0):ℝ×ℝ) = c := by
+        rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]
+        simp only [Prod.fst, Prod.snd, sub_zero, abs_zero]
+        rw [max_eq_left (abs_nonneg c), abs_of_pos hc.1]
+      have hd2 : dist ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) = 1 := by
+        rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]; norm_num
+      rw [hd1, hd2]; ring
+  -- ============ H15: hSrcRpos ============
+  have hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      0 < Metric.infDist
+        (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ := by
+    intro c hc
+    rw [hsrc, htgt, liftPlus_zero_eq_affineComb, hpt c]
+    have hlb := infDist_ball_compl_lb ((1/2,0):ℝ×ℝ) (1/2) ((c,0):ℝ×ℝ)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_c c] at hlb
+    have habs : |c - 1/2| < 1/2 := abs_lt.mpr ⟨by linarith [hc.1], by linarith [hc.2]⟩
+    rw [hR_def]; linarith [hlb, habs]
+  -- Target-edge helpers: the reversed affine combination `(1-c)•(1,0)+c•(0,0) = (1-c,0)`.
+  have hpt' : ∀ c : ℝ, ((1 - c) • ((1,0):ℝ×ℝ) + c • ((0,0):ℝ×ℝ)) = (1 - c, 0) := by
+    intro c; ext <;> simp
+  have hfoot' : ∀ c : ℝ,
+      footParam ((1,0):ℝ×ℝ) ((0,0):ℝ×ℝ) ((1 - c, 0) : ℝ × ℝ) = c := by
+    intro c
+    have := footParam_affineComb hst c
+    rw [hpt' c] at this; exact this
+  -- ============ H16: hTgtSpine ============
+  have hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S := by
+    intro c hc
+    rw [htgtLast, hsrcLast, liftPlus_zero_eq_affineComb, hpt' c]
+    -- (1-c, 0) ∈ S with spine param (1-c) ∈ (0,1).
+    refine ⟨1 - c, ⟨by linarith [hc.2], by linarith [hc.1]⟩, ?_⟩
+    rw [hpt (1 - c)]
+  -- ============ H17: hTgtNear_L ============
+  have hTgtNear_L : ∀ p ∈ S,
+      dist p (β.verts (Fin.last β.numSegs)) <
+          dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) →
+      p ∈ β.segCarrier β.lastSeg ∧
+        0 < footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∧
+        dist p (β.verts (Fin.last β.numSegs)) =
+          footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p *
+            dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) := by
+    rintro p ⟨d, hd, rfl⟩ _
+    rw [hpt d, hvL, hlast, hsegCarr, htgt, hsrc]
+    -- `(d,0) = (1 - (1-d), 0)`, so footParam (1,0) (0,0) (d,0) = 1 - d.
+    have hfd : footParam ((1,0):ℝ×ℝ) ((0,0):ℝ×ℝ) ((d, 0) : ℝ × ℝ) = 1 - d := by
+      have := hfoot' (1 - d)
+      simpa using this
+    refine ⟨hseg_of_mem d (le_of_lt hd.1) (le_of_lt hd.2), ?_, ?_⟩
+    · rw [hfd]; linarith [hd.2]
+    · rw [hfd]
+      -- dist (d,0) (1,0) = |d-1| = 1-d ; dist (1,0) (0,0) = 1.
+      have hd1 : dist ((d,0):ℝ×ℝ) ((1,0):ℝ×ℝ) = 1 - d := by
+        rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]
+        simp only [Prod.fst, Prod.snd, sub_zero, sub_self, abs_zero]
+        rw [max_eq_left (abs_nonneg _), abs_of_nonpos (by linarith [hd.2])]; ring
+      have hd2 : dist ((1,0):ℝ×ℝ) ((0,0):ℝ×ℝ) = 1 := by
+        rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]; norm_num
+      rw [hd1, hd2]; ring
+  -- ============ H18: hTgtRpos ============
+  have hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      0 < Metric.infDist
+        (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ := by
+    intro c hc
+    rw [htgtLast, hsrcLast, liftPlus_zero_eq_affineComb, hpt' c]
+    have hlb := infDist_ball_compl_lb ((1/2,0):ℝ×ℝ) (1/2) ((1 - c,0):ℝ×ℝ)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_c (1 - c)] at hlb
+    have habs : |(1 - c) - 1/2| < 1/2 := abs_lt.mpr ⟨by linarith [hc.2], by linarith [hc.1]⟩
+    rw [hR_def]; linarith [hlb, habs]
+  -- ============ H19: hcover ============
+  have hcover : ∀ δ₀ : ℝ, 0 < δ₀ → R ∩ β.carrier ⊆ taperedTube R S δ₀ := by
+    intro δ₀ hδ₀ z hz
+    obtain ⟨hzR, hzC⟩ := hz
+    rw [hcarr] at hzC
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg z hzC
+    -- z = (b,0) ∈ R forces b ∈ (0,1), hence z ∈ S; then z ∈ taperedTube.
+    rw [hmemR b, abs_lt] at hzR
+    have hzS : ((b, 0) : ℝ × ℝ) ∈ S := hSpt b ⟨by linarith [hzR.1], by linarith [hzR.2]⟩
+    exact subset_taperedTube hR (by rw [hR_def] at hRcne; exact hRcne) hδ₀ hSR hzS
+  -- ============ Assemble and apply ============
+  obtain ⟨U, V, hpart⟩ :=
+    exists_twoSidedPartition_of_straightArc β hβnum
+      (show (0:ℝ) < α by rw [hα_def]; norm_num)
+      (show α < 1 / 3 by rw [hα_def]; norm_num)
+      (show (0:ℝ) < mR by rw [hmR_def]; norm_num)
+      hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hmS hSband hRband_lb
+      hSrcSpine hSrcNear_L hSrcRpos hTgtSpine hTgtNear_L hTgtRpos hcover
+  exact ⟨U, V, hpart⟩
+
 end CrossingLemma.PlaneArcSeparation
