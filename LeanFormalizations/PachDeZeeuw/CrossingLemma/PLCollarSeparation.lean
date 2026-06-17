@@ -895,22 +895,29 @@ theorem exists_twoSidedPartition_prefixStep
       have : (1 - t) * dotp v v = 0 := hdot_diff
       nlinarith
     linarith
-  have hp₂_notin : p₂ ∉ R := by
-    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
-    -- From q = p₂ = p₁ + 1•v + s•ε•n, subtract: v = t•v + s•ε•n
-    -- Take inner prod with v: v•v = t•(v•v), so t = 1.
-    -- But t < 1 (from Ioo), contradiction.
-    sorry
   -- R is open: image of open set under continuous open map (affine).
   have hR_open : IsOpen R := by
     sorry
   -- R is simply connected: convex → simply connected.
   have hR_sc : IsSimplyConnected R := by
     sorry
-  -- Spine S: a "sliver" in the middle of the strip
+  -- Spine S: the open middle portion of the segment (1D, not 2D strip).
+  -- S = {p₁ + t•v | t ∈ (α, 1-α)}
   set α : ℝ := 1/6 with hα
   have hα_pos : 0 < α := by norm_num
   have hα_lt_third : α < 1/3 := by norm_num
+  let S : Set (ℝ × ℝ) :=
+    {q | ∃ (t : ℝ), t ∈ Set.Ioo (α : ℝ) (1 - α) ∧ q = p₁ + t • v}
+  have hS_sub_R : S ⊆ R := by
+    intro q h; rcases h with ⟨t, ht, hq⟩
+    refine ⟨t, 0, ?_, ?_, ?_⟩
+    · -- t ∈ (α, 1-α) → t ∈ (0, 1)
+      rcases Set.mem_Ioo.mp ht with ⟨htl, htr⟩
+      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+    · -- 0 ∈ (-1, 1)
+      exact Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩
+    · -- q = p₁ + t•v = p₁ + t•v + 0•(ε•n)
+      dsimp; rw [hq]; simp
   set cSrc : ℝ := α / 2 with hcSrc
   have hcSrc_pos : 0 < cSrc := by dsimp [cSrc]; positivity
   have hcSrc_le : cSrc ≤ 2 * α := by dsimp [cSrc]; nlinarith
@@ -919,26 +926,26 @@ theorem exists_twoSidedPartition_prefixStep
   have hcTgt_le : cTgt ≤ 2 * α := by dsimp [cTgt]; nlinarith
   set mR : ℝ := ε / 4 with hmR
   have hmR_pos : 0 < mR := by dsimp [mR]; positivity
-  -- Spine S is a narrower strip, still containing the segment midpoint.
-  let S : Set (ℝ × ℝ) :=
-    {q | ∃ (t s : ℝ), t ∈ Set.Ioo (α : ℝ) (1 - α) ∧ s ∈ Set.Ioo (-(1/2 : ℝ)) (1/2) ∧
-      q = p₁ + t • v + s • (ε • n)}
-  have hS_sub_R : S ⊆ R := by
-    intro q h; rcases h with ⟨t, s, ht, hs, hq⟩
-    refine ⟨t, s, ?_, ?_, hq⟩
-    · -- t ∈ Ioo (α, 1-α) → t ∈ Ioo (0, 1)
-      rcases Set.mem_Ioo.mp ht with ⟨htl, htr⟩
-      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
-    · -- s ∈ Ioo (-1/2, 1/2) → s ∈ Ioo (-1, 1)
-      rcases Set.mem_Ioo.mp hs with ⟨hsl, hsr⟩
-      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
   -- Remaining properties: sorried (analytic geometry)
   have hS_carrier_sub : S ⊆ ((straightPolyArc p₁ p₂ hne)).carrier := by
     sorry
   have hS_preconnected : IsPreconnected S := by
     sorry
   have hfirstMid : firstMid (straightPolyArc p₁ p₂ hne) ∈ S := by
-    sorry
+    -- firstMid β = ((β.segSrc β.firstSeg + β.segTgt β.firstSeg) / 2) = (p₁ + p₂) / 2 = p₁ + (1/2)•v
+    -- With t = 1/2 and α = 1/6, we have α < 1/2 < 1-α, so t ∈ Ioo(α, 1-α).
+    have hmid_def : firstMid (straightPolyArc p₁ p₂ hne) = p₁ + ((1/2 : ℝ) • v) := by
+      dsimp [firstMid, straightPolyArc, PolyArc.firstSeg, PolyArc.segSrc, PolyArc.segTgt,
+        PolyArc.verts]
+      dsimp [v]
+      ext <;> dsimp <;> ring
+    rw [hmid_def]
+    refine ⟨1/2, ?_, rfl⟩
+    refine Set.mem_Ioo.mpr ⟨by
+      have : α = 1/6 := rfl
+      linarith, by
+      have : α = 1/6 := rfl
+      linarith⟩
   have hSband : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
       ((straightPolyArc p₁ p₂ hne)).firstSeg,
       footParam (((straightPolyArc p₁ p₂ hne)).segSrc
