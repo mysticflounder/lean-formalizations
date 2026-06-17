@@ -189,3 +189,37 @@ side) and is the real remaining math.
 - `isOpen_regionAt`: do it (freebie).
 - `IsSimplyConnected (regionAt p)`: FALSE — never sorry it.
 - Remaining: Obligation A (heavy-mechanical) + Obligation B (the crux). Both Jordan-free.
+
+---
+
+## ADDENDUM (2026-06-17) — Obligation A's target lemma is VACUOUS; foundation redesign dispatched
+
+**STOP — do not work Obligation A as scoped above.** The lemma it instantiates,
+`exists_twoSidedPartition_of_straightArc` (PLCollarSeparation.lean:479), is
+sorry-free but **VACUOUS**: its hypothesis bundle is jointly **unsatisfiable**, so
+no caller can ever discharge it. Kernel-checked — `False` follows from its own
+hypotheses `hSband` + `hSrcNear` (+ `hsrc`, `hballSrc`, `cSrc ≤ 2α`, `α < 1/3`).
+The same defect makes the general multi-segment sliver-budget collar chain vacuous
+(any `numSegs`), also kernel-checked. DeepSeek's tube work
+(`exists_twoSidedPartition_prefixStep`, :766) is correct in shape but points at an
+inapplicable lemma.
+
+**Root cause (genuine gap, not a typo):** the source end-cap radius `ρ 0` is forced
+`> 2α·L₁` by `hsrc`, but the "near-spine ⇒ first-edge slice" decomposition
+(`taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine`, PLArc.lean:7802,
+applied at 7820–7851) requires every spine point within `ρ 0 + δ₀` of the endpoint
+to have foot-parameter `≤ cSrc ≤ 2α`. The spine (forced ⊇ whole open edge by
+`hSband`) has points in the annulus `(cSrc·L₁, ρ 0 + δ₀)` that violate this. The
+honest discharge helper `arcInterior_near_src` (PLArc.lean:7278) only reaches radius
+`cSrc·L₁ < ρ 0`. The end-cap radius `ρ 0` is conflated with the collar reach budget.
+
+**Blast radius:** contained. Nothing completed/axiom-clean depends on the infected
+lemmas — the sole consumer is the sorried, uncalled `exists_twoSidedPartition_prefixStep`.
+So the redesign invalidates no standing result.
+
+**Status:** a background math-prover was dispatched (2026-06-17) to redesign the
+end-cap/near-spine connectivity — decouple the cap radius from the foot-window
+`cSrc` so the lemma becomes genuinely applicable, with a concrete sorry-free
+instantiation as the non-vacuity acceptance test. Collar-discharge work (Obligations
+A/B) is **on hold** until that lands. See memory facts `01KVA7F09NKJ4GN3C0P9G2GJCE`
+(vacuity) and `01KVA86G6E2TWDXKSFS1RG0KWT` (root cause).
