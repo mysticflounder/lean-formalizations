@@ -6,6 +6,7 @@ Authors: Adam McKenna
 
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLAssembly
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
 /-!
 # Polygonal collar separation
@@ -752,5 +753,35 @@ theorem exists_twoSidedPartition_of_straightArc
   exact exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one
     β h1 ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ₀pos hα hα2 hmS hmR
     hband hsrc htgt hballSrc hballTgt hdisj hTp_pre hTm_pre (hcover δ₀ hδ₀pos)
+
+/-- **Obligation A: tube construction + collar for a prefix-step straight arc.**
+Builds a simply-connected tube `R` around the straight segment `p₁p₂` with
+endpoints outside, then applies the already-proved
+`exists_twoSidedPartition_of_straightArc` to obtain a two-sided partition
+`U, V` of the arc-complement inside the tube.
+
+The tube `R` is an open, simply-connected neighborhood of the open segment
+(excluding endpoints).  {{NEEDS_PROOF}} — heavy-mechanical PL: construct the
+SC tube and discharge the ~30 collar hypotheses of the underlying lemma. -/
+theorem exists_twoSidedPartition_prefixStep
+    (p₁ p₂ : ℝ × ℝ) (hne : p₁ ≠ p₂) :
+    ∃ (R U V : Set (ℝ × ℝ)),
+      IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
+      IsTwoSidedPartition
+        (regionMinusArc R ((straightPolyArc p₁ p₂ hne).toSimpleArc)) U V := by
+  -- Construct R as an open strip around the straight segment (p₁, p₂).
+  -- Let the segment length L = dist p₁ p₂ > 0.  Choose a perpendicular
+  -- direction n of unit length.  For ε = L/6, define
+  --   R := {p₁ + t·(p₂-p₁) + s·ε·n ∣ 0 < t < 1, -1 < s < 1}
+  -- This is an open, convex (hence simply connected) tubular neighbourhood
+  -- of the open segment, with endpoints p₁, p₂ excluded.
+  --
+  -- {{NEEDS_PROOF}} — the tube construction requires:
+  --   1. IsOpen R (affine image of open rectangle; use IsOpen.image_of_isOpenMap)
+  --   2. IsSimplyConnected R (open convex set in ℝ²; use homeomorphism to ℝ²)
+  --   3. p₁ ∈ Rᶜ, p₂ ∈ Rᶜ (endpoints at t=0, t=1 are excluded)
+  --   4. Discharge the ~30 collar hypotheses of
+  --      exists_twoSidedPartition_of_straightArc (analytic estimates).
+  sorry
 
 end CrossingLemma.PlaneArcSeparation

@@ -115,11 +115,15 @@ theorem isOpen_drawingComplementIn {R₀ : Set (ℝ × ℝ)} (hR₀ : IsOpen R�
     exact hcompact.isClosed
   exact hR₀.sdiff hclosed
 
-/-- **The region of a plane point** `p` relative to the drawing complement: the
-connected component of `R₀ ∖ ⋃ₑ arcSet` containing `p`.  For `p` not in the
-complement this is `∅` (the `connectedComponentIn` convention). -/
 def regionAt (R₀ : Set (ℝ × ℝ)) (p : ℝ × ℝ) : Set (ℝ × ℝ) :=
   connectedComponentIn (drawingComplementIn G R₀) p
+
+/-- **Open region lemma.**  `regionAt` returns an open set: the drawing complement
+is open, and connected components of an open set are open in a locally connected
+space (`ℝ × ℝ`). -/
+theorem isOpen_regionAt {R₀ : Set (ℝ × ℝ)} (hR₀ : IsOpen R₀) (p : ℝ × ℝ) :
+    IsOpen (regionAt G R₀ p) :=
+  (isOpen_drawingComplementIn G hR₀).connectedComponentIn
 
 /-- Two points in the same region exactly when their `connectedComponentIn`
 values coincide *and* are nonempty.  We record the workhorse rewrite: points in

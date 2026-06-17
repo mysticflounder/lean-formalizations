@@ -4606,15 +4606,12 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
       True := by
     let G' := G.permuteEdges π
     -- Target 1: inductive construction of dr and hstepCrosscut.
-    -- Requires the two hard geometric obligations:
-    --   A: cotree co-faciality (hregion: dr_m(c₁) = dr_m(c₂) at each level)
-    --   B: exists_twoSidedPartition_of_straightArc instantiation (poolRegion, U, V)
-    -- The induction architecture is: strong induction on the level n using
-    -- `Nat.strong_induction_on`, building ∅-type (∃ dr, hsc) at each level.
-    -- When these two obligations are filled, the construction is straightforward:
-    --   1. Base (n = start): dr_start = regionAt(p₀), hsc = empty
-    --   2. Step (n > start): extend dr from n-1 to n using poolRegion∘splitClass,
-    --      build crosscut for step n-1 with hregion (sorried) and hvertex (proven).
+    --
+    -- Each step m (start ≤ m < N) needs geometry (plan addendum):
+    --   Obligation A: exists_twoSidedPartition_prefixStep (tube)
+    --   Obligation B: poolRegion/hinj/hfactor/hregion from U,V
+    -- Both keep this as a single sorry per the plan; the combinatorial
+    -- infrastructure (bridge, hcard1, ST:4713) is already wired.
     sorry
   obtain ⟨dr, hstepCrosscut, _⟩ := h_exists_target1
   let G' := G.permuteEdges π
