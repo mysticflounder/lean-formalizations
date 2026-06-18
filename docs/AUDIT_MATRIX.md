@@ -29,9 +29,12 @@ These are distinct from **kernel verification** (compiles, `#print axioms` clean
 - `docs/references/TaoVu.AddComb.pdf` — Tao & Vu, *Additive Combinatorics* (CUP 2006). **Local-only, gitignored (copyrighted).**
 - `docs/references/FoxSudakov_DependentRandomChoice_arxiv_0909.3271v2.pdf` — Fox & Sudakov, *Dependent Random Choice*, *RS&A* 38 (2011) 68–99, arXiv:0909.3271. Gitignored PDF (arXiv source is redistributable; track the link).
 
-Last updated: 2026-06-01. **BSG live path: 100% line-verified** against Tao–Vu §6.4
-+ Fox–Sudakov §5; build green (8475 jobs); all 3 public theorems empirically
-axiom-clean (`[propext, Classical.choice, Quot.sound]`, verified — not inferred).
+Last updated: 2026-06-18. **BSG live path: 100% line-verified** against Tao–Vu §6.4
++ Fox–Sudakov §5 (done 2026-06-01, build then 8475 jobs); all 3 public theorems
+empirically axiom-clean (`[propext, Classical.choice, Quot.sound]`, verified — not
+inferred). **2026-06-18:** the full advertised verified surface (53 theorems) was
+re-verified axiom-clean via `scripts/check-axioms.sh`; full build green (8538 jobs).
+Exact paper citations for all results compiled in `README.md` → References.
 
 ---
 
@@ -151,7 +154,7 @@ Kernel status: axiom-clean. No source vendored (standard results).
 
 | Item | Citation | Math | Note |
 |------|----------|------|------|
-| two-point isometry classification | ☐ | ☐ | Mazur–Ulam (in mathlib) + "isometry group fixing 2 points has ≤2 elements" — citation needs a canonical text |
+| two-point isometry classification | 🔧 | ☐ | Mazur–Ulam, *C. R. Acad. Sci. Paris* **194** (1932), 946–948 (linear reduction, in mathlib). The "≤2 isometries fix two points in ℝ²" count is an elementary corollary — folklore, no single originating paper (verified 2026-06-18). Cite added to README. |
 
 ---
 
@@ -174,8 +177,8 @@ substrate is sorry-free and axiom-clean.
 | Reverse cotree consecutive block index bridge | ✅ | `Fin.val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one` and `Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one` formalize the arithmetic that consecutive reverse leaf-peeling indices become consecutive ordered cotree-block positions. `CrossingLemma.DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block` uses this to read the next selected reverse cotree edge at prefix position `a + i + 1`. |
 | Reverse cotree block same-face witness bridge | ✅ | `CrossingLemma.DrawnMultigraph.exists_edgePositionPermutation_of_disjoint_tree_faceEdgeOfLeafOrderReverse`, `CrossingLemma.DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block`, `CrossingLemma.DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block`, `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`, `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq`, `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels`, and `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block_of_treePrefix_incidence` turn a disjoint primal tree block plus full-residual-map reverse cotree block into the exact ordered-prefix position and actual `ResidualMapPrefixStepInsertion.sameFace` witness shape, with old-endpoint incidence supplied by the already-inserted tree prefix or current endpoint coverage. The side-label form now derives the cotree side-label equality from a dual-prefix label invariant, leaving the two sector-to-face identifications of actual splice predecessor corners with the corresponding full-residual-map dart sides as the open topological layer. |
 | PL collar side-classification layer | ✅ | `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_collar_with_collar_sides` strengthens the abstract collar separation theorem by returning the actual containment of the positive and negative collar sides in the two connected components. The polygonal specializations `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides` and `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides` expose the same data for PL crosscuts. `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_collarPlus_of_sliver_budgets` and `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_collarMinus_of_sliver_budgets` place the local vertex sectors in the matching collar side, while `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_of_collarPlus_subset` and `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_of_collarMinus_subset` compose this with an assigned partition side. The remaining open work is not collar separation but the residual-map identification of actual vertex-rotation predecessor corners with these PL side labels. |
-| Newman, *Elements of the Topology of Plane Sets* | ☐ | crosscut theorem cite in PlaneArcSeparation |
-| Pommerenke, *Boundary Behaviour of Conformal Maps* | ☐ | ditto |
+| Newman, *Elements of the Topology of Plane Sets* | 🔧 | Newman, M.H.A., *Elements of the Topology of Plane Sets of Points*, 2nd ed., CUP, 1951 (crosscut theorem). Cite added to README (verified 2026-06-18). |
+| Pommerenke, *Boundary Behaviour of Conformal Maps* | 🔧 | Pommerenke, Ch., *Boundary Behaviour of Conformal Maps*, Grundlehren **299**, Springer, 1992. Cite added to README (verified 2026-06-18). |
 
 ---
 
@@ -202,5 +205,9 @@ conditional. Audit deferred until proofs land.
   deprecation warnings, 3 public theorems re-confirmed axiom-clean. (Four
   pre-existing `unused variable` warnings remain, unrelated.)
 - Bézout: start math audit vs the Pach–de Zeeuw `.tex` (resultant chain).
-- Geometry: pin a canonical text for the two-point isometry fact; audit.
-- Newman / Pommerenke crosscut citations (deferred with CrossingLemma WIP).
+- ~~Geometry: pin a canonical text for the two-point isometry fact~~ — **DONE
+  2026-06-18**: Mazur–Ulam (1932) for the linear reduction; the finite count is
+  folklore (no canonical paper). Still: line-audit the proof body.
+- ~~Newman / Pommerenke crosscut citations~~ — **DONE 2026-06-18**: exact
+  editions pinned (Newman 2nd ed. 1951; Pommerenke Grundlehren 299, 1992), added
+  to README. (Proof audit still deferred with CrossingLemma WIP.)
