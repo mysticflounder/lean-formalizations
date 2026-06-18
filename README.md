@@ -7,6 +7,22 @@ ideally as mathlib contributions. Everything builds against **mathlib only**
 
 Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`).
 
+## Verification status (2026-06-18)
+
+- **Build:** green — `lake build` completes all **8538 jobs**.
+- **Verified core:** the **53** theorems advertised as `✅ VERIFIED` below are
+  mechanically re-verified axiom-clean — each depends only on a subset of the
+  Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
+  with `./scripts/check-axioms.sh` (list in `scripts/axiom-check.lean`).
+- **No trust shortcuts:** the source defines **no custom `axiom`** and uses **no
+  `native_decide`, `unsafe`, `@[extern]`, or `@[implemented_by]`** anywhere — so
+  every `✅` theorem is closed under the Lean kernel alone.
+- **Honest `sorry`s:** every live `sorry` is confined to the `🟡` work-in-progress
+  Pach–de Zeeuw program (`PachDeZeeuw/CrossingLemma/*`, `PachSharir/*`,
+  `ComponentSplit`, `IncidenceAssembly`) or the `⚪` vendored Erdős-problem
+  statements (`FormalConjectures/ErdosProblems/{96,97,98}`, deliberately `sorry`
+  as upstream). **No `✅ VERIFIED` module contains a `sorry`.**
+
 ## Provenance
 
 Much of this code was salvaged from now-dormant Erdős-Problem-98 and
@@ -218,10 +234,12 @@ lake exe cache get
 
 `scripts/check-axioms.sh` runs `#print axioms` on the full advertised list
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
-depends on `sorryAx` or a custom axiom. Last run: all 26 listed theorems clean
-(`[propext, Classical.choice, Quot.sound]`), full build green (8538 jobs). The
-verified core defines no custom `axiom` and uses no `native_decide`, so the only
-disallowed axiom that could appear is `sorryAx`.
+depends on `sorryAx` or a custom axiom. Last run (2026-06-18): all 53 listed
+theorems clean (each depends only on a subset of
+`[propext, Classical.choice, Quot.sound]`), full build green (8538 jobs). The
+verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
+`@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
+is `sorryAx`.
 
 ## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/`
 
