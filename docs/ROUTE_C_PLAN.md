@@ -1036,6 +1036,20 @@ This **pins, with no slack, the only remaining geometric obligations**:
   budget + `dist = foot·‖edge‖`; ⇒ `hSrcNear`/`hTgtNear`). So the **spine-membership** half
   of the collar bundle is fully dischargeable with `S = arcInterior`.
 
+* **⚠ SUPERSEDED (2026-06-18) — see `docs/sector-redefinition-scope.md`.** The metric-disk
+  sector this note is written against no longer exists: `sectorPlus`/`sectorMinus`
+  (`PLArc.lean:2842`/`:2849`) were redefined to the **δ₀-corner-tube UNION** form on 2026-06-14
+  (union, *not* the intersection proposed in the fix path below — the intersection is a
+  gentle-corner NO-GO, see `region-face-bridge-plan §9`). The old **P5** disk collision is gone
+  (`sectorPlusClipped_subset_taperedTube`, `:10321`, carries no `ρ`). An *equivalent* collision
+  migrated to **P2-vs-P3**: the P2 cover (`taperedTube_subset_midBands_union_disks`) still routes
+  interior-vertex tube points through `ball(verts j, ρ j)` — forcing `ρ` large via `hsrc`/`htgt`
+  — while P3 end-cap disjointness forces `ρ` small, the same `L₂² ≤ L₁·L∞` constraint, now on the
+  two endpoint radii. The true residual is the single `sorry` at `PLArc.lean:3140` (the P2
+  interior-vertex disk branch); closing it off the metric disk (corner-tube disjunct
+  `dist(z,v) < δ₀`) dissolves the constraint and unblocks `numSegs ≥ 2`. The 2026-06-13 analysis
+  below is retained as history.
+
 * **Collar instantiation — BLOCKED (2026-06-13): the assembly target's hypothesis bundle
   is PROVABLY UNSATISFIABLE for any arc with an interior vertex (`numSegs ≥ 2`); the sole
   P5 lemma re-imports the `L₂² ≤ L₁·L∞` wall.  Machine-checked.**  Producing the
