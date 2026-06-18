@@ -1002,6 +1002,12 @@ This **pins, with no slack, the only remaining geometric obligations**:
         (replacing the unsatisfiable `foot ≤ cSrc ≤ 2α` at radius `L` that made the lemma vacuous).
         Non-vacuity witnessed by the sorry-free, axiom-clean `exists_twoSidedPartition_unitSegment`
         (R = open sup-ball `ball((1/2,0),1/2)`, S = whole open segment, unit segment).
+      - **Consumer corrected (2026-06-17, commit 9e82e75).** `exists_twoSidedPartition_prefixStep`
+        had carried a stale **middle-portion** spine `S = {p₁+t·v | t ∈ (1/6,5/6)}`, which made its
+        `hSband`/`hSrcSpine`/`hTgtSpine`/`hcover` sorries FALSE against the (always-present) `hSband`
+        requirement that S hold every interior segment point. S was redefined to the **whole open
+        edge** `t ∈ (0,1)` (matching the witness); its 13 sorries now all sit on TRUE statements,
+        with `exists_twoSidedPartition_unitSegment` as the discharge template. See `collar-handoff.md`.
       - Then `×2` (src/tgt) `×2` (plus/minus) mirrors.
     * (4) **reassemble:** `collarPlus = ⋃ (W ∩ collarChainPlus i)` (`W = tube∖carrier`); with
       (1),(2) giving `band,sector ⊆ W`, each `W∩chain i` = `band ∪ sector(opt) ∪

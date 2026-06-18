@@ -23,12 +23,26 @@ Non-vacuity is now witnessed sorry-free by **`exists_twoSidedPartition_unitSegme
 axiom-clean `[propext, Classical.choice, Quot.sound]`). The general
 `exists_twoSidedPartition_prefixStep` was updated to the new interface; its remaining
 sorries are now on TRUE statements (the analytic R-facts for the parallelogram tube).
-The notes below describe the OLD prefixStep parameters and are partially superseded.
+
+### SPINE FIX LANDED (2026-06-17, commit 9e82e75)
+
+`prefixStep`'s spine was redefined from the middle portion `t ∈ (1/6, 5/6)` to the
+**whole open edge `t ∈ (0, 1)`** (item 5 below had already diagnosed this).  With the
+old middle-portion S, four open sorries were **false statements** — `hSband`,
+`hSrcSpine`, `hTgtSpine`, `hcover` — because `of_straightArc`'s `hSband` requires S to
+contain every interior segment point (`footParam ∈ (0,1)`).  All four are now
+satisfiable.  `hS_sub_R` and `hfirstMid` were re-proved for `(0,1)` (still green).
+**All 13 prefixStep sorries now sit on TRUE statements.**  The discharge template is
+`exists_twoSidedPartition_unitSegment`, which uses this same whole-edge S and closes the
+full bundle for a concrete instance — the S-dependent sorries port almost verbatim with
+`v = p₂ − p₁`; only the R-strip analytic facts need the parallelogram geometry.
+
+The parameter block and per-sorry notes below are now updated to match.
 
 ## What's been done
 
 The tube construction (`exists_twoSidedPartition_prefixStep` in
-`PLCollarSeparation.lean:757`) is scaffolded and all non-analytic parts are
+`PLCollarSeparation.lean:865`) is scaffolded and all non-analytic parts are
 proved. The ST:4713 sorries are closed via the bridge. Build is clean.
 
 ### Proved (sorry-free)
@@ -50,19 +64,20 @@ w   := (-v.2, v.1)                (perpendicular direction, nonzero)
 d   := ‖w‖                        (norm, > 0)
 n   := (d⁻¹) • w                  (unit normal vector, perpendicular to v)
 ε   := L / 6                      (half-width of the tube)
-α   := 1/6                        (spine parameter)
-cSrc := α / 2                     (source spine width)
-cTgt := α / 2                     (target spine width)
+α   := 1/6                        (collar half-margin; `hRband_lb` window [α/2, 1-α/2])
 mR  := ε / 4                      (margin for infDist bound)
 
 R   := {p₁ + t•v + s•ε•n | t ∈ Ioo(0,1), s ∈ Ioo(-1,1)}     (open strip)
-S   := {p₁ + t•v         | t ∈ Ioo(α, 1-α)}                 (1D spine, middle portion of segment)
+S   := {p₁ + t•v         | t ∈ Ioo(0, 1)}                   (1D spine, WHOLE open segment)
 β   := straightPolyArc p₁ p₂ hne                              (one-segment polyarc)
 ```
 
-## What remains (15 sorries)
+(`cSrc`/`cTgt` were removed with the `Ioc → Ioo` interface change — `of_straightArc`
+no longer takes per-end foot windows.)
 
-### 1. `hR_open` (line 900) — IsOpen R
+## What remains (13 sorries)
+
+### 1. `hR_open` — IsOpen R
 
 R is the image of `Ioo(0,1) × Ioo(-1,1)` under the affine map
 `(t, s) ↦ p₁ + t•v + s•ε•n`. This map is a homeomorphism (invertible affine
@@ -72,52 +87,39 @@ Therefore R is open.
 Approach: use `AffineMap.isOpenMap` or construct an explicit `Homeomorph`
 between `(0,1) × (-1,1)` and R.
 
-### 2. `hR_sc` (line 903) — IsSimplyConnected R
+### 2. `hR_sc` — IsSimplyConnected R
 
 R is convex (affine image of a convex rectangle). Any convex open set in ℝ²
 is simply connected (contractible). Use `Convex.isConnected` and
 homeomorphism to ℝ² or `Convex.isStarConvex` + contractibility lemma.
 
-### 3. `hS_carrier_sub` (line 931) — S ⊆ β.carrier
+### 3. `hS_carrier_sub` — S ⊆ β.carrier
 
-S is the middle portion of the straight segment. `β.carrier` is the closed
-segment `[p₁, p₂]`. S ⊂ carrier trivially because every point `p₁ + t•v`
-with `t ∈ (α, 1-α) ⊂ (0, 1)` is on the open segment which is contained in
-the closed segment.
+S is the whole open segment. `β.carrier` is the closed segment `[p₁, p₂]`.
+S ⊆ carrier trivially because every point `p₁ + t•v` with `t ∈ (0, 1)` is on the
+open segment, contained in the closed segment.
 
-### 4. `hS_preconnected` (line 933) — IsPreconnected S
+### 4. `hS_preconnected` — IsPreconnected S
 
-S is the affine image of `Ioo(α, 1-α)`, an interval. The affine map is
-continuous, and the continuous image of a connected set is connected, hence
-preconnected.
+S is the affine image of `Ioo(0, 1)`, an interval. The affine map is
+continuous, and the continuous image of a (pre)connected set is preconnected.
+Port the witness's `hSpre` (image of `isPreconnected_Ioo`).
 
-### 5. `hSband` (line 955) — Segment points with foot param in (0,1) are in S
+### 5. `hSband` — Segment points with foot param in (0,1) are in S  ✅ now satisfiable
 
-For `β = straightPolyArc p₁ p₂ hne`, there's one segment (firstSeg = lastSeg).
-`β.segCarrier β.firstSeg` = closed segment `[p₁, p₂]`.
-`footParam p₁ p₂ y` = scalar t such that `y = p₁ + t•v`. If `t ∈ Ioo(0,1)`
-then `y` is on the open segment. But this doesn't guarantee `y ∈ S` — only
-if `t ∈ Ioo(α, 1-α)`. The hypothesis `hSband` says: for all y on the
-segment with footParam ∈ (0,1), y ∈ S. This is only true if ALL open segment
-points are in S, which means α = 0. 
+`β.segCarrier β.firstSeg` = closed segment `[p₁, p₂]`; `footParam p₁ p₂ (p₁+t•v) = t`.
+`hSband` requires: every segment point with `footParam ∈ (0,1)` lies in S.  With the
+whole-edge spine `S = {p₁+t•v | t ∈ (0,1)}` (landed 9e82e75) this is **direct** — port
+the witness's `hSband`: take `y ∈ [p₁,p₂]`, write it as `(b,0)`-analog `p₁+b•v` with
+`b ∈ [0,1]`, rewrite `footParam = b`, and `b ∈ (0,1)` puts `y ∈ S`.  (The old
+middle-portion S made this false; that diagnosis is now resolved.)
 
-**Wait — this may be a hypothesis mismatch.** Check what `hSband` actually
-requires in the context of `exists_twoSidedPartition_of_straightArc`. The call
-site passes S as the spine. The hypothesis may need a WIDER S.
-
-**Alternative:** Redefine S to be the FULL open segment (not just the middle).
-```
-S := {p₁ + t•v | t ∈ Ioo(0, 1)}
-```
-Then `hSband` is trivially true. But then `hfirstMid` still holds
-(t=1/2 ∈ Ioo(0,1)). And `hS_sub_R` still holds. This simplifies everything.
-
-### 6. `hRband_lb` (line 963) — margin lower bound
+### 6. `hRband_lb` — margin lower bound (S-independent)
 
 For points y on the segment with footParam ∈ `Icc(α/2, 1-α/2)`:
 `mR ≤ Metric.infDist y Rᶜ`.
 
-Interpretation: for points in the middle portion of the segment, the distance
+Interpretation: for points in the safe foot window of the segment, the distance
 to the boundary of R is at least mR. Since R is an open strip of half-width ε
 and y is on the midline, the distance to Rᶜ (the boundary of the strip) is
 at least ε. And mR = ε/4, so the inequality holds.
@@ -126,31 +128,45 @@ Approach: for y = p₁ + t•v with t ∈ Icc(α/2, 1-α/2), the closest point o
 Rᶜ is at distance at least ε (the perpendicular distance from the midline to
 the boundary). Compute `Metric.infDist y Rᶜ ≥ ε > mR`.
 
-### 7. `hSrcSpine` (line 969) — liftPlus(p₁, p₂, c, 0) ∈ S
+### 7. `hSrcSpine` — liftPlus(src, tgt, c, 0) ∈ S, for c ∈ Ioo(0,1)
 
-`liftPlus(s, t, c, 0)` lifts a point perpendicular to the segment at the source
-endpoint. For c ∈ Ioc(0, cSrc): the lifted point should be in S (the spine).
+`liftPlus src tgt c 0 = (1-c)•src + c•tgt = p₁ + c•v` (use `liftPlus_zero_eq_affineComb`).
+For c ∈ Ioo(0,1) that is the spine point at param c, in S = whole open edge.  Port the
+witness's `hSrcSpine`.
 
-### 8. `hSrcNear_L` (line 982) — source-near spine characterization
+### 8. `hSrcNear_L` — source-near spine characterization (satisfiable form)
 
-For p ∈ S, if dist(p, src) < dist(segSrc, segTgt) = L, then p is on the
-first segment AND footParam ∈ Ioc(0, cSrc).
+For p ∈ S with `dist(p, verts 0) < L`: show `p ∈ segCarrier firstSeg ∧
+0 < footParam src tgt p ∧ dist(p, verts 0) = footParam src tgt p · L`.  For
+`p = p₁ + c•v` (c ∈ (0,1)): footParam = c > 0, p on the closed segment, and
+`dist(p, p₁) = c·L = footParam·L`.  Port the witness's `hSrcNear_L` verbatim.
 
-### 9. `hSrcRpos` (line 988) — positive infDist for source lifts
+### 9. `hSrcRpos` — positive infDist for source spine points, c ∈ Ioo(0,1)
 
-### 10. `hTgtSpine` (line 994) — liftPlus for target endpoint
+`p₁ + c•v` is strictly interior to the open strip for fixed c ∈ (0,1), so
+`infDist · Rᶜ > 0`.  (Pointwise positive even though it → 0 as c → 0.)
 
-Symmetric to hSrcSpine, using cTgt.
+### 10. `hTgtSpine` — liftPlus(tgt, src, c, 0) ∈ S, for c ∈ Ioo(0,1)
 
-### 11. `hTgtNear_L` (line 1007) — target-near spine characterization
+`liftPlus tgt src c 0 = p₁ + (1-c)•v`, the spine point at param (1-c) ∈ (0,1).
+Symmetric to #7 with the reversed affine combination.
 
-Symmetric to hSrcNear_L.
+### 11. `hTgtNear_L` — target-near spine characterization (satisfiable form)
 
-### 12. `hTgtRpos` (line 1013) — positive infDist for target lifts
+Symmetric to #8, measured from `verts (Fin.last numSegs)` with
+`footParam tgt src`.  Port the witness's `hTgtNear_L`.
 
-Symmetric to hSrcRpos.
+### 12. `hTgtRpos` — positive infDist for target spine points
 
-### 13. `hcover` (line 1016) — tapered tube coverage
+Symmetric to #9.
+
+### 13. `hcover` — tapered tube coverage (∀ δ₀ > 0)
+
+`R ∩ carrier ⊆ taperedTube R S δ₀`.  `R ∩ carrier` is the open segment
+`{p₁+t•v | t ∈ (0,1)} = S`, so every such point is in S and covered by its own ball.
+Port the witness's `hcover` (which calls `subset_taperedTube`).  This is exactly why S
+had to be the whole open edge: with a middle-only S, endpoint-adjacent carrier points
+escape every ball as δ₀ → 0.
 
 ### 14. `h_exists_target1` in `SzemerediTrotter.lean:4615`
 
@@ -161,10 +177,14 @@ the tube, then Obligation B (local→global gluing) lifts U,V to `poolRegion`,
 
 ## Key reference points
 
-- Tube definition and parameters: `PLCollarSeparation.lean:757-928`
-- End of lemma (call to `exists_twoSidedPartition_of_straightArc`): lines 1017-1032
-- Lemma `exists_twoSidedPartition_of_straightArc` (already proved): `PLCollarSeparation.lean:478`
-  — its ~20 hypotheses are what need to be discharged
+- `exists_twoSidedPartition_prefixStep` (the target, 13 sorries): `PLCollarSeparation.lean:865`
+- Tube `R` / spine `S` definitions and parameters: `PLCollarSeparation.lean:865-1020`
+- End of lemma (call to `exists_twoSidedPartition_of_straightArc`): lines 1128-1142
+- Lemma `exists_twoSidedPartition_of_straightArc` (proved, non-vacuous): `PLCollarSeparation.lean:480`
+  — its 19 hypotheses are what need to be discharged
+- **Discharge template** `exists_twoSidedPartition_unitSegment` (sorry-free, closes the
+  full bundle for the unit segment with whole-edge S): `PLCollarSeparation.lean:1166`
+- `liftPlus_zero_eq_affineComb` (`liftPlus s t c 0 = (1-c)•s + c•t`): `PLArc.lean:7203`
 - `PolyArc` namespace for `firstSeg`, `segCarrier`, `segSrc`, `segTgt`, `src`, `tgt`,
   `firstMid`, `carrier`: `PLArc.lean:550-644`
 - `dotp` definition: `PLArc.lean:1458` (no associated lemmas beyond `dotp_smul_left`)
