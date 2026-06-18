@@ -853,291 +853,6 @@ theorem exists_twoSidedPartition_of_straightArc
     β h1 ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ₀pos hα hα2 hmS hmR
     hband hsrc htgt hballSrc hballTgt hdisj hTp_pre hTm_pre (hcover δ₀ hδ₀pos)
 
-/-- **Obligation A: tube construction + collar for a prefix-step straight arc.**
-Builds a simply-connected tube `R` around the straight segment `p₁p₂` with
-endpoints outside, then applies the already-proved
-`exists_twoSidedPartition_of_straightArc` to obtain a two-sided partition
-`U, V` of the arc-complement inside the tube.
-
-The tube `R` is an open, simply-connected neighborhood of the open segment
-(excluding endpoints).  {{NEEDS_PROOF}} — heavy-mechanical PL: construct the
-SC tube and discharge the ~30 collar hypotheses of the underlying lemma. -/
-theorem exists_twoSidedPartition_prefixStep
-    (p₁ p₂ : ℝ × ℝ) (hne : p₁ ≠ p₂) :
-    ∃ (R U V : Set (ℝ × ℝ)),
-      IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
-      IsTwoSidedPartition
-        (regionMinusArc R ((straightPolyArc p₁ p₂ hne).toSimpleArc)) U V := by
-  set β := straightPolyArc p₁ p₂ hne with hβ
-  have h1 : β.numSegs = 1 := by simp [β, straightPolyArc]
-  set L : ℝ := dist p₁ p₂ with hL
-  have hLpos : 0 < L := dist_pos.mpr hne
-  set v : ℝ × ℝ := p₂ - p₁ with hv
-  -- Perpendicular direction w (nonzero because p₁ ≠ p₂)
-  set w : ℝ × ℝ := (-v.2, v.1) with hw
-  have hw_ne_zero : w ≠ 0 := by
-    intro hzero
-    have hz := Prod.ext_iff.mp hzero
-    apply hne
-    have hvzero : v.1 = 0 ∧ v.2 = 0 := by
-      dsimp [w] at hz
-      constructor <;> linarith
-    have hveq : v = 0 := Prod.ext hvzero.1 hvzero.2
-    have hsub : p₂ - p₁ = 0 := by simpa [v] using hveq
-    have heq : p₂ = p₁ := sub_eq_zero.mp hsub
-    exact heq.symm
-  set d : ℝ := ‖w‖ with hd
-  have hdpos : 0 < d := by
-    dsimp [d]
-    have := norm_nonneg w
-    have hzero : ‖w‖ ≠ 0 := mt norm_eq_zero.mp hw_ne_zero
-    positivity
-  -- Unit perpendicular vector n
-  set n : ℝ × ℝ := (d⁻¹ : ℝ) • w with hn
-  -- Open strip half-width
-  set ε : ℝ := L / 6 with hε
-  have hεpos : 0 < ε := div_pos hLpos (by norm_num)
-  -- R is the open strip: affine image of (0,1) × (-1,1)
-  let R : Set (ℝ × ℝ) :=
-    {q | ∃ (t s : ℝ), t ∈ Set.Ioo (0 : ℝ) 1 ∧ s ∈ Set.Ioo (-1 : ℝ) 1 ∧
-      q = p₁ + t • v + s • (ε • n)}
-  -- Basic properties
-  have hv_nonzero : v ≠ 0 := by
-    intro hzero
-    have heq : p₂ = p₁ := sub_eq_zero.mp (by simpa [v] using hzero)
-    exact hne heq.symm
-  have h_perp : dotp v n = 0 := by
-    dsimp [n, d]
-    -- dotp v ((‖w‖⁻¹) • w) = (‖w‖⁻¹) • dotp v w
-    -- and dotp v w = dotp (p₂-p₁) (-v.2, v.1) = -(p₂-p₁).1*(p₂-p₁).2 + (p₂-p₁).2*(p₂-p₁).1 = 0
-    calc
-      dotp v ((‖w‖⁻¹ : ℝ) • w) = (‖w‖⁻¹ : ℝ) * dotp v w := by
-        dsimp [dotp]; ring
-      _ = (‖w‖⁻¹ : ℝ) * 0 := by
-        dsimp [w, v, dotp]; ring
-      _ = 0 := by ring
-  have h_dotp_vv_pos : 0 < dotp v v := by
-    dsimp [dotp]
-    have hsum_sq_pos : 0 < v.1 ^ 2 + v.2 ^ 2 := by
-      by_contra hc
-      have hzero : v.1 ^ 2 + v.2 ^ 2 = 0 := by nlinarith
-      apply hv_nonzero
-      have h1 : v.1 = 0 := by nlinarith
-      have h2 : v.2 = 0 := by nlinarith
-      ext <;> assumption
-    -- v.1 * v.1 + v.2 * v.2 = v.1 ^ 2 + v.2 ^ 2
-    nlinarith
-  -- p₁ ∉ R: t would have to be 0 but t ∈ (0,1)
-  have hp₁_notin : p₁ ∉ R := by
-    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
-    -- From hq: p₁ = p₁ + t•v + s•ε•n, so t•v + s•ε•n = 0
-    have hzero_vec : t • v + s • (ε • n) = 0 := by
-      calc
-        t • v + s • (ε • n) = (p₁ + (t • v + s • (ε • n))) - p₁ := by abel
-        _ = (p₁ + t • v + s • (ε • n)) - p₁ := by abel
-        _ = p₁ - p₁ := by rw [← hq]
-        _ = 0 := by simp
-    -- Dot with v: 0 = dotp(v, 0) = dotp(v, t•v + s•ε•n) = t•dotp(v,v) + s•ε•dotp(v,n)
-    -- Since dotp(v,n) = 0, we get t•dotp(v,v) = 0, and dotp(v,v) > 0, so t = 0
-    have hdot : dotp v (t • v + s • (ε • n)) = 0 := by
-      have hx : (t • v + s • (ε • n)).1 = 0 := by simpa using congrArg Prod.fst hzero_vec
-      have hy : (t • v + s • (ε • n)).2 = 0 := by simpa using congrArg Prod.snd hzero_vec
-      dsimp [dotp]
-      calc
-        v.1 * (t • v + s • (ε • n)).1 + v.2 * (t • v + s • (ε • n)).2
-            = v.1 * 0 + v.2 * 0 := by rw [hx, hy]
-        _ = 0 := by ring
-    -- Now expand the dot product algebraically
-    have hdot_expand : dotp v (t • v + s • (ε • n)) = t * dotp v v := by
-      calc
-        dotp v (t • v + s • (ε • n)) = dotp v (t • v) + dotp v (s • (ε • n)) := by
-          dsimp [dotp]; ring
-        _ = t * dotp v v + (s * ε) * dotp v n := by
-          dsimp [dotp]; ring
-        _ = t * dotp v v + (s * ε) * 0 := by rw [h_perp]
-        _ = t * dotp v v := by ring
-    rw [hdot_expand] at hdot
-    have ht_zero : t = 0 := by
-      have : t * dotp v v = 0 := hdot
-      have hpos : dotp v v > 0 := h_dotp_vv_pos
-      nlinarith
-    have htpos : 0 < t := (Set.mem_Ioo.mp ht).left
-    linarith
-  -- p₂ ∉ R: t would have to be 1 but t ∈ (0,1)
-  have hp₂_notin : p₂ ∉ R := by
-    intro h; rcases h with ⟨t, s, ht, hs, hq⟩
-    have ht_lt_one : t < 1 := (Set.mem_Ioo.mp ht).right
-    -- hq : p₂ = p₁ + t•v + s•ε•n
-    -- Since p₂ = p₁ + v, we get v = t•v + s•ε•n, so (1-t)•v = s•ε•n
-    have hp₂_eq_v : p₂ = p₁ + v := by
-      dsimp [v]; abel
-    have h_diff : (1 - t) • v = s • (ε • n) := by
-      rw [hp₂_eq_v] at hq
-      -- From hq : p₁ + v = p₁ + t•v + s•ε•n
-      -- Rearrange: v - t•v = s•ε•n → (1-t)•v = s•ε•n
-      calc
-        (1 - t) • v = v - t • v := by rw [sub_smul, one_smul]
-        _ = (p₁ + v) - (p₁ + t • v) := by abel
-        _ = (p₁ + v) - (p₁ + t • v + s • (ε • n)) + s • (ε • n) := by abel
-        _ = (p₁ + v) - (p₁ + v) + s • (ε • n) := by rw [← hq]
-        _ = s • (ε • n) := by simp
-    -- Dot both sides with v
-    -- dotp(v, (1-t)•v) = dotp(v, s•ε•n)
-    have hdot_diff : dotp v ((1 - t) • v) = dotp v (s • (ε • n)) := by rw [h_diff]
-    -- Expand both sides
-    have hdot_left : dotp v ((1 - t) • v) = (1 - t) * dotp v v := by
-      dsimp [dotp]; ring
-    have hdot_right : dotp v (s • (ε • n)) = s * ε * dotp v n := by
-      dsimp [dotp]; ring
-    rw [hdot_left, hdot_right, h_perp, mul_zero] at hdot_diff
-    have h_one_minus_t_zero : 1 - t = 0 := by
-      have : (1 - t) * dotp v v = 0 := hdot_diff
-      nlinarith
-    linarith
-  -- R is open: image of open set under continuous open map (affine).
-  have hR_open : IsOpen R := by
-    sorry
-  -- R is simply connected: convex → simply connected.
-  have hR_sc : IsSimplyConnected R := by
-    sorry
-  -- Spine S: the whole open segment (1D, not 2D strip), excluding endpoints.
-  -- S = {p₁ + t•v | t ∈ (0, 1)}.  The lemma's `hSband` requires S to contain
-  -- every interior segment point (footParam ∈ (0,1)), so S must be the full open
-  -- edge, not a middle sub-interval.  (`α = 1/6` is still the collar half-margin
-  -- used by `hRband_lb`'s safe foot window `[α/2, 1-α/2]`.)
-  set α : ℝ := 1/6 with hα
-  have hα_pos : 0 < α := by norm_num
-  have hα_lt_third : α < 1/3 := by norm_num
-  let S : Set (ℝ × ℝ) :=
-    {q | ∃ (t : ℝ), t ∈ Set.Ioo (0 : ℝ) 1 ∧ q = p₁ + t • v}
-  have hS_sub_R : S ⊆ R := by
-    intro q h; rcases h with ⟨t, ht, hq⟩
-    refine ⟨t, 0, ?_, ?_, ?_⟩
-    · -- t ∈ (0, 1) directly
-      exact ht
-    · -- 0 ∈ (-1, 1)
-      exact Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩
-    · -- q = p₁ + t•v = p₁ + t•v + 0•(ε•n)
-      dsimp; rw [hq]; simp
-  set mR : ℝ := ε / 4 with hmR
-  have hmR_pos : 0 < mR := by dsimp [mR]; positivity
-  -- Remaining properties: sorried (analytic geometry)
-  have hS_carrier_sub : S ⊆ ((straightPolyArc p₁ p₂ hne)).carrier := by
-    sorry
-  have hS_preconnected : IsPreconnected S := by
-    sorry
-  have hfirstMid : firstMid (straightPolyArc p₁ p₂ hne) ∈ S := by
-    -- firstMid β = ((β.segSrc β.firstSeg + β.segTgt β.firstSeg) / 2) = (p₁ + p₂) / 2 = p₁ + (1/2)•v
-    -- With t = 1/2 and α = 1/6, we have α < 1/2 < 1-α, so t ∈ Ioo(α, 1-α).
-    have hmid_def : firstMid (straightPolyArc p₁ p₂ hne) = p₁ + ((1/2 : ℝ) • v) := by
-      dsimp [firstMid, straightPolyArc, PolyArc.firstSeg, PolyArc.segSrc, PolyArc.segTgt,
-        PolyArc.verts]
-      dsimp [v]
-      ext <;> dsimp <;> ring
-    rw [hmid_def]
-    exact ⟨1/2, Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩, rfl⟩
-  have hSband : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
-      ((straightPolyArc p₁ p₂ hne)).firstSeg,
-      footParam (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).firstSeg)
-        (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).firstSeg) y ∈ Set.Ioo (0 : ℝ) 1 → y ∈ S := by
-    sorry
-  have hRband_lb : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
-      ((straightPolyArc p₁ p₂ hne)).firstSeg,
-      footParam (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).firstSeg)
-        (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).firstSeg) y ∈ Set.Icc (α / 2) (1 - α / 2) →
-      mR ≤ Metric.infDist y Rᶜ := by
-    sorry
-  have hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
-      liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).firstSeg)
-        (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0 ∈ S := by
-    sorry
-  have hSrcNear_L : ∀ p ∈ S,
-      dist p (((straightPolyArc p₁ p₂ hne)).verts 0) <
-        dist (((straightPolyArc p₁ p₂ hne)).segSrc
-          ((straightPolyArc p₁ p₂ hne)).firstSeg)
-          (((straightPolyArc p₁ p₂ hne)).segTgt
-          ((straightPolyArc p₁ p₂ hne)).firstSeg) →
-      p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
-        ((straightPolyArc p₁ p₂ hne)).firstSeg ∧
-        0 < footParam (((straightPolyArc p₁ p₂ hne)).segSrc
-          ((straightPolyArc p₁ p₂ hne)).firstSeg)
-          (((straightPolyArc p₁ p₂ hne)).segTgt
-          ((straightPolyArc p₁ p₂ hne)).firstSeg) p ∧
-        dist p (((straightPolyArc p₁ p₂ hne)).verts 0) =
-          footParam (((straightPolyArc p₁ p₂ hne)).segSrc
-            ((straightPolyArc p₁ p₂ hne)).firstSeg)
-            (((straightPolyArc p₁ p₂ hne)).segTgt
-            ((straightPolyArc p₁ p₂ hne)).firstSeg) p *
-            dist (((straightPolyArc p₁ p₂ hne)).segSrc
-              ((straightPolyArc p₁ p₂ hne)).firstSeg)
-              (((straightPolyArc p₁ p₂ hne)).segTgt
-              ((straightPolyArc p₁ p₂ hne)).firstSeg) := by
-    sorry
-  have hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
-      0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).firstSeg)
-        (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).firstSeg) c 0) Rᶜ := by
-    sorry
-  have hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
-      liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).lastSeg)
-        (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).lastSeg) c 0 ∈ S := by
-    sorry
-  have hTgtNear_L : ∀ p ∈ S,
-      dist p (((straightPolyArc p₁ p₂ hne)).verts
-          (Fin.last (straightPolyArc p₁ p₂ hne).numSegs)) <
-        dist (((straightPolyArc p₁ p₂ hne)).segSrc
-          ((straightPolyArc p₁ p₂ hne)).lastSeg)
-          (((straightPolyArc p₁ p₂ hne)).segTgt
-          ((straightPolyArc p₁ p₂ hne)).lastSeg) →
-      p ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
-        ((straightPolyArc p₁ p₂ hne)).lastSeg ∧
-        0 < footParam (((straightPolyArc p₁ p₂ hne)).segTgt
-          ((straightPolyArc p₁ p₂ hne)).lastSeg)
-          (((straightPolyArc p₁ p₂ hne)).segSrc
-          ((straightPolyArc p₁ p₂ hne)).lastSeg) p ∧
-        dist p (((straightPolyArc p₁ p₂ hne)).verts
-            (Fin.last (straightPolyArc p₁ p₂ hne).numSegs)) =
-          footParam (((straightPolyArc p₁ p₂ hne)).segTgt
-            ((straightPolyArc p₁ p₂ hne)).lastSeg)
-            (((straightPolyArc p₁ p₂ hne)).segSrc
-            ((straightPolyArc p₁ p₂ hne)).lastSeg) p *
-            dist (((straightPolyArc p₁ p₂ hne)).segTgt
-              ((straightPolyArc p₁ p₂ hne)).lastSeg)
-              (((straightPolyArc p₁ p₂ hne)).segSrc
-              ((straightPolyArc p₁ p₂ hne)).lastSeg) := by
-    sorry
-  have hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
-      0 < Metric.infDist (liftPlus (((straightPolyArc p₁ p₂ hne)).segTgt
-        ((straightPolyArc p₁ p₂ hne)).lastSeg)
-        (((straightPolyArc p₁ p₂ hne)).segSrc
-        ((straightPolyArc p₁ p₂ hne)).lastSeg) c 0) Rᶜ := by
-    sorry
-  have hcover : ∀ δ₀ : ℝ, 0 < δ₀ →
-      R ∩ ((straightPolyArc p₁ p₂ hne)).carrier ⊆ taperedTube R S δ₀ := by
-    sorry
-  -- Assemble and apply the already-proved partition lemma.
-  obtain ⟨U, V, hpart⟩ :=
-    exists_twoSidedPartition_of_straightArc
-      (straightPolyArc p₁ p₂ hne) h1
-      hα_pos hα_lt_third
-      hmR_pos hR_open hR_sc
-      hS_sub_R hS_preconnected hS_carrier_sub
-      hp₁_notin hp₂_notin
-      hfirstMid hSband hRband_lb
-      hSrcSpine hSrcNear_L hSrcRpos
-      hTgtSpine hTgtNear_L hTgtRpos
-      hcover
-  exact ⟨R, U, V, hR_open, hR_sc, hp₁_notin, hp₂_notin, hpart⟩
-
 /-- **Lower bound on the distance to the complement of an open ball.**
 For any `x` in a metric space, `r - dist x c ≤ infDist x (ball c r)ᶜ`.  Reason:
 for any `z ∉ ball c r` we have `dist z c ≥ r`, and the triangle inequality gives
@@ -1152,6 +867,252 @@ private theorem infDist_ball_compl_lb {X : Type*} [MetricSpace X] (c : X) (r : �
   have htri : dist z c ≤ dist z x + dist x c := dist_triangle z x c
   rw [dist_comm x z]
   linarith
+
+/-- **Obligation A: region construction + collar for a prefix-step straight arc.**
+Builds the open ball `R = ball ((p₁+p₂)/2) (‖p₁p₂‖/2)` around the segment `p₁p₂`
+— a simply-connected (convex) neighborhood of the open segment whose boundary
+passes through both endpoints, so `p₁, p₂ ∉ R` — then applies the already-proved
+`exists_twoSidedPartition_of_straightArc` to obtain a two-sided partition `U, V`
+of the arc-complement.  The spine `S` is the whole open segment, and the collar
+hypotheses are discharged exactly as in `exists_twoSidedPartition_unitSegment`,
+with the `infDist`-to-`Rᶜ` bounds coming from `infDist_ball_compl_lb`. -/
+theorem exists_twoSidedPartition_prefixStep
+    (p₁ p₂ : ℝ × ℝ) (hne : p₁ ≠ p₂) :
+    ∃ (R U V : Set (ℝ × ℝ)),
+      IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
+      IsTwoSidedPartition
+        (regionMinusArc R ((straightPolyArc p₁ p₂ hne).toSimpleArc)) U V := by
+  classical
+  set β := straightPolyArc p₁ p₂ hne with hβ
+  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
+  have hLpos : 0 < dist p₁ p₂ := dist_pos.mpr hne
+  -- Segment data for the unique edge (mirrors `exists_twoSidedPartition_unitSegment`).
+  have hverts0 : β.verts 0 = p₁ := by rw [hβ]; simp [straightPolyArc, PolyArc.verts]
+  have hvertsLast : β.verts (Fin.last β.numSegs) = p₂ := by
+    show (straightPolyArc p₁ p₂ hne).verts
+        (Fin.last (straightPolyArc p₁ p₂ hne).numSegs) = _
+    simp [straightPolyArc, PolyArc.verts, Fin.last]
+  have hsrc : β.segSrc β.firstSeg = p₁ := by
+    rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
+  have htgt : β.segTgt β.firstSeg = p₂ := by
+    rw [hβ]; simp [straightPolyArc, PolyArc.segTgt, PolyArc.firstSeg, Fin.succ]
+  have hlast : β.lastSeg = β.firstSeg := by
+    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg, hβnum]
+  have hsrcLast : β.segSrc β.lastSeg = p₁ := by rw [hlast]; exact hsrc
+  have htgtLast : β.segTgt β.lastSeg = p₂ := by rw [hlast]; exact htgt
+  have hcarr : β.carrier = segment ℝ p₁ p₂ := by
+    rw [hβ]; exact straightPolyArc_carrier _ _ hne
+  have hsegCarr : β.segCarrier β.firstSeg = segment ℝ p₁ p₂ := by
+    rw [PolyArc.segCarrier, hsrc, htgt]
+  have hsegCarrLast : β.segCarrier β.lastSeg = segment ℝ p₁ p₂ := by
+    rw [hlast]; exact hsegCarr
+  -- Region = open ball about the segment midpoint; spine = whole open segment.
+  set c₀ : ℝ × ℝ := (1/2 : ℝ) • p₁ + (1/2 : ℝ) • p₂ with hc₀
+  set R : Set (ℝ × ℝ) := Metric.ball c₀ (dist p₁ p₂ / 2) with hR_def
+  set S : Set (ℝ × ℝ) :=
+    {q : ℝ × ℝ | ∃ c : ℝ, c ∈ Set.Ioo (0:ℝ) 1 ∧ q = (1 - c) • p₁ + c • p₂} with hS_def
+  set α : ℝ := 1/6 with hα_def
+  set mR : ℝ := dist p₁ p₂ / 12 with hmR_def
+  have hα_pos : (0:ℝ) < α := by rw [hα_def]; norm_num
+  have hα_lt_third : α < 1/3 := by rw [hα_def]; norm_num
+  have hmR_pos : 0 < mR := by rw [hmR_def]; positivity
+  -- Geometry helpers: distances from a segment point to the center / endpoints.
+  have hnv : ‖p₂ - p₁‖ = dist p₁ p₂ := by rw [← dist_eq_norm, dist_comm]
+  have hsub_center : ∀ c : ℝ,
+      ((1 - c) • p₁ + c • p₂) - c₀ = (c - 1/2) • (p₂ - p₁) := by
+    intro c; rw [hc₀]; module
+  have hdist_mid : ∀ c : ℝ,
+      dist ((1 - c) • p₁ + c • p₂) c₀ = |c - 1/2| * dist p₁ p₂ := by
+    intro c
+    rw [dist_eq_norm, hsub_center c, norm_smul, Real.norm_eq_abs, hnv]
+  have hdist_src : ∀ c : ℝ,
+      dist ((1 - c) • p₁ + c • p₂) p₁ = |c| * dist p₁ p₂ := by
+    intro c
+    rw [dist_eq_norm, show (1 - c) • p₁ + c • p₂ - p₁ = c • (p₂ - p₁) by module,
+      norm_smul, Real.norm_eq_abs, hnv]
+  have hdist_p₁ : dist p₁ c₀ = dist p₁ p₂ / 2 := by
+    rw [dist_eq_norm, hc₀,
+      show p₁ - ((1/2:ℝ) • p₁ + (1/2:ℝ) • p₂) = (1/2:ℝ) • (p₁ - p₂) by module,
+      norm_smul, Real.norm_eq_abs, show |(1/2:ℝ)| = 1/2 from by norm_num,
+      show ‖p₁ - p₂‖ = dist p₁ p₂ from by rw [dist_eq_norm]]
+    ring
+  have hdist_p₂ : dist p₂ c₀ = dist p₁ p₂ / 2 := by
+    rw [dist_eq_norm, hc₀,
+      show p₂ - ((1/2:ℝ) • p₁ + (1/2:ℝ) • p₂) = (1/2:ℝ) • (p₂ - p₁) by module,
+      norm_smul, Real.norm_eq_abs, show |(1/2:ℝ)| = 1/2 from by norm_num, hnv]
+    ring
+  have hmemR : ∀ c : ℝ,
+      ((1 - c) • p₁ + c • p₂) ∈ R ↔ |c - 1/2| < 1/2 := by
+    intro c
+    rw [hR_def, Metric.mem_ball, hdist_mid c]
+    constructor
+    · intro h; nlinarith [h, hLpos, abs_nonneg (c - 1/2)]
+    · intro h; nlinarith [h, hLpos, abs_nonneg (c - 1/2)]
+  -- Orientation facts for `footParam`.
+  have hts : p₂ ≠ p₁ := Ne.symm hne
+  have hst : p₁ ≠ p₂ := hne
+  have hfoot_c : ∀ c : ℝ, footParam p₁ p₂ ((1 - c) • p₁ + c • p₂) = c := fun c =>
+    footParam_affineComb hts c
+  have hfoot_tgt : ∀ c : ℝ, footParam p₂ p₁ ((1 - c) • p₁ + c • p₂) = 1 - c := by
+    intro c
+    have h := footParam_affineComb hst (1 - c)
+    rw [show (1 - (1 - c)) • p₂ + (1 - c) • p₁ = (1 - c) • p₁ + c • p₂ by module] at h
+    exact h
+  -- Spine helpers.
+  have hSpt : ∀ c : ℝ, c ∈ Set.Ioo (0:ℝ) 1 → ((1 - c) • p₁ + c • p₂) ∈ S :=
+    fun c hc => ⟨c, hc, rfl⟩
+  have hmem_seg : ∀ y : ℝ × ℝ, y ∈ segment ℝ p₁ p₂ →
+      ∃ b : ℝ, 0 ≤ b ∧ b ≤ 1 ∧ y = (1 - b) • p₁ + b • p₂ := by
+    intro y hy
+    obtain ⟨a, b, ha, hb, hab, rfl⟩ := hy
+    exact ⟨b, hb, by linarith, by rw [show a = 1 - b by linarith]⟩
+  have hseg_of_mem : ∀ c : ℝ, 0 ≤ c → c ≤ 1 →
+      ((1 - c) • p₁ + c • p₂) ∈ segment ℝ p₁ p₂ :=
+    fun c hc0 hc1 => ⟨1 - c, c, by linarith, hc0, by ring, rfl⟩
+  -- ============ IsOpen R, endpoints in Rᶜ ============
+  have hR : IsOpen R := by rw [hR_def]; exact Metric.isOpen_ball
+  have hsrc0 : β.verts 0 ∈ Rᶜ := by
+    rw [hverts0, Set.mem_compl_iff, hR_def, Metric.mem_ball, hdist_p₁]
+    exact lt_irrefl _
+  have hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ := by
+    rw [hvertsLast, Set.mem_compl_iff, hR_def, Metric.mem_ball, hdist_p₂]
+    exact lt_irrefl _
+  have hRcne : (Rᶜ).Nonempty := ⟨β.verts 0, hsrc0⟩
+  -- ============ IsSimplyConnected R ============
+  have hRsc : IsSimplyConnected R := by
+    have hC : ContractibleSpace R :=
+      (convex_ball c₀ (dist p₁ p₂ / 2)).contractibleSpace
+        ⟨c₀, by rw [Metric.mem_ball, dist_self]; linarith⟩
+    exact SimplyConnectedSpace.ofContractible _
+  -- ============ S ⊆ R, preconnected, ⊆ carrier, midpoint ============
+  have hSR : S ⊆ R := by
+    rintro q ⟨c, hc, rfl⟩
+    rw [hmemR c, abs_lt]
+    rcases hc with ⟨hc0, hc1⟩
+    constructor <;> linarith
+  have hSpre : IsPreconnected S := by
+    have himg : S = (fun c : ℝ => (1 - c) • p₁ + c • p₂) '' Set.Ioo 0 1 := by
+      ext q; constructor
+      · rintro ⟨c, hc, rfl⟩; exact ⟨c, hc, rfl⟩
+      · rintro ⟨c, hc, rfl⟩; exact ⟨c, hc, rfl⟩
+    rw [himg]; exact isPreconnected_Ioo.image _ (by fun_prop)
+  have hS_carrier : S ⊆ β.carrier := by
+    rw [hcarr]; rintro q ⟨c, hc, rfl⟩
+    exact hseg_of_mem c (le_of_lt hc.1) (le_of_lt hc.2)
+  have hmS : firstMid β ∈ S := by
+    refine ⟨1/2, ⟨by norm_num, by norm_num⟩, ?_⟩
+    rw [firstMid, hsrc, htgt]
+    ext <;> simp <;> ring
+  -- ============ hSband ============
+  have hSband : ∀ y ∈ β.segCarrier β.firstSeg,
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) y ∈ Set.Ioo (0 : ℝ) 1 →
+      y ∈ S := by
+    intro y hy hfoot
+    rw [hsegCarr] at hy
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg y hy
+    rw [hsrc, htgt, hfoot_c b] at hfoot
+    exact hSpt b hfoot
+  -- ============ hRband_lb (was `sorry`; now via `infDist_ball_compl_lb`) ============
+  have hRband_lb : ∀ y ∈ β.segCarrier β.firstSeg,
+      footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) y ∈
+        Set.Icc (α / 2) (1 - α / 2) →
+      mR ≤ Metric.infDist y Rᶜ := by
+    intro y hy hfoot
+    rw [hsegCarr] at hy
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg y hy
+    rw [hsrc, htgt, hfoot_c b] at hfoot
+    rcases hfoot with ⟨hflo, hfhi⟩
+    rw [hα_def] at hflo hfhi
+    have hlb := infDist_ball_compl_lb c₀ (dist p₁ p₂ / 2) ((1 - b) • p₁ + b • p₂)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_mid b] at hlb
+    have habs : |b - 1/2| ≤ 5/12 := abs_le.mpr ⟨by linarith, by linarith⟩
+    rw [hmR_def, hR_def]
+    nlinarith [hlb, mul_le_mul_of_nonneg_right habs (le_of_lt hLpos), hLpos]
+  -- ============ hSrcSpine ============
+  have hSrcSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S := by
+    intro c hc
+    rw [hsrc, htgt, liftPlus_zero_eq_affineComb]
+    exact hSpt c hc
+  -- ============ hSrcNear_L ============
+  have hSrcNear_L : ∀ p ∈ S,
+      dist p (β.verts 0) < dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) →
+      p ∈ β.segCarrier β.firstSeg ∧
+        0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∧
+        dist p (β.verts 0) =
+          footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p *
+            dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) := by
+    rintro p ⟨c, hc, rfl⟩ _
+    rw [hsrc, htgt, hsegCarr, hverts0]
+    refine ⟨hseg_of_mem c (le_of_lt hc.1) (le_of_lt hc.2), ?_, ?_⟩
+    · rw [hfoot_c c]; exact hc.1
+    · rw [hfoot_c c, hdist_src c, abs_of_pos hc.1]
+  -- ============ hSrcRpos ============
+  have hSrcRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      0 < Metric.infDist
+        (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0) Rᶜ := by
+    intro c hc
+    rw [hsrc, htgt, liftPlus_zero_eq_affineComb]
+    have hlb := infDist_ball_compl_lb c₀ (dist p₁ p₂ / 2) ((1 - c) • p₁ + c • p₂)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_mid c] at hlb
+    have habs : |c - 1/2| < 1/2 := abs_lt.mpr ⟨by linarith [hc.1], by linarith [hc.2]⟩
+    rw [hR_def]
+    nlinarith [hlb, mul_lt_mul_of_pos_right habs hLpos]
+  -- ============ hTgtSpine ============
+  have hTgtSpine : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S := by
+    intro c hc
+    rw [htgtLast, hsrcLast, liftPlus_zero_eq_affineComb,
+      show (1 - c) • p₂ + c • p₁ = (1 - (1 - c)) • p₁ + (1 - c) • p₂ by module]
+    exact hSpt (1 - c) ⟨by linarith [hc.2], by linarith [hc.1]⟩
+  -- ============ hTgtNear_L ============
+  have hTgtNear_L : ∀ p ∈ S,
+      dist p (β.verts (Fin.last β.numSegs)) <
+          dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) →
+      p ∈ β.segCarrier β.lastSeg ∧
+        0 < footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∧
+        dist p (β.verts (Fin.last β.numSegs)) =
+          footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p *
+            dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) := by
+    rintro p ⟨c, hc, rfl⟩ _
+    rw [hsrcLast, htgtLast, hvertsLast, hsegCarrLast]
+    refine ⟨hseg_of_mem c (le_of_lt hc.1) (le_of_lt hc.2), ?_, ?_⟩
+    · rw [hfoot_tgt c]; linarith [hc.2]
+    · rw [hfoot_tgt c, dist_affineComb_tgt (show (1 - c) + c = 1 by ring),
+        abs_of_nonneg (show (0:ℝ) ≤ 1 - c by linarith [hc.2]), dist_comm p₂ p₁]
+  -- ============ hTgtRpos ============
+  have hTgtRpos : ∀ c ∈ Set.Ioo (0 : ℝ) 1,
+      0 < Metric.infDist
+        (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ := by
+    intro c hc
+    rw [htgtLast, hsrcLast, liftPlus_zero_eq_affineComb,
+      show (1 - c) • p₂ + c • p₁ = (1 - (1 - c)) • p₁ + (1 - c) • p₂ by module]
+    have hlb := infDist_ball_compl_lb c₀ (dist p₁ p₂ / 2)
+      ((1 - (1 - c)) • p₁ + (1 - c) • p₂)
+      (by rw [hR_def] at hRcne; exact hRcne)
+    rw [hdist_mid (1 - c)] at hlb
+    have habs : |(1 - c) - 1/2| < 1/2 := abs_lt.mpr ⟨by linarith [hc.2], by linarith [hc.1]⟩
+    rw [hR_def]
+    nlinarith [hlb, mul_lt_mul_of_pos_right habs hLpos]
+  -- ============ hcover ============
+  have hcover : ∀ δ₀ : ℝ, 0 < δ₀ → R ∩ β.carrier ⊆ taperedTube R S δ₀ := by
+    intro δ₀ hδ₀ z hz
+    obtain ⟨hzR, hzC⟩ := hz
+    rw [hcarr] at hzC
+    obtain ⟨b, hb0, hb1, rfl⟩ := hmem_seg z hzC
+    rw [hmemR b, abs_lt] at hzR
+    have hzS : ((1 - b) • p₁ + b • p₂) ∈ S :=
+      hSpt b ⟨by linarith [hzR.1], by linarith [hzR.2]⟩
+    exact subset_taperedTube hR (by rw [hR_def] at hRcne; exact hRcne) hδ₀ hSR hzS
+  -- ============ Assemble and apply ============
+  obtain ⟨U, V, hpart⟩ :=
+    exists_twoSidedPartition_of_straightArc β hβnum
+      hα_pos hα_lt_third hmR_pos
+      hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hmS hSband hRband_lb
+      hSrcSpine hSrcNear_L hSrcRpos hTgtSpine hTgtNear_L hTgtRpos hcover
+  exact ⟨R, U, V, hR, hRsc, hverts0 ▸ hsrc0, hvertsLast ▸ hsrcL, hpart⟩
 
 /-- **Witness that `exists_twoSidedPartition_of_straightArc` is non-vacuous.**
 

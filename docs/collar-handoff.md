@@ -1,6 +1,38 @@
 # Collar work handoff (2026-06-17)
 
-## UPDATE (2026-06-17, end-cap de-vacuification) — READ FIRST
+## UPDATE (2026-06-18, `prefixStep` CLOSED — strip → ball) — READ FIRST
+
+`exists_twoSidedPartition_prefixStep` (Obligation A) is now **sorry-free and
+kernel-clean** (`#print axioms` → `[propext, Classical.choice, Quot.sound]`).
+Both previously open sorries (`hR_sc` convexity linearity step; `hRband_lb`
+`infDist`-to-`Rᶜ` bound) and ~15 stale port errors are gone, and the whole-lemma
+heartbeat timeout is resolved.
+
+**What changed:** the region `R` was switched from the affine *strip*
+(image of `(0,1)×(-1,1)` under `(t,s) ↦ p₁ + t•v + s•ε•n`) to the **open metric
+ball** `R = Metric.ball ((1/2)•p₁ + (1/2)•p₂) (dist p₁ p₂ / 2)`.  `R` is
+existentially quantified in `prefixStep`'s conclusion, so this is sound, and it
+collapses the two hard obstructions:
+
+- `IsSimplyConnected R` is now immediate from `convex_ball` → `ContractibleSpace`
+  (no vector-algebra linearity sorry).
+- every `infDist · Rᶜ` fact — including `hRband_lb` — comes from the helper
+  `infDist_ball_compl_lb` (`r - dist x c ≤ infDist x (ball c r)ᶜ`), so the bound
+  `mR = dist p₁ p₂ / 12 ≤ infDist y Rᶜ` on the safe foot window `[α/2,1-α/2]`
+  (α = 1/6) is one `linarith`.
+
+The proof now mirrors the sorry-free `exists_twoSidedPartition_unitSegment`
+witness almost verbatim, generalizing `(0,0)→p₁`, `(1,0)→p₂`, and keeping the
+spine in affine-combination form `(1-c)•p₁ + c•p₂` so every `footParam` /
+`liftPlus` rewrite ports directly.  The entire `dotp`/`w`/`n`/`ε` strip
+apparatus was deleted.  `infDist_ball_compl_lb` was moved above `prefixStep`.
+
+**The strip-specific notes below (the "13 sorries" list, the "Still sorried (2)"
+table, the `t•v + s•ε•n` parameter block) are now HISTORICAL.**  The only
+remaining downstream item is #14 (`h_exists_target1` in `SzemerediTrotter.lean`),
+which is unaffected by this change (`prefixStep`'s statement is unchanged).
+
+## UPDATE (2026-06-17, end-cap de-vacuification)
 
 `exists_twoSidedPartition_of_straightArc` was sorry-free but **vacuous** (its
 hypothesis bundle proved `False`): the clipped end-cap slice cover was indexed over the
@@ -197,3 +229,52 @@ the tube, then Obligation B (local→global gluing) lifts U,V to `poolRegion`,
 ```bash
 ./lake-build.sh LeanFormalizations
 ```
+
+## UPDATE (2026-06-17, sorried cleanup session) — STATUS
+
+**11 of 13 sorries are closed** with proofs in `PLCollarSeparation.lean`.
+The file was reset to origin at session start; all changes below are **not committed**.
+
+### Closed (11)
+
+| # | Lemma | Status |
+|---|-------|--------|
+| 1 | `hR_open` — IsOpen R | ✅ Closed (preimage of open intervals under continuous coords) |
+| 2 | `hR_sc` — IsSimplyConnected R | ⚠️ Partially closed (convexity proof, linearity step sorried) |
+| 3 | `hS_carrier_sub` — S ⊆ carrier | ✅ Closed (segment membership) |
+| 4 | `hS_preconnected` — IsPreconnected S | ✅ Closed (image of Ioo under affine map) |
+| 5 | `hSband` — interior segment points in S | ✅ Closed (footParam + affine combination) |
+| 7 | `hSrcSpine` — liftPlus(src,tgt,c,0) ∈ S | ✅ Closed |
+| 8 | `hSrcNear_L` — source-near characterization | ✅ Closed (footParam_affineComb + dist formulas) |
+| 9 | `hSrcRpos` — positive infDist source | ✅ Closed (point in open R) |
+| 10 | `hTgtSpine` — liftPlus(tgt,src,c,0) ∈ S | ✅ Closed |
+| 11 | `hTgtNear_L` — target-near characterization | ✅ Closed (symmetric to #8) |
+| 12 | `hTgtRpos` — positive infDist target | ✅ Closed |
+| 13 | `hcover` — tapered tube coverage | ✅ Closed (R ∩ carrier ⊆ S, then subset_taperedTube) |
+
+### Still sorried (2)
+
+| # | Lemma | Issue |
+|---|-------|-------|
+| 2 | `hR_sc` (linearity step) | The convexity linearity step: `a•(p₁+tx•v+sx•εn) + b•(p₁+ty•v+sy•εn) = p₁ + (a·tx+b·ty)•v + (a·sx+b·sy)•εn`. Tried `simp [smul_add, add_smul, smul_smul, hab]; abel` and various calc blocks; none closed. |
+| 6 | `hRband_lb` — infDist lower bound | The geometric inequality requiring `L·(|v.1|+|v.2|) ≤ 2·dotp(v,v)` and `|n.1|+|n.2| ≤ 4·dotp(n,n)`. Proof approach is clear (case analysis on which of \|v.1\|, \|v.2\| is larger), but implementation has typeclass issues with `max_eq_left`/`max_eq_right`/`sq_abs`. A full working proof was attempted (included in the file as the `hRband_lb` block) but had ~10 errors from `field_simp` subgoal handling and `h_convert` rewrite failures. The block was reverted to `sorry`. |
+
+### Key helper lemmas added (above line 871)
+
+```lean
+hsegSrc_first : β.segSrc β.firstSeg = p₁
+hsegTgt_first : β.segTgt β.firstSeg = p₂
+hsegCarrier_first : β.segCarrier β.firstSeg = segment ℝ p₁ p₂
+hverts0 : β.verts 0 = p₁
+hverts_last : β.verts (Fin.last β.numSegs) = p₂
+hlast_is_first : β.lastSeg = β.firstSeg
+hsegSrc_last / hsegTgt_last / hsegCarrier_last (derived from above)
+```
+
+### Key learnings
+
+1. **`simp [straightPolyArc]` does NOT work** for computing segment data fields (segSrc, segTgt, firstSeg, segCarrier, verts). Use explicit `dsimp` or the helper lemmas above.
+2. **`abel` on vector expressions with `•`** (scalar multiplication) is unreliable. For the convexity linearity step, try `simp` with `add_smul` and `smul_smul` to break down the scalar multiplications, then `abel` on the pure additive part, then `simp [hab]`.
+3. **`max_eq_left`/`max_eq_right`** — use `apply max_eq_left; linarith` rather than `max_eq_left h` (which has type mismatch issues in this mathlib version).
+4. **`sq_abs`** — use `simpa using (sq_abs v.1).symm` rather than `rw [(sq_abs v.1).symm]` directly.
+5. **`Metric.infDist_pos.mpr`** — doesn't exist in this mathlib version. Use `(hR_open.isClosed_compl.notMem_iff_infDist_pos ⟨p₁, hp₁_notin⟩).mpr` instead (pattern from PLArc.lean).
