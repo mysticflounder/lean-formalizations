@@ -7,7 +7,7 @@ theorem exists_twoSidedPartition_of_arc {A R : Set Plane} {β : SimpleArc Plane}
     (h : ArcInRegion A R β) :
     ∃ U V, IsTwoSidedPartition (regionMinusArc R β) U V
 ```
-(`LeanFormalizations/PachDeZeeuw/CrossingLemma/PlaneArcSeparation.lean:377`)
+(`lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/PlaneArcSeparation.lean:377`)
 
 **Route (c)** = *direct plane topology*: build a side-invariant `σ : R∖β → ℤ/2`
 and read the two sides off as `σ⁻¹{0}, σ⁻¹{1}`. The two competing routes —
@@ -776,7 +776,7 @@ tapered tube `T` with the four properties above).
 **Collar (L3) is COMPLETE** (`PLArc.lean`, `main` ≥ `19caa19`): `collarPlus`,
 `collarMinus` open, disjoint, union `= taperedTube ∖ carrier`, each nonempty.
 The G-nodes are now under construction in a **new file
-`LeanFormalizations/PachDeZeeuw/CrossingLemma/PLCover.lean`**.
+`lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/PLCover.lean`**.
 
 ### Architecture refinement (supersedes the §6 piecewise-`g` and the §2 `Z1` framing)
 
@@ -848,7 +848,7 @@ budget bundles; `V₀ ∪ V₁ = univ`, `V₀ ∩ V₁ = Pp ⊔ Pm`), then assem
 
 ## 8. Assembly — the abstract collar ⇒ partition reduction (DONE, 2026-06-03)
 
-`LeanFormalizations/PachDeZeeuw/CrossingLemma/PLAssembly.lean` is sorry-free,
+`lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/PLAssembly.lean` is sorry-free,
 axiom-clean `[propext, Classical.choice, Quot.sound]`. It contains the single
 theorem
 

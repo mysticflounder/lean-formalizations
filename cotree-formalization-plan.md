@@ -1,7 +1,7 @@
 # Closing the cotree `sorry` in `SzemerediTrotter.lean`
 
 Target: the single remaining `sorry` at
-`LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean` in
+`lean/LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean` in
 `straightLineCanonicalComponentResidualMapPlanarityOfARR`, in the
 `hstep` later-cotree branch (`lvertex.length - 1 < m`).
 
@@ -26,9 +26,9 @@ grep -nE "(^|\.)<unqualified-name>\b" <file>        # finds decl + call sites
 ```
 
 Files:
-- `ST` = `LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean`
-- `RM` = `LeanFormalizations/PachDeZeeuw/CrossingLemma/ResidualMapProperties.lean`
-- `VG` = `LeanFormalizations/Combinatorics/CombinatorialMap/VertexGraph.lean`
+- `ST` = `lean/LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean`
+- `RM` = `lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/ResidualMapProperties.lean`
+- `VG` = `lean/LeanFormalizations/Combinatorics/CombinatorialMap/VertexGraph.lean`
 
 ### Target
 | What | Location |
