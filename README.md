@@ -24,7 +24,7 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Provenance
 
-These modules are formalizations we created in the course of researching Erdős
+These modules are formalizations I created in the course of researching Erdős
 problems, re-extracted as standalone, mathlib-only modules — the *general*
 mathematics that stands on its own.
 
@@ -44,7 +44,7 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 
 ## Verified content ✅
 
-### `LeanFormalizations/Combinatorics/Additive/` — Balog–Szemerédi–Gowers
+### `LeanFormalizations/Combinatorics/Additive/` — Balog–Szemerédi–Gowers (Balog–Szemerédi 1994; Gowers 1998)
 
 - **`BalogSzemerediGowers.lean`** — the Balog–Szemerédi–Gowers theorem over
   `Finset.addEnergy` for an arbitrary `AddCommGroup`, in three forms:
@@ -62,7 +62,7 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine gap, while
 reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
 
-### `LeanFormalizations/Geometry/Euclidean/` — 2D two-point isometry classification
+### `LeanFormalizations/Geometry/Euclidean/` — 2D two-point isometry classification (Mazur–Ulam 1932; [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
 
 - **`IsometryClassification.lean`** — for `a b c d : EuclideanSpace ℝ (Fin 2)`
   with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c`,
@@ -88,7 +88,7 @@ reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
   no-go side of its enemy-profile analysis; the module itself is
   self-contained mathematics.)
 
-### `LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5)
+### `LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5) ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982))
 
 Generic linear-algebra / line-geometry lemmas extracted from the Elekes–Sharir
 distance-geometry program (statements faithful to the prose source
@@ -118,7 +118,7 @@ quadratic-form cores below are **axiom-clean** (`#print axioms` =
   at most one such line per ruling ([`atMostOneLine_of_skewRuling_isometryGraph`](LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181)).
   **Axiom-clean.**
 
-### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core
+### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177))
 
 A ~1600-line plane-algebraic-geometry development (namespace
 `PachDeZeeuw.Algebraic`): resultants over `ℝ[x,y]`, common-component theory,
@@ -137,7 +137,7 @@ theorems confirmed axiom-clean:
 > the headline `theorem bezout`. It uses project-flavored names pending the
 > idiomaticity cleanup.
 
-### `LeanFormalizations/Combinatorics/CombinatorialMap/` — combinatorial maps + planar edge bound
+### `LeanFormalizations/Combinatorics/CombinatorialMap/` — combinatorial maps + planar edge bound ([arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
 A standalone, mathlib-only library (promoted out of the Pach–de Zeeuw tree once
 it was confirmed complete). All headlines axiom-clean:
@@ -159,7 +159,7 @@ it was confirmed complete). All headlines axiom-clean:
   selectors for leaf-order edge enumeration, including the von Staudt
   tree/cotree edge-count bridge and two-block edge-order witness.
 
-### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅
+### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅ ([arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
 - **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
   trees, explicit parent-edge enumeration via
@@ -178,7 +178,7 @@ it was confirmed complete). All headlines axiom-clean:
   reverse cotree component argument.
   **Axiom-clean.**
 
-### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
+### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons (Rockafellar 1970; Schneider 2014)
 
 Classical convex-geometry facts not currently in mathlib (formalized in the
 course of our Erdős-problem research). All headlines axiom-clean.
@@ -195,7 +195,7 @@ course of our Erdős-problem research). All headlines axiom-clean.
   occur cyclically consecutively, via the planar chord lemma
   [`chord_in_frontier_of_collinear_boundary_triple`](LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L177).
 
-### `LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting
+### `LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting (Brass–Moser–Pach 2005)
 
 - **`Counting.lean`** — the classical degeneracy argument for unit distances: a
   forward-neighbor bound `k` in some index order forces at most `n · k`
@@ -204,7 +204,7 @@ course of our Erdős-problem research). All headlines axiom-clean.
   [`UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`](LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107)), with a
   [`SimpleConvexPolygon`](LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. Axiom-clean.
 
-### `LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities
+### `LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities (no external source — FLT-staging by-product)
 
 General `Matrix.GeneralLinearGroup` constructions over an arbitrary commutative
 ring, from work done as part of a PR for FLT (a good-prime Hecke-operator
@@ -221,7 +221,7 @@ hypothesis. All headlines axiom-clean.
   determinants of the unipotent and swap general-linear elements
   ([`unipotent_det_eq_one`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L43), [`swap_det_eq_neg_one`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L50)).
 
-### `LeanFormalizations/ElekesSharirGuthKatz/` — Elekes–Sharir/Guth–Katz reduction (base) ✅
+### `LeanFormalizations/ElekesSharirGuthKatz/` — Elekes–Sharir/Guth–Katz reduction (base) ✅ ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982), [arXiv:1011.4105](https://arxiv.org/abs/1011.4105))
 
 The proven ES/GK reduction layer that turns the distinct-distances question into
 a distance-energy bound, imported from the sibling `esgk-on3` project (base layer
@@ -265,7 +265,7 @@ verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
 `@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
 is `sorryAx`.
 
-## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/`
+## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/` ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177); crossing lemma [arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
 A ported copy of the Pach–de Zeeuw "distinct distances on algebraic curves"
 program (the formalization that motivated the standalone modules above). It
@@ -326,7 +326,7 @@ A partly-verified by-product also lives in this program:
   hypothesis, the other omitted its rationality hypothesis); a faithful statement
   needs the rational-parametrization set-up first.
 
-### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
+### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅ ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177))
 
 - **`Bezout.lean`** — `theorem bezout : BezoutFiniteIntersectionStatement`. Two
   bounded-degree real plane curves with no common infinite irreducible
@@ -338,7 +338,7 @@ A partly-verified by-product also lives in this program:
   (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound is not yet stated or
   proven — see `ROADMAP.md`.
 
-## Statement-surfaces ⚪ — `LeanFormalizations/PachDeZeeuw/`
+## Statement-surfaces ⚪ — `LeanFormalizations/PachDeZeeuw/` (Milnor 1964; Thom 1965; Oleĭnik–Petrovskiĭ 1949)
 
 These define a `Prop` but do **not** prove it — accepted classical inputs:
 
