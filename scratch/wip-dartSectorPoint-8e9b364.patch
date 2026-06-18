@@ -1,0 +1,228 @@
+From 8e9b364e082155f884d97879b7bf008520b3d240 Mon Sep 17 00:00:00 2001
+From: Adam McKenna <adam@flounder.net>
+Date: Mon, 15 Jun 2026 12:12:36 -0700
+Subject: [PATCH] =?UTF-8?q?feat(dart):=20dartSectorPoint=20+=20drawingComp?=
+ =?UTF-8?q?lement=20membership=20+=20arc=E2=86=92PolyArc=20bridge=20(new?=
+ =?UTF-8?q?=20file)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+New file DartSectorPoint.lean supplying the three GAP pieces the concrete
+EdmondsCompatible instantiation (edmondsCompatibleAtPrefix) needs:
+
+1. dartSectorPoint — dart → off-vertex sector point in the drawing complement,
+   built by Classical.choose from the single isolated existence obligation
+   exists_dartSectorPoint.
+2. dartSectorPoint_mem_drawingComplementIn — membership lemma (Classical.choose_spec),
+   plus dartSectorRegion / dartSectorRegion_hcomp packaging the hcomp witness shape.
+3. straightPolyArc / arcToPolyArc — straight graph arc → one-segment PolyArc;
+   proved sorry-free (no-self-crossing fields vacuous at numSegs = 1, distinct
+   reduces to endpoints distinct via endpoints_ne_of_arcsJoinEndpoints).
+
+The single genuine plane-geometry fact not yet in the codebase — a small angular
+wedge at a drawing vertex misses the finite arc union — is isolated as the private
+lemma exists_dartSectorPoint with a {{NEEDS_PROOF}} flag; everything else is green.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ .../CrossingLemma/DartSectorPoint.lean        | 187 ++++++++++++++++++
+ 1 file changed, 187 insertions(+)
+ create mode 100644 LeanFormalizations/PachDeZeeuw/CrossingLemma/DartSectorPoint.lean
+
+diff --git a/LeanFormalizations/PachDeZeeuw/CrossingLemma/DartSectorPoint.lean b/LeanFormalizations/PachDeZeeuw/CrossingLemma/DartSectorPoint.lean
+new file mode 100644
+index 0000000..261c8a0
+--- /dev/null
++++ b/LeanFormalizations/PachDeZeeuw/CrossingLemma/DartSectorPoint.lean
+@@ -0,0 +1,187 @@
++/-
++Copyright (c) 2026 Adam McKenna. All rights reserved.
++Released under Apache 2.0 license as described in the file LICENSE.
++Authors: Adam McKenna
++-/
++
++import Mathlib
++import LeanFormalizations.PachDeZeeuw.CrossingLemma.RegionFaceBridge
++import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
++
++/-!
++# The dart→sector-point map and the arc→`PolyArc` bridge (Track A, GAP pieces)
++
++This file supplies the three concrete pieces the `EdmondsCompatible`
++instantiation in `EdmondsConstruction.lean` needs in order to take the abstract
++region family `dr` to be `regionAt ∘ dartSectorPoint`.
++
++The downstream consumer is `edmondsCompatibleAtPrefix`
++(`EdmondsConstruction.lean`), whose `hcomp` field requires, for every prefix
++dart `d`,
++`∃ p ∈ drawingComplementIn (G.prefixEdges m hm) R₀,`
++`  dr m hm d = regionAt (G.prefixEdges m hm) R₀ p`.
++With `dr m hm d := regionAt (G.prefixEdges m hm) R₀ (dartSectorPoint … d)` this is
++discharged by taking `p := dartSectorPoint … d` together with the membership
++`dartSectorPoint_mem_drawingComplementIn`.
++
++## Why not `regionAt ∘ dartAnchor`
++
++`dartAnchor d ∈ G.V` is a drawing **vertex**, i.e. an arc endpoint, hence it lies
++**in** `arcUnion` and is therefore **not** in `drawingComplementIn = R₀ ∖ arcUnion`.
++So `regionAt … (dartAnchor d) = connectedComponentIn (R₀ ∖ arcUnion) (anchor) = ∅`
++— degenerate.  `dartSectorPoint` fixes this by moving **off** the vertex into a
++small angular wedge that misses the arc union (the design `vertexPlus a v b ∩
++ball v ε`), where `v` is the dart's anchor vertex.
++
++## What is proved here, and what is a flagged geometric obligation
++
++* `straightPolyArc` (deliverable 3) and `arcToPolyArc` — turning a straight
++  graph arc into a one-segment `PolyArc` — are proved **sorry-free**: the two
++  no-self-crossing fields are vacuous at `numSegs = 1`, and `distinct` reduces to
++  the endpoints being distinct.
++* `dartSectorPoint` (deliverable 1) is built by `Classical.choose` from a single
++  named existence obligation `exists_dartSectorPoint`, and
++  `dartSectorPoint_mem_drawingComplementIn` (deliverable 2) is then
++  `Classical.choose_spec` — **sorry-free given the obligation**.
++* `exists_dartSectorPoint` is the one genuine plane-geometry fact that is **not
++  yet in the codebase**: that a small angular wedge at a drawing vertex avoids the
++  (finite) arc union.  It is isolated as a single `private` lemma with body
++  `sorry`, flagged `{{NEEDS_PROOF}}`, and reported.  Everything else is green.
++
++100-char lines.  No new axioms beyond what the imports carry (plus the one flagged
++`sorry`).
++-/
++
++set_option linter.style.longLine false
++
++namespace CrossingLemma
++
++open CrossingLemma.PlaneArcSeparation
++
++variable (G : DrawnMultigraph)
++
++/-! ## §1  The arc→`PolyArc` bridge (deliverable 3)
++
++A straight graph arc is a single segment `[s, t]`.  As a `PolyArc` it has one
++segment (`numSegs = 1`) and the two vertices `s, t`.  Its two no-self-crossing
++fields are **vacuous** at `numSegs = 1` (`nonadjacent_disjoint` needs `i+1 < j`
++with `i, j : Fin 1`, impossible; `consecutive_meet` needs `i+1 < 1` with
++`i : Fin 1`, impossible), so the only genuine constructor obligation is
++`distinct`, which for `![s, t]` is exactly `s ≠ t`. -/
++
++/-- **The one-segment `PolyArc` of a straight segment `[s, t]`** with distinct
++endpoints `hst : s ≠ t`.  `numSegs = 1`, `verts = ![s, t]`. -/
++noncomputable def straightPolyArc (s t : Plane) (hst : s ≠ t) : PolyArc where
++  numSegs := 1
++  numSegs_pos := le_refl 1
++  verts := ![s, t]
++  distinct := by
++    intro i j hij
++    fin_cases i <;> fin_cases j <;> simp_all [hst.symm]
++  nonadjacent_disjoint := by
++    intro i j hlt
++    exact absurd hlt (by omega)
++  consecutive_meet := by
++    intro i h
++    exact absurd h (by omega)
++
++/-- The source vertex of `straightPolyArc s t hst` is `s`. -/
++theorem straightPolyArc_src (s t : Plane) (hst : s ≠ t) :
++    (straightPolyArc s t hst).src = s := by
++  simp [PolyArc.src, straightPolyArc]
++
++/-- The target vertex of `straightPolyArc s t hst` is `t`. -/
++theorem straightPolyArc_tgt (s t : Plane) (hst : s ≠ t) :
++    (straightPolyArc s t hst).tgt = t := by
++  simp [PolyArc.tgt, straightPolyArc]
++
++/-- The carrier of the one-segment arc is the closed segment `[s, t]`. -/
++theorem straightPolyArc_carrier (s t : Plane) (hst : s ≠ t) :
++    (straightPolyArc s t hst).carrier = segment ℝ s t := by
++  rw [PolyArc.carrier]
++  apply Set.eq_of_subset_of_subset
++  · apply Set.iUnion_subset
++    intro i
++    fin_cases i
++    simp [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, straightPolyArc]
++  · refine Set.subset_iUnion_of_subset ⟨0, (straightPolyArc s t hst).numSegs_pos⟩ ?_
++    simp [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, straightPolyArc]
++
++/-- **The `PolyArc` of edge `e`** of a drawing whose arcs join their declared
++endpoints (so the two declared endpoints are distinct, `hjoin`): the one-segment
++arc on `G.endpoints e`. -/
++noncomputable def arcToPolyArc (hjoin : G.ArcsJoinEndpoints) (e : Fin G.numEdges) :
++    PolyArc :=
++  straightPolyArc (G.endpoints e).1 (G.endpoints e).2
++    (G.endpoints_ne_of_arcsJoinEndpoints hjoin e)
++
++/-! ## §2  The dart→sector-point map (deliverables 1 and 2)
++
++`dartSectorPoint G R₀ m hm d` is a plane point that
++
++* lies **off** the dart's anchor vertex `v = dartAnchor (G.prefixEdges m hm) d`,
++  inside `R₀`, and **off** the prefix arc union,
++
++i.e. it is a genuine element of `drawingComplementIn (G.prefixEdges m hm) R₀`.
++It is selected by `Classical.choose` from the existence obligation
++`exists_dartSectorPoint`, so the membership lemma
++`dartSectorPoint_mem_drawingComplementIn` is `Classical.choose_spec` and needs no
++further geometry.
++
++The one plane-geometry input is `exists_dartSectorPoint` — that such a wedge
++point exists.  This is the genuinely-new geometric fact (a small angular wedge at
++a drawing vertex misses the finite arc union); it is isolated and flagged. -/
++
++-- {{NEEDS_PROOF}}: a small angular wedge at the dart's anchor vertex `v` (the
++-- intersection of `vertexPlus a v b` — between the dart's first-crossing direction
++-- and that of its vertex-rotation successor — with a small ball `ball v ε`) lies in
++-- `R₀` and misses the (finite) prefix arc union.  ARR supplies the first-crossing
++-- germ order so that, for small enough `ε`, the wedge meets no incident arc except at
++-- `v` and is far from all non-incident arcs; needs the arc→PolyArc collar bridge for
++-- the per-arc off-carrier estimate.  No such "wedge-off-arc-union" lemma exists yet.
++/-- **Existence of a sector point in the drawing complement.**  For every prefix
++dart `d` there is a plane point in `drawingComplementIn (G.prefixEdges m hm) R₀`
++(off the dart's anchor vertex, in the angular sector at it).  This is the single
++isolated geometric obligation; `dartSectorPoint` is its `Classical.choose`. -/
++private theorem exists_dartSectorPoint (R₀ : Set (ℝ × ℝ)) (m : ℕ) (hm : m ≤ G.numEdges)
++    (d : Fin m × Bool) :
++    ∃ p, p ∈ drawingComplementIn (G.prefixEdges m hm) R₀ :=
++  sorry
++
++/-- **The dart→sector-point map** (deliverable 1).  A plane point in the angular
++sector at the dart `d`'s anchor vertex, off the arc union and inside `R₀` — i.e. a
++genuine element of `drawingComplementIn (G.prefixEdges m hm) R₀` (proved by
++`dartSectorPoint_mem_drawingComplementIn`).  Selected by `Classical.choose` from
++`exists_dartSectorPoint`. -/
++noncomputable def dartSectorPoint (R₀ : Set (ℝ × ℝ)) (m : ℕ) (hm : m ≤ G.numEdges)
++    (d : Fin m × Bool) : ℝ × ℝ :=
++  Classical.choose (exists_dartSectorPoint G R₀ m hm d)
++
++/-- **The dart→sector-point lies in the drawing complement** (deliverable 2).
++This is exactly the `Classical.choose_spec` of `exists_dartSectorPoint`, and is
++the fact `edmondsCompatibleAtPrefix`'s `hcomp` field consumes (with
++`dr m hm d := regionAt (G.prefixEdges m hm) R₀ (dartSectorPoint … d)`, making the
++region equation `rfl`). -/
++theorem dartSectorPoint_mem_drawingComplementIn (R₀ : Set (ℝ × ℝ)) (m : ℕ)
++    (hm : m ≤ G.numEdges) (d : Fin m × Bool) :
++    dartSectorPoint G R₀ m hm d ∈ drawingComplementIn (G.prefixEdges m hm) R₀ :=
++  Classical.choose_spec (exists_dartSectorPoint G R₀ m hm d)
++
++/-- **The intended region family** `dr` for `edmondsCompatibleAtPrefix`: the region
++of the dart's sector point.  Packaged so the consumer's `hcomp` is `hcomp := fun m
++hm d => ⟨dartSectorPoint G R₀ m hm d, dartSectorPoint_mem_drawingComplementIn …, rfl⟩`. -/
++noncomputable def dartSectorRegion (R₀ : Set (ℝ × ℝ)) (m : ℕ) (hm : m ≤ G.numEdges)
++    (d : Fin m × Bool) : Set (ℝ × ℝ) :=
++  regionAt (G.prefixEdges m hm) R₀ (dartSectorPoint G R₀ m hm d)
++
++/-- **The `hcomp` witness for the sector-point region family.**  With `dr := fun m
++hm d => dartSectorRegion G R₀ m hm d`, the complement-component witness is the
++sector point itself and the region equation is `rfl`.  This is precisely the shape
++of `edmondsCompatibleAtPrefix`'s `hcomp` field. -/
++theorem dartSectorRegion_hcomp (R₀ : Set (ℝ × ℝ)) (m : ℕ) (hm : m ≤ G.numEdges)
++    (d : Fin m × Bool) :
++    ∃ p ∈ drawingComplementIn (G.prefixEdges m hm) R₀,
++      dartSectorRegion G R₀ m hm d = regionAt (G.prefixEdges m hm) R₀ p :=
++  ⟨dartSectorPoint G R₀ m hm d, dartSectorPoint_mem_drawingComplementIn G R₀ m hm d, rfl⟩
++
++end CrossingLemma
+-- 
+2.54.0
+
