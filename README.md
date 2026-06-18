@@ -212,39 +212,16 @@ headlines axiom-clean.
 
 ```bash
 lake exe cache get
-lake build
-lake env lean - <<'EOF'
-import LeanFormalizations
-#print axioms Finset.balog_szemeredi_gowers_asymmetric
-#print axioms Finset.balog_szemeredi_gowers_symmetric
-#print axioms Finset.balog_szemeredi_gowers_asymmetric_explicit
-#print axioms EuclideanGeometry.twoPoint_isometry_ncard_le_two
-#print axioms EuclideanGeometry.twoPoint_isometry_set_finite
-#print axioms NearEnemy.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
-#print axioms NearEnemy.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
-#print axioms threeAPFree_of_forall_not_collinear
-#print axioms PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound
-#print axioms PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry
-#print axioms PachDeZeeuw.Algebraic.bezout
-#print axioms CombinatorialMap.card_edge_le_three_card_vertex_sub_six
-#print axioms CombinatorialMap.eulerCharacteristic_le_two
-#print axioms CombinatorialMap.dual_isPlanar_iff
-#print axioms convex_line_intersection_isPreconnected
-#print axioms strictlyConvex_boundary_no_three_collinear
-#print axioms SimpleConvexPolygon.collinear_vertices_cyclicInterval
-#print axioms SimpleGraph.IsTree.exists_leaf_insertion_order
-#print axioms SimpleGraph.IsTree.parentEdgeEquiv
-#print axioms unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
-#print axioms Matrix.GeneralLinearGroup.diagonal
-#print axioms Matrix.GeneralLinearGroup.GL2.unipotent
-#print axioms Matrix.GeneralLinearGroup.GL2.upper_unipotent_mul_matrix
-#print axioms Matrix.GeneralLinearGroup.GL2.swap_mul_matrix
-#print axioms Matrix.GeneralLinearGroup.GL2.unipotent_det_eq_one
-#print axioms Matrix.GeneralLinearGroup.GL2.swap_det_eq_neg_one
-EOF
+./lake-build.sh              # memory-capped, single-flight `lake build`
+./scripts/check-axioms.sh    # assert every advertised theorem is axiom-clean
 ```
 
-(Or use `./lake-build.sh` — a memory-capped, single-flight wrapper.)
+`scripts/check-axioms.sh` runs `#print axioms` on the full advertised list
+(maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
+depends on `sorryAx` or a custom axiom. Last run: all 26 listed theorems clean
+(`[propext, Classical.choice, Quot.sound]`), full build green (8538 jobs). The
+verified core defines no custom `axiom` and uses no `native_decide`, so the only
+disallowed axiom that could appear is `sorryAx`.
 
 ## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/`
 
