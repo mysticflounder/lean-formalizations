@@ -1000,19 +1000,21 @@ theorem exists_twoSidedPartition_prefixStep
   -- R is simply connected: convex → simply connected.
   have hR_sc : IsSimplyConnected R := by
     sorry
-  -- Spine S: the open middle portion of the segment (1D, not 2D strip).
-  -- S = {p₁ + t•v | t ∈ (α, 1-α)}
+  -- Spine S: the whole open segment (1D, not 2D strip), excluding endpoints.
+  -- S = {p₁ + t•v | t ∈ (0, 1)}.  The lemma's `hSband` requires S to contain
+  -- every interior segment point (footParam ∈ (0,1)), so S must be the full open
+  -- edge, not a middle sub-interval.  (`α = 1/6` is still the collar half-margin
+  -- used by `hRband_lb`'s safe foot window `[α/2, 1-α/2]`.)
   set α : ℝ := 1/6 with hα
   have hα_pos : 0 < α := by norm_num
   have hα_lt_third : α < 1/3 := by norm_num
   let S : Set (ℝ × ℝ) :=
-    {q | ∃ (t : ℝ), t ∈ Set.Ioo (α : ℝ) (1 - α) ∧ q = p₁ + t • v}
+    {q | ∃ (t : ℝ), t ∈ Set.Ioo (0 : ℝ) 1 ∧ q = p₁ + t • v}
   have hS_sub_R : S ⊆ R := by
     intro q h; rcases h with ⟨t, ht, hq⟩
     refine ⟨t, 0, ?_, ?_, ?_⟩
-    · -- t ∈ (α, 1-α) → t ∈ (0, 1)
-      rcases Set.mem_Ioo.mp ht with ⟨htl, htr⟩
-      exact Set.mem_Ioo.mpr ⟨by linarith, by linarith⟩
+    · -- t ∈ (0, 1) directly
+      exact ht
     · -- 0 ∈ (-1, 1)
       exact Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩
     · -- q = p₁ + t•v = p₁ + t•v + 0•(ε•n)
@@ -1033,12 +1035,7 @@ theorem exists_twoSidedPartition_prefixStep
       dsimp [v]
       ext <;> dsimp <;> ring
     rw [hmid_def]
-    refine ⟨1/2, ?_, rfl⟩
-    refine Set.mem_Ioo.mpr ⟨by
-      have : α = 1/6 := rfl
-      linarith, by
-      have : α = 1/6 := rfl
-      linarith⟩
+    exact ⟨1/2, Set.mem_Ioo.mpr ⟨by norm_num, by norm_num⟩, rfl⟩
   have hSband : ∀ y ∈ ((straightPolyArc p₁ p₂ hne)).segCarrier
       ((straightPolyArc p₁ p₂ hne)).firstSeg,
       footParam (((straightPolyArc p₁ p₂ hne)).segSrc
