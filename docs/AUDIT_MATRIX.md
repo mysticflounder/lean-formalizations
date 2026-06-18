@@ -35,6 +35,14 @@ empirically axiom-clean (`[propext, Classical.choice, Quot.sound]`, verified —
 inferred). **2026-06-18:** the full advertised verified surface (53 theorems) was
 re-verified axiom-clean via `scripts/check-axioms.sh`; full build green (8538 jobs).
 Exact paper citations for all results compiled in `README.md` → References.
+**2026-06-18 (later):** the Elekes–Sharir/Guth–Katz base reduction layer
+(`ElekesSharirGuthKatz/`, `namespace Esgk`) was imported from the sibling
+`esgk-on3` project — base reduction only, with the `esgk-on3` strengthening /
+D7.2 program and its placeholder external-definition shims (duplicates of mathlib
+`Finset.addEnergy` / `AffineSubspace.perpBisector` / `IsAddFreimanIso`) excluded
+on import. 8 ESGK apex theorems added to the gate (now **61 theorems**, full build
+green **8549 jobs**); all axiom-clean. Citation/math-correctness audit of the ESGK
+proofs is tracked in the `esgk-on3` repo (`internal-audit/esgk-bridge-identity.md`).
 
 ---
 

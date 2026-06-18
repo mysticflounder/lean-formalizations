@@ -9,8 +9,8 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Verification status (2026-06-18)
 
-- **Build:** green — `lake build` completes all **8538 jobs**.
-- **Verified core:** the **53** theorems advertised as `✅ VERIFIED` below are
+- **Build:** green — `lake build` completes all **8549 jobs**.
+- **Verified core:** the **61** theorems advertised as `✅ VERIFIED` below are
   mechanically re-verified axiom-clean — each depends only on a subset of the
   Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
   with `./scripts/check-axioms.sh` (list in `scripts/axiom-check.lean`).
@@ -224,6 +224,33 @@ headlines axiom-clean.
   determinants of the unipotent and swap general-linear elements
   (`unipotent_det_eq_one`, `swap_det_eq_neg_one`).
 
+### `LeanFormalizations/ElekesSharirGuthKatz/` — Elekes–Sharir/Guth–Katz reduction (base) ✅
+
+The proven ES/GK reduction layer that turns the distinct-distances question into
+a distance-energy bound, imported from the sibling `esgk-on3` project (base layer
+only; declarations live in `namespace Esgk`). Sorry-free; all headlines
+axiom-clean. The open extremal-energy research target
+`M(n) = max{E(P) : |P| = n, general position}` and the D7.2 strengthening program
+that aims to beat the ceiling are **not** imported — the open bound enters only as
+an explicit `Prop` hypothesis, never as an axiom or `sorry`.
+
+- **Cauchy–Schwarz bridge** (`CauchyEnergy`): `energy_lower_bound_of_few_distances`
+  — `(n(n−1))² ≤ NumDistancesOrdered · DistanceEnergy`, the geometric content of
+  "few distances ⟹ cubic energy".
+- **Elementary `O(n³)` ceiling** (`EnergyCeiling`): under no-four-cocircular,
+  `orderedMultiplicity_le_three_mul` ((E1) `m_r ≤ 3n`) and
+  `distanceEnergy_le_three_mul_cube` ((E2) `E ≤ 3n³`), removing the Guth–Katz
+  `log` factor elementarily; capstone `numDistances_ge_of_ceiling` (the trivial
+  `D = Ω(n)`).
+- **ES-GK decomposition** (`Decomposition`): `elekes_sharir_guth_katz_decomposition`
+  — every injective general-position configuration admits a rich direct-isometry
+  family — and the dyadic energy partition
+  `distanceEnergy_eq_sum_energyAtLevel` (`BridgeIdentity` + `RichnessLevels`).
+- **Finite-minimum transfer** (`FiniteMinimum` + `Parabola`):
+  `all_configs_lower_bound_to_hIndexed_lower_bound`, with `gp_config_nonempty`
+  (the parabola/moment-curve witness that general-position configs exist for
+  every `n`).
+
 ### Reproduce the verification
 
 ```bash
@@ -234,9 +261,9 @@ lake exe cache get
 
 `scripts/check-axioms.sh` runs `#print axioms` on the full advertised list
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
-depends on `sorryAx` or a custom axiom. Last run (2026-06-18): all 53 listed
+depends on `sorryAx` or a custom axiom. Last run (2026-06-18): all 61 listed
 theorems clean (each depends only on a subset of
-`[propext, Classical.choice, Quot.sound]`), full build green (8538 jobs). The
+`[propext, Classical.choice, Quot.sound]`), full build green (8549 jobs). The
 verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
 `@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
 is `sorryAx`.
@@ -468,6 +495,7 @@ LeanFormalizations/
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem ✅
+  ElekesSharirGuthKatz/                     -- ES/GK distance-energy reduction (base, namespace Esgk) ✅
   LinearAlgebra/Matrix/GeneralLinearGroup/  -- diagonal, 2×2 unipotent, generic matrix identities ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅

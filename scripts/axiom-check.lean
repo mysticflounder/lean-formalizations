@@ -106,3 +106,13 @@ Keep this list in sync with the README's ✅ VERIFIED claims.
 -- Tree-order prefix-connectedness + label transport (TreeOrder)
 #print axioms SimpleGraph.connected_induce_take_of_leaf_insertion_parent
 #print axioms SimpleGraph.Connected.apply_eq_of_forall_adj
+
+-- Elekes–Sharir / Guth–Katz base reduction layer (ElekesSharirGuthKatz, namespace Esgk)
+#print axioms Esgk.energy_lower_bound_of_few_distances          -- Cauchy–Schwarz bridge
+#print axioms Esgk.elekes_sharir_guth_katz_decomposition        -- ES-GK decomposition existence
+#print axioms Esgk.orderedMultiplicity_le_three_mul             -- (E1) multiplicity ≤ 3n
+#print axioms Esgk.distanceEnergy_le_three_mul_cube             -- (E2) energy ≤ 3n³
+#print axioms Esgk.numDistances_ge_of_ceiling                   -- D = Ω(n) capstone
+#print axioms Esgk.distanceEnergy_eq_sum_energyAtLevel          -- dyadic energy partition
+#print axioms Esgk.all_configs_lower_bound_to_hIndexed_lower_bound  -- finite-minimum transfer
+#print axioms Esgk.gp_config_nonempty                           -- GP configs exist ∀ n (parabola)

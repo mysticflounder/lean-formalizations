@@ -39,6 +39,14 @@ import LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm
 import LeanFormalizations.Geometry.ElekesSharir.RulingSkewness
 import LeanFormalizations.Geometry.ElekesSharir.ChordCurve
 
+-- Elekes–Sharir / Guth–Katz reduction layer (base, sorry-free): the energy
+-- identity, dyadic richness-level decomposition, ES-GK ledger existence, the
+-- Cauchy–Schwarz bridge, and the elementary (E1)/(E2) O(n³) energy ceiling.
+-- The open extremal-energy target M(n) and the D7.2 strengthening program are
+-- research work and are deliberately NOT imported. Declarations in `namespace
+-- Esgk`. Imported from the sibling esgk-on3 repo.
+import LeanFormalizations.ElekesSharirGuthKatz
+
 -- Pach–de Zeeuw program: distinct distances on algebraic curves, and the
 -- paper-faithful inputs it reduces to. Mostly statement-surfaces / work in
 -- progress with `sorry`; see README for the per-module VERIFIED/PARTIAL triage.
