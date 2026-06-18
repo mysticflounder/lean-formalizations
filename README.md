@@ -480,6 +480,101 @@ LeanFormalizations/
     ErdosProblems/96 97 98                 -- frozen statements-of-record (DO NOT CHANGE)
 ```
 
+## References
+
+Exact sources for the formalized results, grouped by area. Bibliographic
+details (volume/pages/year/arXiv) were verified against publisher pages;
+identifiers that could not be confirmed directly are noted rather than guessed.
+
+### Additive combinatorics — `Combinatorics/Additive/`
+
+- Balog, A. and Szemerédi, E. "A statistical theorem of set addition."
+  *Combinatorica* **14** (1994), 263–268. DOI: 10.1007/BF01212974.
+- Gowers, W.T. "A new proof of Szemerédi's theorem for arithmetic progressions
+  of length four." *Geom. Funct. Anal.* **8** (1998), 529–551.
+  DOI: 10.1007/s000390050065. (Source of the graph-energy form of BSG.)
+- Tao, T. and Vu, V.H. *Additive Combinatorics.* Cambridge Studies in Advanced
+  Mathematics **105**, Cambridge University Press, 2006. (§6.4, Gowers' graph
+  proof — the live BSG path.)
+- Fox, J. and Sudakov, B. "Dependent random choice." *Random Structures &
+  Algorithms* **38** (2011), 68–99. DOI: 10.1002/rsa.20344. arXiv:0909.3271.
+  (§5 — the dependent-random-choice track.)
+- Petridis, G. "New proofs of Plünnecke-type estimates for product sets in
+  groups." *Combinatorica* **32** (2012), no. 6, 721–733.
+  DOI: 10.1007/s00493-012-2818-5. arXiv:1101.3507.
+- Reiher, C. and Schoen, T. "Note on the theorem of Balog, Szemerédi, and
+  Gowers." *Combinatorica* **44** (2024), no. 3, 691–698.
+  DOI: 10.1007/s00493-024-00092-5. arXiv:2308.10245.
+
+### Distinct distances & incidences — `PachDeZeeuw/`, `Geometry/ElekesSharir/`
+
+- Pach, J. and de Zeeuw, F. "Distinct distances on algebraic curves in the
+  plane." *Combin. Probab. Comput.* **26** (2017), no. 1, 99–117.
+  DOI: 10.1017/S0963548316000225. arXiv:1308.0177. (The program's central paper;
+  vendored at `docs/references/PachDeZeeuw_DistancesOnCurves_arxiv_20151031.tex`.)
+- Elekes, G. and Sharir, M. "Incidences in three dimensions and distinct
+  distances in the plane." *Combin. Probab. Comput.* **20** (2011), no. 4,
+  571–608. DOI: 10.1017/S0963548311000137. arXiv:1005.0982.
+- Guth, L. and Katz, N.H. "On the Erdős distinct distances problem in the
+  plane." *Ann. of Math.* **181** (2015), no. 1, 155–190.
+  DOI: 10.4007/annals.2015.181.1.2. arXiv:1011.4105.
+- Szemerédi, E. and Trotter, W.T. "Extremal problems in discrete geometry."
+  *Combinatorica* **3** (1983), no. 3–4, 381–392. DOI: 10.1007/BF02579194.
+- Pach, J. and Sharir, M. "On the number of incidences between points and
+  curves." *Combin. Probab. Comput.* **7** (1998), 121–127. (Journal DOI not
+  directly confirmed.)
+
+### Crossing numbers & combinatorial maps — `Combinatorics/CombinatorialMap/`, `PachDeZeeuw/CrossingLemma/`
+
+- Ajtai, M., Chvátal, V., Newborn, M.M., and Szemerédi, E. "Crossing-free
+  subgraphs." In *Theory and Practice of Combinatorics*, North-Holland Math.
+  Studies **60**, North-Holland, 1982, pp. 9–12.
+- Leighton, F.T. *Complexity Issues in VLSI.* Foundations of Computing Series,
+  MIT Press, 1983. ISBN 978-0-262-12104-0.
+- Székely, L.A. "Crossing numbers and hard Erdős problems in discrete geometry."
+  *Combin. Probab. Comput.* **6** (1997), no. 3, 353–358.
+  DOI: 10.1017/S0963548397002976.
+- Pach, J. and Tóth, G. "A crossing lemma for multigraphs." *Discrete Comput.
+  Geom.* **63** (2020), 918–933. DOI: 10.1007/s00454-018-00052-z.
+  arXiv:1801.00721. (SoCG 2018.)
+- Lando, S.K. and Zvonkin, A.K. *Graphs on Surfaces and Their Applications.*
+  Encyclopaedia of Mathematical Sciences **141**, Springer, 2004.
+  DOI: 10.1007/978-3-540-38361-1. (Dart-permutation map model; §1.3.3,
+  Prop. 1.3.16 — section/proposition location not independently re-verified.)
+- Newman, M.H.A. *Elements of the Topology of Plane Sets of Points.* 2nd ed.,
+  Cambridge University Press, 1951. (Crosscut theorem.)
+- Pommerenke, Ch. *Boundary Behaviour of Conformal Maps.* Grundlehren der math.
+  Wissenschaften **299**, Springer, 1992. ISBN 978-3-540-54751-8.
+
+### Euclidean geometry — `Geometry/Euclidean/`
+
+- Mazur, S. and Ulam, S. "Sur les transformations isométriques d'espaces
+  vectoriels normés." *C. R. Acad. Sci. Paris* **194** (1932), 946–948. (Linear
+  reduction for the two-point isometry classification. The "≤ 2 isometries fix
+  two points in ℝ²" count is an elementary corollary — folklore, with no single
+  originating paper.)
+- Lund, B., Sheffer, A., and de Zeeuw, F. "Bisector energy and few distinct
+  distances." *Discrete Comput. Geom.* **56** (2016), no. 2, 337–356.
+  arXiv:1411.6868; SoCG 2015, DOI: 10.4230/LIPIcs.SOCG.2015.537. (Journal DOI not
+  directly confirmed.) (Bisector-energy notion behind the Near Enemy Theorem.)
+
+### Real algebraic geometry — `PachDeZeeuw/MilnorThom.lean`, `AlgebraicPrelim.lean`, `Bezout.lean`
+
+- Milnor, J. "On the Betti numbers of real varieties." *Proc. Amer. Math. Soc.*
+  **15** (1964), no. 2, 275–280. DOI: 10.1090/S0002-9939-1964-0161339-9.
+- Thom, R. "Sur l'homologie des variétés algébriques réelles." In *Differential
+  and Combinatorial Topology* (S.S. Cairns, ed.), Princeton Math. Series **27**,
+  Princeton University Press, 1965, pp. 255–265.
+- Oleĭnik, O.A. and Petrovskiĭ, I.G. "On the topology of real algebraic
+  surfaces." *Izv. Akad. Nauk SSSR Ser. Mat.* **13** (1949), 389–402.
+  (Component-count bound; Bézout content is from Pach–de Zeeuw above.)
+
+### Vendored statements — `FormalConjectures/`
+
+- Erdős-problem statements (96/97/98) are copied verbatim from
+  [`formal-conjectures`](https://github.com/google-deepmind/formal-conjectures)
+  (Google DeepMind, Apache 2.0); see that repository for problem provenance.
+
 ## License
 
 Apache 2.0 (matching the mathlib ecosystem) — see `LICENSE`.
