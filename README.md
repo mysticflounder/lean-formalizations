@@ -19,8 +19,8 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
   every `✅` theorem is closed under the Lean kernel alone.
 - **Honest `sorry`s:** every live `sorry` is confined to the `🟡` work-in-progress
   Pach–de Zeeuw program (`PachDeZeeuw/CrossingLemma/*`, `PachSharir/*`,
-  `ComponentSplit`, `IncidenceAssembly`). **No `✅ VERIFIED` module contains a
-  `sorry`.**
+  `ComponentSplit`, `IncidenceAssembly/Bridge`). **No `✅ VERIFIED` module contains
+  a `sorry`.**
 
 ## Provenance
 
@@ -48,13 +48,13 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 
 - **`BalogSzemerediGowers.lean`** — the Balog–Szemerédi–Gowers theorem over
   `Finset.addEnergy` for an arbitrary `AddCommGroup`, in three forms:
-  - `Finset.balog_szemeredi_gowers_asymmetric` (equal-cardinality two-set form),
-  - `Finset.balog_szemeredi_gowers_symmetric` (single-set form),
-  - `Finset.balog_szemeredi_gowers_asymmetric_explicit` (explicit
+  - [`Finset.balog_szemeredi_gowers_asymmetric`](LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2425) (equal-cardinality two-set form),
+  - [`Finset.balog_szemeredi_gowers_symmetric`](LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2646) (single-set form),
+  - [`Finset.balog_szemeredi_gowers_asymmetric_explicit`](LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2710) (explicit
     polynomial-in-`η` constants).
 - **`BSGEnergyToGraph.lean`** — energy → popular-difference-graph connector.
 - **`ThreeAPFreeOfNoThreeCollinear.lean`** — no-3-collinear ⟹ `ThreeAPFree`
-  (`threeAPFree_of_forall_not_collinear`): in a real vector space, `a + c = 2b`
+  ([`threeAPFree_of_forall_not_collinear`](LeanFormalizations/Combinatorics/Additive/ThreeAPFreeOfNoThreeCollinear.lean#L24)): in a real vector space, `a + c = 2b`
   makes `b` the midpoint of `a` and `c`, hence the three points collinear; so a
   no-three-collinear set carries no nontrivial 3-term AP. The geometric source
   of `ThreeAPFree` hypotheses for additive-energy arguments. **Axiom-clean.**
@@ -66,8 +66,8 @@ reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
 
 - **`IsometryClassification.lean`** — for `a b c d : EuclideanSpace ℝ (Fin 2)`
   with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c`,
-  `b ↦ d` has `ncard ≤ 2` (`twoPoint_isometry_ncard_le_two`) and is `Finite`
-  (`twoPoint_isometry_set_finite`), plus the underlying linear-isometry bounds.
+  `b ↦ d` has `ncard ≤ 2` ([`twoPoint_isometry_ncard_le_two`](LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225)) and is `Finite`
+  ([`twoPoint_isometry_set_finite`](LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261)), plus the underlying linear-isometry bounds.
   Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation
   argument specific to two dimensions. **Axiom-clean.**
 - **`NearEnemyTheorem.lean`** — the **Near Enemy Theorem for Bisector Energy**
@@ -75,11 +75,11 @@ reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
   with no three collinear points admits ONE injective planar projection whose
   image attains the exact bisector-energy floor `2n(n−1)` with absolute
   minimality, is in full planar general position (no three collinear, no four
-  concyclic), has zero rotational energy (`rotationEnergy`, the
+  concyclic), has zero rotational energy ([`rotationEnergy`](LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the
   proper-rotation channel of the congruent-quadruple count), and has its
   distances in bijection with the upstairs ±difference classes
   (`#distances(T(G)) = #((G−G)∖{0}/±)`). Headline
-  `nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`,
+  [`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`](LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299),
   with a sphere-slice corollary and standalone byproducts (universal
   zero-rotation-energy projection, isosceles-free sphere projection). Engine:
   a generic-avoidance compiler — one master `MvPolynomial` product over five
@@ -98,24 +98,24 @@ quadratic-form cores below are **axiom-clean** (`#print axioms` =
 `[propext, Classical.choice, Quot.sound]`):
 
 - **`OmegaRankCollapse.lean` (L4)** — rank–nullity collapse for a functional:
-  `finrank_ker_functional_ge` (`dim ker ω ≥ dim W − 1`) and its main corollary
-  `finrank_ker_ge_two_of_finrank_eq_three` (`dim W = 3 ⟹ dim ker ω ≥ 2`), plus
-  the abstract pullback-non-degeneracy consequence `pullback_nondegenerate`.
+  [`finrank_ker_functional_ge`](LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L57) (`dim ker ω ≥ dim W − 1`) and its main corollary
+  [`finrank_ker_ge_two_of_finrank_eq_three`](LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L73) (`dim W = 3 ⟹ dim ker ω ≥ 2`), plus
+  the abstract pullback-non-degeneracy consequence [`pullback_nondegenerate`](LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L92).
   **Axiom-clean.**
 - **`ConicNormalForm.lean` (L5)** — affine-graph conic normal form. The
   substituted quadratic part of `|q|² − |p|²` under `q = A·p + b` equals
-  `p ⬝ ((AᵀA − 1) *ᵥ p)` (`quadraticPart_eq`); a symmetric `2×2` form vanishes
-  identically iff its matrix is `0` (`dotProduct_mulVec_self_eq_zero_iff`); hence
-  the conic part vanishes iff `AᵀA = 1` (`quadraticPart_vanishes_iff`, the
+  `p ⬝ ((AᵀA − 1) *ᵥ p)` ([`quadraticPart_eq`](LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L63)); a symmetric `2×2` form vanishes
+  identically iff its matrix is `0` ([`dotProduct_mulVec_self_eq_zero_iff`](LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L78)); hence
+  the conic part vanishes iff `AᵀA = 1` ([`quadraticPart_vanishes_iff`](LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L106), the
   orthogonal/non-orthogonal dichotomy). **Axiom-clean.**
 - **`RulingSkewness.lean` (L3)** — ES line `t ↦ ((p+q)/2 + (t/2)·J(q−p), t)` with
   `J(x,y) = (−y,x)`. Provable half: equal squared distances `‖p−p'‖² = ‖q−q'‖²`
   imply the two ES lines intersect-or-are-parallel
-  (`intersect_or_parallel_of_dist2_eq`), so the graph of one distance-preserving
-  map gives intersecting-or-parallel lines (`intersect_or_parallel_of_isometryGraph`);
+  ([`intersect_or_parallel_of_dist2_eq`](LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L95)), so the graph of one distance-preserving
+  map gives intersecting-or-parallel lines ([`intersect_or_parallel_of_isometryGraph`](LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L159));
   combined with a **hypothesis-level** pairwise-skew-ruling predicate
-  (`PairwiseSkewRuling`, the genuine ℝ³ regulus fact, taken as input) this yields
-  at most one such line per ruling (`atMostOneLine_of_skewRuling_isometryGraph`).
+  ([`PairwiseSkewRuling`](LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L172), the genuine ℝ³ regulus fact, taken as input) this yields
+  at most one such line per ruling ([`atMostOneLine_of_skewRuling_isometryGraph`](LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181)).
   **Axiom-clean.**
 
 ### `LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core
@@ -127,13 +127,13 @@ Bézout-type content. It is **fully `sorry`-free** (the commented-out WIP blocks
 that once held the only `sorry`s were removed in the de-jargon pass). Headline
 theorems confirmed axiom-clean:
 
-- `resultant_ne_zero_of_fraction_coprime`,
-  `resultant_ne_zero_of_isRelPrime_primitive_curry`
-- `coeffline_nonvertical_pair_intersection_bound`,
-  `zeroCurry_nonvertical_pair_intersection_bound`
-- `fiber_ncard_le_max_totalDegree`, `ncard_coeff_roots_le_totalDegree`
+- [`resultant_ne_zero_of_fraction_coprime`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L359),
+  [`resultant_ne_zero_of_isRelPrime_primitive_curry`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L525)
+- [`coeffline_nonvertical_pair_intersection_bound`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L896),
+  [`zeroCurry_nonvertical_pair_intersection_bound`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L1218)
+- [`fiber_ncard_le_max_totalDegree`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L561), [`ncard_coeff_roots_le_totalDegree`](LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L794)
 
-> Note: this is the proof machinery that `Bezout.lean` (above) assembles into
+> Note: this is the proof machinery that `Bezout.lean` (below) assembles into
 > the headline `theorem bezout`. It uses project-flavored names pending the
 > idiomaticity cleanup.
 
@@ -145,13 +145,13 @@ it was confirmed complete). All headlines axiom-clean:
 - **`Basic.lean`** — the combinatorial-map carrier (vertex/edge/face
   permutations, Euler characteristic, planarity).
 - **`DualProperties.lean`** — duality and planarity transport for
-  combinatorial maps (`dual_connected_iff`, `connected_dual_iff`,
-  `dual_isPlanar_iff`).
+  combinatorial maps ([`dual_connected_iff`](LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L125), [`connected_dual_iff`](LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L135),
+  [`dual_isPlanar_iff`](LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L182)).
 - **`PlanarEdgeBound.lean`** — the simple-graph edge bound `e ≤ 3v − 6` from
-  Euler's formula (`card_edge_le_three_card_vertex_sub_six`) and its
-  multiplicity lift `e ≤ M·(3v − 6)` (`planar_multigraph_edge_bound`).
+  Euler's formula ([`card_edge_le_three_card_vertex_sub_six`](LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L415)) and its
+  multiplicity lift `e ≤ M·(3v − 6)` ([`planar_multigraph_edge_bound`](LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L473)).
 - **`EulerBound.lean`** — a connected combinatorial map has Euler characteristic
-  `≤ 2` (`CombinatorialMap.eulerCharacteristic_le_two`).
+  `≤ 2` ([`CombinatorialMap.eulerCharacteristic_le_two`](LeanFormalizations/Combinatorics/CombinatorialMap/EulerBound.lean#L523)).
 - **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
   (`CombinatorialMap.EdgeInsertion.*`).
 - **`VertexGraph.lean`** — vertex/face adjacency graphs for combinatorial maps,
@@ -162,17 +162,18 @@ it was confirmed complete). All headlines axiom-clean:
 ### `LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅
 
 - **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
-  trees, explicit parent-edge enumeration via `parentEdgeEquiv`, and finite
+  trees, explicit parent-edge enumeration via
+  [`parentEdgeEquiv`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L867), and finite
   permutation extenders for one-block and two-block edge orders. It also
   includes the prefix connectedness invariant
-  `SimpleGraph.connected_induce_take_of_leaf_insertion_parent` and the
+  [`SimpleGraph.connected_induce_take_of_leaf_insertion_parent`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) and the
   connected-graph label transport
-  `SimpleGraph.Connected.apply_eq_of_forall_adj`, plus
-  `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup` and
-  `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent` for the
+  [`SimpleGraph.Connected.apply_eq_of_forall_adj`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L570), plus
+  [`SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L582) and
+  [`SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L618) for the
   leaf-peeling fact that the next unpeeled prefix contains no copy of the
   just-peeled leaf-parent edge. The derived transport theorem
-  `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`
+  [`SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`](LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L727)
   turns that exclusion into prefix-wide label constancy. These are used by the
   reverse cotree component argument.
   **Axiom-clean.**
@@ -183,25 +184,25 @@ Classical convex-geometry facts not currently in mathlib (formalized in the
 course of our Erdős-problem research). All headlines axiom-clean.
 
 - **`LineSlice.lean`** — a line meets a convex set in a preconnected, hence
-  interval-shaped, set (`convex_line_intersection_isPreconnected`); a line is
-  homeomorphic to `ℝ` (`lineHomeomorph`); transported there, the slice is
-  `OrdConnected` (`convex_line_slice_ordConnected` / `_uIcc_subset` /
+  interval-shaped, set ([`convex_line_intersection_isPreconnected`](LeanFormalizations/Geometry/Convex/LineSlice.lean#L82)); a line is
+  homeomorphic to `ℝ` ([`lineHomeomorph`](LeanFormalizations/Geometry/Convex/LineSlice.lean#L95)); transported there, the slice is
+  `OrdConnected` ([`convex_line_slice_ordConnected`](LeanFormalizations/Geometry/Convex/LineSlice.lean#L123) / `_uIcc_subset` /
   `_between_mem`); and a strictly convex set has no three collinear frontier
-  points (`strictlyConvex_boundary_no_three_collinear`).
+  points ([`strictlyConvex_boundary_no_three_collinear`](LeanFormalizations/Geometry/Convex/LineSlice.lean#L37)).
 - **`SimpleConvexPolygon.lean`** — a concrete simple-convex-polygon model and
-  its headline `SimpleConvexPolygon.collinear_vertices_cyclicInterval`: three
+  its headline [`SimpleConvexPolygon.collinear_vertices_cyclicInterval`](LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L751): three
   collinear boundary vertices (under an explicit maximal-flat-side hypothesis)
   occur cyclically consecutively, via the planar chord lemma
-  `chord_in_frontier_of_collinear_boundary_triple`.
+  [`chord_in_frontier_of_collinear_boundary_triple`](LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L177).
 
 ### `LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting
 
 - **`Counting.lean`** — the classical degeneracy argument for unit distances: a
   forward-neighbor bound `k` in some index order forces at most `n · k`
   unordered unit-distance pairs
-  (`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`,
-  `UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`), with a
-  `SimpleConvexPolygon`-indexed restatement. Axiom-clean.
+  ([`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`](LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93),
+  [`UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`](LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107)), with a
+  [`SimpleConvexPolygon`](LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. Axiom-clean.
 
 ### `LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities
 
@@ -211,14 +212,14 @@ decomposition). Mathlib-staging: the statements carry no domain-specific
 hypothesis. All headlines axiom-clean.
 
 - **`Defs.lean`** (Bryan Wang) — the invertible diagonal matrix attached to a
-  vector of units (`Matrix.GeneralLinearGroup.diagonal`); the `2 × 2` unipotent
-  `!![1, t; 0, 1]` (`Matrix.GeneralLinearGroup.GL2.unipotent`) with its defining
-  equation (`unipotent_def`), inverse (`unipotent_inv`), and additive composition
-  law (`unipotent_mul`).
+  vector of units ([`Matrix.GeneralLinearGroup.diagonal`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L27)); the `2 × 2` unipotent
+  `!![1, t; 0, 1]` ([`Matrix.GeneralLinearGroup.GL2.unipotent`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L35)) with its defining
+  equation ([`unipotent_def`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L44)), inverse ([`unipotent_inv`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L48)), and additive composition
+  law ([`unipotent_mul`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L52)).
 - **`Hecke.lean`** — four pure-`CommRing` 2×2 identities: the upper-unipotent and
-  swap row operations (`upper_unipotent_mul_matrix`, `swap_mul_matrix`) and the
+  swap row operations ([`upper_unipotent_mul_matrix`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L27), [`swap_mul_matrix`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L36)) and the
   determinants of the unipotent and swap general-linear elements
-  (`unipotent_det_eq_one`, `swap_det_eq_neg_one`).
+  ([`unipotent_det_eq_one`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L43), [`swap_det_eq_neg_one`](LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L50)).
 
 ### `LeanFormalizations/ElekesSharirGuthKatz/` — Elekes–Sharir/Guth–Katz reduction (base) ✅
 
@@ -230,20 +231,20 @@ axiom-clean. The open extremal-energy research target
 that aims to beat the ceiling are **not** imported — the open bound enters only as
 an explicit `Prop` hypothesis, never as an axiom or `sorry`.
 
-- **Cauchy–Schwarz bridge** (`CauchyEnergy`): `energy_lower_bound_of_few_distances`
+- **Cauchy–Schwarz bridge** (`CauchyEnergy`): [`energy_lower_bound_of_few_distances`](LeanFormalizations/ElekesSharirGuthKatz/CauchyEnergy.lean#L20)
   — `(n(n−1))² ≤ NumDistancesOrdered · DistanceEnergy`, the geometric content of
   "few distances ⟹ cubic energy".
 - **Elementary `O(n³)` ceiling** (`EnergyCeiling`): under no-four-cocircular,
-  `orderedMultiplicity_le_three_mul` ((E1) `m_r ≤ 3n`) and
-  `distanceEnergy_le_three_mul_cube` ((E2) `E ≤ 3n³`), removing the Guth–Katz
-  `log` factor elementarily; capstone `numDistances_ge_of_ceiling` (the trivial
+  [`orderedMultiplicity_le_three_mul`](LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L62) ((E1) `m_r ≤ 3n`) and
+  [`distanceEnergy_le_three_mul_cube`](LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L121) ((E2) `E ≤ 3n³`), removing the Guth–Katz
+  `log` factor elementarily; capstone [`numDistances_ge_of_ceiling`](LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L160) (the trivial
   `D = Ω(n)`).
-- **ES-GK decomposition** (`Decomposition`): `elekes_sharir_guth_katz_decomposition`
+- **ES-GK decomposition** (`Decomposition`): [`elekes_sharir_guth_katz_decomposition`](LeanFormalizations/ElekesSharirGuthKatz/Decomposition.lean#L98)
   — every injective general-position configuration admits a rich direct-isometry
   family — and the dyadic energy partition
-  `distanceEnergy_eq_sum_energyAtLevel` (`BridgeIdentity` + `RichnessLevels`).
+  [`distanceEnergy_eq_sum_energyAtLevel`](LeanFormalizations/ElekesSharirGuthKatz/BridgeIdentity.lean#L927) (`BridgeIdentity` + `RichnessLevels`).
 - **Finite-minimum transfer** (`FiniteMinimum` + `Parabola`):
-  `all_configs_lower_bound_to_hIndexed_lower_bound`, with `gp_config_nonempty`
+  [`all_configs_lower_bound_to_hIndexed_lower_bound`](LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L41), with [`gp_config_nonempty`](LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L28)
   (the parabola/moment-curve witness that general-position configs exist for
   every `n`).
 
@@ -266,165 +267,64 @@ is `sorryAx`.
 
 ## Partial / work-in-progress 🟡 — `LeanFormalizations/PachDeZeeuw/`
 
-A vendored, ported copy of the Pach–de Zeeuw "distinct distances on algebraic
-curves" program. It **compiles** but is **not finished**: most modules carry
-`sorry` or consume unproven statement-surfaces. The reduction theorems are
-honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …`).
+A ported copy of the Pach–de Zeeuw "distinct distances on algebraic curves"
+program (the formalization that motivated the standalone modules above). It
+**compiles** but is **not finished**: the work-in-progress modules carry `sorry`
+or consume unproven statement-surfaces, and the reduction theorems are honestly
+stated as *conditional* results (`theorem … (h : SomeStatement) : …`). Live
+`sorry`s currently live only in the modules listed here.
 
 - **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
-  combinatorial-map / Euler-bound / edge-insertion substrate has been promoted to
-  the standalone `Combinatorics/CombinatorialMap/` and `Combinatorics/SimpleGraph/`
-  libraries above; what remains here is the still-unfinished drawing→map bridge
-  and its residual-map/topological helpers (`ResidualMapProperties.lean`,
-  `ResidualMapPermuteEdges.lean`, `ResidualPlanarization.lean`,
-  `EdgeSetDrawing.lean`, `PLArc.lean`, `PLAssembly.lean`,
-  `PLCollarSeparation.lean`). The full crossing lemma still bottoms out in a
-  labelled conjectured geometric residual (`exists_twoSidedPartition_of_arc`,
-  `sorry`). Current tree-cotree bridge progress includes the constructor-facing
-  leaf and same-face local witnesses
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident`
-  / `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_second_endpoint_incident`
-  / `CrossingLemma.exists_residualMapPrefixStepInsertion_leaf_of_old_endpoint_incident_of_endpoints`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOfLeafOrder`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_treeEdgeOfLeafOrder`
-  (with `treeEdgeOfLeafOrder_*incidentEnds*` incidence facts and the
-  permutation transport needed for prefix freshness),
-  the full permuted tree-prefix consequences
-  `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder`
-  / `CrossingLemma.DrawnMultigraph.incidentCoverage_permuted_treePrefix_of_leafOrder_of_le`
-  / `CrossingLemma.DrawnMultigraph.residualMap_edge_card_eq_vertex_card_sub_one_permuted_treePrefix_of_leafOrder`
-  / `CrossingLemma.DrawnMultigraph.residualMap_isPlanar_permuted_treePrefix_of_leafOrder`
-  / `CrossingLemma.DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrder`,
-  the cotree-side finite edge selector and dart-representative adapter
-  `CombinatorialMap.edge_face_label_eq_of_edge_mk_eq`
-  / `CombinatorialMap.faceEdgeOfLeafOrder`
-  / `CombinatorialMap.faceEdgeOfLeafOrder_spec`
-  / `CombinatorialMap.faceEdgeOfLeafOrder_spec_cases`
-  / `CombinatorialMap.faceEdgeOfLeafOrder_injective`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_spec_cases`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_connected`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_unpeeled_prefix_apply_eq_of_forall_adj`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_apply_eq_of_forall_adj_ne_current_parent`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_next_unpeeled_prefix_face_label_eq_of_forall_adj_ne_current_parent`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_leaf_parent_label_eq_of_forall_adj`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_forall_adj_ne_current_parent`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_face_label_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj`
-  / `CombinatorialMap.faceEdgeOfLeafOrderReverse_edge_insertedFaceSplitPoolEquiv_eq_of_forall_adj_ne_current_parent`
-  / `CombinatorialMap.exists_faceEdgeInjection_of_leafOrderReverse`,
-  the reverse leaf-peeling edge exclusion
-  `SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`
-  / `SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`
-  / `SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`,
-  the reverse-index arithmetic
-  `Fin.val_eq_succ_val_of_rev_val_add_two_eq_rev_val_add_one`
-  / `Fin.add_val_eq_add_succ_val_of_rev_val_add_two_eq_rev_val_add_one`,
-  the residual-edge/order adapter
-  `CrossingLemma.residualMapEdgeEquiv_edge_mk`
-  / `CrossingLemma.DrawnMultigraph.exists_edgePositionPermutation_of_disjoint_tree_faceEdgeOfLeafOrderReverse`
-  / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_eq_faceEdgeOfLeafOrderReverse_of_block`
-  / `CrossingLemma.DrawnMultigraph.permuted_prefix_next_eq_faceEdgeOfLeafOrderReverse_of_block`
-  / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoints_eq_or_eq_swap_of_residualMapEdgeEquiv`
-  / `CrossingLemma.DrawnMultigraph.permuted_prefix_last_endpoint_data_of_residualMapEdgeEquiv`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv`,
-  the face-splitting quotient specs
-  `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_of_not_sameCycle`
-  / `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_left`
-  / `CombinatorialMap.EdgeInsertion.splitCycleQuotEquiv_mk_right`,
-  the inserted-face split side labels
-  `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_left`
-  / `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_right`
-  / `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_dartA_right`
-  / `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_dartB_left`,
-  the split-separation facts
-  `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_not_sameCycle_inl_corners`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_not_sameCycle`,
-  the split corner/new-dart face witnesses
-  `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB`
-  / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_left_corner_face_eq_last_true`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_right_corner_face_eq_last_false`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_corners_face_ne`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faces_ne`,
-  the transported inserted-face preservation facts
-  `CombinatorialMap.EdgeInsertion.insertedFaceSplitPoolEquiv_mk_inl_of_not_sameCycle`
-  / `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_of_not_sameCycle`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_of_not_sameCycle`,
-  the split-quotient face-stability criterion
-  `CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_inl_iff_splitPool_eq`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_facePerm_sameCycle_iff_splitPool_eq`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_old_face_eq_iff_splitPool_eq`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_current_face_eq_iff_splitPool_eq`
-  / `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_current_splitPool_eq`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_current_splitPool_eq`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_residualMapEdgeEquiv_of_endpointCoverage_of_current_splitPool_eq`,
-  and the reverse-cotree specialization
-  `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_forall_adj_ne_current_parent`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_forall_adj_ne_current_parent`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_splitPool_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_faceEdgeOfLeafOrderReverse_old_face_eq_of_edge_mk_eq_of_forall_adj_ne_current_parent`,
-  the split-face dual-adjacency facts
-  `CombinatorialMap.insertedEdgeMap_faceGraph_adj_new_edge`
-  / `CrossingLemma.residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm`,
-  the splice-corner face-equality constructor
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_splice_face_eq`,
-  the reverse-cotree block witness
-  `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_current_splitPool_eq`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_next_block_of_endpointCoverage_of_sector_sideLabels`
-  / `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_faceEdgeOfLeafOrderReverse_block_of_treePrefix_incidence`,
-  the first post-tree edge witness
-  `CrossingLemma.DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permuted_treePrefix_next`,
-  and
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident`,
-  plus the one-face specialization
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_card_face_eq_one`
-  and planar tree-prefix bridge
-  `CrossingLemma.exists_residualMapPrefixStepInsertion_sameFace_of_old_endpoint_incident_of_planar_tree_prefix`;
-  the PL collar side-classification layer
-  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_collar_with_collar_sides`
-  / `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`
-  / `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides`
-  / `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_of_collarPlus_subset`
-  / `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_of_collarMinus_subset`
-  / `CrossingLemma.PlaneArcSeparation.sectorPlus_subset_collarPlus_of_sliver_budgets`
-  / `CrossingLemma.PlaneArcSeparation.sectorMinus_subset_collarMinus_of_sliver_budgets`;
-  the complementary dual-tree theorem and the remaining residual-map
-  identification that each actual later splice predecessor corner lies on the
-  side label of the corresponding full-residual-map cotree dart remain open. A
-  separate
-  `subsetAveraging_master` (`sorry`) is a documented dead-end, not used
-  downstream.
-- **`PachSharir/`** — the Pach–Sharir incidence bound (`theorem23`/`corollary24`
-  contain `sorry`).
-- **`AuxiliaryCurves`, `IncidenceBound`, `Theorem11`, `Theorem12`,
-  `IncidenceAssembly`, `Basic`, `CurveInterface`** — the reduction chain to
-  Theorem 1.1; conditional on the statement-surfaces, some `sorry`.
+  combinatorial-map / Euler-bound / edge-insertion substrate has already been
+  promoted to the standalone, sorry-free `Combinatorics/CombinatorialMap/` and
+  `Combinatorics/SimpleGraph/` libraries above. What remains here is the
+  unfinished drawing→map bridge and its residual-map / plane-topology helpers
+  (`ResidualMapProperties.lean`, `PLArc.lean`, `PLCollarSeparation.lean`,
+  `PlaneArcSeparation.lean`, etc.). The full crossing lemma still bottoms out in
+  a labelled conjectured geometric residual,
+  [`exists_twoSidedPartition_of_arc`](LeanFormalizations/PachDeZeeuw/CrossingLemma/PlaneArcSeparation.lean#L377)
+  (`sorry`); a large tree-cotree residual-map bridge and a PL collar
+  side-classification layer are built around it (many sorry-free supporting
+  lemmas), with the remaining open work being the residual-map identification of
+  each later splice-corner with the corresponding cotree-dart side label. The
+  amplification path
+  [`vertexSubsetAveraging_bound`](LeanFormalizations/PachDeZeeuw/CrossingLemma/CrossingLemmaAmplification.lean#L1604)
+  (`sorry`) is a documented dead-end, not used downstream. See `ROUTE_C_PLAN.md`
+  for the geometric-residual plan and `docs/AUDIT_MATRIX.md` for the lemma-level
+  status.
+- **`PachSharir/`** — the Pach–Sharir incidence bound. `Theorem23.lean` states
+  the incidence statement-surfaces ([`Theorem23Statement`](LeanFormalizations/PachDeZeeuw/PachSharir/Theorem23.lean#L76) / [`Corollary24Statement`](LeanFormalizations/PachDeZeeuw/PachSharir/Theorem23.lean#L93),
+  `def … : Prop`, sorry-free); the live `sorry`s are in
+  `PachSharir/SzemerediTrotter.lean` (the Szemerédi–Trotter multigraph assembly).
 - **`ComponentSplit.lean` (L2)** — component split for bounded-degree plane
-  curves (faithful to
-  `erdos-98/docs/problem-98-klow-certificate-fires-lemmas-2026-06-04.md`,
-  Lemma A step 5). Definitions `zeroSet` / `irreducibleFactors` are `sorry`-free;
-  the three results are **stated with `sorry`**: `componentCount_le_totalDegree`
-  (`≤ d` irreducible factors), `lineCircle_components_meet_finite` (line/circle
-  components meet a no-3/no-4 set in `O_d(1)` points), and
-  `exists_genuine_component_rich` (pigeonhole feeding PdZ). Precise
-  statement-surfaces for the algebraic-geometry steps.
+  curves. Definitions
+  [`zeroSet`](LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L53) /
+  [`irreducibleFactors`](LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L59)
+  are `sorry`-free; the three results
+  [`componentCount_le_totalDegree`](LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L69)
+  (`≤ d` irreducible factors),
+  [`lineCircle_components_meet_finite`](LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L86)
+  (line/circle components meet a no-3/no-4 set in `O_d(1)` points), and
+  [`exists_genuine_component_rich`](LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L106)
+  (pigeonhole feeding PdZ) are precise statement-surfaces for the
+  algebraic-geometry steps, **stated with `sorry`**.
+- **`IncidenceAssembly/Bridge.lean`** — the reduction chain to Theorem 1.1,
+  conditional on the statement-surfaces (`sorry`). The accompanying reduction-chain
+  modules (`Theorem11`, `Theorem12`, `IncidenceBound`, `AuxiliaryCurves`,
+  `IncidenceAssembly`, `Basic`, `CurveInterface`) are themselves sorry-free; they
+  package conditional results over the unproven surfaces.
+
+A partly-verified by-product also lives in this program:
+
 - **`Geometry/ElekesSharir/ChordCurve.lean` (L1)** — two-pinned chord curve.
-  `twoPinnedDet_affine` / `twoPinnedDet_eq_const_add_linear` are **axiom-clean**
-  (the step-3 `w×w`-cancellation: the two-pinned determinant is affine-linear in
-  `w`). The curve/finite-fiber steps (Cramer/rationality + `O(1)`-to-1) are
-  **not formalized**: the original `sorry`-stated placeholders were removed
-  2026-06-04 as mis-stated (false as written — one had a `True` placeholder
-  hypothesis, the other omitted its rationality hypothesis); a faithful
-  statement needs the rational-parametrization set-up first.
+  [`twoPinnedDet_affine`](LeanFormalizations/Geometry/ElekesSharir/ChordCurve.lean#L70) /
+  [`twoPinnedDet_eq_const_add_linear`](LeanFormalizations/Geometry/ElekesSharir/ChordCurve.lean#L81)
+  are **axiom-clean** (the step-3 `w×w`-cancellation: the two-pinned determinant
+  is affine-linear in `w`). The curve/finite-fiber steps (Cramer/rationality +
+  `O(1)`-to-1) are **not formalized**: the original `sorry`-stated placeholders
+  were removed 2026-06-04 as mis-stated (one carried a `True` placeholder
+  hypothesis, the other omitted its rationality hypothesis); a faithful statement
+  needs the rational-parametrization set-up first.
 
 ### `LeanFormalizations/PachDeZeeuw/Bezout.lean` — Bézout finite-intersection bound ✅
 
@@ -432,9 +332,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
   bounded-degree real plane curves with no common infinite irreducible
   component meet in a **finite** set whose size is bounded by an explicit
   constant in the degrees (`(d₁ + d₂ + 1) ^ 8`). This is the resultant-based
-  assembly built on `AlgebraicPrelim` (`degreeOf_resultant_le` →
-  `primitive`/`irreducible_pair_intersection_bound` → `factorized_bezout_bound`
-  → `bezout`). **Axiom-clean, 0 `sorry`.** Note: this is the *existential*
+  assembly built on `AlgebraicPrelim` ([`degreeOf_resultant_le`](LeanFormalizations/PachDeZeeuw/Bezout.lean#L134) →
+  `primitive`/[`irreducible_pair_intersection_bound`](LeanFormalizations/PachDeZeeuw/Bezout.lean#L370) → [`factorized_bezout_bound`](LeanFormalizations/PachDeZeeuw/Bezout.lean#L1167)
+  → [`bezout`](LeanFormalizations/PachDeZeeuw/Bezout.lean#L1308)). **Axiom-clean, 0 `sorry`.** Note: this is the *existential*
   (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound is not yet stated or
   proven — see `ROADMAP.md`.
 
@@ -442,9 +342,9 @@ honestly stated as *conditional* results (`theorem … (h : SomeStatement) : …
 
 These define a `Prop` but do **not** prove it — accepted classical inputs:
 
-- **`MilnorThom.lean`** — `MilnorThom22Statement` (Oleĭnik–Petrovskiĭ / Milnor /
+- **`MilnorThom.lean`** — [`MilnorThom22Statement`](LeanFormalizations/PachDeZeeuw/MilnorThom.lean#L54) (Oleĭnik–Petrovskiĭ / Milnor /
   Thom connected-components bound).
-- **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
+- **`CurveSymmetries.lean`** — [`Lemma25Statement`](LeanFormalizations/PachDeZeeuw/CurveSymmetries.lean#L67) / [`Lemma26Statement`](LeanFormalizations/PachDeZeeuw/CurveSymmetries.lean#L269)
   (symmetries of plane algebraic curves).
 
 ## Idiomaticity status (pre-PR)
@@ -474,14 +374,16 @@ LeanFormalizations/
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
   Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem + planar GP primitives ✅
+  Geometry/ElekesSharir/                     -- incidence-geometry L3/L4/L5 lemmas ✅ (ChordCurve.lean L1 partly ✅)
   ElekesSharirGuthKatz/                     -- ES/GK distance-energy reduction (base, namespace Esgk) ✅
   LinearAlgebra/Matrix/GeneralLinearGroup/  -- diagonal, 2×2 unipotent, generic matrix identities ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
     Bezout.lean                             -- Bézout finite-intersection bound ✅
     MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
-    CrossingLemma/ PachSharir/              -- 🟡
-    Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- 🟡
+    CrossingLemma/ PachSharir/SzemerediTrotter.lean  -- live sorrys 🟡
+    ComponentSplit.lean IncidenceAssembly/Bridge.lean -- live sorrys 🟡
+    Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- conditional, sorry-free
 ```
 
 ## References
@@ -510,8 +412,12 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   Gowers." *Combinatorica* **44** (2024), no. 3, 691–698.
   DOI: 10.1007/s00493-024-00092-5. arXiv:2308.10245.
 
-### Distinct distances & incidences — `PachDeZeeuw/`, `Geometry/ElekesSharir/`
+### Distinct distances & incidences — `PachDeZeeuw/`, `Geometry/ElekesSharir/`, `ElekesSharirGuthKatz/`
 
+- Erdős, P. "On sets of distances of n points." *Amer. Math. Monthly* **53**
+  (1946), 248–250. DOI: 10.2307/2305092. (Origin of the distinct-distances
+  problem — the target of the Elekes–Sharir reduction and the Guth–Katz bound
+  whose base reduction is formalized in `ElekesSharirGuthKatz/`.)
 - Pach, J. and de Zeeuw, F. "Distinct distances on algebraic curves in the
   plane." *Combin. Probab. Comput.* **26** (2017), no. 1, 99–117.
   DOI: 10.1017/S0963548316000225. arXiv:1308.0177. (The program's central paper;
@@ -572,6 +478,28 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Oleĭnik, O.A. and Petrovskiĭ, I.G. "On the topology of real algebraic
   surfaces." *Izv. Akad. Nauk SSSR Ser. Mat.* **13** (1949), 389–402.
   (Component-count bound; Bézout content is from Pach–de Zeeuw above.)
+
+### Classical / folklore — `Geometry/Convex/`, `Combinatorics/UnitDistance/`, `LinearAlgebra/Matrix/GeneralLinearGroup/`
+
+These modules formalize textbook-classical facts with no single originating
+paper, so no specific citation is asserted (rather than guess one):
+
+- **Convex slicing & strict convexity** (`Geometry/Convex/`) — a line meets a
+  convex set in an interval-shaped (order-connected) slice, and a strictly convex
+  set has no three collinear boundary points. Standard convex analysis; see e.g.
+  Rockafellar, R.T. *Convex Analysis*, Princeton University Press, 1970, or
+  Schneider, R. *Convex Bodies: The Brunn–Minkowski Theory*, 2nd ed., Cambridge
+  University Press, 2014 (the specific result is folklore, not attributed to a
+  single source here).
+- **Unit-distance elimination-order counting** (`Combinatorics/UnitDistance/`) —
+  the degeneracy / forward-neighbour-bound argument bounding unordered unit
+  pairs by `n·k`. A classical degeneracy argument with no single originating
+  paper; surveyed in Brass, P., Moser, W., and Pach, J. *Research Problems in
+  Discrete Geometry*, Springer, 2005 (general survey; specific bound not
+  attributed there).
+- **`Matrix.GeneralLinearGroup` 2×2 identities** (`LinearAlgebra/Matrix/`) —
+  elementary diagonal / unipotent / row-operation matrix facts, mathlib-staging
+  by-products of the FLT work; no external literature source.
 
 ## License
 

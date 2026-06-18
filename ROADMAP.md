@@ -57,9 +57,10 @@ modules — and advertising them.
   cases (`coeffline_…`, `zeroCurry_nonvertical_pair_intersection_bound`), so a
   sharper general assembly may be reachable. Not attempted yet.
 
-## Erdős-96 salvage
+## Erdős-96 convex-geometry extraction
 
-- [x] **Salvage the general convex-geometry + counting content from #96** —
+- [x] **Extract the general convex-geometry + counting content from the #96
+  research formalization** —
   extracted, de-jargoned (dropped `Problem96.Track1`), ported v4.28 → v4.30, and
   verified axiom-clean: `Geometry/Convex/LineSlice.lean` (line-slices of convex
   sets + strict-convex-no-3-collinear), `Geometry/Convex/SimpleConvexPolygon.lean`
@@ -131,7 +132,7 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   unrelated to the deprecation.)
 - [ ] Open mathlib PR(s) once audit + namespacing are settled.
 
-## General linear group salvage (from stalled FLT PR)
+## General linear group extraction (from work done as part of a PR for FLT)
 
 - [x] **Extract the general `Matrix.GeneralLinearGroup` nugget from the FLT
   good-prime Hecke decomposition** (2026-06-16) — two mathlib-only files under
@@ -140,8 +141,8 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   matrix/determinant identities; **Adam McKenna**). Module-system syntax stripped
   to repo convention (`import Mathlib`, plain namespaces). Builds clean, all 9
   decls `#print axioms`-clean (`propext`, `Classical.choice`, `Quot.sound`). The
-  FLT-specific Hecke-algebra machinery stays in the FLT fork PR — only the
-  domain-agnostic GL₂ matrix facts are re-homed here.
+  FLT-specific Hecke-algebra machinery stays in FLT — only the domain-agnostic
+  GL₂ matrix facts are re-homed here.
 - [ ] **mathlib novelty/dedup check before any mathlib PR** — `diagonal`,
   `GL2.unipotent`, `swap`-det facts must be confirmed not already upstream in
   v4.30.0 (the FLT source carries a `-- TODO ... might have just landed in
