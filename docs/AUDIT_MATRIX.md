@@ -44,6 +44,16 @@ on import. 8 ESGK apex theorems added to the gate (now **61 theorems**, full bui
 green **8549 jobs**); all axiom-clean. Citation/math-correctness audit of the ESGK
 proofs is tracked in the `esgk-on3` repo (`internal-audit/esgk-bridge-identity.md`).
 
+**2026-06-18 (later still):** the vendored Erdős problem statements (96/97/98) and
+their `FormalConjectures/Util.lean` compat shim were removed — `formal-conjectures`
+now tracks mathlib v4.30 directly, so hosting frozen copies is no longer needed. The
+live planar general-position primitives the ESGK layer consumes (`ℝ²`,
+`Set.Triplewise`, `NonTrilinear`, `distinctDistances`, `InGeneralPosition`) were
+relocated verbatim to `Geometry/Euclidean/PlanarGeneralPosition.lean`; the dead
+`ConvexIndep` / `unitDistancePairsCount` / bare `Triplewise` defs and the
+`answer()`/`category`/`AMS` shims were dropped. Gate unchanged at **61 theorems**
+(no gated theorem lived in the removed subtree); build green **8545 jobs**.
+
 ---
 
 ## Balog–Szemerédi–Gowers — `Combinatorics/Additive/BalogSzemerediGowers.lean`

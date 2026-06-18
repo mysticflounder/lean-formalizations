@@ -17,6 +17,10 @@ import LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder
 import LeanFormalizations.Combinatorics.UnitDistance.Counting
 
 -- Euclidean geometry
+-- Planar general-position primitives (ℝ², Set.Triplewise, NonTrilinear,
+-- distinctDistances, InGeneralPosition): formal-conjectures originals (Apache 2.0,
+-- absent from mathlib) consumed by the ESGK base layer below.
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
 -- Near Enemy Theorem for Bisector Energy: full chain from generic-projection
 -- algebra and sphere-slice rigidity to the unconditional existence theorem
@@ -66,7 +70,3 @@ import LeanFormalizations.PachDeZeeuw.IncidenceAssembly
 -- Hecke-operator decomposition; mathlib-staging, complete and axiom-clean.
 import LeanFormalizations.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 import LeanFormalizations.LinearAlgebra.Matrix.GeneralLinearGroup.Hecke
-
--- Vendored, frozen Erdős problem statements (verbatim from formal-conjectures,
--- Apache 2.0) hosted for cross-version reference; see LeanFormalizations.FormalConjectures.
-import LeanFormalizations.FormalConjectures

@@ -5,7 +5,7 @@ Authors: Adam McKenna
 -/
 
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 
 /-!
 # Foundation — proof-local indexed primitives.

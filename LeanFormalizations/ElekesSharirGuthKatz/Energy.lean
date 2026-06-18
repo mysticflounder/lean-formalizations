@@ -6,7 +6,7 @@ Authors: Adam McKenna
 
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 
 /-!

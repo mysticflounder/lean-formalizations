@@ -9,7 +9,7 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Verification status (2026-06-18)
 
-- **Build:** green — `lake build` completes all **8549 jobs**.
+- **Build:** green — `lake build` completes all **8545 jobs**.
 - **Verified core:** the **61** theorems advertised as `✅ VERIFIED` below are
   mechanically re-verified axiom-clean — each depends only on a subset of the
   Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
@@ -19,21 +19,17 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
   every `✅` theorem is closed under the Lean kernel alone.
 - **Honest `sorry`s:** every live `sorry` is confined to the `🟡` work-in-progress
   Pach–de Zeeuw program (`PachDeZeeuw/CrossingLemma/*`, `PachSharir/*`,
-  `ComponentSplit`, `IncidenceAssembly`) or the `⚪` vendored Erdős-problem
-  statements (`FormalConjectures/ErdosProblems/{96,97,98}`, deliberately `sorry`
-  as upstream). **No `✅ VERIFIED` module contains a `sorry`.**
+  `ComponentSplit`, `IncidenceAssembly`). **No `✅ VERIFIED` module contains a
+  `sorry`.**
 
 ## Provenance
 
-Much of this code was salvaged from now-dormant Erdős-Problem-98 and
-Erdős-Problem-96 formalization projects and re-extracted as standalone,
-mathlib-only modules. The source projects' own headline theorems (a circular
-reduction for #98; an abandoned counterexample-path encoding for #96) are
-**not** included here. What is kept is the *general* mathematics that stands on
-its own.
+These modules are formalizations we created in the course of researching Erdős
+problems, re-extracted as standalone, mathlib-only modules — the *general*
+mathematics that stands on its own.
 
-The `LinearAlgebra/Matrix/GeneralLinearGroup/` material is salvaged from a
-stalled FLT pull request (a good-prime Hecke-operator decomposition): the
+The `LinearAlgebra/Matrix/GeneralLinearGroup/` material comes from work done as
+part of a pull request for FLT (a good-prime Hecke-operator decomposition): the
 FLT-specific automorphic-form machinery stays in FLT, but the general
 `Matrix.GeneralLinearGroup` constructions and 2×2 matrix identities, which carry
 no domain-specific hypothesis, are re-extracted here mathlib-only.
@@ -183,8 +179,8 @@ it was confirmed complete). All headlines axiom-clean:
 
 ### `LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons
 
-Classical convex-geometry facts not currently in mathlib (salvaged from a
-now-dormant Erdős-Problem-96 formalization). All headlines axiom-clean.
+Classical convex-geometry facts not currently in mathlib (formalized in the
+course of our Erdős-problem research). All headlines axiom-clean.
 
 - **`LineSlice.lean`** — a line meets a convex set in a preconnected, hence
   interval-shaped, set (`convex_line_intersection_isPreconnected`); a line is
@@ -210,9 +206,9 @@ now-dormant Erdős-Problem-96 formalization). All headlines axiom-clean.
 ### `LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities
 
 General `Matrix.GeneralLinearGroup` constructions over an arbitrary commutative
-ring, salvaged from the (stalled) FLT good-prime Hecke-operator decomposition.
-Mathlib-staging: the statements carry no domain-specific hypothesis. All
-headlines axiom-clean.
+ring, from work done as part of a PR for FLT (a good-prime Hecke-operator
+decomposition). Mathlib-staging: the statements carry no domain-specific
+hypothesis. All headlines axiom-clean.
 
 - **`Defs.lean`** (Bryan Wang) — the invertible diagonal matrix attached to a
   vector of units (`Matrix.GeneralLinearGroup.diagonal`); the `2 × 2` unipotent
@@ -263,7 +259,7 @@ lake exe cache get
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
 depends on `sorryAx` or a custom axiom. Last run (2026-06-18): all 61 listed
 theorems clean (each depends only on a subset of
-`[propext, Classical.choice, Quot.sound]`), full build green (8549 jobs). The
+`[propext, Classical.choice, Quot.sound]`), full build green (8545 jobs). The
 verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
 `@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
 is `sorryAx`.
@@ -451,23 +447,6 @@ These define a `Prop` but do **not** prove it — accepted classical inputs:
 - **`CurveSymmetries.lean`** — `Lemma25Statement` / `Lemma26Statement`
   (symmetries of plane algebraic curves).
 
-## Vendored statements ⚪ — `LeanFormalizations/FormalConjectures/`
-
-Frozen, **verbatim** Erdős problem statements copied from
-[`formal-conjectures`](https://github.com/google-deepmind/formal-conjectures) (Apache 2.0),
-hosted here so downstream projects can reference them without importing that project
-(which is pinned to mathlib v4.27.0; this project is on v4.30.0).
-
-- **`ErdosProblems/96.lean`, `97.lean`, `98.lean`** — problems 96 (unit distances in a
-  convex polygon), 97 (equidistant vertices), 98 (distinct distances in general position).
-  Each carries a `!!! DO NOT CHANGE !!!` notice; the **only** adaptation is the import line.
-  The statements use `sorry`/`answer(sorry)` exactly as upstream (open-problem surfaces).
-- **`Util.lean`** — a thin mathlib-v4.30 compatibility shim (no-op `answer(…)` macro and
-  `category`/`AMS` attributes; `ℝ²`, `ConvexIndep`, `distinctDistances`,
-  `unitDistancePairsCount`, `InGeneralPosition`, `NonTrilinear`, `Set.Triplewise` copied
-  verbatim from `FormalConjecturesForMathlib`). It is *not* a faithful port of the upstream
-  attribute/linter machinery — only enough to compile the frozen statements.
-
 ## Idiomaticity status (pre-PR)
 
 A mathlib-idiomaticity audit drove a de-jargon pass (see `ROADMAP.md`): the
@@ -494,7 +473,7 @@ LeanFormalizations/
   Combinatorics/SimpleGraph/                -- tree-order helpers ✅
   Combinatorics/UnitDistance/               -- elimination-order counting ✅
   Geometry/Convex/                          -- line-slices + simple convex polygon ✅
-  Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem ✅
+  Geometry/Euclidean/                       -- isometry classification + Near Enemy Theorem + planar GP primitives ✅
   ElekesSharirGuthKatz/                     -- ES/GK distance-energy reduction (base, namespace Esgk) ✅
   LinearAlgebra/Matrix/GeneralLinearGroup/  -- diagonal, 2×2 unipotent, generic matrix identities ✅
   PachDeZeeuw/                              -- Pach–de Zeeuw program
@@ -503,9 +482,6 @@ LeanFormalizations/
     MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
     CrossingLemma/ PachSharir/              -- 🟡
     Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- 🟡
-  FormalConjectures/                       -- vendored verbatim Erdős statements ⚪
-    Util.lean                              -- v4.30 compat shim (DO NOT depend on for proofs)
-    ErdosProblems/96 97 98                 -- frozen statements-of-record (DO NOT CHANGE)
 ```
 
 ## References
@@ -596,12 +572,6 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Oleĭnik, O.A. and Petrovskiĭ, I.G. "On the topology of real algebraic
   surfaces." *Izv. Akad. Nauk SSSR Ser. Mat.* **13** (1949), 389–402.
   (Component-count bound; Bézout content is from Pach–de Zeeuw above.)
-
-### Vendored statements — `FormalConjectures/`
-
-- Erdős-problem statements (96/97/98) are copied verbatim from
-  [`formal-conjectures`](https://github.com/google-deepmind/formal-conjectures)
-  (Google DeepMind, Apache 2.0); see that repository for problem provenance.
 
 ## License
 

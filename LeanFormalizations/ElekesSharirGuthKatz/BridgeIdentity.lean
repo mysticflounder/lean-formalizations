@@ -10,7 +10,7 @@ import Mathlib.Analysis.Normed.Affine.MazurUlam
 import Mathlib.Data.Nat.Log
 import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 import LeanFormalizations.ElekesSharirGuthKatz.Energy
 import LeanFormalizations.ElekesSharirGuthKatz.RichnessLevels

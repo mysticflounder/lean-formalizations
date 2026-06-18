@@ -12,7 +12,7 @@ modules.
 -/
 
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 
 namespace Esgk

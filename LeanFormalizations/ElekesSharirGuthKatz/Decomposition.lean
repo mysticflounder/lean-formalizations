@@ -5,7 +5,7 @@ Authors: Adam McKenna
 -/
 
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 import LeanFormalizations.ElekesSharirGuthKatz.RichnessLevels
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification

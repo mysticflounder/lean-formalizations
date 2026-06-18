@@ -11,7 +11,7 @@ import Mathlib.Order.Filter.Basic
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
 import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib
-import LeanFormalizations.FormalConjectures.Util
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 import LeanFormalizations.ElekesSharirGuthKatz.Energy
 
