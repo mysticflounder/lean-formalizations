@@ -17,11 +17,13 @@ name = "LeanFormalizations"
 srcDir = "lean"
 
 # ── Comparator auditability gate (Zulip submission standard) ─────────────────
-# Three out-of-tree modules under comparator/ (not in defaultTargets, so the
+# Two out-of-tree modules under comparator/ (not in defaultTargets, so the
 # normal `lake build` is unaffected). Build them explicitly:
-#   lake build Challenge Solution Conformance
-# Challenge imports Mathlib only; Solution imports the project and discharges
-# the sorries; Conformance checks statement-identity by proof irrelevance.
+#   lake build Challenge Solution
+# Challenge imports Mathlib only and states the 19 headline results as `sorry`
+# stubs; Solution imports the project and discharges them with identical
+# top-level (bare) names. The leanprover/comparator run checks statement
+# identity and axiom cleanliness across the two exports.
 
 [[lean_lib]]
 name = "Challenge"
@@ -29,8 +31,4 @@ srcDir = "comparator"
 
 [[lean_lib]]
 name = "Solution"
-srcDir = "comparator"
-
-[[lean_lib]]
-name = "Conformance"
 srcDir = "comparator"

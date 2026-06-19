@@ -13,9 +13,8 @@ full project (`import LeanFormalizations`) and inhabiting each headline
 statement with the real, axiom-clean project theorem.
 
 Each theorem here states the **exact same signature** as its namesake in
-`Challenge.lean` (verified mechanically by `Conformance.lean`, which checks
-`@Challenge.X = @Solution.X` by proof irrelevance) and proves it from the
-corresponding project declaration. The comparator
+`Challenge.lean` — same `Headline.` name, identical statement — and proves it
+from the corresponding project declaration. The comparator
 (<https://github.com/leanprover/comparator>) re-exports this closure and
 re-checks it under both the `nanoda` kernel and the Lean default kernel.
 
@@ -27,7 +26,14 @@ project-specific structures and are therefore audited by reading the repo).
 
 open scoped Matrix Pointwise
 
-namespace Solution
+-- The 19 headline claims live in a SHARED namespace `Headline`, used identically
+-- in Challenge.lean and Solution.lean. The comparator (leanprover/comparator)
+-- looks up each `config.json` theorem name in BOTH exports under the same
+-- fully-qualified name, so the namespace must match across the two modules. It
+-- also keeps these restatements from colliding with the project's own top-level
+-- theorem names (the `_root_.` references below reach the real project proofs).
+
+namespace Headline
 
 -- ── Balog–Szemerédi–Gowers (Combinatorics/Additive) ────────────────────────
 
@@ -160,4 +166,4 @@ theorem quadraticPart_vanishes_iff (A : Matrix (Fin 2) (Fin 2) ℝ) :
     (∀ (p : Fin 2 → ℝ), p ⬝ᵥ (A.transpose * A - 1).mulVec p = 0) ↔ A.transpose * A = 1 :=
   ElekesSharir.quadraticPart_vanishes_iff A
 
-end Solution
+end Headline

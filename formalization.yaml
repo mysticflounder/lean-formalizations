@@ -160,13 +160,15 @@ fidelity:
 
 # review status
 review:
-  status: "self-assessed"                            # [required] axiom-clean gate + Conformance.lean self-check; no external peer review yet
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
   reviewers: []
   notes: >
     Self-audit: scripts/check-axioms.sh asserts the 63 headline theorems are axiom-clean;
-    comparator/Conformance.lean mechanically checks Challenge ≡ Solution for all 19 by
-    proof irrelevance; comparator/axiom-audit.lean prints the closure for the 19.
-    The authoritative external check is a leanprover/comparator run (CI: .github/workflows/comparator.yml).
+    comparator/axiom-audit.lean prints the #print axioms closure for the 19 mathlib-only
+    headline claims. The authoritative external check is a leanprover/comparator run that
+    verifies statement identity (Challenge ≡ Solution, shared Headline namespace) and axiom
+    compliance and re-runs the nanoda + Lean default kernels (CI: .github/workflows/comparator.yml;
+    validated locally on Lean v4.30.0 through the default kernel).
 
 # alignment - source statements ↦ formal declarations (suggested shape).
 alignment:

@@ -14,9 +14,10 @@ what is being claimed, in formal language, with no need to trust any of the
 project's own definitions — every type and predicate below is from mathlib.
 
 `Solution.lean` (which `import`s the project) discharges each `sorry` with the
-real, axiom-clean project theorem, restating the **identical** signature.
-`Conformance.lean` mechanically checks `@Challenge.X = @Solution.X` for every
-theorem here, so statement drift between the two files cannot pass silently.
+real, axiom-clean project theorem, restating the **identical** signature under
+the same `Headline.` name. The leanprover/comparator run checks that the two
+modules' statements are identical (and the proofs axiom-clean), so statement
+drift between the two files cannot pass silently.
 
 ## Audit boundary — what is and isn't here
 
@@ -51,7 +52,14 @@ axioms, no `native_decide`). See `comparator/config.json` `permitted_axioms`.
 
 open scoped Matrix Pointwise
 
-namespace Challenge
+-- The 19 headline claims live in a SHARED namespace `Headline`, used identically
+-- in Challenge.lean and Solution.lean. The comparator (leanprover/comparator)
+-- looks up each `config.json` theorem name in BOTH exports under the same
+-- fully-qualified name, so the namespace must match across the two modules. It
+-- also keeps Solution's restatements from colliding with the project's own
+-- top-level theorem names. See comparator/README.md.
+
+namespace Headline
 
 -- ── Balog–Szemerédi–Gowers (Combinatorics/Additive) ────────────────────────
 
@@ -184,4 +192,4 @@ theorem quadraticPart_vanishes_iff (A : Matrix (Fin 2) (Fin 2) ℝ) :
     (∀ (p : Fin 2 → ℝ), p ⬝ᵥ (A.transpose * A - 1).mulVec p = 0) ↔ A.transpose * A = 1 :=
   sorry
 
-end Challenge
+end Headline

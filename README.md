@@ -278,12 +278,15 @@ For the Lean community's auditability standard for AI-authored work (the
   exactly what is claimed).
 - [`comparator/Solution.lean`](comparator/Solution.lean) — imports the project
   and discharges each stub with the real, axiom-clean theorem.
-- [`comparator/Conformance.lean`](comparator/Conformance.lean) — checks
-  `@Challenge.X = @Solution.X` for all 19 by proof irrelevance, so any
-  statement drift fails the build.
+  Both declare the 19 under a shared `Headline` namespace, so the comparator
+  finds each `config.json` name in both exports.
+- The authoritative [leanprover/comparator](https://github.com/leanprover/comparator)
+  run checks `Challenge ≡ Solution` for all 19 (statement identity) and re-checks
+  the proofs under the nanoda + Lean default kernels, ending in
+  `Your solution is okay!` (validated locally on Lean v4.30.0; CI-wired).
 
 ```bash
-comparator/check-conformance.sh    # build the 3 modules + axiom-audit the 19
+comparator/check-conformance.sh    # offline pre-flight: build the 2 modules + axiom-audit the 19
 ```
 
 The ~40 further headline results quantify over project-specific structures and

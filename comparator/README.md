@@ -14,25 +14,45 @@ it is **not** the bar for mathlib inclusion (that is a separate PR review).
 | 3 | Comparator run in CI + axiom audit | [`config.json`](config.json) + [`../.github/workflows/comparator.yml`](../.github/workflows/comparator.yml) + [`axiom-audit.lean`](axiom-audit.lean) |
 | 4 | `formalization.yaml` (mathlib-initiative spec) | [`../formalization.yaml`](../formalization.yaml) |
 
-Plus a project-local self-check beyond the external comparator:
-[`Conformance.lean`](Conformance.lean) asserts `@Challenge.X = @Solution.X := rfl`
-for every theorem. Because the two sides are proofs of the same `Prop`, Lean's
-definitional proof irrelevance closes each `rfl` — but only after checking the
-two **types unify**. So the file compiles iff all 19 challenge/solution
-statements are the identical proposition; statement drift fails the build.
+Challenge and Solution declare the 19 results in a **shared `Headline`
+namespace** (so `config.json` lists `Headline.bsg_asymmetric`, …). The
+comparator looks up each name in *both* exports, so they must agree on the
+fully-qualified name; the namespace also keeps Solution's restatements from
+colliding with the project's own top-level theorem names.
 
 ## Run it
 
+Cheap offline pre-flight (build + axiom audit; no comparator toolchain needed):
+
 ```bash
 ./lake-build.sh                       # build the project once
-comparator/check-conformance.sh       # build Challenge/Solution/Conformance + axiom audit
+comparator/check-conformance.sh       # build Challenge/Solution + axiom audit
 ```
 
-`check-conformance.sh` is the cheap offline pre-flight. The authoritative check
-is the real [leanprover/comparator](https://github.com/leanprover/comparator)
-run wired in CI (requirement 3), which re-exports the proof closure and re-runs
-**both** the `nanoda` kernel and the Lean default kernel, ending in
-`Your solution is okay!`.
+The authoritative check is the real
+[leanprover/comparator](https://github.com/leanprover/comparator) run
+(requirement 3): it re-exports both modules through `lean4export`, checks
+statement identity and axiom compliance, then re-runs **both** the `nanoda`
+kernel and the Lean default kernel, ending in `Your solution is okay!`. It is
+wired in CI; to run it locally (validated on Lean v4.30.0):
+
+```bash
+# Build the comparator at the tag matching this repo's lean-toolchain, so its
+# bundled lean4export is built against the SAME Lean as the project.
+TC="$(cut -d: -f2 lean-toolchain)"           # e.g. v4.30.0
+git clone --branch "$TC" https://github.com/leanprover/comparator /tmp/cmp
+( cd /tmp/cmp && lake build && lake build lean4export )   # comparator + matched lean4export
+
+# From this repo, with the project already built (./lake-build.sh Challenge Solution):
+COMPARATOR_LANDRUN=/tmp/cmp/scripts/fake-landrun.sh \
+COMPARATOR_LEAN4EXPORT=/tmp/cmp/.lake/packages/lean4export/.lake/build/bin/lean4export \
+  lake env /tmp/cmp/.lake/build/bin/comparator comparator/config.json
+```
+
+`fake-landrun.sh` is upstream's no-sandbox shim for non-Linux dev hosts (macOS);
+Linux CI uses the real `landrun` sandbox. The nanoda leg needs a `nanoda_bin`
+(build [`ammkrn/nanoda_lib`](https://github.com/ammkrn/nanoda_lib) and point
+`COMPARATOR_NANODA` at it, or set `enable_nanoda: false` to skip it).
 
 ## What is in the gate: the 19 mathlib-only headline claims
 
@@ -42,7 +62,7 @@ expressible with mathlib definitions alone, so a reviewer can read
 their `#print axioms` closure ⊆ `{propext, Classical.choice, Quot.sound}` (no
 `sorryAx`, no custom axioms, no `native_decide`).
 
-| Challenge name | Project theorem | Area |
+| Name (under `Headline`) | Project theorem | Area |
 |---|---|---|
 | `bsg_asymmetric` | `Finset.balog_szemeredi_gowers_asymmetric` | Balog–Szemerédi–Gowers |
 | `bsg_symmetric` | `Finset.balog_szemeredi_gowers_symmetric` | BSG |

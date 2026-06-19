@@ -3,18 +3,20 @@ name: comparator
 # Zulip auditability gate for the AI-authored headline results.
 #
 # Two jobs:
-#   conformance — VALIDATED locally. Builds the project + the three comparator
-#                 modules and runs comparator/check-conformance.sh:
-#                 Challenge (mathlib-only sorry stubs) and Solution (project
-#                 proofs) build, Conformance.lean confirms Challenge ≡ Solution
-#                 (proof irrelevance), and every Solution theorem is axiom-clean
-#                 (⊆ {propext, Classical.choice, Quot.sound}).
-#   comparator  — the authoritative leanprover/comparator run (nanoda + Lean
-#                 default kernel). Authored against the documented contract.
-#                 {{UNVALIDATED}}: the lean4export/comparator ↔ project toolchain
-#                 pairing (project is leanprover/lean4:v4.30.0; comparator's own
-#                 toolchain is newer) needs a first real run to confirm. Kept as
-#                 a separate, non-required job until then.
+#   conformance — VALIDATED locally. Builds the project + the two comparator
+#                 modules (Challenge, Solution) and runs
+#                 comparator/check-conformance.sh: both build and every Solution
+#                 theorem is axiom-clean (⊆ {propext, Classical.choice,
+#                 Quot.sound}). Statement identity is checked by the comparator job.
+#   comparator  — the authoritative leanprover/comparator run: statement
+#                 identity + axiom compliance + nanoda and Lean default-kernel
+#                 re-check, ending in "Your solution is okay!". The comparator is
+#                 checked out at the TAG matching this repo's lean-toolchain, so
+#                 its bundled lean4export is built against the same Lean as the
+#                 project (this resolves the earlier toolchain-pairing concern).
+#                 The pairing + default-kernel leg are validated locally (macOS,
+#                 fake-landrun dev shim); the real-landrun + nanoda legs run here
+#                 on Linux.
 
 on:
   push:
@@ -46,17 +48,18 @@ jobs:
         run: lake exe cache get
 
       - name: Build project + comparator modules
-        run: ./lake-build.sh Challenge Solution Conformance
+        run: ./lake-build.sh Challenge Solution
 
-      - name: Conformance + axiom audit
+      - name: Offline pre-flight (build + axiom audit)
         run: comparator/check-conformance.sh
 
   comparator:
     name: leanprover/comparator (nanoda + default kernel)
     runs-on: ubuntu-latest
-    # {{UNVALIDATED}} toolchain pairing — do not gate merges on this job until a
-    # first successful run confirms lean4export/comparator compatibility with the
-    # project's Lean v4.30.0. Make it `required` in branch protection only after that.
+    # Tag-pinned to the project's lean-toolchain; the pairing + default-kernel leg
+    # are validated locally. Kept non-blocking until a first green CI run confirms
+    # the real-landrun + nanoda legs on the runner; make `required` in branch
+    # protection after that.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -79,25 +82,26 @@ jobs:
       - name: Install Rust (for nanoda)
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build landrun, lean4export, nanoda, and the comparator
+      - name: Build landrun, comparator (+ matched lean4export), and nanoda
         run: |
           set -euo pipefail
-          # landrun (sandbox) — from main per comparator README.
-          git clone --depth 1 https://github.com/Zouuup/landrun
-          (cd landrun && go build -o landrun ./... || go build -o landrun .)
-          echo "$PWD/landrun" >> "$GITHUB_PATH"
-          # lean4export — must match the PROJECT's Lean version (v4.30.0).
-          git clone https://github.com/leanprover/lean4export
-          (cd lean4export && (echo "$(cd .. && cat lean-toolchain)" > lean-toolchain) && lake build)
-          echo "$PWD/lean4export/.lake/build/bin" >> "$GITHUB_PATH"
+          # Clone tools under RUNNER_TEMP so the comparator clone does not collide
+          # with this repo's own comparator/ directory.
+          # landrun (real sandbox, Linux only) — built from source per the README.
+          git clone --depth 1 https://github.com/Zouuup/landrun "$RUNNER_TEMP/landrun"
+          ( cd "$RUNNER_TEMP/landrun" && (go build -o landrun ./... || go build -o landrun .) )
+          echo "COMPARATOR_LANDRUN=$RUNNER_TEMP/landrun/landrun" >> "$GITHUB_ENV"
+          # comparator AT THE TAG matching this repo's lean-toolchain, so its
+          # bundled lean4export builds against the SAME Lean as the project.
+          TC="$(cut -d: -f2 lean-toolchain)"
+          git clone --branch "$TC" https://github.com/leanprover/comparator "$RUNNER_TEMP/cmp"
+          ( cd "$RUNNER_TEMP/cmp" && lake build && lake build lean4export )
+          echo "COMPARATOR_BIN=$RUNNER_TEMP/cmp/.lake/build/bin/comparator" >> "$GITHUB_ENV"
+          echo "COMPARATOR_LEAN4EXPORT=$RUNNER_TEMP/cmp/.lake/packages/lean4export/.lake/build/bin/lean4export" >> "$GITHUB_ENV"
           # nanoda kernel (optional second kernel; config enable_nanoda = true).
-          git clone https://github.com/ammkrn/nanoda_lib
-          (cd nanoda_lib && cargo build --release)
-          echo "$PWD/nanoda_lib/target/release" >> "$GITHUB_PATH"
-          # comparator binary.
-          git clone https://github.com/leanprover/comparator
-          (cd comparator && lake build)
-          echo "COMPARATOR_BIN=$PWD/comparator/.lake/build/bin/comparator" >> "$GITHUB_ENV"
+          git clone --depth 1 https://github.com/ammkrn/nanoda_lib "$RUNNER_TEMP/nanoda"
+          ( cd "$RUNNER_TEMP/nanoda" && cargo build --release )
+          echo "COMPARATOR_NANODA=$RUNNER_TEMP/nanoda/target/release/nanoda_bin" >> "$GITHUB_ENV"
 
       - name: Run comparator on the 19 headline theorems
         run: |
