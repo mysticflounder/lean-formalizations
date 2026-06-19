@@ -24,9 +24,9 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Provenance
 
-These modules are formalizations I created in the course of researching Erdős
-problems, re-extracted as standalone, mathlib-only modules — the *general*
-mathematics that stands on its own.
+These modules are formalizations I created in the course of other research,
+re-extracted as standalone, mathlib-only modules — the *general* mathematics
+that stands on its own.
 
 The `LinearAlgebra/Matrix/GeneralLinearGroup/` material comes from work done as
 part of a pull request for FLT (a good-prime Hecke-operator decomposition): the
@@ -46,92 +46,68 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 
 ### `lean/LeanFormalizations/Combinatorics/Additive/` — Balog–Szemerédi–Gowers (Balog–Szemerédi 1994; Gowers 1998)
 
-- **`BalogSzemerediGowers.lean`** — the Balog–Szemerédi–Gowers theorem over
-  `Finset.addEnergy` for an arbitrary `AddCommGroup`, in three forms:
-  - [`Finset.balog_szemeredi_gowers_asymmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2425) (equal-cardinality two-set form),
-  - [`Finset.balog_szemeredi_gowers_symmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2646) (single-set form),
-  - [`Finset.balog_szemeredi_gowers_asymmetric_explicit`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2710) (explicit
-    polynomial-in-`η` constants).
-- **`BSGEnergyToGraph.lean`** — energy → popular-difference-graph connector.
-- **`ThreeAPFreeOfNoThreeCollinear.lean`** — no-3-collinear ⟹ `ThreeAPFree`
-  ([`threeAPFree_of_forall_not_collinear`](lean/LeanFormalizations/Combinatorics/Additive/ThreeAPFreeOfNoThreeCollinear.lean#L24)): in a real vector space, `a + c = 2b`
-  makes `b` the midpoint of `a` and `c`, hence the three points collinear; so a
-  no-three-collinear set carries no nontrivial 3-term AP. The geometric source
-  of `ThreeAPFree` hypotheses for additive-energy arguments. **Axiom-clean.**
+| Theorem | What it asserts |
+|---|---|
+| [`Finset.balog_szemeredi_gowers_asymmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2425) | Balog–Szemerédi–Gowers, two-set (equal-cardinality) form over `Finset.addEnergy` in an arbitrary `AddCommGroup`: if two finite sets have additive energy that is a positive proportion of the trivial maximum, there exist large subsets A′ ⊆ A, B′ ⊆ B whose sumset A′ + B′ is small. |
+| [`Finset.balog_szemeredi_gowers_symmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2646) | The single-set form: a set with large additive energy has a large subset of small doubling. |
+| [`Finset.balog_szemeredi_gowers_asymmetric_explicit`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2710) | The asymmetric form with explicit polynomial-in-`η` constants (effective bounds in place of `∃`-quantified ones). |
+| [`threeAPFree_of_forall_not_collinear`](lean/LeanFormalizations/Combinatorics/Additive/ThreeAPFreeOfNoThreeCollinear.lean#L24) | In a real vector space, no three collinear points ⟹ `ThreeAPFree`: since `a + c = 2b` makes `b` the midpoint of `a` and `c`, a no-three-collinear set carries no nontrivial 3-term AP. The geometric source of `ThreeAPFree` hypotheses for additive-energy arguments. |
 
-mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine gap, while
-reusing mathlib's `Finset.addEnergy`. **All BSG theorems are axiom-clean.**
+`BSGEnergyToGraph.lean` supplies the supporting energy → popular-difference-graph
+connector. mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine
+gap while reusing mathlib's `Finset.addEnergy`. **All theorems above are
+axiom-clean.**
 
 ### `lean/LeanFormalizations/Geometry/Euclidean/` — 2D two-point isometry classification (Mazur–Ulam 1932; [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
 
-- **`IsometryClassification.lean`** — for `a b c d : EuclideanSpace ℝ (Fin 2)`
-  with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c`,
-  `b ↦ d` has `ncard ≤ 2` ([`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225)) and is `Finite`
-  ([`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261)), plus the underlying linear-isometry bounds.
-  Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation
-  argument specific to two dimensions. **Axiom-clean.**
-- **`NearEnemyTheorem.lean`** — the **Near Enemy Theorem for Bisector Energy**
-  (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space
-  with no three collinear points admits ONE injective planar projection whose
-  image attains the exact bisector-energy floor `2n(n−1)` with absolute
-  minimality, is in full planar general position (no three collinear, no four
-  concyclic), has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the
-  proper-rotation channel of the congruent-quadruple count), and has its
-  distances in bijection with the upstairs ±difference classes
-  (`#distances(T(G)) = #((G−G)∖{0}/±)`). Headline
-  [`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299),
-  with a sphere-slice corollary and standalone byproducts (universal
-  zero-rotation-energy projection, isosceles-free sphere projection). Engine:
-  a generic-avoidance compiler — one master `MvPolynomial` product over five
-  constraint-polynomial families, `MvPolynomial.funext` used exactly once.
-  **Axiom-clean.** (Consumed by the erdős-98 research repo as the formal
-  no-go side of its enemy-profile analysis; the module itself is
-  self-contained mathematics.)
+| Theorem | What it asserts |
+|---|---|
+| [`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225) | For `a b c d : EuclideanSpace ℝ (Fin 2)` with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c` and `b ↦ d` has `ncard ≤ 2`. Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation argument specific to two dimensions. |
+| [`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261) | The same two-point-pinned isometry set is `Finite` (with the underlying linear-isometry bounds). |
+| [`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299) | The **Near Enemy Theorem for bisector energy** (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space with no three collinear points admits ONE injective planar projection whose image (a) attains the exact bisector-energy floor 2n(n−1) with absolute minimality, (b) is in full planar general position (no three collinear, no four concyclic), (c) has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the proper-rotation channel of the congruent-quadruple count), and (d) has its distances in bijection with the upstairs ±difference classes. |
+
+The Near Enemy result also carries a sphere-slice corollary and standalone
+byproducts (a universal zero-rotation-energy projection and an isosceles-free
+sphere projection). Engine: a generic-avoidance compiler — one master
+`MvPolynomial` product over five constraint-polynomial families, with
+`MvPolynomial.funext` used exactly once. **Both modules are axiom-clean.** The
+Near Enemy module is self-contained mathematics.
 
 ### `lean/LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5) ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982))
 
 Generic linear-algebra / line-geometry lemmas extracted from the Elekes–Sharir
-distance-geometry program (statements faithful to the prose source
-`erdos-98/docs/problem-98-klow-certificate-fires-lemmas-2026-06-04.md`). These
-are standalone — no Erdős-98-specific content. The linear-algebra and
-quadratic-form cores below are **axiom-clean** (`#print axioms` =
-`[propext, Classical.choice, Quot.sound]`):
+distance-geometry program; standalone, with no project-specific content. The
+linear-algebra and quadratic-form cores are **axiom-clean** (`#print axioms` =
+`[propext, Classical.choice, Quot.sound]`). The L3 module works with the ES line
+`t ↦ ((p+q)/2 + (t/2)·J(q−p), t)`, `J(x,y) = (−y,x)`.
 
-- **`OmegaRankCollapse.lean` (L4)** — rank–nullity collapse for a functional:
-  [`finrank_ker_functional_ge`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L57) (`dim ker ω ≥ dim W − 1`) and its main corollary
-  [`finrank_ker_ge_two_of_finrank_eq_three`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L73) (`dim W = 3 ⟹ dim ker ω ≥ 2`), plus
-  the abstract pullback-non-degeneracy consequence [`pullback_nondegenerate`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L92).
-  **Axiom-clean.**
-- **`ConicNormalForm.lean` (L5)** — affine-graph conic normal form. The
-  substituted quadratic part of `|q|² − |p|²` under `q = A·p + b` equals
-  `p ⬝ ((AᵀA − 1) *ᵥ p)` ([`quadraticPart_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L63)); a symmetric `2×2` form vanishes
-  identically iff its matrix is `0` ([`dotProduct_mulVec_self_eq_zero_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L78)); hence
-  the conic part vanishes iff `AᵀA = 1` ([`quadraticPart_vanishes_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L106), the
-  orthogonal/non-orthogonal dichotomy). **Axiom-clean.**
-- **`RulingSkewness.lean` (L3)** — ES line `t ↦ ((p+q)/2 + (t/2)·J(q−p), t)` with
-  `J(x,y) = (−y,x)`. Provable half: equal squared distances `‖p−p'‖² = ‖q−q'‖²`
-  imply the two ES lines intersect-or-are-parallel
-  ([`intersect_or_parallel_of_dist2_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L95)), so the graph of one distance-preserving
-  map gives intersecting-or-parallel lines ([`intersect_or_parallel_of_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L159));
-  combined with a **hypothesis-level** pairwise-skew-ruling predicate
-  ([`PairwiseSkewRuling`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L172), the genuine ℝ³ regulus fact, taken as input) this yields
-  at most one such line per ruling ([`atMostOneLine_of_skewRuling_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181)).
-  **Axiom-clean.**
+| Module | Theorem | What it asserts |
+|---|---|---|
+| `OmegaRankCollapse.lean` (L4) | [`finrank_ker_functional_ge`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L57) | Rank–nullity collapse for a functional ω: `dim ker ω ≥ dim W − 1`. |
+| | [`finrank_ker_ge_two_of_finrank_eq_three`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L73) | Main corollary: `dim W = 3 ⟹ dim ker ω ≥ 2`. |
+| | [`pullback_nondegenerate`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L92) | The abstract pullback-non-degeneracy consequence. |
+| `ConicNormalForm.lean` (L5) | [`quadraticPart_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L63) | Affine-graph conic normal form: under `q = A·p + b`, the quadratic part of ‖q‖² − ‖p‖² equals `p ⬝ ((AᵀA − 1) *ᵥ p)`. |
+| | [`dotProduct_mulVec_self_eq_zero_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L78) | A symmetric `2×2` quadratic form vanishes identically iff its matrix is `0`. |
+| | [`quadraticPart_vanishes_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L106) | Hence the conic part vanishes iff `AᵀA = 1` (the orthogonal / non-orthogonal dichotomy). |
+| `RulingSkewness.lean` (L3) | [`intersect_or_parallel_of_dist2_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L95) | Equal squared distances ‖p − p′‖² = ‖q − q′‖² imply the two ES lines intersect or are parallel. |
+| | [`intersect_or_parallel_of_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L159) | So the graph of one distance-preserving map yields intersecting-or-parallel ES lines. |
+| | [`atMostOneLine_of_skewRuling_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181) | With the hypothesis-level [`PairwiseSkewRuling`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L172) predicate (the genuine ℝ³ regulus fact, taken as input), at most one such line occurs per ruling. |
 
 ### `lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177))
 
 A ~1600-line plane-algebraic-geometry development (namespace
 `PachDeZeeuw.Algebraic`): resultants over `ℝ[x,y]`, common-component theory,
 fiber-finiteness, and **explicit point-pair intersection bounds** — the genuine
-Bézout-type content. It is **fully `sorry`-free** (the commented-out WIP blocks
-that once held the only `sorry`s were removed in the de-jargon pass). Headline
-theorems confirmed axiom-clean:
+Bézout-type content. It is **fully `sorry`-free** and confirmed axiom-clean.
 
-- [`resultant_ne_zero_of_fraction_coprime`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L359),
-  [`resultant_ne_zero_of_isRelPrime_primitive_curry`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L525)
-- [`coeffline_nonvertical_pair_intersection_bound`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L896),
-  [`zeroCurry_nonvertical_pair_intersection_bound`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L1218)
-- [`fiber_ncard_le_max_totalDegree`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L561), [`ncard_coeff_roots_le_totalDegree`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L794)
+| Theorem | What it asserts |
+|---|---|
+| [`resultant_ne_zero_of_fraction_coprime`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L359) | Two univariate polynomials over the coefficient ring that are coprime after mapping to the fraction field have nonzero resultant. |
+| [`resultant_ne_zero_of_isRelPrime_primitive_curry`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L525) | Primitive, relatively-prime curried plane curves (`Curry0 p`, `Curry0 q`) have nonzero resultant. |
+| [`coeffline_nonvertical_pair_intersection_bound`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L896) | Coefficient-line branch of the pair bound: under total-degree bounds d₁, d₂ and a non-divisibility hypothesis, the coefficient-line zero set meets the plane-curve zero set in a finite set of cardinality ≤ d₁·d₂. |
+| [`zeroCurry_nonvertical_pair_intersection_bound`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L1218) | Zero-degree / positive-degree branch: two irreducible, non-associated curves with the stated degree splits meet in a finite set of cardinality ≤ d₁·d₂. |
+| [`fiber_ncard_le_max_totalDegree`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L561) | A common vertical fiber (with at least one specialization nonzero) is finite, of cardinality ≤ max(p.totalDegree, q.totalDegree). |
+| [`ncard_coeff_roots_le_totalDegree`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L794) | The real root set of a nonzero coefficient polynomial has cardinality ≤ its total degree. |
 
 > Note: this is the proof machinery that `Bezout.lean` (below) assembles into
 > the headline `theorem bezout`. It uses project-flavored names pending the
@@ -142,111 +118,92 @@ theorems confirmed axiom-clean:
 A standalone, mathlib-only library (promoted out of the Pach–de Zeeuw tree once
 it was confirmed complete). All headlines axiom-clean:
 
-- **`Basic.lean`** — the combinatorial-map carrier (vertex/edge/face
-  permutations, Euler characteristic, planarity).
-- **`DualProperties.lean`** — duality and planarity transport for
-  combinatorial maps ([`dual_connected_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L125), [`connected_dual_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L135),
-  [`dual_isPlanar_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L182)).
-- **`PlanarEdgeBound.lean`** — the simple-graph edge bound `e ≤ 3v − 6` from
-  Euler's formula ([`card_edge_le_three_card_vertex_sub_six`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L415)) and its
-  multiplicity lift `e ≤ M·(3v − 6)` ([`planar_multigraph_edge_bound`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L473)).
-- **`EulerBound.lean`** — a connected combinatorial map has Euler characteristic
-  `≤ 2` ([`CombinatorialMap.eulerCharacteristic_le_two`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/EulerBound.lean#L523)).
-- **`EdgeInsertion.lean`** — the orbit-count engine for edge insertion
-  (`CombinatorialMap.EdgeInsertion.*`).
-- **`VertexGraph.lean`** — vertex/face adjacency graphs for combinatorial maps,
-  connectedness-to-spanning-tree bridges, and concrete primal/dual edge
-  selectors for leaf-order edge enumeration, including the von Staudt
-  tree/cotree edge-count bridge and two-block edge-order witness.
+| Module · result | What it asserts |
+|---|---|
+| `Basic.lean` (carrier) | The combinatorial-map carrier: vertex / edge / face permutations, Euler characteristic, planarity. |
+| `DualProperties.lean` — [`dual_connected_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L125) / [`connected_dual_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L135) | Connectedness is preserved under duality: `M.dual` is connected iff `M` is. |
+| `DualProperties.lean` — [`dual_isPlanar_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L182) | Euler-form planarity is preserved under duality: `M.dual.IsPlanar` iff `M.IsPlanar`. |
+| `PlanarEdgeBound.lean` — [`card_edge_le_three_card_vertex_sub_six`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L415) | The simple-graph planar edge bound `e ≤ 3v − 6`, from Euler's formula. |
+| `PlanarEdgeBound.lean` — [`planar_multigraph_edge_bound`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean#L473) | Its multiplicity lift: `e ≤ M·(3v − 6)`. |
+| `EulerBound.lean` — [`CombinatorialMap.eulerCharacteristic_le_two`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/EulerBound.lean#L523) | A connected combinatorial map has Euler characteristic ≤ 2. |
+| `EdgeInsertion.lean` (engine) | The orbit-count engine for edge insertion (`CombinatorialMap.EdgeInsertion.*`). |
+| `VertexGraph.lean` (helpers) | Vertex / face adjacency graphs, connectedness-to-spanning-tree bridges, primal/dual edge selectors for leaf-order enumeration, the von Staudt tree/cotree edge-count bridge, and the two-block edge-order witness. |
 
 ### `lean/LeanFormalizations/Combinatorics/SimpleGraph/` — tree-order helpers ✅ ([arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
-- **`TreeOrder.lean`** — leaf-removal and leaf-insertion orders for finite
-  trees, explicit parent-edge enumeration via
-  [`parentEdgeEquiv`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L867), and finite
-  permutation extenders for one-block and two-block edge orders. It also
-  includes the prefix connectedness invariant
-  [`SimpleGraph.connected_induce_take_of_leaf_insertion_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) and the
-  connected-graph label transport
-  [`SimpleGraph.Connected.apply_eq_of_forall_adj`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L570), plus
-  [`SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L582) and
-  [`SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L618) for the
-  leaf-peeling fact that the next unpeeled prefix contains no copy of the
-  just-peeled leaf-parent edge. The derived transport theorem
-  [`SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L727)
-  turns that exclusion into prefix-wide label constancy. These are used by the
-  reverse cotree component argument.
-  **Axiom-clean.**
+`TreeOrder.lean` builds leaf-removal and leaf-insertion orders for finite trees,
+plus finite permutation extenders for one-block and two-block edge orders. All
+**axiom-clean**.
+
+| Theorem | What it asserts |
+|---|---|
+| [`parentEdgeEquiv`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L867) | Explicit parent-edge enumeration for the leaf-removal / leaf-insertion order on a finite tree. |
+| [`SimpleGraph.connected_induce_take_of_leaf_insertion_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) | Prefix connectedness invariant: each prefix of a leaf-insertion order induces a connected subgraph through its parent edge. |
+| [`SimpleGraph.Connected.apply_eq_of_forall_adj`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L570) | Connected-graph label transport: a labeling constant across every adjacency is globally constant on a connected graph. |
+| [`SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L582) | Within a nodup prefix, a vertex's parent edge differs from the indexed prefix edge (supporting lemma). |
+| [`SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L618) | Leaf-peeling fact: the next unpeeled prefix contains no copy of the just-peeled leaf-parent edge. |
+| [`SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L727) | Turns that exclusion into prefix-wide label constancy (used by the reverse cotree component argument). |
 
 ### `lean/LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons (Rockafellar 1970; Schneider 2014)
 
-Classical convex-geometry facts not currently in mathlib (formalized in the
-course of our Erdős-problem research). All headlines axiom-clean.
+Classical convex-geometry facts not currently in mathlib. All headlines
+axiom-clean.
 
-- **`LineSlice.lean`** — a line meets a convex set in a preconnected, hence
-  interval-shaped, set ([`convex_line_intersection_isPreconnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L82)); a line is
-  homeomorphic to `ℝ` ([`lineHomeomorph`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L95)); transported there, the slice is
-  `OrdConnected` ([`convex_line_slice_ordConnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L123) / `_uIcc_subset` /
-  `_between_mem`); and a strictly convex set has no three collinear frontier
-  points ([`strictlyConvex_boundary_no_three_collinear`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L37)).
-- **`SimpleConvexPolygon.lean`** — a concrete simple-convex-polygon model and
-  its headline [`SimpleConvexPolygon.collinear_vertices_cyclicInterval`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L751): three
-  collinear boundary vertices (under an explicit maximal-flat-side hypothesis)
-  occur cyclically consecutively, via the planar chord lemma
-  [`chord_in_frontier_of_collinear_boundary_triple`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L177).
+| Module · theorem | What it asserts |
+|---|---|
+| `LineSlice.lean` — [`convex_line_intersection_isPreconnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L82) | A line meets a convex set in a preconnected — hence interval-shaped — set. |
+| `LineSlice.lean` — [`lineHomeomorph`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L95) | A line in the plane is homeomorphic to `ℝ` (the transport used to read off order structure). |
+| `LineSlice.lean` — [`convex_line_slice_ordConnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L123) | Transported to `ℝ`, the convex slice is `OrdConnected` (with `_uIcc_subset` / `_between_mem` variants). |
+| `LineSlice.lean` — [`strictlyConvex_boundary_no_three_collinear`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L37) | A strictly convex set has no three collinear frontier points. |
+| `SimpleConvexPolygon.lean` — [`SimpleConvexPolygon.collinear_vertices_cyclicInterval`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L751) | In a concrete simple-convex-polygon model, three collinear boundary vertices (under an explicit maximal-flat-side hypothesis) occur cyclically consecutively. |
+| `SimpleConvexPolygon.lean` — [`chord_in_frontier_of_collinear_boundary_triple`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L177) | The planar chord lemma behind it: a collinear boundary triple forces the spanning chord into the frontier. |
 
 ### `lean/LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting (Brass–Moser–Pach 2005)
 
-- **`Counting.lean`** — the classical degeneracy argument for unit distances: a
-  forward-neighbor bound `k` in some index order forces at most `n · k`
-  unordered unit-distance pairs
-  ([`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93),
-  [`UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107)), with a
-  [`SimpleConvexPolygon`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. Axiom-clean.
+`Counting.lean` formalizes the classical degeneracy argument for unit distances.
+Axiom-clean.
+
+| Theorem | What it asserts |
+|---|---|
+| [`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93) | A forward-neighbor bound `k` in some index order forces at most `n · k` unordered unit-distance pairs. |
+| [`UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107) | The same bound packaged over a `UnitDistanceEliminationOrder`, with a [`SimpleConvexPolygon`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. |
 
 ### `lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities (no external source — FLT-staging by-product)
 
 General `Matrix.GeneralLinearGroup` constructions over an arbitrary commutative
 ring, from work done as part of a PR for FLT (a good-prime Hecke-operator
 decomposition). Mathlib-staging: the statements carry no domain-specific
-hypothesis. All headlines axiom-clean.
+hypothesis. All headlines axiom-clean. (`Defs.lean` constructions due to Bryan
+Wang.)
 
-- **`Defs.lean`** (Bryan Wang) — the invertible diagonal matrix attached to a
-  vector of units ([`Matrix.GeneralLinearGroup.diagonal`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L27)); the `2 × 2` unipotent
-  `!![1, t; 0, 1]` ([`Matrix.GeneralLinearGroup.GL2.unipotent`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L35)) with its defining
-  equation ([`unipotent_def`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L44)), inverse ([`unipotent_inv`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L48)), and additive composition
-  law ([`unipotent_mul`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L52)).
-- **`Hecke.lean`** — four pure-`CommRing` 2×2 identities: the upper-unipotent and
-  swap row operations ([`upper_unipotent_mul_matrix`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L27), [`swap_mul_matrix`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L36)) and the
-  determinants of the unipotent and swap general-linear elements
-  ([`unipotent_det_eq_one`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L43), [`swap_det_eq_neg_one`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L50)).
+| Module · construction | What it is |
+|---|---|
+| `Defs.lean` — [`Matrix.GeneralLinearGroup.diagonal`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L27) | The invertible diagonal matrix attached to a vector of units. |
+| `Defs.lean` — [`Matrix.GeneralLinearGroup.GL2.unipotent`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L35) | The `2 × 2` unipotent `!![1, t; 0, 1]` as a general-linear element. |
+| `Defs.lean` — [`unipotent_def`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L44) / [`unipotent_inv`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L48) / [`unipotent_mul`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L52) | Its defining equation, its inverse, and the additive composition law (`unipotent t · unipotent s = unipotent (t + s)`). |
+| `Hecke.lean` — [`upper_unipotent_mul_matrix`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L27) / [`swap_mul_matrix`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L36) | The upper-unipotent and swap row operations on a `2 × 2` matrix (pure `CommRing` identities). |
+| `Hecke.lean` — [`unipotent_det_eq_one`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L43) / [`swap_det_eq_neg_one`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Hecke.lean#L50) | Determinants of the unipotent (= 1) and swap (= −1) general-linear elements. |
 
 ### `lean/LeanFormalizations/ElekesSharirGuthKatz/` — Elekes–Sharir/Guth–Katz reduction (base) ✅ ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982), [arXiv:1011.4105](https://arxiv.org/abs/1011.4105))
 
 The proven ES/GK reduction layer that turns the distinct-distances question into
-a distance-energy bound, imported from the sibling `esgk-on3` project (base layer
-only; declarations live in `namespace Esgk`). Sorry-free; all headlines
+a distance-energy bound (base layer only; declarations live in `namespace Esgk`).
+Sorry-free; all headlines
 axiom-clean. The open extremal-energy research target
 `M(n) = max{E(P) : |P| = n, general position}` and the D7.2 strengthening program
 that aims to beat the ceiling are **not** imported — the open bound enters only as
 an explicit `Prop` hypothesis, never as an axiom or `sorry`.
 
-- **Cauchy–Schwarz bridge** (`CauchyEnergy`): [`energy_lower_bound_of_few_distances`](lean/LeanFormalizations/ElekesSharirGuthKatz/CauchyEnergy.lean#L20)
-  — `(n(n−1))² ≤ NumDistancesOrdered · DistanceEnergy`, the geometric content of
-  "few distances ⟹ cubic energy".
-- **Elementary `O(n³)` ceiling** (`EnergyCeiling`): under no-four-cocircular,
-  [`orderedMultiplicity_le_three_mul`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L62) ((E1) `m_r ≤ 3n`) and
-  [`distanceEnergy_le_three_mul_cube`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L121) ((E2) `E ≤ 3n³`), removing the Guth–Katz
-  `log` factor elementarily; capstone [`numDistances_ge_of_ceiling`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L160) (the trivial
-  `D = Ω(n)`).
-- **ES-GK decomposition** (`Decomposition`): [`elekes_sharir_guth_katz_decomposition`](lean/LeanFormalizations/ElekesSharirGuthKatz/Decomposition.lean#L98)
-  — every injective general-position configuration admits a rich direct-isometry
-  family — and the dyadic energy partition
-  [`distanceEnergy_eq_sum_energyAtLevel`](lean/LeanFormalizations/ElekesSharirGuthKatz/BridgeIdentity.lean#L927) (`BridgeIdentity` + `RichnessLevels`).
-- **Finite-minimum transfer** (`FiniteMinimum` + `Parabola`):
-  [`all_configs_lower_bound_to_hIndexed_lower_bound`](lean/LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L41), with [`gp_config_nonempty`](lean/LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L28)
-  (the parabola/moment-curve witness that general-position configs exist for
-  every `n`).
+| Module · theorem | What it asserts |
+|---|---|
+| `CauchyEnergy` — [`energy_lower_bound_of_few_distances`](lean/LeanFormalizations/ElekesSharirGuthKatz/CauchyEnergy.lean#L20) | Cauchy–Schwarz bridge: `(n(n−1))² ≤ NumDistancesOrdered · DistanceEnergy` — the geometric content of "few distances ⟹ cubic energy". |
+| `EnergyCeiling` — [`orderedMultiplicity_le_three_mul`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L62) | (E1) under no-four-cocircular, each ordered multiplicity `m_r ≤ 3n`. |
+| `EnergyCeiling` — [`distanceEnergy_le_three_mul_cube`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L121) | (E2) `E ≤ 3n³`, removing the Guth–Katz `log` factor elementarily. |
+| `EnergyCeiling` — [`numDistances_ge_of_ceiling`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L160) | Capstone: the trivial distinct-distance bound `D = Ω(n)`. |
+| `Decomposition` — [`elekes_sharir_guth_katz_decomposition`](lean/LeanFormalizations/ElekesSharirGuthKatz/Decomposition.lean#L98) | Every injective general-position configuration admits a rich direct-isometry family. |
+| `BridgeIdentity` + `RichnessLevels` — [`distanceEnergy_eq_sum_energyAtLevel`](lean/LeanFormalizations/ElekesSharirGuthKatz/BridgeIdentity.lean#L927) | The dyadic energy partition: total distance energy is the sum of its per-level (richness-band) contributions. |
+| `FiniteMinimum` + `Parabola` — [`all_configs_lower_bound_to_hIndexed_lower_bound`](lean/LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L41) | Transfers an all-configurations lower bound to the h-indexed lower bound. |
+| `FiniteMinimum` + `Parabola` — [`gp_config_nonempty`](lean/LeanFormalizations/ElekesSharirGuthKatz/FiniteMinimum.lean#L28) | The parabola / moment-curve witness that general-position configurations exist for every `n`. |
 
 ### Reproduce the verification
 
