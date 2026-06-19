@@ -46,7 +46,7 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 
 ### `lean/LeanFormalizations/Combinatorics/Additive/` — Balog–Szemerédi–Gowers (Balog–Szemerédi 1994; Gowers 1998)
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`Finset.balog_szemeredi_gowers_asymmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2425) | Balog–Szemerédi–Gowers, two-set (equal-cardinality) form over `Finset.addEnergy` in an arbitrary `AddCommGroup`: if two finite sets have additive energy that is a positive proportion of the trivial maximum, there exist large subsets A′ ⊆ A, B′ ⊆ B whose sumset A′ + B′ is small. |
 | [`Finset.balog_szemeredi_gowers_symmetric`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2646) | The single-set form: a set with large additive energy has a large subset of small doubling. |
@@ -60,7 +60,7 @@ axiom-clean.**
 
 ### `lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean` — 2D two-point isometry classification (Mazur–Ulam 1932)
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225) | For `a b c d : EuclideanSpace ℝ (Fin 2)` with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c` and `b ↦ d` has `ncard ≤ 2`. Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation argument specific to two dimensions. |
 | [`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261) | The same two-point-pinned isometry set is `Finite` (with the underlying linear-isometry bounds). |
@@ -77,7 +77,7 @@ cap-size Cauchy–Schwarz step. The `(11n²−18n)/12` bound is Dumitrescu's
 formalization. Ported from a separate project; the problem-specific lower-bound
 / `K4` / removable-vertex machinery is deliberately **not** included.
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`iCount_le_of_convexIndep_circumscribed`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L60) | **Dumitrescu 2006, eq. (5).** For a finite planar set `A` that is nonempty, non-collinear, convex-independent (`ConvexIndep`), and has at least three points on its minimum enclosing circle, the isosceles-triangle count satisfies `(iCount A : ℝ) ≤ (11·\|A\|² − 18·\|A\|)/12`. |
 | [`CGN8_circumscribed_iCount_upper_bound`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L778) | Provenance alias preserving the upstream identifier; definitionally the same statement. |
@@ -88,7 +88,7 @@ This is a result introduced and named here, not a formalization of a prior
 paper — it is independent of the Mazur–Ulam isometry classification above; the
 two only share the `Geometry/Euclidean/` directory.
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`nearEnemy_noThreeCollinear_exists_bisectorEnergy[...]`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299) | The **Near Enemy Theorem for bisector energy** (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space with no three collinear points admits ONE injective planar projection whose image (a) attains the exact bisector-energy floor 2n(n−1) with absolute minimality, (b) is in full planar general position (no three collinear, no four concyclic), (c) has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the proper-rotation channel of the congruent-quadruple count), and (d) has its distances in bijection with the upstairs ±difference classes. |
 
@@ -124,17 +124,17 @@ linear-algebra and quadratic-form cores are **axiom-clean** (`#print axioms` =
 `[propext, Classical.choice, Quot.sound]`). The L3 module works with the ES line
 `t ↦ ((p+q)/2 + (t/2)·J(q−p), t)`, `J(x,y) = (−y,x)`.
 
-| Module | Theorem | What it asserts |
-|---|---|---|
-| `OmegaRankCollapse.lean` (L4) | [`finrank_ker_functional_ge`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L57) | Rank–nullity collapse for a functional ω: `dim ker ω ≥ dim W − 1`. |
-| | [`finrank_ker_ge_two_of_finrank_eq_three`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L73) | Main corollary: `dim W = 3 ⟹ dim ker ω ≥ 2`. |
-| | [`pullback_nondegenerate`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L92) | The abstract pullback-non-degeneracy consequence. |
-| `ConicNormalForm.lean` (L5) | [`quadraticPart_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L63) | Affine-graph conic normal form: under `q = A·p + b`, the quadratic part of ‖q‖² − ‖p‖² equals `p ⬝ ((AᵀA − 1) *ᵥ p)`. |
-| | [`dotProduct_mulVec_self_eq_zero_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L78) | A symmetric `2×2` quadratic form vanishes identically iff its matrix is `0`. |
-| | [`quadraticPart_vanishes_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L106) | Hence the conic part vanishes iff `AᵀA = 1` (the orthogonal / non-orthogonal dichotomy). |
-| `RulingSkewness.lean` (L3) | [`intersect_or_parallel_of_dist2_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L95) | Equal squared distances ‖p − p′‖² = ‖q − q′‖² imply the two ES lines intersect or are parallel. |
-| | [`intersect_or_parallel_of_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L159) | So the graph of one distance-preserving map yields intersecting-or-parallel ES lines. |
-| | [`atMostOneLine_of_skewRuling_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181) | With the hypothesis-level [`PairwiseSkewRuling`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L172) predicate (the genuine ℝ³ regulus fact, taken as input), at most one such line occurs per ruling. |
+| Result | What it asserts |
+|---|---|
+| `OmegaRankCollapse.lean` (L4) — [`finrank_ker_functional_ge`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L57) | Rank–nullity collapse for a functional ω: `dim ker ω ≥ dim W − 1`. |
+| `OmegaRankCollapse.lean` (L4) — [`finrank_ker_ge_two_of_finrank_eq_three`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L73) | Main corollary: `dim W = 3 ⟹ dim ker ω ≥ 2`. |
+| `OmegaRankCollapse.lean` (L4) — [`pullback_nondegenerate`](lean/LeanFormalizations/Geometry/ElekesSharir/OmegaRankCollapse.lean#L92) | The abstract pullback-non-degeneracy consequence. |
+| `ConicNormalForm.lean` (L5) — [`quadraticPart_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L63) | Affine-graph conic normal form: under `q = A·p + b`, the quadratic part of ‖q‖² − ‖p‖² equals `p ⬝ ((AᵀA − 1) *ᵥ p)`. |
+| `ConicNormalForm.lean` (L5) — [`dotProduct_mulVec_self_eq_zero_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L78) | A symmetric `2×2` quadratic form vanishes identically iff its matrix is `0`. |
+| `ConicNormalForm.lean` (L5) — [`quadraticPart_vanishes_iff`](lean/LeanFormalizations/Geometry/ElekesSharir/ConicNormalForm.lean#L106) | Hence the conic part vanishes iff `AᵀA = 1` (the orthogonal / non-orthogonal dichotomy). |
+| `RulingSkewness.lean` (L3) — [`intersect_or_parallel_of_dist2_eq`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L95) | Equal squared distances ‖p − p′‖² = ‖q − q′‖² imply the two ES lines intersect or are parallel. |
+| `RulingSkewness.lean` (L3) — [`intersect_or_parallel_of_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L159) | So the graph of one distance-preserving map yields intersecting-or-parallel ES lines. |
+| `RulingSkewness.lean` (L3) — [`atMostOneLine_of_skewRuling_isometryGraph`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L181) | With the hypothesis-level [`PairwiseSkewRuling`](lean/LeanFormalizations/Geometry/ElekesSharir/RulingSkewness.lean#L172) predicate (the genuine ℝ³ regulus fact, taken as input), at most one such line occurs per ruling. |
 
 ### `lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean` — real-algebraic-geometry core ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177))
 
@@ -143,7 +143,7 @@ A ~1600-line plane-algebraic-geometry development (namespace
 fiber-finiteness, and **explicit point-pair intersection bounds** — the genuine
 Bézout-type content. It is **fully `sorry`-free** and confirmed axiom-clean.
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`resultant_ne_zero_of_fraction_coprime`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L359) | Two univariate polynomials over the coefficient ring that are coprime after mapping to the fraction field have nonzero resultant. |
 | [`resultant_ne_zero_of_isRelPrime_primitive_curry`](lean/LeanFormalizations/PachDeZeeuw/AlgebraicPrelim.lean#L525) | Primitive, relatively-prime curried plane curves (`Curry0 p`, `Curry0 q`) have nonzero resultant. |
@@ -161,7 +161,7 @@ Bézout-type content. It is **fully `sorry`-free** and confirmed axiom-clean.
 A standalone, mathlib-only library (promoted out of the Pach–de Zeeuw tree once
 it was confirmed complete). All headlines axiom-clean:
 
-| Module · result | What it asserts |
+| Result | What it asserts |
 |---|---|
 | `Basic.lean` (carrier) | The combinatorial-map carrier: vertex / edge / face permutations, Euler characteristic, planarity. |
 | `DualProperties.lean` — [`dual_connected_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L125) / [`connected_dual_iff`](lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean#L135) | Connectedness is preserved under duality: `M.dual` is connected iff `M` is. |
@@ -178,7 +178,7 @@ it was confirmed complete). All headlines axiom-clean:
 plus finite permutation extenders for one-block and two-block edge orders. All
 **axiom-clean**.
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`parentEdgeEquiv`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L867) | Explicit parent-edge enumeration for the leaf-removal / leaf-insertion order on a finite tree. |
 | [`SimpleGraph.connected_induce_take[...]`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) | Prefix connectedness invariant: each prefix of a leaf-insertion order induces a connected subgraph through its parent edge. |
@@ -192,7 +192,7 @@ plus finite permutation extenders for one-block and two-block edge orders. All
 Classical convex-geometry facts not currently in mathlib. All headlines
 axiom-clean.
 
-| Module · theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | `LineSlice.lean` — [`convex_line_intersection_isPreconnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L82) | A line meets a convex set in a preconnected — hence interval-shaped — set. |
 | `LineSlice.lean` — [`lineHomeomorph`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L95) | A line in the plane is homeomorphic to `ℝ` (the transport used to read off order structure). |
@@ -206,7 +206,7 @@ axiom-clean.
 `Counting.lean` formalizes the classical degeneracy argument for unit distances.
 Axiom-clean.
 
-| Theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | [`unitPairIndexFinset_card_le_mul[...]`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93) | A forward-neighbor bound `k` in some index order forces at most `n · k` unordered unit-distance pairs. |
 | [`UnitDistanceEliminationOrder.unitPairIndexFinset[...]`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107) | The same bound packaged over a `UnitDistanceEliminationOrder`, with a [`SimpleConvexPolygon`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. |
@@ -219,7 +219,7 @@ decomposition). Mathlib-staging: the statements carry no domain-specific
 hypothesis. All headlines axiom-clean. (`Defs.lean` constructions due to Bryan
 Wang.)
 
-| Module · construction | What it is |
+| Result | What it asserts |
 |---|---|
 | `Defs.lean` — [`Matrix.GeneralLinearGroup.diagonal`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L27) | The invertible diagonal matrix attached to a vector of units. |
 | `Defs.lean` — [`Matrix.GeneralLinearGroup.GL2.unipotent`](lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/Defs.lean#L35) | The `2 × 2` unipotent `!![1, t; 0, 1]` as a general-linear element. |
@@ -237,7 +237,7 @@ axiom-clean. The open extremal-energy research target
 that aims to beat the ceiling are **not** imported — the open bound enters only as
 an explicit `Prop` hypothesis, never as an axiom or `sorry`.
 
-| Module · theorem | What it asserts |
+| Result | What it asserts |
 |---|---|
 | `CauchyEnergy` — [`energy_lower_bound_of_few_distances`](lean/LeanFormalizations/ElekesSharirGuthKatz/CauchyEnergy.lean#L20) | Cauchy–Schwarz bridge: `(n(n−1))² ≤ NumDistancesOrdered · DistanceEnergy` — the geometric content of "few distances ⟹ cubic energy". |
 | `EnergyCeiling` — [`orderedMultiplicity_le_three_mul`](lean/LeanFormalizations/ElekesSharirGuthKatz/EnergyCeiling.lean#L62) | (E1) under no-four-cocircular, each ordered multiplicity `m_r ≤ 3n`. |
