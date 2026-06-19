@@ -28,6 +28,35 @@ distinct-distances problem. Its conclusion is that generic planar projections
 of the near enemy attain the absolute minimum possible bisector energy: every
 unordered point-pair has a distinct perpendicular bisector.
 
+## Provenance of the components
+
+We coined the name "Near Enemy Theorem" for the *combination* -- one generic
+projection simultaneously witnessing the whole profile, for every
+no-three-collinear set in any dimension, kernel-checked. The individual
+ingredients are not ours, and are credited here:
+
+* The "near enemy" set (lattice-sphere slice + generic planar projection):
+  Erdos-Furedi-Pach-Ruzsa, "The grid revisited", Discrete Math. 111 (1993),
+  189-196.
+* A generic projection keeps points in general position (injective, no 3
+  collinear, no 4 concyclic in the image): folklore "generic projection trick";
+  canonical statement Solymosi-Tao, "An incidence theorem in higher dimensions",
+  DCG 48 (2012), Sec. 5.1 (arXiv:1103.2926); also used in Pach-de Zeeuw.
+* Bisector energy itself: Lund-Sheffer-de Zeeuw, "Bisector energy and few
+  distinct distances", DCG 56 (2016), arXiv:1411.6868 -- they use it for upper
+  bounds; the minimization direction and the floor 2n(n-1) are ours.
+* Decomposing congruent point-pair quadruples by isometry type (translation /
+  half-turn / proper rotation), behind `rotationEnergy`: the Elekes-Sharir
+  (2011) / Guth-Katz (2015) framework; the "rotation channel = 0 for the image"
+  statistic is ours.
+* The distinct-distance bound n*2^{O(sqrt log n)} for general position that the
+  sphere-slice corollary reduces to: EFPR 1993 -- external arithmetic, NOT
+  formalized and NOT claimed here.
+
+This theorem carries no new quantitative distinct-distance bound: its
+distance-count conclusion equals the upstairs +-difference-class count, and any
+numeric bound on that count is EFPR's.
+
 The public theorem name is:
 
 `Near Enemy Theorem for Bisector Energy`

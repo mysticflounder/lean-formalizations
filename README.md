@@ -73,7 +73,7 @@ two only share the `Geometry/Euclidean/` directory.
 
 | Theorem | What it asserts |
 |---|---|
-| [`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299) | The **Near Enemy Theorem for bisector energy** (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space with no three collinear points admits ONE injective planar projection whose image (a) attains the exact bisector-energy floor 2n(n−1) with absolute minimality, (b) is in full planar general position (no three collinear, no four concyclic), (c) has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the proper-rotation channel of the congruent-quadruple count), and (d) has its distances in bijection with the upstairs ±difference classes. |
+| [`nearEnemy_noThreeCollinear_exists_bisectorEnergy[...]`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299) | The **Near Enemy Theorem for bisector energy** (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space with no three collinear points admits ONE injective planar projection whose image (a) attains the exact bisector-energy floor 2n(n−1) with absolute minimality, (b) is in full planar general position (no three collinear, no four concyclic), (c) has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the proper-rotation channel of the congruent-quadruple count), and (d) has its distances in bijection with the upstairs ±difference classes. |
 
 The Near Enemy result also carries a sphere-slice corollary and standalone
 byproducts (a universal zero-rotation-energy projection and an isosceles-free
@@ -82,11 +82,10 @@ sphere projection). Engine: a generic-avoidance compiler — one master
 `MvPolynomial.funext` used exactly once. **Both modules are axiom-clean.** The
 Near Enemy module is self-contained: it imports only Mathlib.
 
-**Provenance of the components.** The *name* "Near Enemy Theorem" and the
-*combination* — one generic projection simultaneously witnessing the whole
-profile, for every no-three-collinear set in any dimension, kernel-checked — are
-original to this project. The individual ingredients are not, and are credited
-here:
+**Provenance of the components.** We coined the name "Near Enemy Theorem" for
+the *combination* — one generic projection simultaneously witnessing the whole
+profile, for every no-three-collinear set in any dimension, kernel-checked. The
+individual ingredients are not ours, and are credited here:
 
 | Component | Source |
 |---|---|
@@ -96,12 +95,9 @@ here:
 | Decomposing congruent point-pair quadruples by isometry type (translation / half-turn / proper rotation), behind [`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315) | Elekes–Sharir (2011) / Guth–Katz (2015). The "rotation channel `= 0` for the image" statistic is ours |
 | The distinct-distance bound `n·2^{O(√log n)}` for general position that the sphere-slice corollary ultimately reduces to | Erdős–Füredi–Pach–Ruzsa (1993) — external arithmetic, **not** formalized and **not** claimed here |
 
-What is original to this project is therefore the *combination*, not the parts:
-the single-witness bundle, the bisector-energy minimization direction, the
-zero-rotation-energy and distance-transport conjuncts, and the kernel-checked
-formalization. The theorem carries **no new quantitative distinct-distance
-bound** — its distance-count conclusion equals the upstairs ±difference-class
-count, and any numeric bound on that count is EFPR's, not ours.
+The theorem carries **no new quantitative distinct-distance bound** — its
+distance-count conclusion equals the upstairs ±difference-class count, and any
+numeric bound on that count is EFPR's, not ours.
 
 ### `lean/LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5) ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982))
 
@@ -168,11 +164,11 @@ plus finite permutation extenders for one-block and two-block edge orders. All
 | Theorem | What it asserts |
 |---|---|
 | [`parentEdgeEquiv`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L867) | Explicit parent-edge enumeration for the leaf-removal / leaf-insertion order on a finite tree. |
-| [`SimpleGraph.connected_induce_take_of_leaf_insertion_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) | Prefix connectedness invariant: each prefix of a leaf-insertion order induces a connected subgraph through its parent edge. |
+| [`SimpleGraph.connected_induce_take[...]`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L638) | Prefix connectedness invariant: each prefix of a leaf-insertion order induces a connected subgraph through its parent edge. |
 | [`SimpleGraph.Connected.apply_eq_of_forall_adj`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L570) | Connected-graph label transport: a labeling constant across every adjacency is globally constant on a connected graph. |
-| [`SimpleGraph.sym2_ne_getElem_parent_of_mem_take_nodup`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L582) | Within a nodup prefix, a vertex's parent edge differs from the indexed prefix edge (supporting lemma). |
-| [`SimpleGraph.reverse_leafOrder_prefix_sym2_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L618) | Leaf-peeling fact: the next unpeeled prefix contains no copy of the just-peeled leaf-parent edge. |
-| [`SimpleGraph.reverse_leafOrder_prefix_apply_eq_of_forall_adj_ne_current_parent`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L727) | Turns that exclusion into prefix-wide label constancy (used by the reverse cotree component argument). |
+| [`SimpleGraph.sym2_ne_getElem_parent[...]`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L582) | Within a nodup prefix, a vertex's parent edge differs from the indexed prefix edge (supporting lemma). |
+| [`SimpleGraph.reverse_leafOrder_prefix_sym2[...]`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L618) | Leaf-peeling fact: the next unpeeled prefix contains no copy of the just-peeled leaf-parent edge. |
+| [`SimpleGraph.reverse_leafOrder_prefix_apply_eq[...]`](lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean#L727) | Turns that exclusion into prefix-wide label constancy (used by the reverse cotree component argument). |
 
 ### `lean/LeanFormalizations/Geometry/Convex/` — slicing convex sets, simple convex polygons (Rockafellar 1970; Schneider 2014)
 
@@ -185,7 +181,7 @@ axiom-clean.
 | `LineSlice.lean` — [`lineHomeomorph`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L95) | A line in the plane is homeomorphic to `ℝ` (the transport used to read off order structure). |
 | `LineSlice.lean` — [`convex_line_slice_ordConnected`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L123) | Transported to `ℝ`, the convex slice is `OrdConnected` (with `_uIcc_subset` / `_between_mem` variants). |
 | `LineSlice.lean` — [`strictlyConvex_boundary_no_three_collinear`](lean/LeanFormalizations/Geometry/Convex/LineSlice.lean#L37) | A strictly convex set has no three collinear frontier points. |
-| `SimpleConvexPolygon.lean` — [`SimpleConvexPolygon.collinear_vertices_cyclicInterval`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L751) | In a concrete simple-convex-polygon model, three collinear boundary vertices (under an explicit maximal-flat-side hypothesis) occur cyclically consecutively. |
+| `SimpleConvexPolygon.lean` — [`SimpleConvexPolygon.collinear_vertices[...]`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L751) | In a concrete simple-convex-polygon model, three collinear boundary vertices (under an explicit maximal-flat-side hypothesis) occur cyclically consecutively. |
 | `SimpleConvexPolygon.lean` — [`chord_in_frontier_of_collinear_boundary_triple`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L177) | The planar chord lemma behind it: a collinear boundary triple forces the spanning chord into the frontier. |
 
 ### `lean/LeanFormalizations/Combinatorics/UnitDistance/` — elimination-order counting (Brass–Moser–Pach 2005)
@@ -195,8 +191,8 @@ Axiom-clean.
 
 | Theorem | What it asserts |
 |---|---|
-| [`unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93) | A forward-neighbor bound `k` in some index order forces at most `n · k` unordered unit-distance pairs. |
-| [`UnitDistanceEliminationOrder.unitPairIndexFinset_card_le_mul`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107) | The same bound packaged over a `UnitDistanceEliminationOrder`, with a [`SimpleConvexPolygon`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. |
+| [`unitPairIndexFinset_card_le_mul[...]`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L93) | A forward-neighbor bound `k` in some index order forces at most `n · k` unordered unit-distance pairs. |
+| [`UnitDistanceEliminationOrder.unitPairIndexFinset[...]`](lean/LeanFormalizations/Combinatorics/UnitDistance/Counting.lean#L107) | The same bound packaged over a `UnitDistanceEliminationOrder`, with a [`SimpleConvexPolygon`](lean/LeanFormalizations/Geometry/Convex/SimpleConvexPolygon.lean#L66)-indexed restatement. |
 
 ### `lean/LeanFormalizations/LinearAlgebra/Matrix/GeneralLinearGroup/` — diagonal, 2×2 unipotent, generic matrix identities (no external source — FLT-staging by-product)
 
