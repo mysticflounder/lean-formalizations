@@ -11,7 +11,7 @@ import Mathlib
 # Dumitrescu L1: perpendicular-bisector apex bound (Problem 97)
 
 `IsoscelesCounting.Dumitrescu.perpBisector_apex_bound` is Dumitrescu's Lemma 1
-(Dumitrescu 2006 / Fox–Pach 2012, arXiv:1207.1266 §2):
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
 
   For any convex-independent finite point set `A ⊆ ℝ²` and any base edge
   `(a, b)` with `a, b ∈ A` and `a ≠ b`, at most `2` points of `A` lie on
@@ -52,8 +52,9 @@ lies in the convex hull of the other two, which is a subset of
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.*
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 -/
 
 set_option linter.style.openClassical false
@@ -122,7 +123,7 @@ private lemma collinear_of_three_on_perpBisector
   rcases hx with rfl
   exact ⟨t, by rw [eq_vadd_iff_vsub_eq, ← ht]⟩
 
-/-- **Dumitrescu L1 / Fox-Pach 2012 perpendicular-bisector apex bound.**
+/-- **Dumitrescu L1 / Nivasch–Pach–Pinchasi–Zerbib 2013 perpendicular-bisector apex bound.**
 
 For any convex-independent finite point set `A ⊆ ℝ²` and any base edge
 `(a, b)` with `a, b ∈ A` and `a ≠ b`, the number of points of `A` lying

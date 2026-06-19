@@ -11,7 +11,7 @@ import Mathlib
 # Dumitrescu L3: trivial edge-isosceles bound (Problem 97)
 
 `IsoscelesCounting.Dumitrescu.trivial_edge_bound` is Dumitrescu's Lemma 3
-(Dumitrescu 2006 / Fox–Pach 2012, arXiv:1207.1266 §2):
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
 
   For any finite point set `A ⊆ ℝ²` and any base pair `(b, c)` with
   `b, c ∈ A` and `b ≠ c`, the number of apexes `a ∈ A` with `a ∉ {b, c}`
@@ -43,8 +43,9 @@ The convex-independent corollary chains this with L1.
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.*
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 -/
 
 set_option linter.style.openClassical false

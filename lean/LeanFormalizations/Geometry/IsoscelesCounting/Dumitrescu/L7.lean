@@ -12,8 +12,8 @@ import Mathlib
 # Dumitrescu L7: cross-cap edges are good (cap-witness sense)
 
 `IsoscelesCounting.Dumitrescu.cross_cap_edge_good` is Dumitrescu's
-"cross-cap edge is good" lemma in the Dumitrescu 2006 / Fox–Pach 2012
-(Nivasch–Pach–Pinchasi–Zerbib, arXiv:1207.1266) three-cap decomposition
+"cross-cap edge is good" lemma in the Dumitrescu 2006 /
+Nivasch–Pach–Pinchasi–Zerbib 2013 (arXiv:1207.1266) three-cap decomposition
 argument:
 
   *Every unordered pair `{u, v} ⊆ A` whose endpoints lie in strictly

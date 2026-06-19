@@ -84,8 +84,9 @@ instead of `(11n² − 18n) / 12`), should a fallback path be needed.
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.* Lemma 2 + Corollary 1, p. 3-4.
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 -/
 
 set_option linter.style.openClassical false

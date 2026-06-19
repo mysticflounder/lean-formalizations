@@ -12,7 +12,7 @@ import Mathlib
 `IsoscelesCounting.Dumitrescu.power_mean_three_caps_nat` (natural form) discharge
 the abstract power-mean / Cauchy–Schwarz inequality used in the final
 arithmetic assembly of Dumitrescu's isosceles upper bound
-(Dumitrescu 2006 / Fox–Pach 2012, arXiv:1207.1266 §2 final step).
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2 final step).
 
 The inequality has no geometric content: for any three nonnegative reals
 `m₁, m₂, m₃` with `m₁ + m₂ + m₃ = N`,

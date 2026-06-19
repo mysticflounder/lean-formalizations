@@ -46,7 +46,7 @@ A3 added by the Dumitrescu Lc1 dispatch (2026-05-22):
 * A1 — `onArcOpposite_iff_arcAngle_sign_mul`: the same iff restated as a sign
   product of arc-angle differences, by applying `arcAngle_sub_arcAngle` with the
   test point itself as the center. This is the form downstream consumers (Lc1,
-  Fox-Pach L6, the U-sequence geometric core) read out of A1.
+  Nivasch–Pach–Pinchasi–Zerbib L6, the U-sequence geometric core) read out of A1.
 * A2 — `arcAngle_chord_length` chord-length formula `dist p q = 2 r |sin(Δ/2)|`.
 * A3 — `arcAngle_chord_length_strict_mono` strict monotonicity of chord length
   in arc-angle difference; analytic core `abs_sin_half_strict_mono`.
@@ -189,7 +189,7 @@ the `oangle (q-center) (p-center)` vs `oangle (p-center) (q-center)` swap that
 arises from A0's argument order.
 
 The theorem `arcAngle_chord_length` is the headline export. Downstream
-consumers (Lc1, Fox-Pach L6, A3 monotonicity) read `dist p q` in terms of
+consumers (Lc1, Nivasch–Pach–Pinchasi–Zerbib L6, A3 monotonicity) read `dist p q` in terms of
 `arcAngle` differences out of this lemma.
 
 ## A3 — Status and approach
@@ -376,7 +376,7 @@ OnArcOpposite vi vj vk v ↔
     (arcAngle vi vk - arcAngle vi vj).sign ≤ 0
 ```
 
-This is the form downstream consumers (Lc1, Fox-Pach L6, U-sequence
+This is the form downstream consumers (Lc1, Nivasch–Pach–Pinchasi–Zerbib L6, U-sequence
 geometric core) read out of A1 — both factors are arc-angle subtractions
 which compose cleanly with further A0 algebra.
 

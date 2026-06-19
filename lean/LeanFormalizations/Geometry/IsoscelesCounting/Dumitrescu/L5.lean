@@ -11,7 +11,7 @@ import Mathlib
 # Dumitrescu L5: cap witness uniqueness (Lemma 8)
 
 `IsoscelesCounting.Dumitrescu.cap_witness_uniqueness` is Dumitrescu's Lemma 8
-(Dumitrescu 2006 / Fox–Pach 2012, arXiv:1207.1266 §2):
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
 
   Within a single cap `C ⊆ A` of size `m`, the number of "isosceles
   witness pairs" — unordered pairs `{x, y} ⊆ C` such that some apex
@@ -73,13 +73,14 @@ on the ranking.
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.* (Original Lemma 8.)
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 
 ## Downstream
 
 The `m - 1` bound is consumed by
-`p97-dumitrescu-l6-cap-good-edge-quadratic` (Corollary 9), which sums
+`p97-dumitrescu-l6-cap-good-edge-quadratic` (Theorem 9), which sums
 the cap-internal isosceles pair count via L5 + L3 to obtain the
 `O(m²)` good-edge bound. The `CapWitnessRanking` assumption surfaces in
 L6's statement as a structural input alongside the `CapTriple`.

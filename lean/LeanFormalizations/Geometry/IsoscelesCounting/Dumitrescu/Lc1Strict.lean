@@ -12,13 +12,13 @@ import Mathlib
 # Perpendicular-bisector half-plane comparison
 
 This file deposits the **load-bearing chord-side / half-plane lemma**
-used by Fox-Pach 2012 Lemma 6 (the witness-monotonicity argument that
+used by Nivasch–Pach–Pinchasi–Zerbib 2013 Lemma 6 (the witness-monotonicity argument that
 underlies both Dumitrescu L5 `CapWitnessRanking` and Dumitrescu Lc3
 `CapDiagonalVertexProfile`).
 
 ## Paper provenance
 
-Fox-Pach 2012 (arXiv:1207.1266) §2 Lemma 6 begins its proof with:
+Nivasch–Pach–Pinchasi–Zerbib 2013 (arXiv:1207.1266) §2 Lemma 6 begins its proof with:
 
 > "We have `|yc| ≥ |ya| = |yb|`."
 
@@ -80,7 +80,7 @@ perpendicular bisector of `ac` (`⟪y - x, c - a⟫_ℝ ≤ 0`), then
 
 ## What is NOT in this file (Lemma 6's gap)
 
-Fox-Pach Lemma 6's actual proof requires three more ingredients that
+Nivasch–Pach–Pinchasi–Zerbib Lemma 6's actual proof requires three more ingredients that
 are **all open** in the current infrastructure:
 
 ### Gap 1 — `convex_order_implies_perpBisector_side`  (NOT proven)
@@ -104,7 +104,7 @@ chord-side / disk-containment data we currently package.
 
 ### Gap 2 — wedge containment (`∠acb ≤ ∠ycb`)  (NOT proven)
 
-Fox-Pach Lemma 6 then derives a contradiction by combining
+Nivasch–Pach–Pinchasi–Zerbib Lemma 6 then derives a contradiction by combining
 `∠acb ≥ π/2` (cap-Thales at the cap-endpoint chord) with
 `∠ycb ≤ π/2` (chord-side argument inside △ycb using `|yc| ≥ |yb|`)
 **and** the wedge containment `∠acb ≤ ∠ycb`. The last piece — that the
@@ -114,11 +114,11 @@ current infrastructure.
 
 ### Gap 3 — cap-Thales-at-all-triples generalization  (NOT proven)
 
-Definition 3 of Fox-Pach 2012 (p. 4) gives a cap-Thales iff at the
+Definition 3 of Nivasch–Pach–Pinchasi–Zerbib 2013 (p. 4) gives a cap-Thales iff at the
 *cap endpoints*. Our `inner_nonpos_of_cap_region_thales` discharges
 this in `lc1_capArcThales_C{1,2,3}` for cap-points subtending the
 *Moser-vertex chord* — exactly the cap-endpoint case. The diagonal-
-vertex argument (Dumitrescu §2 p. 3-4 / Fox-Pach Corollary 7 proof)
+vertex argument (Dumitrescu §2 p. 3-4 / Nivasch–Pach–Pinchasi–Zerbib Corollary 7 proof)
 **does not require the all-triples generalization** — it composes
 Lemma 6 (applied with various choices of cap endpoints) with the
 positional constraint. So Gap 3 is *not* on the Lemma 6 critical
@@ -141,9 +141,10 @@ without further analytic work.
 
 ## References
 
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2, Definition 5, Lemma 6,
-  Corollary 7.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2, Definition 5,
+  Lemma 6, Corollary 7.
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.* Lemma 2, Corollary 1 (p. 3-4).
 -/
@@ -299,7 +300,7 @@ theorem dist_lt_of_inner_chord_neg (a c y : ℝ²)
 
 /- ### Cap-witness flavored re-statement
 
-In the Fox-Pach Lemma 6 setting, the role of `midpoint a c` is filled
+In the Nivasch–Pach–Pinchasi–Zerbib Lemma 6 setting, the role of `midpoint a c` is filled
 by the **witness** `x` for edge `ac`: `x` lies on the perpendicular
 bisector of `ac`, i.e. `dist x a = dist x c`. The half-plane side test
 through `x` is then equivalent (modulo translation along the bisector)
@@ -336,7 +337,7 @@ half-plane of the perpendicular bisector of `ac`, expressed as the
 witness-relative inner-product condition `⟪y - x, c - a⟫_ℝ ≤ 0`. Then
 `dist y a ≤ dist y c`.
 
-This is the **Fox-Pach Lemma 6 "step 1" chain** in inner-product form:
+This is the **Nivasch–Pach–Pinchasi–Zerbib Lemma 6 "step 1" chain** in inner-product form:
 given a witness `x` for `(a, c)` and a point `y` "on the cap-side
 preceding `x`", the distance to the `a`-endpoint is at most the
 distance to the `c`-endpoint. -/
@@ -438,7 +439,7 @@ between `a` and `x` on a segment, and `x` is on the perpendicular
 bisector of `ac` (equivalently `dist x a = dist x c`), then `y` is on
 `a`'s closed half-plane of the perpendicular bisector of `ac`.
 
-This is the linear-algebra core of Fox-Pach 2012 Lemma 6: the
+This is the linear-algebra core of Nivasch–Pach–Pinchasi–Zerbib 2013 Lemma 6: the
 closed half-plane on `a`'s side of the perpendicular bisector of `ac`
 is convex (a linear functional `≤ 0` half-space) and contains both
 endpoints `a` and `x` — so it contains every point weakly between
@@ -477,7 +478,7 @@ theorem convex_order_implies_perpBisector_side
 
 /-- **Gap 2 — Thales-form angle bound.** In triangle `ycb` with `b ≠ c`,
 if `dist y b ≤ dist y c` then the angle at `c` is strictly acute. This
-is the second half of the Fox-Pach 2012 Lemma 6 contradiction chain:
+is the second half of the Nivasch–Pach–Pinchasi–Zerbib 2013 Lemma 6 contradiction chain:
 `|yc| ≥ |yb|` ⟹ `∠ycb < π/2`. -/
 theorem angle_lt_pi_div_two_of_dist_ge
     {b c y : ℝ²} (hbc : b ≠ c)

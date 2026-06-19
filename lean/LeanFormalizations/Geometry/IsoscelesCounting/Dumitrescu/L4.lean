@@ -51,8 +51,9 @@ cap-sum} clean and free of the K4 antecedent.
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.*
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 -/
 
 set_option linter.style.openClassical false

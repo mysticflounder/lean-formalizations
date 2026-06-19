@@ -12,7 +12,7 @@ import Mathlib
 # Dumitrescu L2: base/apex double-count bound on the isosceles count
 
 `IsoscelesCounting.Dumitrescu.base_apex_double_count` is Dumitrescu's Lemma 2
-(Dumitrescu 2006 / Fox–Pach 2012, arXiv:1207.1266 §2):
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
 
   For any convex-independent finite point set `A ⊆ ℝ²`, the total
   isosceles-pair count is bounded by `n · (n − 1)`, where `n = |A|`:
@@ -58,8 +58,9 @@ We count pairs `(a, s)` where `a ∈ A` is the *apex* and
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.*
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
 -/
 
 set_option linter.style.openClassical false
@@ -141,7 +142,7 @@ private lemma two_mul_choose_two (n : ℕ) :
   rw [hdiv]
   omega
 
-/-- **Dumitrescu L2 / Fox–Pach 2012 base/apex double-count bound.**
+/-- **Dumitrescu L2 / Nivasch–Pach–Pinchasi–Zerbib 2013 base/apex double-count bound.**
 
 For any convex-independent finite point set `A ⊆ ℝ²`, the total
 isosceles-pair count summed over all apexes is bounded by

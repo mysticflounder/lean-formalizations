@@ -12,7 +12,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.SignedAreaOangle
 
 This module supplies a thin wrapper around the upstream predicate
 `EuclideanGeometry.IsCcwConvexPolygon` (from
-`FormalConjecturesForMathlib.Geometry.2d`) suited to the Fox-Pach 2012
+`FormalConjecturesForMathlib.Geometry.2d`) suited to the Nivasch–Pach–Pinchasi–Zerbib 2013
 Lemma 6 sign-stability arguments consumed downstream by the CGN counting
 bridge.
 
@@ -129,7 +129,7 @@ is the *first* argument of `signedArea2`).
 /-- Sign-stability of `signedArea2 p q ·` as the third argument varies
 between `r` and `s` (central vertex `p`, the smallest cyclic index).
 
-This is the headline primitive consumed by Fox-Pach 2012 Lemma 6's
+This is the headline primitive consumed by Nivasch–Pach–Pinchasi–Zerbib 2013 Lemma 6's
 witness-monotonicity step. -/
 theorem ConvexCyclicOrder.signedArea2_sign_stable_pq
     {A : Finset ℝ²} {p q r s : ℝ²}

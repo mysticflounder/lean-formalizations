@@ -10,13 +10,13 @@ import LeanFormalizations.Geometry.IsoscelesCounting.Dumitrescu.L5
 import Mathlib
 
 /-!
-# Dumitrescu L6: cap good-edge quadratic bound (Corollary 9)
+# Dumitrescu L6: cap good-edge quadratic bound (Theorem 9)
 
 `IsoscelesCounting.Dumitrescu.cap_good_edge_quadratic_of_ranking` and
 `IsoscelesCounting.Dumitrescu.cap_good_edge_quadratic` are the two forms of
-Dumitrescu's Lemma 6 / Corollary 9
-(Dumitrescu 2006 / Fox–Pach 2012 / Nivasch–Pach–Pinchasi–Zerbib 2012,
-arXiv:1207.1266 §2 Corollary 9):
+Dumitrescu's Lemma 6 / Theorem 9
+(Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013,
+arXiv:1207.1266 §2 Theorem 9):
 
   Within a single convex-independent cap `C ⊆ A` of size `m`, the
   total **(witness-pair, non-base apex)** incidence count is `O(m²)`,
@@ -83,11 +83,9 @@ sibling files `DumitrescuL1.lean`, `DumitrescuL3.lean`,
 
 * Dumitrescu, A. (2006). *Planar point sets with many isosceles
   triangles.* (Original Lemma 6.)
-* Fox, J. and Pach, J. (2012). *Erdős-Szekeres-type theorems for monotone
-  paths and convex bodies.* arXiv:1207.1266 §2.
-* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2012).
-  *The number of distinct distances from a vertex of a convex polygon.*
-  arXiv:1207.1266 §2 (Corollary 9).
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2 (Theorem 9).
 -/
 
 set_option linter.style.openClassical false
@@ -193,7 +191,7 @@ theorem sum_capPairApexes_le_two_mul_witnessPairs
           rw [Finset.sum_const, smul_eq_mul]
     _ = 2 * (capWitnessPairs A C).card := by ring
 
-/-- **Dumitrescu L6 (Corollary 9, ranked form, linear-in-`m` bound).**
+/-- **Dumitrescu L6 (Theorem 9, ranked form, linear-in-`m` bound).**
 
 For a convex-independent finite point set `A ⊆ ℝ²` and a cap `C ⊆ A`
 equipped with a `CapWitnessRanking` (the angle-monotonicity injection
@@ -202,7 +200,7 @@ within the cap is bounded by
 
   `2 · (|C| − 1)`,
 
-i.e. linear in `m = |C|`. This is the strongest form of Corollary 9
+i.e. linear in `m = |C|`. This is the strongest form of Theorem 9
 that the Dumitrescu chain consumes: L8 sums it across the three caps
 of a `CapTriple` together with the L7 cross-cap contribution.
 
@@ -220,7 +218,7 @@ theorem cap_good_edge_quadratic_of_ranking
     _ ≤ 2 * (C.card - 1) :=
         Nat.mul_le_mul_left 2 (cap_witness_uniqueness R)
 
-/-- **Dumitrescu L6 (Corollary 9, unconditional quadratic bound).**
+/-- **Dumitrescu L6 (Theorem 9, unconditional quadratic bound).**
 
 For a convex-independent finite point set `A ⊆ ℝ²` and a cap `C ⊆ A`,
 the total `(witness-pair, non-base apex)` incidence count within the
