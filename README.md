@@ -58,12 +58,21 @@ connector. mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine
 gap while reusing mathlib's `Finset.addEnergy`. **All theorems above are
 axiom-clean.**
 
-### `lean/LeanFormalizations/Geometry/Euclidean/` — 2D two-point isometry classification (Mazur–Ulam 1932; [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
+### `lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean` — 2D two-point isometry classification (Mazur–Ulam 1932)
 
 | Theorem | What it asserts |
 |---|---|
 | [`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225) | For `a b c d : EuclideanSpace ℝ (Fin 2)` with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c` and `b ↦ d` has `ncard ≤ 2`. Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation argument specific to two dimensions. |
 | [`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261) | The same two-point-pinned isometry set is `Finite` (with the underlying linear-isometry bounds). |
+
+### `lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean` — Near Enemy Theorem for bisector energy (original result of this project; the bisector-energy notion it minimizes is from Lund–Sheffer–de Zeeuw, [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
+
+This is a result introduced and named here, not a formalization of a prior
+paper — it is independent of the Mazur–Ulam isometry classification above; the
+two only share the `Geometry/Euclidean/` directory.
+
+| Theorem | What it asserts |
+|---|---|
 | [`nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L3299) | The **Near Enemy Theorem for bisector energy** (namespace `NearEnemy`, ~3500 lines): every finite set in any Euclidean space with no three collinear points admits ONE injective planar projection whose image (a) attains the exact bisector-energy floor 2n(n−1) with absolute minimality, (b) is in full planar general position (no three collinear, no four concyclic), (c) has zero rotational energy ([`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315), the proper-rotation channel of the congruent-quadruple count), and (d) has its distances in bijection with the upstairs ±difference classes. |
 
 The Near Enemy result also carries a sphere-slice corollary and standalone
