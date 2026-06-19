@@ -8,7 +8,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.Dumitrescu.L1
 import Mathlib
 
 /-!
-# Dumitrescu L3: trivial edge-isosceles bound (Problem 97)
+# Dumitrescu L3: trivial edge-isosceles bound
 
 `IsoscelesCounting.Dumitrescu.trivial_edge_bound` is Dumitrescu's Lemma 3
 (Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
@@ -23,8 +23,7 @@ This is one of the smallest lemmas in the Dumitrescu L1–L10 chain: it
 simply says that filtering with a strictly stronger predicate
 (`a ∉ {b, c} ∧ dist a b = dist a c`) yields a subset of filtering with
 the weaker predicate (`dist a b = dist a c`). Its purpose is to provide
-a clean named hook for the per-base apex count used in L6
-(`p97-dumitrescu-l6-cap-good-edge-quadratic`).
+a clean named hook for the per-base apex count used in L6.
 
 Combined with L1 (`IsoscelesCounting.Dumitrescu.perpBisector_apex_bound`), the
 right-hand side is bounded by `2` under `ConvexIndep A`, giving the
@@ -41,8 +40,8 @@ The convex-independent corollary chains this with L1.
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.*
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.

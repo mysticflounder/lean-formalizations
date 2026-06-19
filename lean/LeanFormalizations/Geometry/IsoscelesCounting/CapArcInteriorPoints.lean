@@ -429,8 +429,7 @@ the distance from `p` strictly increases from `x` to `E`:
 
   `dist p x < dist p E`.
 
-This is the `M5` conclusion of the micro-stack `M0`–`M5` (prose
-`docs/97-full-prose-proof-draft.md`, lines ~9857–9894): `EndpointUsed(x,p) = E`
+This is the `M5` conclusion of the micro-stack `M0`–`M5`: `EndpointUsed(x,p) = E`
 sits strictly farther from `p` than the interior source `x`, which is the
 content `U1k-b0c`'s radius equality refutes (closing `U1k-b1a1R`).
 
@@ -441,7 +440,7 @@ and the non-obtuse hypothesis, the right side is strictly positive, so
 
 The remaining open input is the inner-product inequality itself,
 `inner_nonpos_disk_endpoint_thales` (`★`, the disk-chord-endpoint Thales
-generalization); see the `U1k-b1a1M` dead-end note (`p97-u1k-b1a1M-arcangle`)
+generalization); see the `U1k-b1a1M` dead-end note
 and the 2026-05-28 feasibility study. Verified axiom-clean
 (`{propext, Classical.choice, Quot.sound}`). -/
 theorem b1a1M_metric {p x E : ℝ²} (hxE : x ≠ E)
@@ -470,7 +469,7 @@ more.  It does **not** close `★`: it repackages it as the polynomial obligatio
 `0 ≤ G` (see `reduction_wiring`).  `0 ≤ G` is the genuinely-open `U1k-b1a1M`
 content and is provably **not** reachable by any closed Positivstellensatz / SOS
 certificate over the cap hypotheses (both the global SOS route and the
-geometric case-split route are recorded dead in `p97-u1k-b1a1M-arcangle`); the
+geometric case-split route are recorded dead in the `U1k-b1a1M` dead-end note); the
 live candidate is an arc-parametrization inscribed-angle argument. -/
 theorem b1a1m_reduction_identity (x1 x2 p1 p2 f1 f2 : ℝ) (hf : f1 ^ 2 + f2 ^ 2 = 1) :
     ((f1 - x1) * (x1 - p1) + (f2 - x2) * (x2 - p2)) * ((f1 - p1) ^ 2 + (f2 - p2) ^ 2)

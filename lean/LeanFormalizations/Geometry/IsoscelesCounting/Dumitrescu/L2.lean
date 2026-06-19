@@ -21,8 +21,7 @@ import Mathlib
 
 This is a direct consequence of L1 (perpBisector apex bound,
 `IsoscelesCounting.Dumitrescu.perpBisector_apex_bound`) via base/apex
-double counting. It corresponds to the blueprint obligation
-`p97-dumitrescu-l2-base-apex-double-count`.
+double counting.
 
 ## Proof strategy
 
@@ -56,8 +55,8 @@ We count pairs `(a, s)` where `a ∈ A` is the *apex* and
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.*
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.

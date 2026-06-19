@@ -82,8 +82,8 @@ instead of `(11n² − 18n) / 12`), should a fallback path be needed.
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.* Lemma 2 + Corollary 1, p. 3-4.
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.

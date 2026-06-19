@@ -22,9 +22,8 @@ or equivalently in natural-number form (no division),
 
 In the Dumitrescu specialization `N = n + 3` and `m_i = |Cᵢ|` are the
 sizes of the three caps, but the present file is purely about the
-algebraic inequality. The downstream consumer is
-`p97-dumitrescu-l10-final-bound`; see obligation
-`p97-dumitrescu-l9-power-mean-three-caps` in `data/blueprint.db`.
+algebraic inequality. This is the power-mean three-caps step (L9); the
+downstream consumer is L10 (the final bound).
 
 ## Proof strategy
 

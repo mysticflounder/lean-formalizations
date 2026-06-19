@@ -10,7 +10,7 @@ import Mathlib
 # Bridge: algebraic `signedArea2` ↔ Mathlib oriented angle sign
 
 This module supplies the foundational bridge consumed by the MEC arc–angle
-chain (sub-obligation `p97-signed-area-eq-oangle-sign`, alias A.1). The
+chain. The
 algebraic predicate `IsoscelesCounting.signedArea2` defined in `Foundation` is the
 chord-side / signed-area form used by the cap-witness machinery. The MEC
 parametrization, in contrast, needs Mathlib's oriented angle

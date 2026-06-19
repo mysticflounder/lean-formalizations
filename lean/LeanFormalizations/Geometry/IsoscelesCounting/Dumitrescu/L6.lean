@@ -25,8 +25,7 @@ arXiv:1207.1266 §2 Theorem 9):
   is bounded by `m - 1` under a `CapWitnessRanking` (via L5) or
   unconditionally by `Nat.choose m 2` (via the trivial subset bound).
 
-This file corresponds to the blueprint obligation
-`p97-dumitrescu-l6-cap-good-edge-quadratic`.
+This file establishes the per-cap good-edge quadratic bound (L6).
 
 ## Composition
 
@@ -49,7 +48,7 @@ The proof is a clean double-count:
   Multiplying gives the headline quadratic bound `O(m²)`.
 
 The result is consumed by
-`p97-dumitrescu-l8-three-cap-good-edge-count` (Corollary 10), which
+L8 (the three-cap good-edge count, Corollary 10), which
 sums over the three caps of a `CapTriple` and adds the
 `crossCapEdges` count from L7.
 
@@ -81,8 +80,8 @@ sibling files `DumitrescuL1.lean`, `DumitrescuL3.lean`,
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.* (Original Lemma 6.)
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2 (Theorem 9).

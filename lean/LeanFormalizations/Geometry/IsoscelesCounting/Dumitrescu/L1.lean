@@ -8,7 +8,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.ConvexIndepHelpers
 import Mathlib
 
 /-!
-# Dumitrescu L1: perpendicular-bisector apex bound (Problem 97)
+# Dumitrescu L1: perpendicular-bisector apex bound
 
 `IsoscelesCounting.Dumitrescu.perpBisector_apex_bound` is Dumitrescu's Lemma 1
 (Dumitrescu 2006 / Nivasch–Pach–Pinchasi–Zerbib 2013, arXiv:1207.1266 §2):
@@ -18,8 +18,7 @@ import Mathlib
   the perpendicular bisector of the segment `ab`.
 
 This is the "perpendicular-bisector apex bound" used in the
-isosceles-count double-count argument. It corresponds to the blueprint
-obligation `p97-dumitrescu-l1-perp-bisector-apex`.
+isosceles-count double-count argument.
 
 ## Proof strategy
 
@@ -50,8 +49,8 @@ lies in the convex hull of the other two, which is a subset of
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.*
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.

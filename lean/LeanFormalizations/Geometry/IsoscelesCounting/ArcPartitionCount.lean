@@ -9,7 +9,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.Moser.MoserNonDeg
 import Mathlib
 
 /-!
-# Arc-partition count for the MEC cap partition (Problem 97)
+# Arc-partition count for the MEC cap partition
 
 `IsoscelesCounting.MEC.arc_partition_count_eq_one` discharges the
 `hAGenericCapCount` hypothesis of

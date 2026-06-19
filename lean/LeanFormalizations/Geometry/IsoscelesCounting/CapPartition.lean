@@ -6,14 +6,13 @@ Authors: Adam McKenna
 import Mathlib
 
 /-!
-# Cap-partition sum identity (Erdős Problem 97, Milestone 4)
+# Cap-partition sum identity
 
-Pure combinatorics extracted from the geometric setup in the universal
-proof of Erdős Problem 97 (`p97-positive-defect-bridge`).
+Pure combinatorics extracted from the geometric setup of the
+convex-position isosceles-counting argument.
 
-**Geometric origin.** In the universal-descent argument for Problem 97
-(see `docs/97-uniform-theorem-closure-plan.md`), a convex counterexample
-`P` to the 4-equidistant property carries three "caps" `C₁, C₂, C₃` cut
+**Geometric origin.** In the cap-decomposition argument, a convex
+point set `P` carries three "caps" `C₁, C₂, C₃` cut
 out by closed chains between three selected Moser vertices.  Each Moser vertex lies on exactly two opposite caps and
 every other vertex on exactly one of the three chains, so
 
@@ -36,7 +35,7 @@ Both pieces of data ("Moser vertex ⇒ in exactly two caps" and
 `CapPartition` so the geometric obligation can hand the combinatorics
 a single bundled object.
 
-This is `p97-cap-sum-identity` (Milestone 4 sub-step 2 of 4).  It is
+This is the cap-sum identity.  It is
 independent of the geometric existence proofs and provable from the
 structural setup alone.
 -/

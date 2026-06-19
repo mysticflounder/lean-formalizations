@@ -145,8 +145,8 @@ without further analytic work.
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2, Definition 5,
   Lemma 6, Corollary 7.
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.* Lemma 2, Corollary 1 (p. 3-4).
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 -/
 
 open scoped EuclideanGeometry InnerProductSpace

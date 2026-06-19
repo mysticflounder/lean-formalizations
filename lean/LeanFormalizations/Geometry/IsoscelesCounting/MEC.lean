@@ -53,7 +53,7 @@ this file builds the proof from first principles:
 
 * `IsoscelesCounting.MEC.exists_unique_minimum_enclosing_circle` — combined
   `∃!` statement at the `ℝ² × ℝ` pair level, the form requested by the
-  downstream blueprint obligation `p97-mec-existence`.
+  downstream cap-partition construction.
 
 * `IsoscelesCounting.MEC.mec` — `noncomputable` extractor producing the unique
   MEC record from any nonempty `Finset ℝ²`.

@@ -45,9 +45,7 @@ formula `d = R · √3`, the full chord-side characterization of the 60°
 Apollonius arc, the `Real.Angle.pi_div_three` arithmetic at an
 equilateral inscribed apex, and the converse direction
 `Collinear ↔ signedArea2 = 0`) are deliberately *not* included in this
-pass — they remain open sub-obligations flagged in
-`docs/97-uniform-theorem-closure-plan.md` Phase 1 sublemma 5 and
-`docs/97-uniform-theorem-candidate.md`. -/
+pass — they remain open sub-lemmas of the equilateral-inscribed bridge. -/
 
 open scoped EuclideanGeometry
 
@@ -181,8 +179,7 @@ at the same angle as `vi` does") with a chord-side condition pinning
 This file does not (yet) prove that `OpApolloniusArc` agrees with the
 classical 60° arc through `vj, vk` opposite `vi` in the equilateral
 inscribed setting. That equivalence is the load-bearing content of
-Phase 1 sublemma 5; see
-`docs/97-uniform-theorem-closure-plan.md` lines 213–217 and the
+this equilateral-inscribed bridge; see the
 `Abstract60ApolloniusArc` `{{NEEDS_RESEARCH}}` marker at
 `U3ShortCapSaturation.lean:114`. -/
 
@@ -250,9 +247,8 @@ theorem cospherical_of_opApolloniusArc
 
 /- ### Equilateral-inscribed bridge lemmas
 
-These close the four deferred bridge lemmas flagged for Phase 1 of the
-uniform-theorem closure plan (`docs/97-uniform-theorem-closure-plan.md`,
-sublemma 5). They are stated in the general inner-product / sphere
+These close the four deferred equilateral-inscribed bridge lemmas. They
+are stated in the general inner-product / sphere
 setting so they can specialise to the MEC sphere `mecSphere A hA` (the
 caller substitutes `s := mecSphere A hA`). Together with the existing
 `cospherical_of_opApolloniusArc` forward direction, they constitute the

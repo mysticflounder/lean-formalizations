@@ -23,11 +23,6 @@ Quotienting by `2π` (i.e. landing in `Real.Angle = ℝ / 2πℤ`) eliminates th
 branch cut. Signed circular differences (`arcAngle p − arcAngle q`) are then
 well-defined and compose cleanly via `Orientation.oangle` algebra.
 
-## Cross-reference
-
-See `docs/97-arc-angle-parametrization-plan.md` § "A0 — `arcAngle` definition +
-algebra" for the four-step program (A0 + A1 + A2 + A3).
-
 ## Status — A0 + A1 + A2 + A3 (plus A3-iff)
 
 This file establishes the full A0-A3 program plus the equality / iff forms of
@@ -80,8 +75,7 @@ opposite arg order is desired).
 
 ## A1 — Status and approach
 
-The scoping report (`docs/97-arc-angle-parametrization-plan.md` §3, §5 A1)
-proposed defining a 3-angle predicate `Real.Angle.btwArcNotThrough` and
+The scoping report proposed defining a 3-angle predicate `Real.Angle.btwArcNotThrough` and
 formulating A1 as `OnArcOpposite vi vj vk v ↔ btwArcNotThrough …` on arc-angles
 of `vj, vk, v` centered at the **MEC center**. The plan further claimed the iff
 would reduce to `signedArea2_sign_eq_oangle_sign` + A0 alone, **without**

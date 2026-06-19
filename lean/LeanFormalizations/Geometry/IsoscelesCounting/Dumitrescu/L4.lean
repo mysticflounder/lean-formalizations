@@ -9,7 +9,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.CapPartitionFromMEC
 import LeanFormalizations.Geometry.IsoscelesCounting.CapStructure
 
 /-!
-# Dumitrescu L4: three-cap decomposition (Problem 97)
+# Dumitrescu L4: three-cap decomposition
 
 `IsoscelesCounting.Dumitrescu.three_cap_decomposition` packages the heavy
 MEC + Moser-triangle + cap-partition machinery into the headline
@@ -41,7 +41,7 @@ L4 is stated **restricted to the circumscribed branch**: the
 dichotomy (three pairwise distinct MEC-boundary vertices), matching the
 existing `cap_partition_from_moser_circumscribed` shape. The diameter
 branch (`Or.inr _`) is closed by a separate K4-driven exclusion lemma
-(`p97-mec-no-diameter-under-k4`); consumers that need to handle a raw
+(the K4 no-diameter exclusion); consumers that need to handle a raw
 Moser triangle case-split on `MT.case_split` themselves before invoking
 `three_cap_decomposition`. Keeping L4 as a pure composition lemma keeps
 the dependency chain L4 → {arc count, Moser non-degeneracy, cap-from-MEC,
@@ -49,8 +49,8 @@ cap-sum} clean and free of the K4 antecedent.
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.*
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
@@ -79,7 +79,7 @@ This is the headline packaging lemma for the Dumitrescu L1–L10 chain;
 L5–L8 consume the resulting cap triple to bound the isosceles count.
 
 The diameter branch (`Or.inr _` of `MT.case_split`) is excluded by a
-separate K4-driven argument (`p97-mec-no-diameter-under-k4`) — see
+separate K4-driven argument — see
 the module docstring. -/
 theorem three_cap_decomposition
     {A : Finset ℝ²} {hA : A.Nonempty} {hncol : ¬ Collinear ℝ (A : Set ℝ²)}

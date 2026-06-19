@@ -19,8 +19,7 @@ import Mathlib
   perpendicular bisector of the chord `xy`) — is bounded by `m - 1`
   via an angle-monotonicity argument on the cap's MEC arc.
 
-This file corresponds to the blueprint obligation
-`p97-dumitrescu-l5-cap-witness-uniqueness`.
+This file establishes cap-witness uniqueness (L5).
 
 ## Formalization shape
 
@@ -71,8 +70,8 @@ on the ranking.
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.* (Original Lemma 8.)
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
 * Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
   distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
   4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2.
@@ -80,7 +79,7 @@ on the ranking.
 ## Downstream
 
 The `m - 1` bound is consumed by
-`p97-dumitrescu-l6-cap-good-edge-quadratic` (Theorem 9), which sums
+L6 (the per-cap good-edge quadratic bound, Theorem 9), which sums
 the cap-internal isosceles pair count via L5 + L3 to obtain the
 `O(m²)` good-edge bound. The `CapWitnessRanking` assumption surfaces in
 L6's statement as a structural input alongside the `CapTriple`.

@@ -6,7 +6,7 @@ Authors: Adam McKenna
 import LeanFormalizations.Geometry.IsoscelesCounting.Base
 
 /-!
-# `ConvexIndep` Finset helpers (Milestone 2)
+# `ConvexIndep` Finset helpers
 
 Direct proofs from the extreme-point characterization
 `EuclideanGeometry.ConvexIndep S ↔ ∀ a ∈ S, a ∉ convexHull ℝ (S \ {a})`:

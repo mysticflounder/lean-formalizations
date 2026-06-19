@@ -27,7 +27,7 @@ diameter case the third vertex is taken to coincide with the first
 together with the centre/radius identifications.
 
 This is the **structural** layer: downstream consumers
-(`p97-mec-cap-partition`, `p97-u1-*`) need only the boundary-membership
+(the cap-partition construction and the U1 surplus-cap steps) need only the boundary-membership
 data; the "obtuse-or-right" geometric content of the circumscribed case
 is not formalised here (it is implicit in the variational characterisation
 and not required by any open obligation as a separate lemma).

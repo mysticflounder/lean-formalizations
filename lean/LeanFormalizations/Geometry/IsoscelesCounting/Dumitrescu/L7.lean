@@ -21,8 +21,7 @@ argument:
   both `u` and `v` — is NOT a "cap witness pair" for any of the three
   caps.*
 
-This file corresponds to the blueprint obligation
-`p97-dumitrescu-l7-cross-cap-edge-good`.
+This file establishes the cross-cap edge "good" property (L7).
 
 ## Definition of "good edge" in the source paper
 
@@ -77,17 +76,17 @@ Nothing in this file requires the missing MEC-arc parametrization
 
 ## References
 
-* Dumitrescu, A. (2006). *Planar point sets with many isosceles
-  triangles.*
-* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2012).
-  *The number of distinct distances from a vertex of a convex polygon.*
-  arXiv:1207.1266 §2 (Definition 4, Definition 5, Corollary 7,
-  Corollary 8).
+* Dumitrescu, A. (2006). *On Distinct Distances from a Vertex of a Convex
+  Polygon.* Discrete Comput. Geom. 36(4):503–509. DOI:10.1007/s00454-006-1262-y.
+* Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. (2013). *The number of
+  distinct distances from a vertex of a convex polygon.* J. Comput. Geom.
+  4(1):1–12. arXiv:1207.1266. DOI:10.20382/JOCG.V4I1A1 §2 (Definition 4,
+  Definition 5, Corollary 7, Corollary 8).
 
 ## Downstream
 
 The non-witness property is consumed by
-`p97-dumitrescu-l8-three-cap-good-edge-count` (Corollary 8): cross-cap
+L8 (the three-cap good-edge count, Corollary 8): cross-cap
 edges contribute to the good-edge count as a disjoint summand alongside
 the per-cap L6 quadratic bound.
 -/
@@ -195,8 +194,8 @@ the trivial obstruction: `IsCapWitnessPair A C uv` requires `uv ⊆ C`
 as its first conjunct (`DumitrescuL5.IsCapWitnessPair`), which a
 cross-cap edge violates by definition.
 
-Consumed by `p97-dumitrescu-l8-three-cap-good-edge-count` (Corollary 8
-of Nivasch–Pach–Pinchasi–Zerbib 2012) as the structural fact that the
+Consumed by L8 (the three-cap good-edge count, Corollary 8
+of Nivasch–Pach–Pinchasi–Zerbib 2013) as the structural fact that the
 disjoint-summand `Cᵢ ↦ capWitnessPairs A Cᵢ` and `crossCapEdges`
 indexings of `A.powersetCard 2` are well-typed. -/
 theorem cross_cap_edge_good

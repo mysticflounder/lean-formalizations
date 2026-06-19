@@ -17,7 +17,7 @@ import Mathlib
 Constructive content toward `IsoscelesCounting.exists_isCcwConvexPolygon_of_convexIndep`
 (Step 2 of the ConvexCyclicOrder construction lane used by the CGN bridge).
 
-Strategy (locked in `docs/97-convex-cyclic-order-step2-spec.md`): enumerate `A`
+Strategy: enumerate `A`
 by angular order around an interior point `c` of `convexHull A`, using the
 in-tree `IsoscelesCounting.arcAngle c · : ℝ² → Real.Angle` and Mathlib's
 `Real.Angle.instCircularOrder`, cutting the circular order open at an anchor.
@@ -60,9 +60,8 @@ It also lands the cut-open enumeration:
   bookkeeping over `Finset.orderEmbOfFin` of the key-image, using §3.2 for
   injectivity of the key on `A`.
 
-The remaining sub-lemma — §3.5, the geometric heart (cyclic angular order ⇒
-CCW), and the final assembly — are **not** in this file yet; see
-`docs/97-convex-cyclic-order-step2-spec.md` §3.5 and the risk register.
+The remaining sub-lemma — the geometric heart (cyclic angular order ⇒
+CCW) and the final assembly — are **not** in this file yet.
 -/
 
 open scoped EuclideanGeometry Real

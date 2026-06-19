@@ -10,8 +10,7 @@ import LeanFormalizations.Geometry.IsoscelesCounting.CapPartition
 # Cap-structural packet: Moser triangle, cap triple, surplus cap data
 
 This file is the *structural data layer* used by the U1–U7 surplus-cap
-program (see `docs/97-uniform-theorem-closure-plan.md`).  The closure
-plan talks freely about
+program.  That program talks freely about
 
 * a minimum-enclosing-circle (MEC) and a *Moser triangle* — three MEC
   boundary vertices `v1, v2, v3 ∈ A`;
@@ -27,10 +26,9 @@ infrastructure.  This file does **not** attempt to build that
 infrastructure.  Instead it packages exactly the **abstract
 combinatorial data** that the U1 prose reduces to, so that downstream
 formal arguments can consume the packet without re-deriving its
-geometric provenance.  In the "structure-first" pattern flagged on the
-blueprint obligation `p97-mec-setup`, this is the structure half;
-existence of the data on a real counterexample is a separate
-obligation that will eventually instantiate the packet.
+geometric provenance.  In the "structure-first" pattern, this is the
+structure half; existence of the data on a real configuration is a
+separate step that will eventually instantiate the packet.
 
 Every definition here is purely about `Finset ℝ²` cardinalities,
 membership, and the existing `ConvexIndep` / `HasNEquidistantProperty`

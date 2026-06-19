@@ -31,7 +31,7 @@ Subtract 3 from both sides:
 
 No geometric content.  All steps are real arithmetic closed by `nlinarith`.
 
-Blueprint obligation: `p97-dumitrescu-l10c-cauchy-schwarz-finalization`.
+Step L10c: Cauchy–Schwarz finalization.
 -/
 
 namespace IsoscelesCounting

@@ -23,7 +23,7 @@ two sums via `Finset.sum_comm`, then recognize the inner filter as
 
 No geometric content is required; all steps are pure Finset arithmetic.
 
-Blueprint obligation: `p97-dumitrescu-l10a-base-pair-reindex`.
+Step L10a: base-pair reindex.
 -/
 
 set_option linter.style.openClassical false
@@ -106,7 +106,7 @@ the three intra-cap `Cᵢ.powersetCard 2` collections and `crossCapEdges CP`.
 Given any `uv ∈ A.powersetCard 2`, either `uv ⊆ C1` or `uv ⊆ C2` or
 `uv ⊆ C3`, or none of these holds — in the last case `uv ∈ crossCapEdges`.
 
-Blueprint obligation: `p97-dumitrescu-l10b-base-pair-cap-partition`.
+Step L10b: base-pair cap partition.
 -/
 
 /-- **Disjointness: `C1.powersetCard 2` vs `C2.powersetCard 2`.**
