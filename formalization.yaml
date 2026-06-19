@@ -1,0 +1,153 @@
+# formalization.yaml (v0.3): repo-root metadata for formalization projects.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill — actual model list and spend across the full multi-session history. Do not
+# treat a marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations"                       # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # update if the canonical remote differs
+
+# sources - what was formalized. Collection repo: one entry per principal source
+# behind the comparator-verified headline results (comparator/config.json).
+sources:                                            # [required]
+  - title: "On sets of integers containing no k elements in arithmetic progression / Balog–Szemerédi–Gowers theorem"
+    authors: ["Antal Balog", "Endre Szemerédi", "W. T. Gowers"]
+    id: "Balog–Szemerédi 1994; Gowers 1998 (GAFA 8 (1998) 529–551)"   # core BSG predates arXiv
+    type: "article"
+    prior_work: "Modern dependent-random-choice exposition: arXiv:0909.3271 (Fox–Sudakov); arXiv:2308.10245 (Reiher–Schoen)"
+  - title: "The Mazur–Ulam theorem (two-point isometry rigidity, used for the 2D classification)"
+    authors: ["Stanisław Mazur", "Stanisław Ulam"]
+    id: "Mazur–Ulam 1932 (C. R. Acad. Sci. Paris 194)"
+    type: "article"
+  - title: "On distinct distances in the plane (Elekes–Sharir framework)"
+    authors: ["György Elekes", "Micha Sharir"]
+    id: "arXiv:1005.0982"
+    type: "preprint"
+  - title: "Distinct distances on two lines / incidence framework (Pach–de Zeeuw)"
+    authors: ["János Pach", "Frank de Zeeuw"]
+    id: "arXiv:1308.0177"
+    type: "preprint"
+
+# project status
+status:
+  scope: >
+    Collection of discrete-geometry and additive-combinatorics formalizations,
+    mathlib-only dependencies (no project axioms; no native_decide in the verified
+    core). 61 headline theorems are audited axiom-clean by scripts/axiom-check.lean.
+    19 of those — exactly the ones whose statement is expressible in mathlib alone —
+    are packaged for the leanprover/comparator gate (see comparator/). The remaining
+    headline results quantify over project-specific structures and are audited in-repo
+    (see comparator/README.md "audit boundary"). One incidence route (Pach–Sharir /
+    Szemerédi–Trotter assembly) is still open.
+  sorry_count: 8                # build-reported `declaration uses sorry`, all in the open Pach–Sharir route
+  sorry_in_definitions: 0       # all 8 are proof-level (in theorems), none in definitions
+  axioms: ["propext", "Classical.choice", "Quot.sound"]   # axiom closure of every headline/comparator result
+  axioms_note: >
+    The 8 open declarations in the Pach–Sharir / Szemerédi–Trotter route additionally
+    depend on `sorryAx`. None of them is a headline claim, is named in
+    scripts/axiom-check.lean, or appears in comparator/config.json `theorem_names`.
+  main_results:
+  - declaration: "comparator/config.json theorem_names (19 mathlib-only headline claims)"
+    file: "comparator/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/config.json"
+    literature_dependencies: []
+  - declaration: "Finset.balog_szemeredi_gowers_asymmetric (and symmetric/explicit variants)"
+    file: "lean/LeanFormalizations/Combinatorics/Additive/"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/config.json"
+  - declaration: "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
+    file: "lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/config.json"
+  full_audit_note: >
+    The complete list of 61 axiom-clean headline theorems and the gate that asserts
+    their closure is scripts/axiom-check.lean (run by scripts/check-axioms.sh).
+
+# how it was produced. Extra per-entry fields are allowed.
+automation:                                          # [required]
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["{{NEEDS_ADAM_INPUT}}"]               # full multi-session model history not verifiable from the repo; this session: Claude Opus 4.8
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, nthdegree memory,
+        lean4 proof-repair/golf/axiom-eliminator subagents, doc-check + lean-guardrail
+        hooks). Some work was carried in parallel git-worktree agent sessions.
+      cost:
+        wall_time: "{{NEEDS_ADAM_INPUT}}"
+        spend_usd: "{{NEEDS_ADAM_INPUT}}"
+        hardware: "API-only / local laptop (no GPU)"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["{{NEEDS_ADAM_INPUT}}"]               # some worktree agents ran via the Codex CLI (worktree-agent-* branches); models per Adam
+      framework: "Codex CLI"
+      tool_setup: "Parallel worktree agents managed via codex-nudge; checkpoint-commit nudging."
+  spend_usd: "{{NEEDS_ADAM_INPUT}}"                  # total across all sessions/tools — owner-only
+  notes: >
+    Human-directed multi-agent autoformalization over many sessions. Every checkpoint
+    re-ran the build and the axiom-clean gate (scripts/check-axioms.sh). The comparator
+    packaging (comparator/) was added as the final auditability step.
+
+# fidelity
+fidelity:
+  divergences: >
+    The mathlib-only comparator gate covers the 19 headline claims that are statable
+    in mathlib alone. The remaining ~40 audited headline results are stated over
+    project-specific structures (CombinatorialMap, PachDeZeeuw.Algebraic.Curry0,
+    NearEnemy.bisectorEnergy, Esgk.Config, ElekesSharir.dist2/P2, AbstractPlanarizedMultigraph,
+    SimpleConvexPolygon, lineHomeomorph) and are audited by reading the repo plus
+    scripts/axiom-check.lean — see comparator/README.md. The Pach–Sharir / Szemerédi–Trotter
+    incidence route remains open (8 sorries) and underlies no headline claim.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + Conformance.lean self-check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the 61 headline theorems are axiom-clean;
+    comparator/Conformance.lean mechanically checks Challenge ≡ Solution for all 19 by
+    proof irrelevance; comparator/axiom-audit.lean prints the closure for the 19.
+    The authoritative external check is a leanprover/comparator run (CI: .github/workflows/comparator.yml).
+
+# alignment - source statements ↦ formal declarations (suggested shape).
+alignment:
+  namespace: "(collection — multiple namespaces)"
+  statements:
+    - source: "Balog–Szemerédi–Gowers theorem (asymmetric form)"
+      lean: "Finset.balog_szemeredi_gowers_asymmetric"
+      module: "LeanFormalizations.Combinatorics.Additive"
+      status: "proved"
+    - source: "2D two-point isometry rigidity (≤ 2 isometries fixing a labeled segment)"
+      lean: "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
+      module: "LeanFormalizations.Geometry.Euclidean.IsometryClassification"
+      status: "proved"
+    - source: "Elekes–Sharir rank–nullity for a linear functional"
+      lean: "ElekesSharir.finrank_ker_functional_ge"
+      module: "LeanFormalizations.ElekesSharirGuthKatz"
+      status: "proved"
+    - source: "Szemerédi–Trotter incidence assembly (Pach–Sharir route)"
+      lean: "(in progress)"
+      module: "LeanFormalizations.PachDeZeeuw.PachSharir.SzemerediTrotter"
+      status: "in-progress"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.

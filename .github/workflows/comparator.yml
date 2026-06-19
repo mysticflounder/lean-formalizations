@@ -1,0 +1,107 @@
+name: comparator
+
+# Zulip auditability gate for the AI-authored headline results.
+#
+# Two jobs:
+#   conformance — VALIDATED locally. Builds the project + the three comparator
+#                 modules and runs comparator/check-conformance.sh:
+#                 Challenge (mathlib-only sorry stubs) and Solution (project
+#                 proofs) build, Conformance.lean confirms Challenge ≡ Solution
+#                 (proof irrelevance), and every Solution theorem is axiom-clean
+#                 (⊆ {propext, Classical.choice, Quot.sound}).
+#   comparator  — the authoritative leanprover/comparator run (nanoda + Lean
+#                 default kernel). Authored against the documented contract.
+#                 {{UNVALIDATED}}: the lean4export/comparator ↔ project toolchain
+#                 pairing (project is leanprover/lean4:v4.30.0; comparator's own
+#                 toolchain is newer) needs a first real run to confirm. Kept as
+#                 a separate, non-required job until then.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'comparator/**'
+      - 'lean/**'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
+      - '.github/workflows/comparator.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  conformance:
+    name: conformance + axiom audit (validated)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan (Lean toolchain manager)
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz
+          ./elan-init -y --default-toolchain "$(cat lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch mathlib build cache
+        run: lake exe cache get
+
+      - name: Build project + comparator modules
+        run: ./lake-build.sh Challenge Solution Conformance
+
+      - name: Conformance + axiom audit
+        run: comparator/check-conformance.sh
+
+  comparator:
+    name: leanprover/comparator (nanoda + default kernel)
+    runs-on: ubuntu-latest
+    # {{UNVALIDATED}} toolchain pairing — do not gate merges on this job until a
+    # first successful run confirms lean4export/comparator compatibility with the
+    # project's Lean v4.30.0. Make it `required` in branch protection only after that.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz
+          ./elan-init -y --default-toolchain "$(cat lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch mathlib build cache
+        run: lake exe cache get
+
+      - name: Pre-build project + comparator modules
+        # A pre-built .lake means the comparator does not rebuild Solution.lean,
+        # so its guarantee no longer rests on landrun's sandbox (README assumption 6).
+        run: ./lake-build.sh Challenge Solution
+
+      - name: Install Rust (for nanoda)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build landrun, lean4export, nanoda, and the comparator
+        run: |
+          set -euo pipefail
+          # landrun (sandbox) — from main per comparator README.
+          git clone --depth 1 https://github.com/Zouuup/landrun
+          (cd landrun && go build -o landrun ./... || go build -o landrun .)
+          echo "$PWD/landrun" >> "$GITHUB_PATH"
+          # lean4export — must match the PROJECT's Lean version (v4.30.0).
+          git clone https://github.com/leanprover/lean4export
+          (cd lean4export && (echo "$(cd .. && cat lean-toolchain)" > lean-toolchain) && lake build)
+          echo "$PWD/lean4export/.lake/build/bin" >> "$GITHUB_PATH"
+          # nanoda kernel (optional second kernel; config enable_nanoda = true).
+          git clone https://github.com/ammkrn/nanoda_lib
+          (cd nanoda_lib && cargo build --release)
+          echo "$PWD/nanoda_lib/target/release" >> "$GITHUB_PATH"
+          # comparator binary.
+          git clone https://github.com/leanprover/comparator
+          (cd comparator && lake build)
+          echo "COMPARATOR_BIN=$PWD/comparator/.lake/build/bin/comparator" >> "$GITHUB_ENV"
+
+      - name: Run comparator on the 19 headline theorems
+        run: |
+          set -euo pipefail
+          # Invoked from the project dir so `lake env` resolves Challenge/Solution.
+          lake env "$COMPARATOR_BIN" comparator/config.json
+          # Success ends with "Your solution is okay!".

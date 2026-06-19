@@ -265,6 +265,32 @@ verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
 `@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
 is `sorryAx`.
 
+### Auditability gate (`comparator/`)
+
+For the Lean community's auditability standard for AI-authored work (the
+[leanprover/comparator](https://github.com/leanprover/comparator) gate +
+[`formalization.yaml`](formalization.yaml)), the headline results whose
+*statement* is expressible in mathlib alone are packaged under
+[`comparator/`](comparator/):
+
+- [`comparator/Challenge.lean`](comparator/Challenge.lean) — **mathlib-only**,
+  19 headline claims as `sorry` stubs (read this instead of the repo to see
+  exactly what is claimed).
+- [`comparator/Solution.lean`](comparator/Solution.lean) — imports the project
+  and discharges each stub with the real, axiom-clean theorem.
+- [`comparator/Conformance.lean`](comparator/Conformance.lean) — checks
+  `@Challenge.X = @Solution.X` for all 19 by proof irrelevance, so any
+  statement drift fails the build.
+
+```bash
+comparator/check-conformance.sh    # build the 3 modules + axiom-audit the 19
+```
+
+The ~40 further headline results quantify over project-specific structures and
+are not mathlib-only-statable; they stay audited by `scripts/check-axioms.sh`.
+See [`comparator/README.md`](comparator/README.md) for the full in-set list and
+the audit boundary, and `.github/workflows/comparator.yml` for the CI wiring.
+
 ## Partial / work-in-progress 🟡 — `lean/LeanFormalizations/PachDeZeeuw/` ([arXiv:1308.0177](https://arxiv.org/abs/1308.0177); crossing lemma [arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
 A ported copy of the Pach–de Zeeuw "distinct distances on algebraic curves"
