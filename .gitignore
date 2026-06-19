@@ -12,3 +12,7 @@
 /docs/references/*.pdf
 # proof-blueprint DB is a build artifact (intent/ is the durable record)
 /data/proof-blueprint.db
+# internal planning doc — not for publication
+/docs/lean-community-submission-standard-2026-06-18.md
+# internal cost-mining working record (cross-project data)
+/scratch/automation-cost-raw.md

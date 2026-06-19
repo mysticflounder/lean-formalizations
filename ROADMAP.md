@@ -44,7 +44,7 @@ modules — and advertising them.
 - [x] **Restore the proven Bézout finite-intersection assembly** — ported the
   ~1300-line resultant-based chain (`degreeOf_resultant_le` →
   `primitive`/`irreducible_pair_intersection_bound` → `factorized_bezout_bound`
-  → capstone `bezout`) from the `erdos-98` source into
+  → capstone `bezout`) from the source research repo into
   `PachDeZeeuw/Bezout.lean` (imports `AlgebraicPrelim`, namespace
   `PachDeZeeuw.Algebraic`), ported v4.27 → v4.30. Discharges
   `BezoutFiniteIntersectionStatement` (the **existential** form: `∃ C, finite ∧ ncard ≤

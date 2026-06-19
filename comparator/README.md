@@ -1,8 +1,7 @@
 # comparator/ — Zulip auditability gate
 
 This directory packages the project for the Lean community's **auditability gate
-for AI-authored formalizations** (leanprover Zulip, "AI authored projects"; see
-[`docs/lean-community-submission-standard-2026-06-18.md`](../docs/lean-community-submission-standard-2026-06-18.md)).
+for AI-authored formalizations** (leanprover Zulip, "AI authored projects").
 The gate answers *"is this claim real, and is it exactly what you say it is?"* —
 it is **not** the bar for mathlib inclusion (that is a separate PR review).
 
