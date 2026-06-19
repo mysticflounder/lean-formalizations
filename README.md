@@ -80,7 +80,28 @@ byproducts (a universal zero-rotation-energy projection and an isosceles-free
 sphere projection). Engine: a generic-avoidance compiler — one master
 `MvPolynomial` product over five constraint-polynomial families, with
 `MvPolynomial.funext` used exactly once. **Both modules are axiom-clean.** The
-Near Enemy module is self-contained mathematics.
+Near Enemy module is self-contained: it imports only Mathlib.
+
+**Provenance of the components.** The *name* "Near Enemy Theorem" and the
+*combination* — one generic projection simultaneously witnessing the whole
+profile, for every no-three-collinear set in any dimension, kernel-checked — are
+original to this project. The individual ingredients are not, and are credited
+here:
+
+| Component | Source |
+|---|---|
+| The "near enemy" set — lattice-sphere slice `{x ∈ [−h,h]^d ∩ ℤ^d : ‖x‖² = R}` projected generically to the plane | Erdős–Füredi–Pach–Ruzsa, "The grid revisited" (1993) |
+| A generic projection keeps points in general position (injective, no 3 collinear, no 4 concyclic in the image) | folklore "generic projection trick"; canonical statement Solymosi–Tao (2012) §5.1; used explicitly in Pach–de Zeeuw, "Distinct distances on algebraic curves" |
+| Bisector energy — the quantity that is minimized | Lund–Sheffer–de Zeeuw (2016), who introduced it as an *upper*-bound tool. The *minimization* direction and the floor `2n(n−1)` (all perpendicular bisectors distinct) are ours |
+| Decomposing congruent point-pair quadruples by isometry type (translation / half-turn / proper rotation), behind [`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315) | Elekes–Sharir (2011) / Guth–Katz (2015). The "rotation channel `= 0` for the image" statistic is ours |
+| The distinct-distance bound `n·2^{O(√log n)}` for general position that the sphere-slice corollary ultimately reduces to | Erdős–Füredi–Pach–Ruzsa (1993) — external arithmetic, **not** formalized and **not** claimed here |
+
+What is original to this project is therefore the *combination*, not the parts:
+the single-witness bundle, the bisector-energy minimization direction, the
+zero-rotation-energy and distance-transport conjuncts, and the kernel-checked
+formalization. The theorem carries **no new quantitative distinct-distance
+bound** — its distance-count conclusion equals the upstairs ±difference-class
+count, and any numeric bound on that count is EFPR's, not ours.
 
 ### `lean/LeanFormalizations/Geometry/ElekesSharir/` — incidence-geometry generic lemmas (L3/L4/L5) ([arXiv:1005.0982](https://arxiv.org/abs/1005.0982))
 
@@ -458,7 +479,21 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Lund, B., Sheffer, A., and de Zeeuw, F. "Bisector energy and few distinct
   distances." *Discrete Comput. Geom.* **56** (2016), no. 2, 337–356.
   arXiv:1411.6868; SoCG 2015, DOI: 10.4230/LIPIcs.SOCG.2015.537. (Journal DOI not
-  directly confirmed.) (Bisector-energy notion behind the Near Enemy Theorem.)
+  directly confirmed.) (Source of the bisector-energy notion the Near Enemy
+  Theorem *minimizes*; they use it for upper bounds, the minimization direction
+  is ours.)
+- Erdős, P., Füredi, Z., Pach, J., and Ruzsa, I.Z. "The grid revisited."
+  *Discrete Math.* **111** (1993), no. 1–3, 189–196. (Source of the "near enemy"
+  set — the lattice-sphere slice and its generic planar projection — and of the
+  general-position distinct-distance bound `n·2^{O(√log n)}` that the Near Enemy
+  sphere-slice corollary reduces to. DOI not independently confirmed.)
+- Solymosi, J. and Tao, T. "An incidence theorem in higher dimensions."
+  *Discrete Comput. Geom.* **48** (2012), no. 3, 255–280. arXiv:1103.2926. (§5.1
+  — the canonical "generic projection keeps points in general position" trick the
+  Near Enemy construction relies on. DOI not independently confirmed.) The
+  rotation-energy channel decomposition (translation / half-turn / proper
+  rotation) is the Elekes–Sharir (2011) / Guth–Katz (2015) framework cited under
+  *Distinct distances & incidences* above.
 
 ### Real algebraic geometry — `PachDeZeeuw/MilnorThom.lean`, `AlgebraicPrelim.lean`, `Bezout.lean`
 
