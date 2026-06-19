@@ -79,21 +79,19 @@ status:
     their closure is scripts/axiom-check.lean (run by scripts/check-axioms.sh).
 
 # how it was produced. Extra per-entry fields are allowed.
-# Figures below were reconstructed (2026-06-18) from session logs for the
-# lean-formalizations working dir only: Claude Code (~/.claude/projects/…/*.jsonl,
-# 8 sessions), Codex CLI (~/.codex/sessions, 19 sessions attributed by cwd), and
-# OpenCode (~/.local/share/opencode/opencode.db, 10 sessions). Token counts are
-# exact from the logs; USD is metered for OpenCode and notional API-equivalent
-# (Anthropic list price) for the otherwise-subscription Claude usage.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
 automation:                                          # [required]
   methods:
     - method: "agent"                                # AI agents under human direction
-      models: ["claude-opus-4-8"]                    # lean-formalizations Claude Code logs: opus-4-8 only (other projects also used opus-4-6/4-7, sonnet-4-6, fable-5)
+      models: ["claude-opus-4-8"]
       framework: "Claude Code (with agent-smith multi-agent orchestration)"
       tool_setup: >
-        Claude Code CLI with project skills/hooks (proof-blueprint, nthdegree memory,
-        lean4 proof-repair/golf/axiom-eliminator subagents, doc-check + lean-guardrail
-        hooks). Some work was carried in parallel git-worktree agent sessions.
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
       cost:
         wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
         spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
@@ -103,9 +101,9 @@ automation:                                          # [required]
         Math-proofs working style: hardest sub-obstruction first; conditional statements
         over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
     - method: "agent"
-      models: ["openai/codex (ChatGPT Pro plan; exact model recoverable from Codex turn_context)"]
+      models: ["openai/codex (ChatGPT Pro plan)"]
       framework: "Codex CLI"
-      tool_setup: "Parallel git-worktree agents managed via codex-nudge; checkpoint-commit nudging."
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
       cost:
         wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
         spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
@@ -123,16 +121,13 @@ automation:                                          # [required]
   spend_usd: >
     Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered) plus flat-rate Claude Max
     and ChatGPT/Codex Pro subscriptions. Notional API-equivalent of the Claude portion
-    ≈ $7,050 (Opus list price); Codex portion unpriced (subscription). Figures cover the
-    lean-formalizations working directory only.
+    ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
   notes: >
     Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
-    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode) over git
-    worktrees. Aggregate agent active-time ≈ 212 agent-hours (heavily overlapping, so far
-    below the sum in human terms). Every checkpoint re-ran the build and the axiom-clean
-    gate (scripts/check-axioms.sh); the comparator packaging was the final auditability step.
-    Token totals are exact from session logs; see scratch/automation-cost-raw.md for the
-    per-source breakdown and method.
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
 
 # fidelity
 fidelity:
