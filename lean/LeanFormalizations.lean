@@ -43,6 +43,17 @@ import LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm
 import LeanFormalizations.Geometry.ElekesSharir.RulingSkewness
 import LeanFormalizations.Geometry.ElekesSharir.ChordCurve
 
+-- Dumitrescu's isosceles-triangle counting bound (circumscribed case),
+-- complete and axiom-clean: for a finite planar set that is nonempty,
+-- non-collinear, convex-independent, and has ≥3 points on its minimum
+-- enclosing circle, `iCount A ≤ (11·|A|² − 18·|A|)/12` (Dumitrescu 2006,
+-- eq. (5); cap-decomposition method of Fox–Pach). Headline theorem
+-- `IsoscelesCounting.iCount_le_of_convexIndep_circumscribed` in
+-- `CGN/CGN8.lean`; importing it pulls the full dependency closure. Extracted
+-- from the erdos-97-96 project (problem-specific lower-bound / K4 / descent
+-- machinery deliberately NOT ported).
+import LeanFormalizations.Geometry.IsoscelesCounting.CGN.CGN8
+
 -- Elekes–Sharir / Guth–Katz reduction layer (base, sorry-free): the energy
 -- identity, dyadic richness-level decomposition, ES-GK ledger existence, the
 -- Cauchy–Schwarz bridge, and the elementary (E1)/(E2) O(n³) energy ceiling.

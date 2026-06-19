@@ -20,6 +20,10 @@ Keep this list in sync with the README's ✅ VERIFIED claims.
 #print axioms EuclideanGeometry.twoPoint_isometry_ncard_le_two
 #print axioms EuclideanGeometry.twoPoint_isometry_set_finite
 
+-- Dumitrescu's isosceles-counting bound (circumscribed case), Dumitrescu 2006 eq. (5)
+#print axioms IsoscelesCounting.iCount_le_of_convexIndep_circumscribed
+#print axioms IsoscelesCounting.CGN8_circumscribed_iCount_upper_bound
+
 -- Near Enemy Theorem
 #print axioms NearEnemy.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
 #print axioms NearEnemy.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport

@@ -9,8 +9,8 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 
 ## Verification status (2026-06-18)
 
-- **Build:** green — `lake build` completes all **8545 jobs**.
-- **Verified core:** the **61** theorems advertised as `✅ VERIFIED` below are
+- **Build:** green — `lake build` completes all **8585 jobs**.
+- **Verified core:** the **63** theorems advertised as `✅ VERIFIED` below are
   mechanically re-verified axiom-clean — each depends only on a subset of the
   Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
   with `./scripts/check-axioms.sh` (list in `scripts/axiom-check.lean`).
@@ -64,6 +64,22 @@ axiom-clean.**
 |---|---|
 | [`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225) | For `a b c d : EuclideanSpace ℝ (Fin 2)` with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c` and `b ↦ d` has `ncard ≤ 2`. Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation argument specific to two dimensions. |
 | [`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261) | The same two-point-pinned isometry set is `Finite` (with the underlying linear-isometry bounds). |
+
+### `lean/LeanFormalizations/Geometry/IsoscelesCounting/` — Dumitrescu's isosceles-triangle counting bound (Dumitrescu 2006; cap method of Fox–Pach 2012)
+
+A 40-file extraction (~17k lines, `namespace IsoscelesCounting`) of Dumitrescu's
+upper bound on the isosceles-triangle count of a convex point set. `iCount A`
+counts apex-isosceles triangles (equilaterals 3×); the closure reaches the bound
+through a minimum-enclosing-circle cap decomposition, the cyclic-order
+construction for convex-independent sets, the cap-local saving lemmas, and a
+cap-size Cauchy–Schwarz step. Ported from the erdos-97-96 project; the
+problem-specific lower-bound / `K4` / removable-vertex machinery is deliberately
+**not** included.
+
+| Theorem | What it asserts |
+|---|---|
+| [`iCount_le_of_convexIndep_circumscribed`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L60) | **Dumitrescu 2006, eq. (5) / Corollary 1.** For a finite planar set `A` that is nonempty, non-collinear, convex-independent (`ConvexIndep`), and has at least three points on its minimum enclosing circle, the isosceles-triangle count satisfies `(iCount A : ℝ) ≤ (11·\|A\|² − 18·\|A\|)/12`. |
+| [`CGN8_circumscribed_iCount_upper_bound`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean) | Provenance alias preserving the upstream erdos-97-96 identifier; definitionally the same statement. |
 
 ### `lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean` — Near Enemy Theorem for bisector energy (original result of this project; the bisector-energy notion it minimizes is from Lund–Sheffer–de Zeeuw, [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
 
