@@ -18,12 +18,12 @@ The matching upper bound `I(A) ≤ (11·|A|²−18·|A|)/12` for convex point se
 Dumitrescu 2006 eq. (5); it is the headline result extracted in
 `LeanFormalizations.Geometry.IsoscelesCounting.CGN.CGN8`.
 
-This is an extraction/port of the `iCount` definition from the erdos-97-96
-project. The Erdős-Problem-97-specific lower-bound machinery (the `K4`
+This is an extraction/port of the `iCount` definition from a separate
+formalization project. The problem-specific lower-bound machinery (the `K4`
 lemmas, `six_mul_card_le_iCount_of_K4`, the `n = 9` closure interfaces) is
-deliberately *not* ported — those depend on the problem-specific
-`HasNEquidistantProperty` predicate and are outside the scope of the
-isosceles-counting bound itself.
+deliberately *not* ported — those depend on a problem-specific equidistant
+neighbour predicate and are outside the scope of the isosceles-counting bound
+itself.
 -/
 
 set_option linter.style.openClassical false

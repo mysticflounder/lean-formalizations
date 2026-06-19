@@ -22,25 +22,29 @@ points on its minimum enclosing circle (the "circumscribed" hypothesis):
 
   `(iCount A : ℝ) ≤ (11 · |A|² − 18 · |A|) / 12`.
 
-This is **Dumitrescu 2006, eq. (5) / Corollary 1** — the combinatorial heart of
-Dumitrescu's isosceles-triangle bound, building on the cap-decomposition method
-of **Fox–Pach** for convex point sets.
+This is **Dumitrescu 2006, eq. (5)** — the isosceles-triangle count bound that
+Dumitrescu establishes (inside his per-vertex distinct-distances argument) for a
+convex point set.
 
 ## Provenance
 
-This is an extraction / port of `Problem97.CGN8_circumscribed_iCount_upper_bound`
-from the erdos-97-96 project, de-jargoned to a standalone module against plain
-Mathlib. The proof combines the three-cap decomposition, the support-cap
-packaging, the cap-local saving lemmas, the intra-cap disjointness lemma, and a
-cap-size Cauchy–Schwarz bound.
+This is an extraction / port of a `CGN8_circumscribed_iCount_upper_bound`
+declaration from a separate formalization project, de-jargoned to a standalone
+module against plain Mathlib. The bound `(11n²−18n)/12` is Dumitrescu's
+(eq. (5)); the Lean proof — a minimum-enclosing-circle three-cap decomposition,
+the support-cap packaging, the cap-local saving lemmas, the intra-cap
+disjointness lemma, and a cap-size Cauchy–Schwarz bound — is this project's
+formalization.
 
 ## References
 
-* A. Dumitrescu, *On distinct distances and isosceles triangles* (2006);
-  the bound is eq. (5) / Corollary 1 there.
-* J. Fox, J. Pach, *Coloring K_k-free intersection graphs of geometric objects
-  in the plane* and related cap-decomposition machinery for convex point sets
-  (2012).
+* A. Dumitrescu, *On Distinct Distances from a Vertex of a Convex Polygon*,
+  Discrete & Computational Geometry **36** (2006), no. 4, 503–509,
+  DOI 10.1007/s00454-006-1262-y. The isosceles-count bound `(11n²−18n)/12` is
+  eq. (5); the paper's headline result is the per-vertex distinct-distance bound.
+* G. Nivasch, J. Pach, R. Pinchasi, S. Zerbib, *The number of distinct distances
+  from a vertex of a convex polygon*, arXiv:1207.1266 (J. Comput. Geom. 2013) —
+  credits Dumitrescu's `(11n²−18n)/12` isosceles bound and sharpens it.
 -/
 
 open scoped EuclideanGeometry
@@ -773,8 +777,8 @@ theorem iCount_le_of_convexIndep_circumscribed
   nlinarith [hupper_real, hsave_total]
 
 /-- Provenance alias for `iCount_le_of_convexIndep_circumscribed`, preserving the
-upstream identifier `CGN8_circumscribed_iCount_upper_bound` from the erdos-97-96
-source for traceability. -/
+upstream identifier `CGN8_circumscribed_iCount_upper_bound` from the source
+formalization for traceability. -/
 theorem CGN8_circumscribed_iCount_upper_bound
     {A : Finset ℝ²}
     (hne : A.Nonempty)

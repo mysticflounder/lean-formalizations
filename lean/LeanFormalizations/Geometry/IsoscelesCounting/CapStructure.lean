@@ -287,7 +287,7 @@ end IsoscelesCounting
 `oppCap1`, `oppCap2`, the `capSum` lemma, the existence theorem
 `CapTriple.toSurplusCapPacket_of_card_gt_nine`, and the `(m, 4, 4)`
 regime predicate `IsM44` (with its consequences) have been moved
-downstream into `Erdos9796Proof.P97.CapPartitionFromMEC`, where the
+downstream into `IsoscelesCounting.CapPartitionFromMEC`, where the
 MEC promotion data (a `MEC.NonObtuseCircumscribedMoserTriangle` and
 its circumscribed-case-split witness) can be carried directly inside
 the packet. This is the prerequisite for downstream U1 sub-lemmas to

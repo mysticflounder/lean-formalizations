@@ -38,13 +38,24 @@ sources:                                            # [required]
     authors: ["János Pach", "Frank de Zeeuw"]
     id: "arXiv:1308.0177"
     type: "preprint"
+  - title: "On Distinct Distances from a Vertex of a Convex Polygon"
+    authors: ["Adrian Dumitrescu"]
+    id: "Discrete Comput. Geom. 36 (2006), no. 4, 503–509; DOI 10.1007/s00454-006-1262-y"
+    type: "article"
+    note: >
+      Source of the isosceles-triangle count bound I(P) ≤ (11n²−18n)/12 for a
+      convex point set — eq. (5) of the paper (its headline result is the
+      per-vertex distinct-distance bound). The IsoscelesCounting cluster formalizes
+      the cap-decomposition proof of that bound; no new quantitative bound is
+      claimed. Later improved by Nivasch–Pach–Pinchasi–Zerbib, J. Comput. Geom. 4
+      (2013), arXiv:1207.1266.
 
 # project status
 status:
   scope: >
     Collection of discrete-geometry and additive-combinatorics formalizations,
     mathlib-only dependencies (no project axioms; no native_decide in the verified
-    core). 61 headline theorems are audited axiom-clean by scripts/axiom-check.lean.
+    core). 63 headline theorems are audited axiom-clean by scripts/axiom-check.lean.
     19 of those — exactly the ones whose statement is expressible in mathlib alone —
     are packaged for the leanprover/comparator gate (see comparator/). The remaining
     headline results quantify over project-specific structures and are audited in-repo
@@ -74,8 +85,14 @@ status:
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
     comparator_config: "comparator/config.json"
+  - declaration: "IsoscelesCounting.iCount_le_of_convexIndep_circumscribed (alias CGN8_circumscribed_iCount_upper_bound)"
+    file: "lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: null    # quantifies over project-specific structures (iCount, ConvexIndep, MEC); audited in-repo, not in the mathlib-only comparator gate
+    literature_dependencies: ["Dumitrescu, Discrete Comput. Geom. 36 (2006) 503–509, eq. (5)"]
   full_audit_note: >
-    The complete list of 61 axiom-clean headline theorems and the gate that asserts
+    The complete list of 63 axiom-clean headline theorems and the gate that asserts
     their closure is scripts/axiom-check.lean (run by scripts/check-axioms.sh).
 
 # how it was produced. Extra per-entry fields are allowed.
@@ -133,10 +150,11 @@ automation:                                          # [required]
 fidelity:
   divergences: >
     The mathlib-only comparator gate covers the 19 headline claims that are statable
-    in mathlib alone. The remaining ~40 audited headline results are stated over
+    in mathlib alone. The remaining ~44 audited headline results are stated over
     project-specific structures (CombinatorialMap, PachDeZeeuw.Algebraic.Curry0,
     NearEnemy.bisectorEnergy, Esgk.Config, ElekesSharir.dist2/P2, AbstractPlanarizedMultigraph,
-    SimpleConvexPolygon, lineHomeomorph) and are audited by reading the repo plus
+    SimpleConvexPolygon, lineHomeomorph, IsoscelesCounting.iCount/ConvexIndep/MEC) and are
+    audited by reading the repo plus
     scripts/axiom-check.lean — see comparator/README.md. The Pach–Sharir / Szemerédi–Trotter
     incidence route remains open (8 sorries) and underlies no headline claim.
 
@@ -145,7 +163,7 @@ review:
   status: "self-assessed"                            # [required] axiom-clean gate + Conformance.lean self-check; no external peer review yet
   reviewers: []
   notes: >
-    Self-audit: scripts/check-axioms.sh asserts the 61 headline theorems are axiom-clean;
+    Self-audit: scripts/check-axioms.sh asserts the 63 headline theorems are axiom-clean;
     comparator/Conformance.lean mechanically checks Challenge ≡ Solution for all 19 by
     proof irrelevance; comparator/axiom-audit.lean prints the closure for the 19.
     The authoritative external check is a leanprover/comparator run (CI: .github/workflows/comparator.yml).
@@ -165,6 +183,10 @@ alignment:
     - source: "Elekes–Sharir rank–nullity for a linear functional"
       lean: "ElekesSharir.finrank_ker_functional_ge"
       module: "LeanFormalizations.ElekesSharirGuthKatz"
+      status: "proved"
+    - source: "Dumitrescu (2006) isosceles-triangle count bound for a convex point set, eq. (5): I(P) ≤ (11n²−18n)/12"
+      lean: "IsoscelesCounting.iCount_le_of_convexIndep_circumscribed"
+      module: "LeanFormalizations.Geometry.IsoscelesCounting.CGN.CGN8"
       status: "proved"
     - source: "Szemerédi–Trotter incidence assembly (Pach–Sharir route)"
       lean: "(in progress)"

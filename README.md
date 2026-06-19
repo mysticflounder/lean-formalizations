@@ -65,21 +65,22 @@ axiom-clean.**
 | [`twoPoint_isometry_ncard_le_two`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L225) | For `a b c d : EuclideanSpace ℝ (Fin 2)` with `a ≠ b` and `dist a b = dist c d`, the set of isometries sending `a ↦ c` and `b ↦ d` has `ncard ≤ 2`. Proof: Mazur–Ulam reduction to the linear part, then a right-angle-rotation argument specific to two dimensions. |
 | [`twoPoint_isometry_set_finite`](lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean#L261) | The same two-point-pinned isometry set is `Finite` (with the underlying linear-isometry bounds). |
 
-### `lean/LeanFormalizations/Geometry/IsoscelesCounting/` — Dumitrescu's isosceles-triangle counting bound (Dumitrescu 2006; cap method of Fox–Pach 2012)
+### `lean/LeanFormalizations/Geometry/IsoscelesCounting/` — Dumitrescu's isosceles-triangle counting bound (Dumitrescu 2006, [DOI 10.1007/s00454-006-1262-y](https://doi.org/10.1007/s00454-006-1262-y))
 
-A 40-file extraction (~17k lines, `namespace IsoscelesCounting`) of Dumitrescu's
-upper bound on the isosceles-triangle count of a convex point set. `iCount A`
-counts apex-isosceles triangles (equilaterals 3×); the closure reaches the bound
-through a minimum-enclosing-circle cap decomposition, the cyclic-order
+A 40-file extraction (~17k lines, `namespace IsoscelesCounting`) formalizing
+Dumitrescu's upper bound on the isosceles-triangle count of a convex point set.
+`iCount A` counts apex-isosceles triangles (equilaterals 3×); the proof reaches
+the bound through a minimum-enclosing-circle cap decomposition, the cyclic-order
 construction for convex-independent sets, the cap-local saving lemmas, and a
-cap-size Cauchy–Schwarz step. Ported from the erdos-97-96 project; the
-problem-specific lower-bound / `K4` / removable-vertex machinery is deliberately
-**not** included.
+cap-size Cauchy–Schwarz step. The `(11n²−18n)/12` bound is Dumitrescu's
+(eq. (5)); the Lean development of the cap machinery is this project's
+formalization. Ported from a separate project; the problem-specific lower-bound
+/ `K4` / removable-vertex machinery is deliberately **not** included.
 
 | Theorem | What it asserts |
 |---|---|
-| [`iCount_le_of_convexIndep_circumscribed`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L60) | **Dumitrescu 2006, eq. (5) / Corollary 1.** For a finite planar set `A` that is nonempty, non-collinear, convex-independent (`ConvexIndep`), and has at least three points on its minimum enclosing circle, the isosceles-triangle count satisfies `(iCount A : ℝ) ≤ (11·\|A\|² − 18·\|A\|)/12`. |
-| [`CGN8_circumscribed_iCount_upper_bound`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean) | Provenance alias preserving the upstream erdos-97-96 identifier; definitionally the same statement. |
+| [`iCount_le_of_convexIndep_circumscribed`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L60) | **Dumitrescu 2006, eq. (5).** For a finite planar set `A` that is nonempty, non-collinear, convex-independent (`ConvexIndep`), and has at least three points on its minimum enclosing circle, the isosceles-triangle count satisfies `(iCount A : ℝ) ≤ (11·\|A\|² − 18·\|A\|)/12`. |
+| [`CGN8_circumscribed_iCount_upper_bound`](lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean#L778) | Provenance alias preserving the upstream identifier; definitionally the same statement. |
 
 ### `lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean` — Near Enemy Theorem for bisector energy (original result of this project; the bisector-energy notion it minimizes is from Lund–Sheffer–de Zeeuw, [arXiv:1411.6868](https://arxiv.org/abs/1411.6868))
 
@@ -506,6 +507,18 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   rotation-energy channel decomposition (translation / half-turn / proper
   rotation) is the Elekes–Sharir (2011) / Guth–Katz (2015) framework cited under
   *Distinct distances & incidences* above.
+- Dumitrescu, A. "On Distinct Distances from a Vertex of a Convex Polygon."
+  *Discrete Comput. Geom.* **36** (2006), no. 4, 503–509.
+  DOI: 10.1007/s00454-006-1262-y. (Source of the isosceles-triangle count bound
+  `I(P) ≤ (11n²−18n)/12` for a convex point set, the headline of
+  `Geometry/IsoscelesCounting/` — it is eq. (5) of this paper, used there inside
+  the per-vertex distinct-distance argument. The cap-decomposition Lean
+  development is this project's formalization; no new quantitative bound is
+  claimed.)
+- Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. "The number of distinct
+  distances from a vertex of a convex polygon." *J. Comput. Geom.* **4** (2013),
+  no. 1, 1–12. arXiv:1207.1266. (Credits Dumitrescu's `(11n²−18n)/12` isosceles
+  bound and sharpens it; DOI not independently confirmed.)
 
 ### Real algebraic geometry — `PachDeZeeuw/MilnorThom.lean`, `AlgebraicPrelim.lean`, `Bezout.lean`
 
