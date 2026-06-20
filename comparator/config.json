@@ -30,6 +30,8 @@
     "Headline.quadraticPart_vanishes_iff",
     "Headline.two_mul_pairCount_le_bisectorEnergy",
     "Headline.bisectorEnergy_eq_of_bisectorInjective",
+    "Headline.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport",
+    "Headline.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport",
     "Headline.unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le",
     "Headline.ncard_coeff_roots_le_totalDegree",
     "Headline.resultant_ne_zero_of_isRelPrime_primitive_curry",

@@ -271,6 +271,103 @@ theorem bisectorEnergy_eq_of_bisectorInjective
       = 2 * P.card * (P.card - 1) :=
   sorry
 
+-- Near Enemy complete-profile existence headlines (`bisectorEnergy` inlined as
+-- above, `rotationEnergy` to its own mathlib `Finset.filter … |>.card` form). The
+-- def-site carries `open scoped Classical`, matched here.
+
+open scoped Classical in
+/-- Near Enemy complete profile, no-three-collinear case with distance transport:
+a no-3-collinear set in any Euclidean space has an injective planar projection
+hitting the bisector floor, absolutely minimal, image in general position, zero
+rotational energy, and image distances in bijection with upstairs ±difference
+classes (`bisectorEnergy`/`rotationEnergy` inlined). -/
+theorem nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+    {ι : Type*} [Fintype ι]
+    {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →
+      ¬ Collinear ℝ ({p₁, p₂, p₃} : Set (EuclideanSpace ℝ ι))) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+          ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card
+        = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+            ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+          q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+            {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card
+          ≤ (((P' ×ˢ P') ×ˢ (P' ×ˢ P')).filter fun q ↦
+            q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+              {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+          ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          dist q.1.1 q.1.2 = dist q.2.1 q.2.2 ∧
+          q.1.1 - q.1.2 ≠ q.2.1 - q.2.2 ∧
+          q.1.1 - q.1.2 ≠ -(q.2.1 - q.2.2)).card = 0 ∧
+      (∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+        (dist (T a) (T b) = dist (T c) (T e) ↔
+          (a - b = c - e ∨ a - b = -(c - e)))) ∧
+      (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2).card =
+        ((G.offDiag).image fun p ↦
+          ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card :=
+  sorry
+
+open scoped Classical in
+/-- Near Enemy complete profile, sphere-slice case with distance transport: every
+finite subset of a sphere in any Euclidean space admits the same complete planar
+projection profile (`bisectorEnergy`/`rotationEnergy` inlined). -/
+theorem nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
+    {ι : Type*} [Fintype ι]
+    {center : EuclideanSpace ℝ ι} {R : ℝ} {G : Finset (EuclideanSpace ℝ ι)}
+    (hG : ∀ x ∈ G, x ∈ Metric.sphere center R) :
+    ∃ T : EuclideanSpace ℝ ι →ₗ[ℝ] EuclideanSpace ℝ (Fin 2),
+      Set.InjOn (fun x ↦ T x) ↑G ∧
+      ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+          ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card
+        = 2 * G.card * (G.card - 1) ∧
+      (∀ P' : Finset (EuclideanSpace ℝ (Fin 2)), P'.card = G.card →
+        ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+            ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+          q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+            {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card
+          ≤ (((P' ×ˢ P') ×ˢ (P' ×ˢ P')).filter fun q ↦
+            q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+              {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), q₁ ≠ q₂ → q₁ ≠ q₃ → q₂ ≠ q₃ →
+          ¬ Collinear ℝ ({q₁, q₂, q₃} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      (∀ q₁ ∈ G.image (fun x ↦ T x), ∀ q₂ ∈ G.image (fun x ↦ T x),
+        ∀ q₃ ∈ G.image (fun x ↦ T x), ∀ q₄ ∈ G.image (fun x ↦ T x),
+        q₁ ≠ q₂ → q₁ ≠ q₃ → q₁ ≠ q₄ → q₂ ≠ q₃ → q₂ ≠ q₄ → q₃ ≠ q₄ →
+          ¬ EuclideanGeometry.Cospherical
+            ({q₁, q₂, q₃, q₄} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+      ((((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x)) ×ˢ
+          ((G.image fun x ↦ T x) ×ˢ (G.image fun x ↦ T x))).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          dist q.1.1 q.1.2 = dist q.2.1 q.2.2 ∧
+          q.1.1 - q.1.2 ≠ q.2.1 - q.2.2 ∧
+          q.1.1 - q.1.2 ≠ -(q.2.1 - q.2.2)).card = 0 ∧
+      (∀ a ∈ G, ∀ b ∈ G, ∀ c ∈ G, ∀ e ∈ G,
+        (dist (T a) (T b) = dist (T c) (T e) ↔
+          (a - b = c - e ∨ a - b = -(c - e)))) ∧
+      (((G.image fun x ↦ T x).offDiag).image fun q ↦ dist q.1 q.2).card =
+        ((G.offDiag).image fun p ↦
+          ({p.1 - p.2, p.2 - p.1} : Finset (EuclideanSpace ℝ ι))).card :=
+  sorry
+
 -- ── Unit-distance elimination-order counting (Combinatorics/UnitDistance) ────
 -- Inlines `unitForwardNeighborFinset`/`unitPairIndexFinset` (transparent
 -- `Finset.filter`/`Finset.sigma` over `dist (p i) (p j) = 1`).
