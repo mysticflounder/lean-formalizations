@@ -18,6 +18,7 @@
     "Headline.convex_line_intersection_isPreconnected",
     "Headline.strictlyConvex_boundary_no_three_collinear",
     "Headline.chord_in_frontier_of_collinear_boundary_triple",
+    "Headline.collinear_vertices_cyclicInterval",
     "Headline.tree_exists_leaf_insertion_order",
     "Headline.connected_induce_take_of_leaf_insertion_parent",
     "Headline.connected_apply_eq_of_forall_adj",

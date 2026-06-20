@@ -139,6 +139,49 @@ theorem chord_in_frontier_of_collinear_boundary_triple {V : Type*} [NormedAddCom
     segment ℝ a c ⊆ frontier s :=
   sorry
 
+-- `SimpleConvexPolygon V` is a structure (not def-inlinable): its four
+-- mathlib-typed fields are unbundled here as explicit `vertices : List V`
+-- hypotheses. `IsCyclicInterval` is a transparent `def` over `List.rotate`/
+-- `List.take`/`Finset`, inlined in the conclusion. The file carries
+-- `open Classical`, so the `DecidableEq V` of the `Finset` literals and
+-- `List.toFinset` is `Classical.propDecidable` — inlined under `open scoped
+-- Classical in`. `Solution.lean` reconstructs the structure and applies the
+-- project theorem (defeq via structure projection + `Fin` proof irrelevance).
+
+open scoped Classical in
+/-- In a 2-dimensional space, three collinear vertices of a simple convex polygon
+whose supporting line meets no other vertex occur consecutively in the cyclic
+vertex order (`SimpleConvexPolygon` fields unbundled, `IsCyclicInterval` inlined). -/
+theorem collinear_vertices_cyclicInterval {V : Type*}
+    [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+    (hdim : Module.finrank ℝ V = 2)
+    (vertices : List V)
+    (nodup : vertices.Nodup)
+    (length_ge_three : 3 ≤ vertices.length)
+    (on_frontier : ∀ v ∈ vertices,
+      v ∈ frontier (convexHull ℝ ((vertices.toFinset : Set V))))
+    (consecutive_segments_on_frontier : ∀ (i : Fin vertices.length),
+      segment ℝ (vertices.get i)
+          (vertices.get ⟨(i.val + 1) % vertices.length,
+            Nat.mod_lt _ (by have := length_ge_three; omega)⟩) ⊆
+        frontier (convexHull ℝ ((vertices.toFinset : Set V))))
+    {a b c : V}
+    (ha : a ∈ vertices) (hb : b ∈ vertices) (hc : c ∈ vertices)
+    (hab : a ≠ b) (hbc : b ≠ c) (hac : a ≠ c)
+    (huniq : ∀ v ∈ vertices, v ∈ affineSpan ℝ ({a, b, c} : Set V) →
+      v = a ∨ v = b ∨ v = c)
+    (hcol : Collinear ℝ ({a, b, c} : Set V)) :
+    ∃ x y z : V,
+      ({a, b, c} : Finset V) = ({x, y, z} : Finset V) ∧
+        ∃ k : Nat, k < vertices.length ∧
+          ((vertices.rotate k).take 3 = [x, y, z] ∨
+           (vertices.rotate k).take 3 = [x, z, y] ∨
+           (vertices.rotate k).take 3 = [y, x, z] ∨
+           (vertices.rotate k).take 3 = [y, z, x] ∨
+           (vertices.rotate k).take 3 = [z, x, y] ∨
+           (vertices.rotate k).take 3 = [z, y, x]) :=
+  sorry
+
 -- ── Tree order (Combinatorics/SimpleGraph) ─────────────────────────────────
 
 theorem tree_exists_leaf_insertion_order {V : Type*} (G : SimpleGraph V) [Fintype V]
