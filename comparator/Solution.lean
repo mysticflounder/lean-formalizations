@@ -148,6 +148,28 @@ theorem collinear_vertices_cyclicInterval {V : Type*}
       consecutive_segments_on_frontier := consecutive_segments_on_frontier }
     ha hb hc hab hbc hac huniq hcol
 
+open scoped Classical in
+theorem iCount_le_of_convexIndep_circumscribed
+    {A : Finset (EuclideanSpace ℝ (Fin 2))}
+    (hne : A.Nonempty)
+    (hnoncol : ¬ Collinear ℝ (A : Set (EuclideanSpace ℝ (Fin 2))))
+    (hconv : ∀ a ∈ (A : Set (EuclideanSpace ℝ (Fin 2))),
+      a ∉ convexHull ℝ ((A : Set (EuclideanSpace ℝ (Fin 2))) \ {a}))
+    (center : EuclideanSpace ℝ (Fin 2)) (radius : ℝ)
+    (radius_nn : 0 ≤ radius)
+    (enclosing : ∀ p ∈ A, dist p center ≤ radius)
+    (minimal : ∀ c' r', (∀ p ∈ A, dist p c' ≤ r') → radius ≤ r')
+    (hbd : 3 ≤ (A.filter (fun p => dist p center = radius)).card) :
+    ((∑ p ∈ A, (((A.erase p).powersetCard 2).filter
+        (fun s => ∃ r : ℝ, ∀ q ∈ s, dist p q = r)).card : ℕ) : ℝ)
+      ≤ ((11 : ℝ) * A.card ^ 2 - 18 * A.card) / 12 := by
+  obtain ⟨hc, hr⟩ := IsoscelesCounting.MinEnclosingCircle.unique_pair hne radius_nn
+    (IsoscelesCounting.MEC.mec A hne).radius_nn enclosing
+    (IsoscelesCounting.MEC.mec A hne).enclosing minimal
+    (IsoscelesCounting.MEC.mec A hne).minimal
+  subst hc; subst hr
+  exact IsoscelesCounting.iCount_le_of_convexIndep_circumscribed hne hnoncol hconv hbd
+
 -- ── Tree order (Combinatorics/SimpleGraph) ─────────────────────────────────
 
 theorem tree_exists_leaf_insertion_order {V : Type*} (G : SimpleGraph V) [Fintype V]

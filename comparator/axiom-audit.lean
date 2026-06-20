@@ -25,6 +25,7 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.strictlyConvex_boundary_no_three_collinear
 #print axioms Headline.chord_in_frontier_of_collinear_boundary_triple
 #print axioms Headline.collinear_vertices_cyclicInterval
+#print axioms Headline.iCount_le_of_convexIndep_circumscribed
 #print axioms Headline.tree_exists_leaf_insertion_order
 #print axioms Headline.connected_induce_take_of_leaf_insertion_parent
 #print axioms Headline.connected_apply_eq_of_forall_adj

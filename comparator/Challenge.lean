@@ -182,6 +182,38 @@ theorem collinear_vertices_cyclicInterval {V : Type*}
            (vertices.rotate k).take 3 = [z, y, x]) :=
   sorry
 
+-- Isosceles-triangle counting (Dumitrescu). `MinEnclosingCircle A` is a
+-- structure extracted by choice (`mec A hne`); its `center`/`radius` are not
+-- def-inlinable, so the minimum-enclosing-circle is unbundled as `(center,
+-- radius)` + its three mathlib-typed axioms (`radius_nn`/`enclosing`/`minimal`).
+-- `iCount`/`IsoscelesPairsAt` (transparent `Finset.sum`/`powersetCard`/`filter`)
+-- and `ConvexIndep` (= `∀ a ∈ ↑A, a ∉ convexHull ℝ (↑A \ {a})`) are inlined.
+-- The `iCount` filter `∃ r, …` is classical; the `dist · = radius` filter is
+-- `Real.decidableEq` (wins over low-prio classical) — both matched under
+-- `open scoped Classical in`. `Solution.lean` bridges the abstract circle to
+-- `mec A hne` by the min-enclosing-circle uniqueness lemma.
+
+open scoped Classical in
+/-- Dumitrescu isosceles-counting bound, circumscribed case: a convex-independent,
+non-collinear planar set with ≥ 3 points on its minimum enclosing circle has at
+most `(11n² − 18n)/12` isosceles triples (`iCount`/`ConvexIndep` inlined,
+`MinEnclosingCircle` unbundled to `center`/`radius` + its three axioms). -/
+theorem iCount_le_of_convexIndep_circumscribed
+    {A : Finset (EuclideanSpace ℝ (Fin 2))}
+    (hne : A.Nonempty)
+    (hnoncol : ¬ Collinear ℝ (A : Set (EuclideanSpace ℝ (Fin 2))))
+    (hconv : ∀ a ∈ (A : Set (EuclideanSpace ℝ (Fin 2))),
+      a ∉ convexHull ℝ ((A : Set (EuclideanSpace ℝ (Fin 2))) \ {a}))
+    (center : EuclideanSpace ℝ (Fin 2)) (radius : ℝ)
+    (radius_nn : 0 ≤ radius)
+    (enclosing : ∀ p ∈ A, dist p center ≤ radius)
+    (minimal : ∀ c' r', (∀ p ∈ A, dist p c' ≤ r') → radius ≤ r')
+    (hbd : 3 ≤ (A.filter (fun p => dist p center = radius)).card) :
+    ((∑ p ∈ A, (((A.erase p).powersetCard 2).filter
+        (fun s => ∃ r : ℝ, ∀ q ∈ s, dist p q = r)).card : ℕ) : ℝ)
+      ≤ ((11 : ℝ) * A.card ^ 2 - 18 * A.card) / 12 :=
+  sorry
+
 -- ── Tree order (Combinatorics/SimpleGraph) ─────────────────────────────────
 
 theorem tree_exists_leaf_insertion_order {V : Type*} (G : SimpleGraph V) [Fintype V]
