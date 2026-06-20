@@ -21,8 +21,12 @@ drift between the two files cannot pass silently.
 
 ## Audit boundary — what is and isn't here
 
-The 19 theorems below are exactly the headline results whose **statement** is
-expressible using mathlib definitions alone. They span:
+The 47 theorems below are the headline results whose **statement** is expressible
+using mathlib definitions alone. Where a result is stated with a transparent
+project `def`/`abbrev`, that symbol is inlined to its mathlib body; where it
+quantifies over a project structure with mathlib-typed fields, the structure is
+unbundled into those fields as hypotheses; one result eliminates a constructed
+homeomorphism in favour of `AffineMap.lineMap`. They span:
 
 * Balog–Szemerédi–Gowers over `Finset.addEnergy` (asymmetric, symmetric,
   explicit-constant, and the popular-difference-graph connector);
@@ -30,20 +34,38 @@ expressible using mathlib definitions alone. They span:
   `EuclideanSpace ℝ (Fin 2) ≃ᵢ EuclideanSpace ℝ (Fin 2)`);
 * `no-3-collinear ⟹ ThreeAPFree`;
 * convex slicing (preconnected line-intersection; strictly-convex boundary has
-  no 3 collinear points; collinear boundary triple ⟹ chord in frontier);
+  no 3 collinear points; collinear boundary triple ⟹ chord in frontier;
+  convex line-slice order-connectedness with `lineHomeomorph` eliminated);
+* the simple-convex-polygon collinear-vertices cyclic-interval bridge
+  (`SimpleConvexPolygon` unbundled, `IsCyclicInterval` inlined);
+* the Dumitrescu isosceles-counting circumscribed bound (`iCount`/`ConvexIndep`
+  inlined, the minimum enclosing circle unbundled);
 * tree-order helpers (leaf-insertion order; prefix-induced connectedness;
   edge-constant functions are globally constant);
 * the Elekes–Sharir generic linear-algebra core (rank–nullity for a functional;
-  pullback non-degeneracy; the orthogonal-matrix quadratic-form identities).
+  pullback non-degeneracy; the orthogonal-matrix quadratic-form identities);
+* the Elekes–Sharir geometric core (`dist2`/`J`/`esLine`/`Intersect`/`Parallel`/
+  `IsDist2Preserving`/`PairwiseSkewRuling` inlined: two-pinned determinant,
+  squared-distance intersection criterion, and the isometry-graph exclusions);
+* the Near Enemy bisector-energy floor and equality, and the two
+  distance-transport complete-profile existence results
+  (`bisectorEnergy`/`rotationEnergy` inlined);
+* unit-distance elimination-order counting (`unitPairIndexFinset` etc. inlined);
+* the Pach–de Zeeuw / Bézout finite-intersection layer (`Curry0`,
+  `Specialized0`, `PlaneCurveZeroSet`, resultant and fiber bounds — inlined);
+* the Elekes–Sharir–Guth–Katz base layer (`Config`, `OrderedMultiplicity`,
+  `DistanceEnergy`, `Richness`, `IsDirect`, `InGeneralPosition`, `hIndexed`,
+  the rich-isometry-family decomposition — inlined).
 
-The project also proves a further ~40 headline results whose statements
-**quantify over project-specific structures** and therefore cannot be stated in
-mathlib alone — e.g. `CombinatorialMap`, `PachDeZeeuw.Algebraic.Curry0`,
-`NearEnemy.bisectorEnergy`, `Esgk.Config`, `ElekesSharir.dist2 / P2`,
-`AbstractPlanarizedMultigraph`, `SimpleConvexPolygon`, `lineHomeomorph`. Those
-are audited by reading the repository and its `scripts/axiom-check.lean` report;
-they are out of scope for this mathlib-only comparator gate. See
-`comparator/README.md` for the full enumeration.
+The project also proves headline results whose statements **quantify over a
+project-specific structure that is genuinely new** (not a transparent definition
+or a mathlib-typed field bundle) and therefore cannot be restated in mathlib
+alone — the combinatorial-map planar edge-bound surface (`CombinatorialMap`,
+`AbstractPlanarizedMultigraph`, `planar_multigraph_edge_bound`). The `GL₂`
+unipotent helper is an auxiliary lemma kept out of the gate. These are audited by
+reading the repository and its axiom-closure report; they are out of scope for
+this mathlib-only comparator gate. See `comparator/README.md` for the full
+enumeration.
 
 Every theorem in `Solution.lean` is axiom-clean: its `#print axioms` closure is a
 subset of `{propext, Classical.choice, Quot.sound}` (no `sorryAx`, no custom
@@ -52,7 +74,7 @@ axioms, no `native_decide`). See `comparator/config.json` `permitted_axioms`.
 
 open scoped Matrix Pointwise
 
--- The 19 headline claims live in a SHARED namespace `Headline`, used identically
+-- The 47 headline claims live in a SHARED namespace `Headline`, used identically
 -- in Challenge.lean and Solution.lean. The comparator (leanprover/comparator)
 -- looks up each `config.json` theorem name in BOTH exports under the same
 -- fully-qualified name, so the namespace must match across the two modules. It

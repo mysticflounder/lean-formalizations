@@ -26,7 +26,7 @@ project-specific structures and are therefore audited by reading the repo).
 
 open scoped Matrix Pointwise
 
--- The 19 headline claims live in a SHARED namespace `Headline`, used identically
+-- The 47 headline claims live in a SHARED namespace `Headline`, used identically
 -- in Challenge.lean and Solution.lean. The comparator (leanprover/comparator)
 -- looks up each `config.json` theorem name in BOTH exports under the same
 -- fully-qualified name, so the namespace must match across the two modules. It

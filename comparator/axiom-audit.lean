@@ -8,7 +8,7 @@ reviewer (or CI) see the closure directly. Every report must be a subset of
 {propext, Classical.choice, Quot.sound} — no `sorryAx`, no custom axioms, no
 `Lean.ofReduceBool` (the project uses no `native_decide`).
 
-The 19 theorems live in the shared `Headline` namespace in `Solution.lean`, so
+The 47 theorems live in the shared `Headline` namespace in `Solution.lean`, so
 the comparator finds them under the same qualified names listed in `config.json`.
 
 Run: lake env lean comparator/axiom-audit.lean

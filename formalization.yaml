@@ -56,7 +56,7 @@ status:
     Collection of discrete-geometry and additive-combinatorics formalizations,
     mathlib-only dependencies (no project axioms; no native_decide in the verified
     core). 63 headline theorems are audited axiom-clean by scripts/axiom-check.lean.
-    19 of those — exactly the ones whose statement is expressible in mathlib alone —
+    47 of those — exactly the ones whose statement is expressible in mathlib alone —
     are packaged for the leanprover/comparator gate (see comparator/). The remaining
     headline results quantify over project-specific structures and are audited in-repo
     (see comparator/README.md "audit boundary"). One incidence route (Pach–Sharir /
@@ -69,7 +69,7 @@ status:
     depend on `sorryAx`. None of them is a headline claim, is named in
     scripts/axiom-check.lean, or appears in comparator/config.json `theorem_names`.
   main_results:
-  - declaration: "comparator/config.json theorem_names (19 mathlib-only headline claims)"
+  - declaration: "comparator/config.json theorem_names (47 mathlib-only headline claims)"
     file: "comparator/Solution.lean"
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -149,14 +149,13 @@ automation:                                          # [required]
 # fidelity
 fidelity:
   divergences: >
-    The mathlib-only comparator gate covers the 19 headline claims that are statable
-    in mathlib alone. The remaining ~44 audited headline results are stated over
-    project-specific structures (CombinatorialMap, PachDeZeeuw.Algebraic.Curry0,
-    NearEnemy.bisectorEnergy, Esgk.Config, ElekesSharir.dist2/P2, AbstractPlanarizedMultigraph,
-    SimpleConvexPolygon, lineHomeomorph, IsoscelesCounting.iCount/ConvexIndep/MEC) and are
-    audited by reading the repo plus
-    scripts/axiom-check.lean — see comparator/README.md. The Pach–Sharir / Szemerédi–Trotter
-    incidence route remains open (8 sorries) and underlies no headline claim.
+    The mathlib-only comparator gate covers the 47 headline claims that are statable
+    in mathlib alone. The remaining audited headline results are stated over
+    project-specific structures that are genuinely new (CombinatorialMap,
+    AbstractPlanarizedMultigraph, and the GL₂ unipotent helper) and are
+    audited by reading the repo plus scripts/axiom-check.lean — see comparator/README.md.
+    The Pach–Sharir / Szemerédi–Trotter incidence route remains open (8 sorries) and
+    underlies no headline claim.
 
 # review status
 review:
@@ -164,7 +163,7 @@ review:
   reviewers: []
   notes: >
     Self-audit: scripts/check-axioms.sh asserts the 63 headline theorems are axiom-clean;
-    comparator/axiom-audit.lean prints the #print axioms closure for the 19 mathlib-only
+    comparator/axiom-audit.lean prints the #print axioms closure for the 47 mathlib-only
     headline claims. The authoritative external check is a leanprover/comparator run that
     verifies statement identity (Challenge ≡ Solution, shared Headline namespace) and axiom
     compliance and re-runs the nanoda + Lean default kernels (CI: .github/workflows/comparator.yml;
