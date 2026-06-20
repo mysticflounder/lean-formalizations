@@ -574,7 +574,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    reconciled at corners by the existing L2 convex/reflex sector model where `z` is near a
    vertex.  The vertex region is the **corner-tube overlap** `{infDist z (edge i) < δ₀} ∩
    {infDist z (edge i+1) < δ₀}` — controlled by the **free** `δ₀`, not by `ρ_v`, which is
-   what escapes the wall.  **KEYSTONE DONE:** `exists_delta_corner_confine` — for any
+   what escapes the constraint.  **KEYSTONE DONE:** `exists_delta_corner_confine` — for any
    target radius `r>0`, ∃ `δ>0` s.t. a point within `δ` of both incident edges is within
    `r` of the shared vertex (compactness: trim each edge to its `≥ r/2`-from-`v` part,
    disjoint compacts by `consecutive_meet`, separated by `σ`, take `δ = min(r/2, σ/2)`);
@@ -586,7 +586,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    the keystone + the C2 glue); the `δ₀` budget choice.  Hypotheses: `IsCorner` at interior
    vertices (gives the finite `sin θ` min) + endpoints in `Rᶜ`.
 
-   **THE `tan θ` WALL IS AN ARTIFACT — DISSOLVED (2026-06-03).**  Re-examining the wall:
+   **The `tan θ` constraint is an artifact of the vertex-distance estimate and does not apply to the strip-width bound (2026-06-03).**  Re-examining the constraint:
    it came entirely from discharging the glue's thinness `hthin` via `exists_radius_thin`,
    whose bound `|sideForm v b z| ≤ M·dist v z` measures to the **vertex** (so `r ≈
    tan θ·edgelen`, angle-dependent).  But the literature's normal-distance estimate measures
@@ -606,7 +606,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    has no Jordan/crosscut/arc-separation lemma to import (searched) — the collar must be
    built, but this estimate removes the obstruction.  STILL TODO unchanged below, now with a
    clear path: bands carry an `infDist z (segCarrier i) < δ₀` strip certificate, vertex
-   pieces are `τ`-selected sectors, all glued by `thin_of_infDist_*` (no `ρ_v` wall);
+   pieces are `τ`-selected sectors, all glued by `thin_of_infDist_*` (no `ρ_v` constraint);
    `exists_delta_nonadjacent_tube_sep` kills non-adjacent overlaps; `exists_delta_corner_confine`
    remains available for the adjacent band–band case.
 
@@ -1052,7 +1052,7 @@ This **pins, with no slack, the only remaining geometric obligations**:
 
 * **Collar instantiation — BLOCKED (2026-06-13): the assembly target's hypothesis bundle
   is PROVABLY UNSATISFIABLE for any arc with an interior vertex (`numSegs ≥ 2`); the sole
-  P5 lemma re-imports the `L₂² ≤ L₁·L∞` wall.  Machine-checked.**  Producing the
+  P5 lemma re-imports the `L₂² ≤ L₁·L∞` constraint.  Machine-checked.**  Producing the
   `(δ₀, α, ρ, S)` bundle for
   `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
   (`PLCollarSeparation.lean:260`) **requires proving `False`**:
@@ -1070,13 +1070,13 @@ This **pins, with no slack, the only remaining geometric obligations**:
     (`hsectorW` vs `hO1`/`hO2`); it is the only assembled P5 route.
   - The collision is **unconditional** (angle-independent): chaining with `hband`
     (`M_i·δ₀ < α·P_i`) gives `α·L_i < ρ ≤ δ₀ < α·P_i/M_i`, i.e.
-    `L_i < P_i/M_i = ‖Δ‖₂²/‖Δ‖₁ ≤ ‖Δ‖_∞ = L_i` — the sup-metric `L₂² ≤ L₁·L∞` wall (§6,
+    `L_i < P_i/M_i = ‖Δ‖₂²/‖Δ‖₁ ≤ ‖Δ‖_∞ = L_i` — the sup-metric `L₂² ≤ L₁·L∞` constraint (§6,
     line 567), here machine-confirmed as a standalone Lean lemma.
-  - **Root cause:** the §6 "wall dissolved (2026-06-03)" resolution converted the
+  - **Root cause:** the §6 "constraint eliminated (2026-06-03)" resolution converted the
     **disjointness glue (P3)** to the angle-free `thin_of_infDist_*` form, but the **P5
     sector-in-tube containment** still uses the *metric disk* `ball(verts, ρ)` — the
     `sectorPlus`/`collarPlus` definitions (`PLArc.lean:2752`/`2789`) were never converted to
-    the δ₀-controlled corner-tube-overlap form, so the wall remains live there.
+    the δ₀-controlled corner-tube-overlap form, so the constraint persists there.
   **Fix path (NOT attempted, out of this node's scope):** redefine `sectorPlus`/`sectorMinus`
   as a δ₀-corner-tube-overlap `{infDist z (edge i) < δ₀} ∩ {infDist z (edge i+1) < δ₀} ∩
   vertexPlus` (the free-`δ₀` vertex region of §6 line 576, controlled by `δ₀`, not by a disk

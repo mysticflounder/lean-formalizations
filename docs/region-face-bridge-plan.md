@@ -371,7 +371,7 @@ fronts. All file:line verified against the current tree.
   `False`-from-bundle finding.)
 - **NEW δ₀-corner-tube sector: jointly SATISFIABLE** (concrete assignment given) —
   **but with a subtlety**: reusing the *narrowed band* foot witness (`1−2α`) in the
-  rewritten `overlap_…_src/tgt` reintroduces the wall (`‖Δ‖₁·‖Δ‖∞/‖Δ‖₂² < 1/4`,
+  rewritten `overlap_…_src/tgt` reintroduces the constraint (`‖Δ‖₁·‖Δ‖∞/‖Δ‖₂² < 1/4`,
   impossible by `l1_linf ≥ l2sq`). **Resolution:** the corner-tube admits a **free
   off-edge witness** along the bisector toward `v`, decoupling δ₀ from `αL` ⇒ Group
   B reduces to `δ₀ > 0`. SAT holds; the redefinition is sound.
@@ -412,19 +412,18 @@ for the δ₀-tube model. **Validated GREEN** (the entire 3777–4111 region com
 
 **Reach lemma = the genuine crux** (`overlap_sectorPlus_bandStripPlus_src`, PLArc:6222).
 The δ₀-tube sector additionally needs the witness within δ₀ of the **outgoing** edge i+1.
-The naive on-edge band witness (foot `1−2α` or `1−α`, near `v`) **provably hits a wall
+The naive on-edge band witness (foot `1−2α` or `1−α`, near `v`) **provably fails
 for gentle corners**: the joint reach `αL·sinφ < δ₀` and band-thinness `hδin`
 (`δ₀ < α·(L²/‖Δ‖₁)·|tanφ|`) reduce to **`|cos φ| < ‖Δ‖₂/‖Δ‖₁`**, which fails when the
 corner turn `φ ≈ 0` and edge `i` is diagonal (`‖Δ‖₂/‖Δ‖₁ → 1/√2`). This *supersedes*
 §7.3's hand-wavy "free bisector witness ⇒ reach reduces to δ₀>0" — that claim was not
-verified and the wall is real for that witness family.
+verified and the failure is real for that witness family.
 
-**ROOT CAUSE + FIX LEAD (concrete, not a dead end):** the wall is *entirely* from the
+**ROOT CAUSE + FIX LEAD (concrete, not a dead end):** the obstruction is *entirely* from the
 **`‖Δ‖₁` L1-norm** in `hδin`, which enters via `thin_of_infDist_incoming` (≈PLArc:3284,
 used by `bandStrip_incoming_mem_vertexPlus` 3263). If `thin_of_infDist_incoming` can be
 reproven with **`‖Δ‖₂`** (L2) instead of `‖Δ‖₁`, the joint condition becomes
-`|cos φ| < 1` — true for **every** genuine corner (`φ ∈ (0,π)`, `φ≠0`) — and the wall
-dissolves. {{NEEDS_PROOF}}: verify `thin_of_infDist_incoming` admits the L2 bound
+`|cos φ| < 1` — true for **every** genuine corner (`φ ∈ (0,π)`, `φ≠0`) — and the constraint is eliminated. {{NEEDS_PROOF}}: verify `thin_of_infDist_incoming` admits the L2 bound
 (depends on whether its `‖Δ‖₁` is a coordinate-wise-essential estimate or a soft
 Cauchy–Schwarz step that tightens to `‖Δ‖₂`). **This is the next action.** If L2 holds,
 the reach goes through with the existing on-edge witness (re-pointed at the δ₀-tube,
@@ -437,11 +436,11 @@ independent-but-mechanical (`isPreconnected_sector*` convexity 4801/4811,
 `sectorPlus_subset_taperedTube` 8172, the bundle 8634, P2-cover 2946). Do these *after*
 the reach is settled (the reach may change δ₀/α constraints feeding the bundle).
 
-## 9 · §8's fix-lead is DEAD; the intersection-tube walls structurally; pivot to a union tube (2026-06-14, later)
+## 9 · §8's fix-lead is refuted; the intersection-tube model is structurally obstructed; pivot to a union tube (2026-06-14, later)
 
 §8's `{{NEEDS_PROOF}}` (tighten `‖Δ‖₁ → ‖Δ‖₂` in `thin_of_infDist_incoming`) is now
 **resolved NEGATIVE — provably impossible** — and the diagnosis sharpened to a
-*structural* wall in the intersection-tube model. Verified by reading, no longer
+*structural* obstruction in the intersection-tube model. Verified by reading, no longer
 conjectural.
 
 **(a) `Plane = ℝ×ℝ` carries the L∞ (sup/max) product metric** (`Prod.dist_eq`), not
@@ -452,10 +451,9 @@ Euclidean. So `Metric.infDist` is the L∞ distance `d∞`.
 distance. But for every vector `‖x‖∞ ≤ ‖x‖₂`, so `d∞ ≤ d₂` *always*. Hence
 `|sideForm| ≤ ‖Δ‖₂ · d∞` would require `d₂ ≤ d∞` — false. The existing
 `abs_sideForm_le_M_infDist` with `M = ‖Δ‖₁` is in fact the **sharp** bound for this
-metric (`‖Δ‖₂ ≤ ‖Δ‖₁ ≤ √2‖Δ‖₂`). The norm cannot be improved. §8's "wall dissolves"
-lead is dead.
+metric (`‖Δ‖₂ ≤ ‖Δ‖₁ ≤ √2‖Δ‖₂`). The norm cannot be improved. §8's proposed constraint-elimination is ruled out.
 
-**(c) The wall is structural to intersection-tube + α-margin bands.** Two constraints
+**(c) The constraint is structural to intersection-tube + α-margin bands.** Two constraints
 on the single shared `δ₀` at a corner (turn ψ = π−θ, edge length L):
 - **Reach** (`sectorPlus i ∩ bandStripPlus i ≠ ∅`, needed for collar connectivity):
   `bandStripPlus` forces `footParam ∈ (α,1−α)`, so every band point is `≥ αL` from the
@@ -472,11 +470,11 @@ cancels** (linear on both sides) — no budget choice closes it. Empty δ₀-win
 `|tanψ| ≲ ‖Δ‖₁/‖Δ‖₂ ∈ [1,√2]`, i.e. for **every turn gentler than ~45°**. The
 intersection-tube model (`sectorPlus = vertexPlus ∩ {δ₀ of i} ∩ {δ₀ of i+1}`) is a
 NO-GO. The doc comment at `sectorPlus` (PLArc:2758) claiming decoupling δ₀ from ρ
-"escapes the wall `L₂² ≤ L₁·L∞`" is right for the disjointness cascade but **the reach
-lemma re-imports the wall**.
+"escapes the constraint `L₂² ≤ L₁·L∞`" is right for the disjointness cascade but **the reach
+lemma re-imports the constraint**.
 
 **(d) Decision (Adam, 2026-06-14): switch to the UNION tube.**
-`sectorPlus = vertexPlus ∩ ({δ₀ of edge i} ∪ {δ₀ of edge i+1})`. The reach wall is
+`sectorPlus = vertexPlus ∩ ({δ₀ of edge i} ∪ {δ₀ of edge i+1})`. The reach obstruction is
 entirely from the *intersection* demanding a band-overlap point (near one edge) also be
 near the other; the union drops that. Reach: a band-i point is δ₀-close to edge i, so the
 `{δ₀ of i}` disjunct holds — any δ₀ > 0 works.
@@ -515,7 +513,7 @@ strip-separation). Plan:
   5. Downstream connectivity / cover / bundle, then green build → COMMIT.
 **Boundary cases** (z near a shared vertex, foot→0/1): open sectors exclude the corner
 locus (σ=0 there), and near a vertex z is thin to both incident edges — handled by the
-incident corner's structure. No wall, normal formalization.
+incident corner's structure. No constraint, normal formalization.
 
 ## 10 · UNION-tube GREEN BASELINE landed (2026-06-14) — `sorry` worklist for the rework
 
@@ -731,7 +729,7 @@ sidesteps it cleanly. The band keeps its original `hSband`/`hRband` (`Icc(a/2)(1
 downstream `exists_twoSidedPartition_of_polyArc` packaging + `dartSectorPoint` + EC instantiation are the
 path to discharging the two ST cotree-theorem sorries.
 
-## §15 Target-1 phase, session 2026-06-15 (regression fix · binder cleanup · the endpoint-cap wall and its single-segment resolution)
+## §15 Target-1 phase, session 2026-06-15 (regression fix · binder cleanup · the endpoint-cap constraint and its single-segment resolution)
 
 **Regression found + fixed (merged, main `4a38faa`).** The §14 clip-core flip changed PLArc's sliver-wrapper
 signatures (`isPreconnected_collar{Plus,Minus}_of_sliver_budgets` gained `hα1`, `hsectorW`) but its "green"
@@ -747,7 +745,7 @@ PLC:151/265 carried 4 provably-unused budget binders — `hρsep`, `hvertexS`, `
 directly contradicts the live `htgt` (`δ₀+2α·dist < ρ(succ i)`), which had made the sliver-budget bundle
 unsatisfiable (provable but uninstantiable).
 
-**The endpoint-cap wall (verified) and why it does NOT block the goal.** Attempting
+**The endpoint-cap constraint (verified) and why it does NOT block the goal.** Attempting
 `exists_twoSidedPartition_of_polyArc` for a *general multi-segment* PolyArc hits a genuine inconsistency at the
 source/target endpoints: the cap radius `ρ 0` must reach `footParam = 2α` to connect to the band
 (`overlap_endCapSrcPlus_bandStripPlus`, PLArc:7866) yet stay `foot < α` for cap↔SECTOR disjointness
@@ -757,7 +755,7 @@ convex corners side-separation would dissolve it; for reflex corners the foot bo
 **But sectors require `numSegs ≥ 2`.** The region↔face crosscut is the inserted graph edge itself
 (RFB:309-314), straight ⇒ `arcToPolyArc`/`straightPolyArc` give `numSegs = 1`, where there are no sectors and
 every `collar±` disjointness is Plus-vs-Minus **by side** (`sideForm>0` vs `<0` w.r.t. the one edge). Adam
-confirmed the crosscut is a single straight chord, so the wall is **vacuous for the actual application**.
+confirmed the crosscut is a single straight chord, so the constraint is **vacuous for the actual application**.
 
 **Resolution path (→ §16: DONE/MERGED).** Build `exists_twoSidedPartition_of_straightArc` (single-segment) feeding
 `exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides` (PLC:41) — which takes `hdisj`,

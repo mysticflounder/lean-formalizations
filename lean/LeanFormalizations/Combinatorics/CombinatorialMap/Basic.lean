@@ -20,7 +20,7 @@ They provide a nice way to represent graph embeddings into a surface.
 
 Only two-dimensional combinatorial maps are considered.
 
-## TODO
+## Open items
 - Provide a way to get a `combinatorialMap` using three maps satisfying the conditions of a
   combinatorial map. This will allow us to get a `combinatorialMap` without having to worry about
   whether our maps are permutations or not.

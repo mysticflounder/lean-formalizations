@@ -63,13 +63,13 @@ def ConvexCyclicOrder (A : Finset ℝ²) (p q r s : ℝ²) : Prop :=
       ip < iq ∧ iq < ir ∧ ir < is ∧
       φ ip = p ∧ φ iq = q ∧ φ ir = r ∧ φ is = s
 
--- TODO Step 2: ConvexCyclicOrder.rotate — `ConvexCyclicOrder A p q r s
+-- OPEN (Step 2): ConvexCyclicOrder.rotate — `ConvexCyclicOrder A p q r s
 -- → ConvexCyclicOrder A q r s p`. Needs reindexing `φ` along
 -- `(finRotate n)^[iq.val]` and a lemma that `IsCcwConvexPolygon (φ ∘ σ)`
 -- for general cyclic `σ` (only the shift-by-one form
 -- `sign_oangle_finRotate` is in the upstream API today).
 --
--- TODO Step 2: ConvexCyclicOrder.reverse — reversing the cyclic order
+-- OPEN (Step 2): ConvexCyclicOrder.reverse — reversing the cyclic order
 -- flips CCW → CW. The faithful Step-2 form should be stated over
 -- `IsConvexPolygon` (the chirality-agnostic predicate at
 -- `FormalConjecturesForMathlib/Geometry/2d.lean`), not the CCW form.

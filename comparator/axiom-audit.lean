@@ -6,7 +6,7 @@ Comparator axiom audit. Prints the `#print axioms` closure for every theorem in
 comparator itself enforces `permitted_axioms` during its run; this file lets a
 reviewer (or CI) see the closure directly. Every report must be a subset of
 {propext, Classical.choice, Quot.sound} — no `sorryAx`, no custom axioms, no
-`Lean.ofReduceBool` (the project uses no `native_decide`).
+`Lean.ofReduceBool` — the comparator set uses no `native_decide`, so it is absent here.
 
 The 53 theorems live in the shared `Headline` namespace in `Solution.lean`, so
 the comparator finds them under the same qualified names listed in `config.json`.

@@ -54,9 +54,9 @@ noncomputable def sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
 disjuncts, which the source justifies as mandatory (see §0 and `region-face-bridge-plan §9`).
 
 **Conclusion for §1:** no new sector definition is needed. The δ₀-corner-tube redefinition is
-already in place. {{UNVALIDATED — that the union form is mathematically the right choice; the
+already in place. {{UNVALIDATED}} that the union form is mathematically the right choice; the
 in-source argument is plausible and the program builds on it, but it is not separately
-re-derived here.}}
+re-derived here.
 
 ## 2. Does it escape the constraint? (the crux)
 
@@ -93,10 +93,10 @@ is now documented as **false** and is replaced by `sectorPlusClipped_subset_tape
   flipped (δ₀ no longer collides with ρ via P5), but `ρ` is now over-determined by P2-large vs
   P3-end-cap-small.
 
-  {{NEEDS_PROOF — no standalone `False`-from-hypotheses Lean lemma was compiled for the migrated
+  {{NEEDS_PROOF}} no standalone `False`-from-hypotheses Lean lemma was compiled for the migrated
   P2/P3 collision the way §8 did for the old P5 one. The derivation is hand-checked against the
   binder text at `:3088`–3097, `:4939`–4946, and the verified sup-metric lemmas `:2269`/`:2281`.
-  Status: CONJECTURED at the Lean level, hand-verified at the algebra level.}}
+  Status: CONJECTURED at the Lean level, hand-verified at the algebra level.
 
   Caveat: the collision binds **only the two endpoint radii `ρ 0`, `ρ last`** (where P3's
   `hballSrc/hballTgt` apply). Interior-vertex radii `ρ(succ i)` are bound by P2-large and by
@@ -127,7 +127,7 @@ used in the disjointness proof.
 |---|---|---|---|---|
 | P1 open | `isOpen_collarPlus`/`Minus` | `:3009`/`:3018` | survives verbatim | Already proven for new clipped sectors via `isOpen_sectorPlusClipped` (`:2897`). |
 | P2 union | `union_collarPlus_collarMinus` | `:3079` | **needs full rework** | The interior-vertex disk branch is the sole `sorry` (`:3140`); band/endpoint branches done. Rework per `:3134`–3139 (foot-sign split + corner-tube disjunct), dropping `ball(verts j, ρ j)`. |
-| P2 cover | `taperedTube_subset_midBands_union_disks` | `:2574` | needs minor re-proof OR new variant | Currently emits a `ball(verts j, ρ j)` interior disjunct (`:2588`). A δ₀-only variant emitting `dist(z, verts j) < δ₀` (point "behind" both incident feet) lets `:3140` close without ρ. {{NEEDS_PROOF — that such a variant is provable; the `:3134` comment asserts the geometry but it is unproven.}} |
+| P2 cover | `taperedTube_subset_midBands_union_disks` | `:2574` | needs minor re-proof OR new variant | Currently emits a `ball(verts j, ρ j)` interior disjunct (`:2588`). A δ₀-only variant emitting `dist(z, verts j) < δ₀` (point "behind" both incident feet) lets `:3140` close without ρ. {{NEEDS_PROOF}} that such a variant is provable; the `:3134` comment asserts the geometry but it is unproven. |
 | P2 numSegs=1 | `union_collarPlus_collarMinus_of_numSegs_one` | `:3195` | survives | Interior-disk branch vacuous (no interior vertices); sorry-free. Why the single-segment path closes. |
 | P3 disjoint | `disjoint_collarPlus_collarMinus` | `:4925` | survives verbatim | Proven for clipped sectors; uses only δ₀-corner-confine, non-adj-sep, angle-free glue `thin_of_infDist_*`, ball disjointness, endpoint separation. No `ρ ≤ δ₀`. |
 | P3 4×4 grid | `disjoint_*_all` aggregators | `:4988`–5044 | survives verbatim | Built on clipped-sector lemmas. |
@@ -164,10 +164,10 @@ only remaining consumer of `hsrc`/`htgt` in P2 — which lets the endpoint `ρ` 
 `hballSrc`/`hballTgt` and dissolves the constraint.
 
 So the sector redefinition (already done) plus closing `:3140` are jointly the fix; `:3140` is
-the load-bearing node. {{NEEDS_PROOF — that closing `:3140` suffices to drop `hsrc`/`htgt`
+the load-bearing node. {{NEEDS_PROOF}} that closing `:3140` suffices to drop `hsrc`/`htgt`
 everywhere; the instantiation `PLCollarSeparation.lean:317` also threads them through
 `_of_sliver_budgets` overlap calls (`:11288`–11301) where they feed the now-dead `hbud` arg.
-Those calls need re-plumbing to a budget-free overlap variant.}}
+Those calls need re-plumbing to a budget-free overlap variant.
 
 ## 5. Build order, risks, estimate
 

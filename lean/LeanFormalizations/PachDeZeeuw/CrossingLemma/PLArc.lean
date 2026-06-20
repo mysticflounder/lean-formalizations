@@ -36,7 +36,7 @@ This is the bottom of the route-(c) node DAG:
   The coercion `PolyArc → SimpleArc` and the collar (L3) are built on top in
   later work.                                                         [definitions]
 
-Nothing here is `sorry`; it imports the proven core of `PlaneArcSeparation`.
+The multi-segment P2 union proof (`union_collarPlus_collarMinus`, line ~3140) carries one labelled `sorry` in its interior-vertex disk branch; the single-segment variant is `sorry`-free. It imports the proven core of `PlaneArcSeparation`.
 -/
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
@@ -1661,7 +1661,7 @@ hypothesis (`mem_vertexPlus_of_outgoing` etc.), discharged from closeness to the
 *line* (`infDist z [v,b] < δ₀`) and a foot lower bound (`α ≤ footParam v b z`), under a
 threshold on `δ₀` that is *independent of the corner angle*.  This replaces
 `exists_radius_thin` (whose vertex-distance radius `r ≈ tanθ·‖edge‖` shrank with the
-angle, the wall): here the only smallness needed is the tube half-width, uniformly. -/
+angle): here the only smallness needed is the tube half-width, uniformly. -/
 theorem thin_of_infDist_outgoing {a v b z : Plane} (hbv : b ≠ v) {α δ₀ : ℝ}
     (hfoot : α ≤ footParam v b z)
     (hstrip : Metric.infDist z (segment ℝ v b) < δ₀)
@@ -3075,7 +3075,7 @@ theorem mem_openSegment_of_sideForm_zero_ball' {s t z : Plane} (h : t ≠ s)
   · rw [footParam_swap_eq h]; linarith
   · rwa [dist_comm s t] at hball
 
-/-- **P2 (union).** -/
+/-- **P2 (union).** The interior-vertex disk branch (line ~3140) carries one labelled `sorry`; band and endpoint branches are proven. -/
 theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
     (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
     (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
@@ -5772,7 +5772,7 @@ theorem isPreconnected_vertexMinus_inter_ball (a v b : Plane) (hcorner : IsCorne
 
 /-- The positive vertex sector is preconnected.
 
-**UNION-tube TODO (region-face-bridge-plan §9, step 5).**  `sectorPlus β δ₀ i hi1 =
+**UNION-tube note (region-face-bridge-plan §9, step 5).**  `sectorPlus β δ₀ i hi1 =
 vertexPlus a v b ∩ (stripSupport i ∪ stripSupport (i+1))`.  `vertexPlus` is a convex cone at
 `v = segTgt i`; each `stripSupport` is an open δ₀-neighbourhood of a segment through `v`.
 The two strips both contain a punctured neighbourhood of `v` inside the cone, so the union
