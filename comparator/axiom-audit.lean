@@ -33,3 +33,13 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.quadraticPart_eq
 #print axioms Headline.dotProduct_mulVec_self_eq_zero_iff
 #print axioms Headline.quadraticPart_vanishes_iff
+#print axioms Headline.two_mul_pairCount_le_bisectorEnergy
+#print axioms Headline.bisectorEnergy_eq_of_bisectorInjective
+#print axioms Headline.unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
+#print axioms Headline.ncard_coeff_roots_le_totalDegree
+#print axioms Headline.resultant_ne_zero_of_isRelPrime_primitive_curry
+#print axioms Headline.resultant_ne_zero_of_fraction_coprime
+#print axioms Headline.fiber_ncard_le_max_totalDegree
+#print axioms Headline.zeroCurry_nonvertical_pair_intersection_bound
+#print axioms Headline.coeffline_nonvertical_pair_intersection_bound
+#print axioms Headline.bezout

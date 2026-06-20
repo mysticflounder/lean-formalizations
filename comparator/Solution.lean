@@ -166,4 +166,114 @@ theorem quadraticPart_vanishes_iff (A : Matrix (Fin 2) (Fin 2) ℝ) :
     (∀ (p : Fin 2 → ℝ), p ⬝ᵥ (A.transpose * A - 1).mulVec p = 0) ↔ A.transpose * A = 1 :=
   ElekesSharir.quadraticPart_vanishes_iff A
 
+-- ── Near Enemy / bisector energy ────────────────────────────────────────────
+-- The inlined statements below are definitionally equal to the project theorems
+-- about `NearEnemy.bisectorEnergy` (and `BisectorInjectiveOnPairs`), so each
+-- discharges by applying the project theorem directly — the bridge is `rfl`.
+
+open scoped Classical in
+theorem two_mul_pairCount_le_bisectorEnergy
+    (P : Finset (EuclideanSpace ℝ (Fin 2))) :
+    2 * P.card * (P.card - 1) ≤
+      (((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card :=
+  NearEnemy.two_mul_pairCount_le_bisectorEnergy P
+
+open scoped Classical in
+theorem bisectorEnergy_eq_of_bisectorInjective
+    {P : Finset (EuclideanSpace ℝ (Fin 2))}
+    (hP : ∀ p ∈ P, ∀ q ∈ P, ∀ p' ∈ P, ∀ q' ∈ P, p ≠ q → p' ≠ q' →
+        {x | dist x p = dist x q} = {x | dist x p' = dist x q'} →
+        ({p, q} : Set (EuclideanSpace ℝ (Fin 2))) = {p', q'}) :
+    (((P ×ˢ P) ×ˢ (P ×ˢ P)).filter fun q ↦
+        q.1.1 ≠ q.1.2 ∧ q.2.1 ≠ q.2.2 ∧
+          {x | dist x q.1.1 = dist x q.1.2} = {x | dist x q.2.1 = dist x q.2.2}).card
+      = 2 * P.card * (P.card - 1) :=
+  NearEnemy.bisectorEnergy_eq_of_bisectorInjective hP
+
+-- ── Unit-distance elimination-order counting ────────────────────────────────
+
+open scoped Classical in
+theorem unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le
+    {n k : ℕ} (p : Fin n → ℝ × ℝ)
+    (hforward : ∀ i, ((Finset.univ.filter fun j => dist (p i) (p j) = 1).filter
+        fun j => i.val < j.val).card ≤ k) :
+    ((Finset.univ.sigma fun i => Finset.univ.filter fun j => dist (p i) (p j) = 1).filter
+      fun ij => ij.1.val < ij.2.val).card ≤ n * k :=
+  _root_.unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le p hforward
+
+-- ── Real-algebraic geometry / Bézout ────────────────────────────────────────
+
+theorem ncard_coeff_roots_le_totalDegree
+    (r : MvPolynomial (Fin 1) ℝ) (hr : r ≠ 0) :
+    {x : ℝ | MvPolynomial.eval (fun _ : Fin 1 => x) r = 0}.ncard ≤ r.totalDegree :=
+  PachDeZeeuw.Algebraic.ncard_coeff_roots_le_totalDegree r hr
+
+theorem resultant_ne_zero_of_isRelPrime_primitive_curry
+    (p q : MvPolynomial (Fin 2) ℝ)
+    (hpprim : (MvPolynomial.finSuccEquiv ℝ 1 p).IsPrimitive)
+    (hqprim : (MvPolynomial.finSuccEquiv ℝ 1 q).IsPrimitive)
+    (hrel : IsRelPrime (MvPolynomial.finSuccEquiv ℝ 1 p) (MvPolynomial.finSuccEquiv ℝ 1 q)) :
+    Polynomial.resultant (MvPolynomial.finSuccEquiv ℝ 1 p) (MvPolynomial.finSuccEquiv ℝ 1 q) ≠ 0 :=
+  PachDeZeeuw.Algebraic.resultant_ne_zero_of_isRelPrime_primitive_curry p q hpprim hqprim hrel
+
+theorem resultant_ne_zero_of_fraction_coprime
+    (P Q : Polynomial (MvPolynomial (Fin 1) ℝ))
+    (hcop : IsCoprime
+      (P.map (algebraMap (MvPolynomial (Fin 1) ℝ) (FractionRing (MvPolynomial (Fin 1) ℝ))))
+      (Q.map (algebraMap (MvPolynomial (Fin 1) ℝ) (FractionRing (MvPolynomial (Fin 1) ℝ))))) :
+    Polynomial.resultant P Q ≠ 0 :=
+  PachDeZeeuw.Algebraic.resultant_ne_zero_of_fraction_coprime P Q hcop
+
+theorem fiber_ncard_le_max_totalDegree
+    (p q : MvPolynomial (Fin 2) ℝ) (x : ℝ)
+    (h : (MvPolynomial.finSuccEquiv ℝ 1 p).map (MvPolynomial.eval (fun _ : Fin 1 => x)) ≠ 0 ∨
+         (MvPolynomial.finSuccEquiv ℝ 1 q).map (MvPolynomial.eval (fun _ : Fin 1 => x)) ≠ 0) :
+    {y : ℝ |
+        Polynomial.eval y ((MvPolynomial.finSuccEquiv ℝ 1 p).map (MvPolynomial.eval (fun _ : Fin 1 => x))) = 0 ∧
+        Polynomial.eval y ((MvPolynomial.finSuccEquiv ℝ 1 q).map (MvPolynomial.eval (fun _ : Fin 1 => x))) = 0}.ncard
+      ≤ max p.totalDegree q.totalDegree :=
+  PachDeZeeuw.Algebraic.fiber_ncard_le_max_totalDegree p q x h
+
+theorem zeroCurry_nonvertical_pair_intersection_bound
+    (h k : MvPolynomial (Fin 2) ℝ) {d₁ d₂ : ℕ}
+    (hh : Irreducible h) (hk : Irreducible k)
+    (hdeg : h.totalDegree ≤ d₁) (kdeg : k.totalDegree ≤ d₂)
+    (hnot : ¬ Associated h k)
+    (hdeg0 : (MvPolynomial.finSuccEquiv ℝ 1 h).natDegree = 0)
+    (kpos : 0 < (MvPolynomial.finSuccEquiv ℝ 1 k).natDegree) :
+    ({x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) h = 0} ∩
+        {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) k = 0}).Finite ∧
+      ({x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) h = 0} ∩
+        {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) k = 0}).ncard ≤ d₁ * d₂ :=
+  PachDeZeeuw.Algebraic.zeroCurry_nonvertical_pair_intersection_bound h k hh hk hdeg kdeg hnot hdeg0 kpos
+
+theorem coeffline_nonvertical_pair_intersection_bound {d₁ d₂ : ℕ}
+    (a : MvPolynomial (Fin 1) ℝ) (q : MvPolynomial (Fin 2) ℝ)
+    (ha0 : a ≠ 0) (_hq0 : q ≠ 0)
+    (hadeg : a.totalDegree ≤ d₁) (hqdeg : q.totalDegree ≤ d₂)
+    (_hq0deg : 0 < (MvPolynomial.finSuccEquiv ℝ 1 q).natDegree)
+    (hnotDiv : ∀ x : ℝ, MvPolynomial.eval (fun _ : Fin 1 => x) a = 0 →
+          ¬ (MvPolynomial.X (1 : Fin 2) - MvPolynomial.C x) ∣ q) :
+    ({p : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun _ : Fin 1 => p 1) a = 0} ∩
+        {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) q = 0}).Finite ∧
+      ({p : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun _ : Fin 1 => p 1) a = 0} ∩
+        {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) q = 0}).ncard ≤ d₁ * d₂ :=
+  PachDeZeeuw.Algebraic.coeffline_nonvertical_pair_intersection_bound a q ha0 _hq0 hadeg hqdeg _hq0deg hnotDiv
+
+theorem bezout :
+    ∀ d₁ d₂ : ℕ, ∃ C : ℕ, 0 < C ∧
+      ∀ C₁ C₂ : Set (EuclideanSpace ℝ (Fin 2)),
+        (∃ p : MvPolynomial (Fin 2) ℝ, p ≠ 0 ∧ p.totalDegree ≤ d₁ ∧
+            C₁ = {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i ↦ x i) p = 0}) →
+        (∃ p : MvPolynomial (Fin 2) ℝ, p ≠ 0 ∧ p.totalDegree ≤ d₂ ∧
+            C₂ = {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i ↦ x i) p = 0}) →
+        (¬ ∃ e : ℕ, ∃ C : Set (EuclideanSpace ℝ (Fin 2)),
+            (∃ p : MvPolynomial (Fin 2) ℝ, p ≠ 0 ∧ p.totalDegree ≤ e ∧ Irreducible p ∧
+              C = {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i ↦ x i) p = 0}) ∧
+            C.Infinite ∧ C ⊆ C₁ ∧ C ⊆ C₂) →
+        (C₁ ∩ C₂).Finite ∧ (C₁ ∩ C₂).ncard ≤ C :=
+  PachDeZeeuw.Algebraic.bezout
+
 end Headline

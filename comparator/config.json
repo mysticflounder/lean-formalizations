@@ -26,6 +26,16 @@
     "Headline.pullback_nondegenerate",
     "Headline.quadraticPart_eq",
     "Headline.dotProduct_mulVec_self_eq_zero_iff",
-    "Headline.quadraticPart_vanishes_iff"
+    "Headline.quadraticPart_vanishes_iff",
+    "Headline.two_mul_pairCount_le_bisectorEnergy",
+    "Headline.bisectorEnergy_eq_of_bisectorInjective",
+    "Headline.unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le",
+    "Headline.ncard_coeff_roots_le_totalDegree",
+    "Headline.resultant_ne_zero_of_isRelPrime_primitive_curry",
+    "Headline.resultant_ne_zero_of_fraction_coprime",
+    "Headline.fiber_ncard_le_max_totalDegree",
+    "Headline.zeroCurry_nonvertical_pair_intersection_bound",
+    "Headline.coeffline_nonvertical_pair_intersection_bound",
+    "Headline.bezout"
   ]
 }
