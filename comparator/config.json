@@ -36,6 +36,9 @@
     "Headline.fiber_ncard_le_max_totalDegree",
     "Headline.zeroCurry_nonvertical_pair_intersection_bound",
     "Headline.coeffline_nonvertical_pair_intersection_bound",
-    "Headline.bezout"
+    "Headline.bezout",
+    "Headline.twoPinnedDet_affine",
+    "Headline.twoPinnedDet_eq_const_add_linear",
+    "Headline.intersect_or_parallel_of_dist2_eq"
   ]
 }

@@ -328,4 +328,37 @@ theorem bezout :
         (C₁ ∩ C₂).Finite ∧ (C₁ ∩ C₂).ncard ≤ C :=
   sorry
 
+-- ── Elekes–Sharir geometric core (Geometry/ElekesSharir) ────────────────────
+-- P2/Vec2 := ℝ × ℝ; det2/twoPinnedDet/J/esLine/Intersect/Parallel are transparent
+-- arithmetic over ℝ × ℝ (J v = (-v.2, v.1)). Inlined.
+
+/-- The two-pinned chord determinant expands affinely in the pin `w`. -/
+theorem twoPinnedDet_affine (a₁ a₂ w : ℝ × ℝ) :
+    (a₁ - (2 : ℝ) • w).1 * (a₂ - (2 : ℝ) • w).2
+        - (a₁ - (2 : ℝ) • w).2 * (a₂ - (2 : ℝ) • w).1
+      = (a₁.1 * a₂.2 - a₁.2 * a₂.1)
+        - 2 * (a₁.1 * w.2 - a₁.2 * w.1)
+        - 2 * (w.1 * a₂.2 - w.2 * a₂.1) :=
+  sorry
+
+/-- The two-pinned chord determinant is a constant plus a linear form in `w`. -/
+theorem twoPinnedDet_eq_const_add_linear (a₁ a₂ w : ℝ × ℝ) :
+    (a₁ - (2 : ℝ) • w).1 * (a₂ - (2 : ℝ) • w).2
+        - (a₁ - (2 : ℝ) • w).2 * (a₂ - (2 : ℝ) • w).1
+      = (a₁.1 * a₂.2 - a₁.2 * a₂.1)
+        + (- 2 * (a₁.1 - a₂.1) * w.2 + 2 * (a₁.2 - a₂.2) * w.1) :=
+  sorry
+
+/-- Equal squared chord lengths force the two perpendicular-bisector lines to
+intersect or be parallel (`esLine`/`J` inlined). -/
+theorem intersect_or_parallel_of_dist2_eq {p q p' q' : ℝ × ℝ}
+    (h : (p.1 - p'.1) ^ 2 + (p.2 - p'.2) ^ 2 = (q.1 - q'.1) ^ 2 + (q.2 - q'.2) ^ 2) :
+    (∃ t s : ℝ,
+      (((p.1 + q.1) / 2 + (t / 2) * (-(q - p).2, (q - p).1).1,
+        (p.2 + q.2) / 2 + (t / 2) * (-(q - p).2, (q - p).1).2), t)
+        = (((p'.1 + q'.1) / 2 + (s / 2) * (-(q' - p').2, (q' - p').1).1,
+            (p'.2 + q'.2) / 2 + (s / 2) * (-(q' - p').2, (q' - p').1).2), s))
+    ∨ (-(q - p).2, (q - p).1) = (-(q' - p').2, (q' - p').1) :=
+  sorry
+
 end Headline

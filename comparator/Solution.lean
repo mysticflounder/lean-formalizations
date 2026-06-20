@@ -276,4 +276,31 @@ theorem bezout :
         (C₁ ∩ C₂).Finite ∧ (C₁ ∩ C₂).ncard ≤ C :=
   PachDeZeeuw.Algebraic.bezout
 
+-- ── Elekes–Sharir geometric core ────────────────────────────────────────────
+
+theorem twoPinnedDet_affine (a₁ a₂ w : ℝ × ℝ) :
+    (a₁ - (2 : ℝ) • w).1 * (a₂ - (2 : ℝ) • w).2
+        - (a₁ - (2 : ℝ) • w).2 * (a₂ - (2 : ℝ) • w).1
+      = (a₁.1 * a₂.2 - a₁.2 * a₂.1)
+        - 2 * (a₁.1 * w.2 - a₁.2 * w.1)
+        - 2 * (w.1 * a₂.2 - w.2 * a₂.1) :=
+  ElekesSharir.twoPinnedDet_affine a₁ a₂ w
+
+theorem twoPinnedDet_eq_const_add_linear (a₁ a₂ w : ℝ × ℝ) :
+    (a₁ - (2 : ℝ) • w).1 * (a₂ - (2 : ℝ) • w).2
+        - (a₁ - (2 : ℝ) • w).2 * (a₂ - (2 : ℝ) • w).1
+      = (a₁.1 * a₂.2 - a₁.2 * a₂.1)
+        + (- 2 * (a₁.1 - a₂.1) * w.2 + 2 * (a₁.2 - a₂.2) * w.1) :=
+  ElekesSharir.twoPinnedDet_eq_const_add_linear a₁ a₂ w
+
+theorem intersect_or_parallel_of_dist2_eq {p q p' q' : ℝ × ℝ}
+    (h : (p.1 - p'.1) ^ 2 + (p.2 - p'.2) ^ 2 = (q.1 - q'.1) ^ 2 + (q.2 - q'.2) ^ 2) :
+    (∃ t s : ℝ,
+      (((p.1 + q.1) / 2 + (t / 2) * (-(q - p).2, (q - p).1).1,
+        (p.2 + q.2) / 2 + (t / 2) * (-(q - p).2, (q - p).1).2), t)
+        = (((p'.1 + q'.1) / 2 + (s / 2) * (-(q' - p').2, (q' - p').1).1,
+            (p'.2 + q'.2) / 2 + (s / 2) * (-(q' - p').2, (q' - p').1).2), s))
+    ∨ (-(q - p).2, (q - p).1) = (-(q' - p').2, (q' - p').1) :=
+  ElekesSharir.intersect_or_parallel_of_dist2_eq (p := p) (q := q) (p' := p') (q' := q') h
+
 end Headline

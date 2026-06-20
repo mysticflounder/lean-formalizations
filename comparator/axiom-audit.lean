@@ -43,3 +43,6 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.zeroCurry_nonvertical_pair_intersection_bound
 #print axioms Headline.coeffline_nonvertical_pair_intersection_bound
 #print axioms Headline.bezout
+#print axioms Headline.twoPinnedDet_affine
+#print axioms Headline.twoPinnedDet_eq_const_add_linear
+#print axioms Headline.intersect_or_parallel_of_dist2_eq
