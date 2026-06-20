@@ -139,6 +139,21 @@ theorem chord_in_frontier_of_collinear_boundary_triple {V : Type*} [NormedAddCom
     segment ℝ a c ⊆ frontier s :=
   sorry
 
+-- `lineHomeomorph hAC : ℝ ≃ₜ line[ℝ,A,C]` is a constructed homeomorphism (its
+-- coercion is a cast-laden term, not defeq to a clean lambda), so it is
+-- ELIMINATED here: the line-slice's parameter set is spelled directly as
+-- `{t | AffineMap.lineMap A C t ∈ s}`. `Solution.lean` proves this equals the
+-- `lineHomeomorph` preimage via the bridge `(lineHomeomorph hAC t : V) =
+-- AffineMap.lineMap A C t`, then applies the project theorem.
+
+/-- A convex set's slice along the affine line through two distinct points,
+viewed in the line's parameter `ℝ`, is order-connected (`lineHomeomorph`
+eliminated; the parameter set is `{t | AffineMap.lineMap A C t ∈ s}`). -/
+theorem convex_line_slice_ordConnected {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V] {s : Set V} (hs : Convex ℝ s) {A C : V} (hAC : A ≠ C) :
+    Set.OrdConnected {t : ℝ | AffineMap.lineMap A C t ∈ s} :=
+  sorry
+
 -- `SimpleConvexPolygon V` is a structure (not def-inlinable): its four
 -- mathlib-typed fields are unbundled here as explicit `vertices : List V`
 -- hypotheses. `IsCyclicInterval` is a transparent `def` over `List.rotate`/

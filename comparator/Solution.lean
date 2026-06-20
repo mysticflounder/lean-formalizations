@@ -113,6 +113,48 @@ theorem chord_in_frontier_of_collinear_boundary_triple {V : Type*} [NormedAddCom
     segment ℝ a c ⊆ frontier s :=
   _root_.chord_in_frontier_of_collinear_boundary_triple hdim hs hcl hsbtw haf hbf hcf
 
+/-- Casting a `ContinuousAffineEquiv` along a `Submodule` equality preserves the
+ambient-space value of its application. (Bridge helper for `lineHomeomorph`.) -/
+private lemma cae_mpr_val {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {p q : Submodule ℝ V} (h : q = p)
+    (e : ℝ ≃ᴬ[ℝ] ↥p) (t : ℝ) :
+    ((Eq.mpr (congrArg (fun X : Submodule ℝ V => ℝ ≃ᴬ[ℝ] ↥X) h) e t : ↥q) : V) =
+    ((e t : ↥p) : V) := by
+  subst h; rfl
+
+open scoped Affine in
+/-- Bridge: the underlying-`V` value of `lineHomeomorph hAC t` is `lineMap A C t`. -/
+private lemma lineHomeomorph_coe_apply {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {A C : V} (hAC : A ≠ C) (t : ℝ) :
+    ((_root_.lineHomeomorph (V := V) hAC t : line[ℝ, A, C]) : V)
+      = AffineMap.lineMap A C t := by
+  have hdiff : (C -ᵥ A : V) ≠ 0 := fun h => hAC (vsub_eq_zero_iff_eq.mp h).symm
+  have hdir : (line[ℝ, A, C] : AffineSubspace ℝ V).direction = ℝ ∙ (C -ᵥ A) := by
+    rw [direction_affineSpan, vectorSpan_pair_rev]
+  rw [AffineMap.lineMap_apply]
+  simp only [_root_.lineHomeomorph]
+  erw [AffineSubspace.coe_vadd]
+  congr 1
+  have key := cae_mpr_val (p := ℝ ∙ (C -ᵥ A))
+    (q := (line[ℝ, A, C] : AffineSubspace ℝ V).direction)
+    hdir
+    ((ContinuousLinearEquiv.toSpanNonzeroSingleton ℝ (C -ᵥ A) hdiff).toContinuousAffineEquiv)
+    t
+  erw [key]
+  simp [ContinuousLinearEquiv.coe_toContinuousAffineEquiv]
+
+open scoped Affine in
+theorem convex_line_slice_ordConnected {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V] {s : Set V} (hs : Convex ℝ s) {A C : V} (hAC : A ≠ C) :
+    Set.OrdConnected {t : ℝ | AffineMap.lineMap A C t ∈ s} := by
+  have key : {t : ℝ | AffineMap.lineMap A C t ∈ s}
+      = (_root_.lineHomeomorph (V := V) hAC) ⁻¹'
+          ((Subtype.val : line[ℝ, A, C] → V) ⁻¹' s) := by
+    ext t
+    simp only [Set.mem_setOf_eq, Set.mem_preimage, lineHomeomorph_coe_apply hAC t]
+  rw [key]
+  exact _root_.convex_line_slice_ordConnected hs hAC
+
 open scoped Classical in
 theorem collinear_vertices_cyclicInterval {V : Type*}
     [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
