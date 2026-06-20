@@ -14,7 +14,7 @@ it is **not** the bar for mathlib inclusion (that is a separate PR review).
 | 3 | Comparator run in CI + axiom audit | [`config.json`](config.json) + [`../.github/workflows/comparator.yml`](../.github/workflows/comparator.yml) + [`axiom-audit.lean`](axiom-audit.lean) |
 | 4 | `formalization.yaml` (mathlib-initiative spec) | [`../formalization.yaml`](../formalization.yaml) |
 
-Challenge and Solution declare the 47 results in a **shared `Headline`
+Challenge and Solution declare the 53 results in a **shared `Headline`
 namespace** (so `config.json` lists `Headline.bsg_asymmetric`, …). The
 comparator looks up each name in *both* exports, so they must agree on the
 fully-qualified name; the namespace also keeps Solution's restatements from
@@ -54,11 +54,11 @@ Linux CI uses the real `landrun` sandbox. The nanoda leg needs a `nanoda_bin`
 (build [`ammkrn/nanoda_lib`](https://github.com/ammkrn/nanoda_lib) and point
 `COMPARATOR_NANODA` at it, or set `enable_nanoda: false` to skip it).
 
-## What is in the gate: the 47 mathlib-only headline claims
+## What is in the gate: the 53 mathlib-only headline claims
 
 These are exactly the project's headline results whose **statement** is
 expressible with mathlib definitions alone, so a reviewer can read
-`Challenge.lean` without trusting any project definition. All 47 are axiom-clean:
+`Challenge.lean` without trusting any project definition. All 53 are axiom-clean:
 their `#print axioms` closure ⊆ `{propext, Classical.choice, Quot.sound}` (no
 `sorryAx`, no custom axioms, no `native_decide`).
 
@@ -111,22 +111,32 @@ their `#print axioms` closure ⊆ `{propext, Classical.choice, Quot.sound}` (no
 | `all_configs_lower_bound_to_hIndexed_lower_bound` | `Esgk.all_configs_lower_bound_to_hIndexed_lower_bound` | Elekes–Sharir–Guth–Katz |
 | `distanceEnergy_eq_sum_energyAtLevel` | `Esgk.distanceEnergy_eq_sum_energyAtLevel` | Elekes–Sharir–Guth–Katz |
 | `elekes_sharir_guth_katz_decomposition` | `Esgk.elekes_sharir_guth_katz_decomposition` | Elekes–Sharir–Guth–Katz |
+| `eulerCharacteristic_le_two` | `CombinatorialMap.eulerCharacteristic_le_two` | Combinatorial maps / planar edge bound |
+| `card_edge_le_three_card_vertex_sub_six` | `CombinatorialMap.card_edge_le_three_card_vertex_sub_six` | Combinatorial maps / planar edge bound |
+| `dual_isPlanar_iff` | `CombinatorialMap.dual_isPlanar_iff` | Combinatorial maps / planar edge bound |
+| `dual_connected_iff` | `CombinatorialMap.dual_connected_iff` | Combinatorial maps / planar edge bound |
+| `connected_dual_iff` | `CombinatorialMap.connected_dual_iff` | Combinatorial maps / planar edge bound |
+| `planar_multigraph_edge_bound` | `planar_multigraph_edge_bound` | Combinatorial maps / planar edge bound |
+
+The combinatorial-map cluster is gated by unbundling: a `CombinatorialMap` on a
+finite dart set `D` is three permutations of `D` (`vertexPerm`/`edgePerm`/
+`facePerm`) with `facePerm * edgePerm * vertexPerm = 1` and `edgePerm` a
+fixed-point-free involution — all mathlib-typed. Its cells are the permutation
+cycles (`Quotient (Equiv.Perm.SameCycle.setoid ·)`), counted with `Nat.card`;
+planarity is `Euler = 2`, connectivity is `Relation.ReflTransGen`, simplicity is
+no-loop + no-parallel on the dart-level endpoint pairs. `Solution.lean`
+reconstructs the structure and bridges the counts via `Nat.card_eq_fintype_card`.
 
 ## The audit boundary: results NOT in the mathlib-only gate
 
-The project proves further headline results whose **statements quantify over
-project-specific structures that are genuinely new** (not a transparent definition
-or a mathlib-typed field bundle) and therefore cannot be restated in mathlib
-alone. They are audited by reading the repository and the axiom report
-([`scripts/axiom-check.lean`](../scripts/axiom-check.lean)), not by this
-comparator. The bespoke structures involved:
+The remaining headline-adjacent results are mathlib-typed but auxiliary, so they
+stay audited by reading the repository and the axiom report
+([`scripts/axiom-check.lean`](../scripts/axiom-check.lean)), not by this comparator:
 
-- **Combinatorial maps / planar edge bound** (`CombinatorialMap.*`,
-  `planar_multigraph_edge_bound`) — the `CombinatorialMap` structure,
-  `AbstractPlanarizedMultigraph`, `HasGenusZeroSimplePlanarization`.
-- **GL₂ utility identities** (`Matrix.GeneralLinearGroup.GL2.*`) — mathlib-typed
-  but auxiliary helper lemmas built on the project def `GL2.unipotent`; not
-  headline mathematical claims (the README labels them an FLT-staging by-product).
+- **GL₂ utility identities** (`Matrix.GeneralLinearGroup.GL2.*`) — helper lemmas
+  built on the project def `GL2.unipotent`; not headline mathematical claims (an
+  FLT-staging by-product). They are restate-able in mathlib (they are mathlib-typed)
+  but are left out as plumbing rather than headline results.
 
 This boundary is deliberate and honest: the comparator gate covers the
-mathlib-statable headline surface; everything else is audited in-repo.
+mathlib-statable headline surface; the GL₂ helpers are audited in-repo.

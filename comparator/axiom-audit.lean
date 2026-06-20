@@ -8,7 +8,7 @@ reviewer (or CI) see the closure directly. Every report must be a subset of
 {propext, Classical.choice, Quot.sound} — no `sorryAx`, no custom axioms, no
 `Lean.ofReduceBool` (the project uses no `native_decide`).
 
-The 47 theorems live in the shared `Headline` namespace in `Solution.lean`, so
+The 53 theorems live in the shared `Headline` namespace in `Solution.lean`, so
 the comparator finds them under the same qualified names listed in `config.json`.
 
 Run: lake env lean comparator/axiom-audit.lean
@@ -61,3 +61,11 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.all_configs_lower_bound_to_hIndexed_lower_bound
 #print axioms Headline.distanceEnergy_eq_sum_energyAtLevel
 #print axioms Headline.elekes_sharir_guth_katz_decomposition
+
+-- Combinatorial maps / planar edge bound
+#print axioms Headline.eulerCharacteristic_le_two
+#print axioms Headline.card_edge_le_three_card_vertex_sub_six
+#print axioms Headline.dual_isPlanar_iff
+#print axioms Headline.dual_connected_iff
+#print axioms Headline.connected_dual_iff
+#print axioms Headline.planar_multigraph_edge_bound

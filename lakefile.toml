@@ -20,7 +20,7 @@ srcDir = "lean"
 # Two out-of-tree modules under comparator/ (not in defaultTargets, so the
 # normal `lake build` is unaffected). Build them explicitly:
 #   lake build Challenge Solution
-# Challenge imports Mathlib only and states the 47 headline results as `sorry`
+# Challenge imports Mathlib only and states the 53 headline results as `sorry`
 # stubs; Solution imports the project and discharges them with identical
 # top-level (bare) names. The leanprover/comparator run checks statement
 # identity and axiom cleanliness across the two exports.

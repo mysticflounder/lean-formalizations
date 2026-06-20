@@ -274,24 +274,26 @@ For the Lean community's auditability standard for AI-authored work (the
 [`comparator/`](comparator/):
 
 - [`comparator/Challenge.lean`](comparator/Challenge.lean) — **mathlib-only**,
-  47 headline claims as `sorry` stubs (read this instead of the repo to see
+  53 headline claims as `sorry` stubs (read this instead of the repo to see
   exactly what is claimed).
 - [`comparator/Solution.lean`](comparator/Solution.lean) — imports the project
   and discharges each stub with the real, axiom-clean theorem.
-  Both declare the 47 under a shared `Headline` namespace, so the comparator
+  Both declare the 53 under a shared `Headline` namespace, so the comparator
   finds each `config.json` name in both exports.
 - The authoritative [leanprover/comparator](https://github.com/leanprover/comparator)
-  run checks `Challenge ≡ Solution` for all 47 (statement identity) and re-checks
+  run checks `Challenge ≡ Solution` for all 53 (statement identity) and re-checks
   the proofs under the nanoda + Lean default kernels, ending in
   `Your solution is okay!` (validated locally on Lean v4.30.0; CI-wired).
 
 ```bash
-comparator/check-conformance.sh    # offline pre-flight: build the 2 modules + axiom-audit the 47
+comparator/check-conformance.sh    # offline pre-flight: build the 2 modules + axiom-audit the 53
 ```
 
-The remaining headline results quantify over project-specific structures
-(combinatorial-map planar edge-bound surface and the GL₂ unipotent helper) and
-are not mathlib-only-statable; they stay audited by `scripts/check-axioms.sh`.
+The combinatorial-map planar edge-bound surface is now stated mathlib-only inside
+the gate (its `CombinatorialMap` structure unbundles to three permutations of a
+finite dart set). The only headline results left outside are the GL₂ unipotent
+helpers — mathlib-typed but auxiliary FLT-staging identities, not headline
+claims; they stay audited by `scripts/check-axioms.sh`.
 See [`comparator/README.md`](comparator/README.md) for the full in-set list and
 the audit boundary, and `.github/workflows/comparator.yml` for the CI wiring.
 

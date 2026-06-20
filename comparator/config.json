@@ -54,6 +54,12 @@
     "Headline.numDistances_ge_of_ceiling",
     "Headline.all_configs_lower_bound_to_hIndexed_lower_bound",
     "Headline.distanceEnergy_eq_sum_energyAtLevel",
-    "Headline.elekes_sharir_guth_katz_decomposition"
+    "Headline.elekes_sharir_guth_katz_decomposition",
+    "Headline.eulerCharacteristic_le_two",
+    "Headline.card_edge_le_three_card_vertex_sub_six",
+    "Headline.dual_isPlanar_iff",
+    "Headline.dual_connected_iff",
+    "Headline.connected_dual_iff",
+    "Headline.planar_multigraph_edge_bound"
   ]
 }
