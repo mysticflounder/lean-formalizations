@@ -303,6 +303,35 @@ theorem intersect_or_parallel_of_dist2_eq {p q p' q' : ℝ × ℝ}
     ∨ (-(q - p).2, (q - p).1) = (-(q' - p').2, (q' - p').1) :=
   ElekesSharir.intersect_or_parallel_of_dist2_eq (p := p) (q := q) (p' := p') (q' := q') h
 
+theorem intersect_or_parallel_of_isometryGraph {g : ℝ × ℝ → ℝ × ℝ}
+    (hg : ∀ x y : ℝ × ℝ,
+        ((g x).1 - (g y).1) ^ 2 + ((g x).2 - (g y).2) ^ 2
+          = (x.1 - y.1) ^ 2 + (x.2 - y.2) ^ 2)
+    (p p' : ℝ × ℝ) :
+    (∃ t s : ℝ,
+      (((p.1 + (g p).1) / 2 + (t / 2) * (-((g p) - p).2, ((g p) - p).1).1,
+        (p.2 + (g p).2) / 2 + (t / 2) * (-((g p) - p).2, ((g p) - p).1).2), t)
+        = (((p'.1 + (g p').1) / 2 + (s / 2) * (-((g p') - p').2, ((g p') - p').1).1,
+            (p'.2 + (g p').2) / 2 + (s / 2) * (-((g p') - p').2, ((g p') - p').1).2), s))
+    ∨ (-((g p) - p).2, ((g p) - p).1) = (-((g p') - p').2, ((g p') - p').1) :=
+  ElekesSharir.intersect_or_parallel_of_isometryGraph hg p p'
+
+theorem atMostOneLine_of_skewRuling_isometryGraph {g : ℝ × ℝ → ℝ × ℝ}
+    (hg : ∀ x y : ℝ × ℝ,
+        ((g x).1 - (g y).1) ^ 2 + ((g x).2 - (g y).2) ^ 2
+          = (x.1 - y.1) ^ 2 + (x.2 - y.2) ^ 2)
+    {S : Set ((ℝ × ℝ) × (ℝ × ℝ))}
+    (hskew : ∀ x ∈ S, ∀ y ∈ S, x ≠ y →
+      (¬ ∃ t s : ℝ,
+        (((x.1.1 + x.2.1) / 2 + (t / 2) * (-(x.2 - x.1).2, (x.2 - x.1).1).1,
+          (x.1.2 + x.2.2) / 2 + (t / 2) * (-(x.2 - x.1).2, (x.2 - x.1).1).2), t)
+          = (((y.1.1 + y.2.1) / 2 + (s / 2) * (-(y.2 - y.1).2, (y.2 - y.1).1).1,
+              (y.1.2 + y.2.2) / 2 + (s / 2) * (-(y.2 - y.1).2, (y.2 - y.1).1).2), s))
+      ∧ ¬ ((-(x.2 - x.1).2, (x.2 - x.1).1) = (-(y.2 - y.1).2, (y.2 - y.1).1)))
+    (hgraph : ∀ x ∈ S, x.2 = g x.1) :
+    S.Subsingleton :=
+  ElekesSharir.atMostOneLine_of_skewRuling_isometryGraph hg hskew hgraph
+
 -- ── Elekes–Sharir–Guth–Katz base layer ──────────────────────────────────────
 
 theorem energy_lower_bound_of_few_distances {n : ℕ}

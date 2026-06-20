@@ -40,6 +40,8 @@
     "Headline.twoPinnedDet_affine",
     "Headline.twoPinnedDet_eq_const_add_linear",
     "Headline.intersect_or_parallel_of_dist2_eq",
+    "Headline.intersect_or_parallel_of_isometryGraph",
+    "Headline.atMostOneLine_of_skewRuling_isometryGraph",
     "Headline.energy_lower_bound_of_few_distances",
     "Headline.gp_config_nonempty",
     "Headline.orderedMultiplicity_le_three_mul",

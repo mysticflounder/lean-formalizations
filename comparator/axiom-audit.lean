@@ -46,6 +46,8 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.twoPinnedDet_affine
 #print axioms Headline.twoPinnedDet_eq_const_add_linear
 #print axioms Headline.intersect_or_parallel_of_dist2_eq
+#print axioms Headline.intersect_or_parallel_of_isometryGraph
+#print axioms Headline.atMostOneLine_of_skewRuling_isometryGraph
 #print axioms Headline.energy_lower_bound_of_few_distances
 #print axioms Headline.gp_config_nonempty
 #print axioms Headline.orderedMultiplicity_le_three_mul

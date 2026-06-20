@@ -361,6 +361,43 @@ theorem intersect_or_parallel_of_dist2_eq {p q p' q' : ℝ × ℝ}
     ∨ (-(q - p).2, (q - p).1) = (-(q' - p').2, (q' - p').1) :=
   sorry
 
+/-- **Isometry consequence.** If `q = g p` and `q' = g p'` for one
+squared-distance-preserving map `g`, the two perpendicular-bisector lines
+intersect or are parallel (`IsDist2Preserving`/`Intersect`/`Parallel`/`esLine`/`J`
+inlined). -/
+theorem intersect_or_parallel_of_isometryGraph {g : ℝ × ℝ → ℝ × ℝ}
+    (hg : ∀ x y : ℝ × ℝ,
+        ((g x).1 - (g y).1) ^ 2 + ((g x).2 - (g y).2) ^ 2
+          = (x.1 - y.1) ^ 2 + (x.2 - y.2) ^ 2)
+    (p p' : ℝ × ℝ) :
+    (∃ t s : ℝ,
+      (((p.1 + (g p).1) / 2 + (t / 2) * (-((g p) - p).2, ((g p) - p).1).1,
+        (p.2 + (g p).2) / 2 + (t / 2) * (-((g p) - p).2, ((g p) - p).1).2), t)
+        = (((p'.1 + (g p').1) / 2 + (s / 2) * (-((g p') - p').2, ((g p') - p').1).1,
+            (p'.2 + (g p').2) / 2 + (s / 2) * (-((g p') - p').2, ((g p') - p').1).2), s))
+    ∨ (-((g p) - p).2, ((g p) - p).1) = (-((g p') - p').2, ((g p') - p').1) :=
+  sorry
+
+/-- **Ruling skewness exclusion, assembled.** A pairwise-skew ruling `S` all of
+whose members are perpendicular-bisector lines of one squared-distance-preserving
+map `g` contains at most one line (`IsDist2Preserving`/`PairwiseSkewRuling`/
+`Intersect`/`Parallel`/`esLine`/`J` inlined). -/
+theorem atMostOneLine_of_skewRuling_isometryGraph {g : ℝ × ℝ → ℝ × ℝ}
+    (hg : ∀ x y : ℝ × ℝ,
+        ((g x).1 - (g y).1) ^ 2 + ((g x).2 - (g y).2) ^ 2
+          = (x.1 - y.1) ^ 2 + (x.2 - y.2) ^ 2)
+    {S : Set ((ℝ × ℝ) × (ℝ × ℝ))}
+    (hskew : ∀ x ∈ S, ∀ y ∈ S, x ≠ y →
+      (¬ ∃ t s : ℝ,
+        (((x.1.1 + x.2.1) / 2 + (t / 2) * (-(x.2 - x.1).2, (x.2 - x.1).1).1,
+          (x.1.2 + x.2.2) / 2 + (t / 2) * (-(x.2 - x.1).2, (x.2 - x.1).1).2), t)
+          = (((y.1.1 + y.2.1) / 2 + (s / 2) * (-(y.2 - y.1).2, (y.2 - y.1).1).1,
+              (y.1.2 + y.2.2) / 2 + (s / 2) * (-(y.2 - y.1).2, (y.2 - y.1).1).2), s))
+      ∧ ¬ ((-(x.2 - x.1).2, (x.2 - x.1).1) = (-(y.2 - y.1).2, (y.2 - y.1).1)))
+    (hgraph : ∀ x ∈ S, x.2 = g x.1) :
+    S.Subsingleton :=
+  sorry
+
 -- ── Elekes–Sharir–Guth–Katz base layer (ElekesSharirGuthKatz) ────────────────
 -- `Config n` = `Fin n → EuclideanSpace ℝ (Fin 2)`; `Config.toFinset p`,
 -- `OrderedDistanceValues`/`OrderedMultiplicity`/`DistanceEnergy`/`NumDistancesOrdered`
