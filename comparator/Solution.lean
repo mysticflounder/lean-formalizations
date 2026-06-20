@@ -303,4 +303,152 @@ theorem intersect_or_parallel_of_dist2_eq {p q p' q' : ℝ × ℝ}
     ∨ (-(q - p).2, (q - p).1) = (-(q' - p').2, (q' - p').1) :=
   ElekesSharir.intersect_or_parallel_of_dist2_eq (p := p) (q := q) (p' := p') (q' := q') h
 
+-- ── Elekes–Sharir–Guth–Katz base layer ──────────────────────────────────────
+
+theorem energy_lower_bound_of_few_distances {n : ℕ}
+    (p : Fin n → EuclideanSpace ℝ (Fin 2)) :
+    (n * (n - 1)) ^ 2 ≤
+      (Finset.image (fun ij : Fin n × Fin n => dist (p ij.1) (p ij.2))
+          ((Finset.univ.product Finset.univ).filter
+            (fun ij : Fin n × Fin n => ij.1 ≠ ij.2))).card
+        * (∑ r ∈ Finset.image (fun ij : Fin n × Fin n => dist (p ij.1) (p ij.2))
+              ((Finset.univ.product Finset.univ).filter
+                (fun ij : Fin n × Fin n => ij.1 ≠ ij.2)),
+            ((Finset.univ.product Finset.univ).filter
+                (fun ij : Fin n × Fin n => ij.1 ≠ ij.2 ∧ dist (p ij.1) (p ij.2) = r)).card ^ 2) :=
+  Esgk.energy_lower_bound_of_few_distances p
+
+theorem gp_config_nonempty :
+    ∀ n : ℕ, ∃ p : Fin n → EuclideanSpace ℝ (Fin 2),
+      Function.Injective p ∧
+      ((∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) :=
+  Esgk.gp_config_nonempty
+
+theorem orderedMultiplicity_le_three_mul {n : ℕ}
+    {p : Fin n → EuclideanSpace ℝ (Fin 2)} (hp : Function.Injective p)
+    (hgp : (∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T))
+    (r : ℝ) :
+    ((Finset.univ.product Finset.univ).filter
+        (fun ij : Fin n × Fin n => ij.1 ≠ ij.2 ∧ dist (p ij.1) (p ij.2) = r)).card ≤ 3 * n :=
+  Esgk.orderedMultiplicity_le_three_mul hp hgp r
+
+theorem distanceEnergy_le_three_mul_cube {n : ℕ}
+    {p : Fin n → EuclideanSpace ℝ (Fin 2)} (hp : Function.Injective p)
+    (hgp : (∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) :
+    (∑ r ∈ Finset.image (fun ij : Fin n × Fin n => dist (p ij.1) (p ij.2))
+          ((Finset.univ.product Finset.univ).filter
+            (fun ij : Fin n × Fin n => ij.1 ≠ ij.2)),
+        ((Finset.univ.product Finset.univ).filter
+            (fun ij : Fin n × Fin n => ij.1 ≠ ij.2 ∧ dist (p ij.1) (p ij.2) = r)).card ^ 2)
+      ≤ 3 * n ^ 3 :=
+  Esgk.distanceEnergy_le_three_mul_cube hp hgp
+
+theorem numDistances_ge_of_ceiling {n : ℕ}
+    {p : Fin n → EuclideanSpace ℝ (Fin 2)} (hp : Function.Injective p)
+    (hgp : (∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) :
+    (n * (n - 1)) ^ 2 ≤ 3 * n ^ 3 *
+      ((Finset.image p Finset.univ).offDiag.image
+        (fun pair : EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2) =>
+          dist pair.1 pair.2)).card :=
+  Esgk.numDistances_ge_of_ceiling hp hgp
+
+theorem all_configs_lower_bound_to_hIndexed_lower_bound {n : ℕ} {B : ℕ}
+    (hB : ∀ p : Fin n → EuclideanSpace ℝ (Fin 2), Function.Injective p →
+      ((∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) →
+      B ≤ ((Finset.image p Finset.univ).offDiag.image
+        (fun pair : EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2) =>
+          dist pair.1 pair.2)).card) :
+    B ≤ sInf {k : ℕ | ∃ p : Fin n → EuclideanSpace ℝ (Fin 2),
+      Function.Injective p ∧
+      ((∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) ∧
+      k = ((Finset.image p Finset.univ).offDiag.image
+        (fun pair : EuclideanSpace ℝ (Fin 2) × EuclideanSpace ℝ (Fin 2) =>
+          dist pair.1 pair.2)).card} :=
+  Esgk.all_configs_lower_bound_to_hIndexed_lower_bound hB
+
+theorem distanceEnergy_eq_sum_energyAtLevel {n : ℕ}
+    (p : Fin n → EuclideanSpace ℝ (Fin 2)) (hp : Function.Injective p)
+    (isoms : Finset (EuclideanSpace ℝ (Fin 2) ≃ᵢ EuclideanSpace ℝ (Fin 2)))
+    (hisoms :
+      (∀ g : EuclideanSpace ℝ (Fin 2) ≃ᵢ EuclideanSpace ℝ (Fin 2),
+          0 < LinearMap.det (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv :
+              EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)) →
+          2 ≤ (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card →
+          g ∈ isoms) ∧
+        (∀ g ∈ isoms,
+          0 < (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card) ∧
+        (∀ g ∈ isoms,
+          0 < LinearMap.det (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv :
+              EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)) →
+          2 ≤ (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card)) :
+    (∑ r ∈ Finset.image (fun ij : Fin n × Fin n => dist (p ij.1) (p ij.2))
+          ((Finset.univ.product Finset.univ).filter
+            (fun ij : Fin n × Fin n => ij.1 ≠ ij.2)),
+        ((Finset.univ.product Finset.univ).filter
+            (fun ij : Fin n × Fin n => ij.1 ≠ ij.2 ∧ dist (p ij.1) (p ij.2) = r)).card ^ 2)
+      = ∑ k ∈ Finset.range (Nat.log 2 n + 1),
+          ∑ g ∈ isoms.filter (fun g =>
+              0 < LinearMap.det (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv :
+                  EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)) ∧
+              2 ^ k ≤ (Finset.univ.filter fun i : Fin n =>
+                  g (p i) ∈ Finset.image p Finset.univ).card ∧
+              (Finset.univ.filter fun i : Fin n =>
+                  g (p i) ∈ Finset.image p Finset.univ).card < 2 ^ (k + 1)),
+            (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card *
+              ((Finset.univ.filter fun i : Fin n =>
+                g (p i) ∈ Finset.image p Finset.univ).card - 1) :=
+  Esgk.distanceEnergy_eq_sum_energyAtLevel p hp isoms hisoms
+
+theorem elekes_sharir_guth_katz_decomposition :
+    ∀ n : ℕ, ∀ p : Fin n → EuclideanSpace ℝ (Fin 2), Function.Injective p →
+      ((∀ ⦃x⦄, x ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃y⦄, y ∈ SetLike.coe (Finset.image p Finset.univ) →
+          ∀ ⦃z⦄, z ∈ SetLike.coe (Finset.image p Finset.univ) →
+          x ≠ y → y ≠ z → x ≠ z → ¬ Collinear ℝ ({x, y, z} : Set (EuclideanSpace ℝ (Fin 2)))) ∧
+        ∀ T ⊆ Finset.image p Finset.univ, T.card = 4 →
+          ¬ EuclideanGeometry.Cospherical (SetLike.coe T)) →
+      ∃ isoms : Finset (EuclideanSpace ℝ (Fin 2) ≃ᵢ EuclideanSpace ℝ (Fin 2)),
+        (∀ g : EuclideanSpace ℝ (Fin 2) ≃ᵢ EuclideanSpace ℝ (Fin 2),
+            0 < LinearMap.det (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv :
+                EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)) →
+            2 ≤ (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card →
+            g ∈ isoms) ∧
+          (∀ g ∈ isoms,
+            0 < (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card) ∧
+          (∀ g ∈ isoms,
+            0 < LinearMap.det (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv :
+                EuclideanSpace ℝ (Fin 2) →ₗ[ℝ] EuclideanSpace ℝ (Fin 2)) →
+            2 ≤ (Finset.univ.filter fun i : Fin n => g (p i) ∈ Finset.image p Finset.univ).card) :=
+  Esgk.elekes_sharir_guth_katz_decomposition
+
 end Headline

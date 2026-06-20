@@ -46,3 +46,11 @@ Run: lake env lean comparator/axiom-audit.lean
 #print axioms Headline.twoPinnedDet_affine
 #print axioms Headline.twoPinnedDet_eq_const_add_linear
 #print axioms Headline.intersect_or_parallel_of_dist2_eq
+#print axioms Headline.energy_lower_bound_of_few_distances
+#print axioms Headline.gp_config_nonempty
+#print axioms Headline.orderedMultiplicity_le_three_mul
+#print axioms Headline.distanceEnergy_le_three_mul_cube
+#print axioms Headline.numDistances_ge_of_ceiling
+#print axioms Headline.all_configs_lower_bound_to_hIndexed_lower_bound
+#print axioms Headline.distanceEnergy_eq_sum_energyAtLevel
+#print axioms Headline.elekes_sharir_guth_katz_decomposition
