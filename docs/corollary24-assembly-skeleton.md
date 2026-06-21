@@ -591,16 +591,16 @@ FLAG FOR IMPLEMENTER: sheet-maps              [LOW priority; assessed OFF critic
 | D2 strip-is-K | `decomp_D2_strip_isK` | **PROVEN (landed)** | D2b + `strip` def (DecompositionD2.lean) |
 | arc-on-good | `decomp_arc_on_good` | **PROVEN (landed)** | LEAF A + LEAF B + D2 (DecompositionD2.lean, axiom-clean) |
 | export-2 | `export_2_band_compact` | **PROVEN-modulo (glue written)** | D2a' + D2_strip_isK |
-| D3a fibre card | `decomp_D3a_fibre_card_le` | **PROVEN-shaped** | mathlib roots + StripCompact internals — FLAG `fibre-card` |
-| D3b local constancy | `decomp_D3b_locally_constant` | **CONJECTURED-constructible (full skeleton)** | IFT box (MonotoneArc) + LEAF B — FLAG `fibre-local-constant` (hardest here) |
-| D3b constancy | `decomp_D3b_fibre_card_const` | **PROVEN-modulo (topology)** | `fibre-local-constant` + `IsPreconnected` |
-| D3 sheets | `decomp_D3_sheets` | **CONJECTURED-constructible** | D3a + D3b |
+| D3a fibre card | `fibre_card` | **PROVEN (landed)** | mathlib roots + StripCompact internals (SheetCount.lean, axiom-clean) |
+| D3b local constancy | `fibre_localConstant` | **PROVEN (landed), unconditional** | pinch of `fibre_ncard_le_eventually` (lower sc) + `fibre_ncard_ge_eventually` (upper sc), over `isCompact_strip` carrier — the genuine D3 content (SheetCount.lean, axiom-clean) |
+| D3b constancy | `fibre_card_const` / `fibre_ncard_constant` | **PROVEN (landed)** | `fibre-local-constant` + `IsLocallyConstant.apply_eq_of_preconnectedSpace` (SheetCount.lean) |
+| D3 sheets | `decomp_D3_sheet_count` | **PROVEN (landed)** | D3a + D3b: ∃ s ≤ `(Curry1 h).natDegree`, ∀ x ∈ Ioo, fibre finite ∧ ncard = s (SheetCount.lean, axiom-clean) |
 | D1a InfRoot finite | `decomp_D1_infroot_finite` | **PROVEN (landed)** | `finite_yLeadCoeff_zeroSet` unfolded (DecompositionD1.lean, axiom-clean); takes `yLeadCoeff h ≠ 0` |
 | D1b Crit finite | `decomp_D1_crit_finite` | **PROVEN (landed)** | B-crit `finite_critX_of_irreducible_bound` transported via chart-bridge `critX_eq_image_critPointSet` (DecompositionD1.lean, axiom-clean) |
 | D1 Bad finite | `decomp_D1_bad_finite` | **PROVEN (landed)** | D1a ∪ D1b; `yLeadCoeff ≠ 0` derived from `∂_y h ≠ 0` via `yLeadCoeff_ne_zero_of_partialY_ne_zero` — needs only B-crit hyps |
 | D1c components | `decomp_D1_goodLocus_components` | **PROVEN (landed)** | generic `finite_compl_eq_iUnion_Ioo` (GoodLocusComponents.lean, axiom-clean); takes `(Bad h).Finite` as hyp |
 | export-1 | `export_1_bad_finite` | = D1 | as D1 |
-| endpoint-pin (ψ xQ filler) | `export_3_endpoint_pin` | **CONJECTURED-constructible (full skeleton)** | continuation-uniqueness (MonotoneArc) — FLAG `endpoint-pin` |
+| endpoint-pin (ψ xQ filler) | `endpoint_pin_of_connectingGraph` | **PARTIAL — uniqueness half landed** | connecting-graph form PROVEN via `eqOn_of_witness` (SheetCount.lean, axiom-clean): given a continuous on-curve graph χ from (xP,yP) to (xQ,yQ), ψ xQ = yQ. Closes endpoint-pin **iff** E1 supplies χ as a LEAF-A continuation arc (the planned pairing). The connected-component (`SameSheet`) form would additionally need `component_no_second_sheet` (single-valuedness of a band-good strip component) — **OPEN**, not shipped, no sorry. Decided at E1 wiring. |
 | `uinf-containment` (`Inf_x ⊆ InfRoot_x`) | downstream correctness, NOT a D1/D2 input here | **CONJECTURED (spec §2.3, LEAF B discharges its core)** | LEAF B — in-flight FLAG |
 | Bad ncard bound | `decomp_D1_bad_ncard` | **PROVEN-modulo (arithmetic)**, optional | B-crit ncard + InfRoot deg — FLAG `bad-ncard` |
 
