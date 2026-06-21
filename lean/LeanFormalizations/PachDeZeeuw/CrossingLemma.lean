@@ -11,6 +11,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.LocalArc
 -- Per-arc interval-clopen single-ψ analytic atoms (Edge-B, conditional on the band):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.MonotoneArc
+-- Vertical-strip compactness over a leading-coefficient-nonzero interval (Edge-B, lc-bound):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.StripCompact
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
