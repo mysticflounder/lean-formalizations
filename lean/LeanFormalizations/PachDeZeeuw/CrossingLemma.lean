@@ -27,6 +27,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD2
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetCount
 -- export-3: connecting-arc glue (decomp_arc_on_good + endpoint_pin) for the E1 pairing (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ConnectingArc
+-- Fibrewise sheet rank invariant along a continuation arc — the E1 same-rank pairing datum (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetRank
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
