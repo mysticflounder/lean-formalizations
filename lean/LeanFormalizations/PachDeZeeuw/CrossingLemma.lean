@@ -31,6 +31,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.ConnectingArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetRank
 -- Per-sheet incident-point bookkeeping (pointsOnSheet/edgesOnSheet, curve port of edgesOnLine) (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetEdges
+-- Shear substitution + curve-preservation coherence (generic-rotation WLOG step 1) (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
