@@ -33,6 +33,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetRank
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetEdges
 -- Shear substitution + curve-preservation coherence (generic-rotation WLOG step 1) (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear
+-- export-4a: each consecutive edgesOnSheet pair is a pinned connecting arc (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeArc
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
