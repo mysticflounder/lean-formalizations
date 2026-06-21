@@ -355,10 +355,26 @@ NEEDS-CONSTRUCTION-routine.
 
 ## 7. What next (ranked)
 
+**Status (2026-06-21).** Items 1–3 + the Irreducible row are LANDED, all axiom-clean
+(`[propext, Classical.choice, Quot.sound]`), gated on main:
+- Item 1 (shear + coherence): `Shear.lean` — `shearPoly`, `shearPoint`,
+  `evalPlane_shearPoly_shearPoint`, `shearPoint_bijective`, `shearPoint_curve_iff`.
+- Item 2 (Obstruction GR-1, degree bound): `Shear.lean` — `totalDegree_aeval_le`,
+  `shearPoly_totalDegree_le` (`≤` direction; sufficient for the `≤ d` clause).
+- Item 3 (`∂_y ≠ 0` chain): `ShearPartialY.lean` — `partialY_shearPoly_finite_bad`
+  (per-curve bad set finite, via `shearTopPoly`/`coeff_yD_shear_eq_eval`). Build doc
+  `docs/corollary24-shearpartialy-build.md`.
+- Irreducible row (§3.4): `ShearIrreducible.lean` — `irreducible_shearPoly_iff` via
+  `shearAlgEquiv` + `MulEquiv.irreducible_iff`. Build doc
+  `docs/corollary24-shearirreducible-build.md`.
+
+Remaining: **item 4** (`exists_good_shear`, the glue) then **item 5** (incidence
+transfer-back into `edgeB_crossingInput`).
+
 1. **`shearPoly` / `shearPoint` + coherence (`evalPlane_shearPoly_shearPoint`,
    `shearPoint_bijective`).** The substitution and its curve-preservation. Gates everything
    else; routine `aeval`/`eval` algebra with a repo precedent (`eval_specialized1`). Do
-   first. Risk LOW.
+   first. Risk LOW. **[LANDED — `Shear.lean`.]**
 
 2. **Obstruction GR-1 (`(B_s h).totalDegree = h.totalDegree`).** The one item with no
    mathlib lemma. Standard `Finsupp`-support degree bookkeeping; the bottleneck only in the

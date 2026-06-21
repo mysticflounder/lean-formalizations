@@ -37,6 +37,10 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeArc
 -- curveArc + export-4b interior-disjointness (SimpleCurveArc from a graph; disjoint sheets/intervals) (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CurveArc
+-- generic-rotation step 2: per-curve bad-shear-scalar set is finite (∂_y ≠ 0 off finitely many s) (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearPartialY
+-- generic-rotation: irreducibility is preserved by the shear (AlgEquiv transfer) (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearIrreducible
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
