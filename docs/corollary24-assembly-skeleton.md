@@ -528,11 +528,12 @@ FLAG FOR IMPLEMENTER: crit-finite-projection   [plumbing; depends on B-crit + ch
   set equality Crit_x = fst '' (E '' Z) carefully (the ⊇ uses chart-bridge's eval-intertwining,
   the ⊆ uses it backwards).
 
-FLAG FOR IMPLEMENTER: goodlocus-components     [generic real-line, curve-agnostic]
+FLAG FOR IMPLEMENTER: goodlocus-components     [LANDED — GoodLocusComponents.lean, axiom-clean]
   Lemma decomp_D1_goodLocus_components: for finite S ⊆ ℝ, Sᶜ is a finite disjoint union of open
-  intervals (EReal endpoints). Pure order topology; no curve content. Risk: LOW-MED (the EReal
-  endpoint bookkeeping for the two unbounded ends is the only fiddly part). Optional: D2/D3 are
-  stated against "any Ioo α β disjoint from Bad", so they do NOT block on this packaging.
+  intervals (EReal endpoints). DONE: generic `finite_compl_eq_iUnion_Ioo` (curve-agnostic) +
+  specialization to S = Bad h. Component count = exactly |S|+1 (Fin (|S|+1) index). The
+  specialization takes `(Bad h).Finite` as a hypothesis (NOT re-derived from hirr/hdeg/hpy),
+  discharged downstream by decomp_D1_bad_finite. See docs/corollary24-goodlocus-build.md.
 
 FLAG FOR IMPLEMENTER: fibre-card              [routine; reuses StripCompact internals]
   Lemma decomp_D3a_fibre_card_le: for x ∉ Bad h, (Fibre h x).Finite ∧ ncard ≤ (Curry1 h).natDegree.
@@ -597,7 +598,7 @@ FLAG FOR IMPLEMENTER: sheet-maps              [LOW priority; assessed OFF critic
 | D1a InfRoot finite | `decomp_D1_infroot_finite` | **PROVEN-trivial-modulo** | `yLeadCoeff ≠ 0` + `setOf_isRoot_finite` — FLAG `infroot-finite` |
 | D1b Crit finite | `decomp_D1_crit_finite` | **CONJECTURED-constructible (plumbing)** | `B-crit` + `chart-bridge` (in-flight) — FLAG `crit-finite-projection` |
 | D1 Bad finite | `decomp_D1_bad_finite` | **CONJECTURED-constructible** | D1a + D1b |
-| D1c components | `decomp_D1_goodLocus_components` | **PROVEN-modulo (real-line)** | finite-set order topology — FLAG `goodlocus-components` |
+| D1c components | `decomp_D1_goodLocus_components` | **PROVEN (landed)** | generic `finite_compl_eq_iUnion_Ioo` (GoodLocusComponents.lean, axiom-clean); takes `(Bad h).Finite` as hyp |
 | export-1 | `export_1_bad_finite` | = D1 | as D1 |
 | endpoint-pin (ψ xQ filler) | `export_3_endpoint_pin` | **CONJECTURED-constructible (full skeleton)** | continuation-uniqueness (MonotoneArc) — FLAG `endpoint-pin` |
 | `uinf-containment` (`Inf_x ⊆ InfRoot_x`) | downstream correctness, NOT a D1/D2 input here | **CONJECTURED (spec §2.3, LEAF B discharges its core)** | LEAF B — in-flight FLAG |
