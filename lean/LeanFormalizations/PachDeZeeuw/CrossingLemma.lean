@@ -49,6 +49,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.MultigraphIncidenceEndgame
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.BadPointBounds
 -- Edge-B drawn multigraph: edgeBMultigraph def + arc field + glue (card_V, numEdges_eq_sum) (curve port of stMultigraph):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultigraph
+-- Edge-B WellDrawn discharge (vi): crossingCount ≤ M·|Γ|² (same-curve disjoint + cross-curve ≤M-per-pair injection):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBWellDrawn
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
