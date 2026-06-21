@@ -13,6 +13,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.LocalArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.MonotoneArc
 -- Vertical-strip compactness over a leading-coefficient-nonzero interval (Edge-B, lc-bound):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.StripCompact
+-- Shared cut-set / fibre vocabulary for the decomposition assembly (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionDefs
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
