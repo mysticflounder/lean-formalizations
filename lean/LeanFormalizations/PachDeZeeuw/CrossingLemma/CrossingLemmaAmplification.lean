@@ -1573,7 +1573,8 @@ theorem independentSimpleWeakAveragedBound_of_crossingFreePlanarizationLarge
   independentSimpleWeakAveragedBound_of_inducedWeakBound
     (independentSimpleInducedWeakBound_of_crossingFreePlanarizationLarge hpl)
 
-/-- **OBSTRUCTION — `vertexSubsetAveraging_bound` [BLOCKED, `sorry`; NOT used by the main theorem].**
+/-- **OBSTRUCTION — `vertexSubsetAveraging_bound` [BLOCKED, `sorry`; NOT used by the main
+theorem].**
 
 The integer double-count master inequality. Summing an assumed per-subset weak bound
 `edgesOn G S ≤ 3·M·S.card + crossingsOn G S` over all `S ∈ G.V.powersetCard s` and

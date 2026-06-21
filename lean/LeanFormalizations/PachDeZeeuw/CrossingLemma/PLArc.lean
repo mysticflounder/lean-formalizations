@@ -6189,7 +6189,8 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
 but each strip arm is intersected with a convex `footParam` half-plane that trims the FAR end of
 the arm.  The apex hub `pt`, built near the shared vertex `v`, still lands in both clipped arms:
 on edge `i` (vertex foot `1`) `footParam pt = 1 − ε·(1 − footParam P) > α`, and on edge `i+1`
-(vertex foot `0`) `footParam pt = ε·footParam P < 1 − α`, for the (suitably small) apex weight `ε`. -/
+(vertex foot `0`) `footParam pt = ε·footParam P < 1 − α`, for the (suitably small) apex weight
+`ε`. -/
 theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α) (hα1 : α < 1)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
@@ -7738,7 +7739,8 @@ theorem nonempty_endCapSrcPlus_slices_of_sliver_budget
     linarith
 
 /-- **Local overlap of the source-positive cap slices** (obligation B of the clipped end-cap
-connectivity). The slice family is `endCapSrcPlus β ρ ∩ ball(p c, r c)` with `p c = liftPlus s t c 0`
+connectivity). The slice family is `endCapSrcPlus β ρ ∩ ball(p c, r c)` with
+`p c = liftPlus s t c 0`
 the foot-`c` point of the first edge and `r c = min(δ₀, ½·infDist(p c) Rᶜ)`. Consecutive slices
 share a common point: the lift `w = liftPlus s t c ε` (a tiny `+`-side push of `p c`). The proof
 is done **entirely in the sup metric** (`dist_liftPlus_liftPlus_le`, `dist_liftPlus_src_le`): `w`

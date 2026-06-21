@@ -667,7 +667,18 @@ lemma ruzsa_sumset_to_difference {G : Type*} [AddCommGroup G] [DecidableEq G] :
   linarith [hdiff_mul_cA]
 
 
-/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let `P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths `a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich `S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Reference: Tao–Vu, *Additive Combinatorics*, §6.4 (quantitative form of Corollary 6.20, "Paths of length three"). NOTE: currently unused by the BSG proof (the live path obtains its pointwise — not averaged — path-3 bound from `dense_bipartite_has_path3_rectangle` via dependent random choice). Retained as a self-contained, general bipartite path-counting inequality — a potential mathlib contribution. Safe to delete if no longer wanted. -/
+/-- **Length-3 path count lower bound (Cauchy-Schwarz on the bipartite graph).** For a bipartite
+graph `E ⊆ A ×ˢ B` and `(a, b) ∈ A × B`, let
+`P(a, b) := #{(b₁, a₁) ∈ B × A : (a, b₁) ∈ E ∧ (a₁, b₁) ∈ E ∧ (a₁, b) ∈ E}` count length-3 paths
+`a — b₁ — a₁ — b` in `E`. Then `Σ_{(a,b) ∈ A × B} P(a, b) ≥ |E|⁴ / (|A| · |B|)²`. The proof uses
+Cauchy-Schwarz twice: once on row-degrees to get `Σ_a rowDeg(a)² ≥ |E|²/|A|`, then a sandwich
+`S(b)² ≤ |B| · colDeg(b) · S(b)` (where `S(b) := Σ_{a:(a,b)∈E} rowDeg(a)`) followed by
+Cauchy-Schwarz on `(Σ S)² ≤ |B| · Σ S²`. Reference: Tao–Vu, *Additive Combinatorics*, §6.4
+(quantitative form of Corollary 6.20, "Paths of length three"). NOTE: currently unused by the BSG
+proof (the live path obtains its pointwise — not averaged — path-3 bound from
+`dense_bipartite_has_path3_rectangle` via dependent random choice). Retained as a self-contained,
+general bipartite path-counting inequality — a potential mathlib contribution. Safe to delete if no
+longer wanted. -/
 lemma length_three_path_count_lower_bound {G : Type*} [AddCommGroup G] [DecidableEq G]
     (A B : Finset G) (E : Finset (G × G)) (hE_sub : E ⊆ A ×ˢ B) :
     (E.card : ℝ) ^ 4 ≤ ((A.card : ℝ) * B.card) ^ 2 *
@@ -2431,7 +2442,8 @@ theorem balog_szemeredi_gowers_asymmetric {G : Type*} [AddCommGroup G] [Decidabl
           c * (Y.card : ℝ) ≤ (Y'.card : ℝ) ∧
           ((X' - Y').card : ℝ) ≤ C * (X.card : ℝ) := by
   intro η hη
-  -- Outer constants: graph_balogSzemerediGowers_restricted_sumset with (δ := η/2, K := 4/η), then Ruzsa adapter.
+  -- Outer constants: graph_balogSzemerediGowers_restricted_sumset with (δ := η/2, K := 4/η), then
+  -- Ruzsa adapter.
   obtain ⟨c₀, C₀, hc₀, hC₀, hGraphBSG⟩ :=
     graph_balogSzemerediGowers_restricted_sumset (G := G) (η / 2) (4 / η) (by linarith) (by positivity)
   -- Final constants

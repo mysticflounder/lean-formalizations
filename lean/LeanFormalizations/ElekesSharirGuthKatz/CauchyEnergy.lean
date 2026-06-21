@@ -11,12 +11,20 @@ import LeanFormalizations.ElekesSharirGuthKatz.Energy
 /-!
 # Cauchy-Schwarz energy lower bound.
 
-Lifts (Sigma m_r)^2 <= |D| * (Sigma m_r^2) to (n(n-1))^2 <= NumDistancesOrdered * DistanceEnergy, the geometric content underlying few-distances implies cubic energy. Stated in the ordered-pair NumDistancesOrdered form so the inequality holds for all p; the image-finset NumDistances view is recovered at GP-aware call sites via numDistances_eq_numDistancesOrdered_of_injective.
+Lifts (Sigma m_r)^2 <= |D| * (Sigma m_r^2) to (n(n-1))^2 <= NumDistancesOrdered *
+DistanceEnergy, the geometric content underlying few-distances implies cubic energy.
+Stated in the ordered-pair NumDistancesOrdered form so the inequality holds for all p;
+the image-finset NumDistances view is recovered at GP-aware call sites via
+numDistances_eq_numDistancesOrdered_of_injective.
 -/
 
 namespace Esgk
 
-/-- Cauchy-Schwarz on ordered multiplicities: `(Σ m_r)² ≤ |D| · Σ m_r² = NumDistancesOrdered · DistanceEnergy`, with `Σ m_r = n(n-1)` (total ordered pairs with `i ≠ j`). Stated in the ordered-pair `NumDistancesOrdered` form so the inequality holds for all `p` (no injectivity hypothesis); under `Function.Injective p` the bridge `numDistances_eq_numDistancesOrdered_of_injective` recovers the image-finset form. -/
+/-- Cauchy-Schwarz on ordered multiplicities:
+`(Σ m_r)² ≤ |D| · Σ m_r² = NumDistancesOrdered · DistanceEnergy`, with `Σ m_r = n(n-1)`
+(total ordered pairs with `i ≠ j`). Stated in the ordered-pair `NumDistancesOrdered` form
+so the inequality holds for all `p` (no injectivity hypothesis); under `Function.Injective p`
+the bridge `numDistances_eq_numDistancesOrdered_of_injective` recovers the image-finset form. -/
 theorem energy_lower_bound_of_few_distances {n : ℕ} (p : Config n) :
     (n * (n - 1))^2 ≤ (NumDistancesOrdered p) * (DistanceEnergy p) := by
   classical

@@ -211,7 +211,8 @@ theorem independentSimpleCrossingLemma_of_simpleCrossingLemma
 /-! ## Drawing → genus-0-map bridge: rotation from geometry
 
 This section adds the companion definitions and the analysis
-core of the drawing→genus-0-map bridge, §4 and §6. Everything is additive: the carriers `SimpleCurveArc`,
+core of the drawing→genus-0-map bridge, §4 and §6. Everything is additive: the carriers
+`SimpleCurveArc`,
 `DrawnMultigraph` above are untouched.
 
 The deliverable is `vertexRotation`: under the **pinned** regularity hypothesis
@@ -370,7 +371,8 @@ def IsFirstCrossing (G : DrawnMultigraph) (p : ℝ × ℝ) (e : Fin G.numEdges �
         dist ((G.arc e.1).param s) p < r
 
 /-- **The pinned regularity predicate ARR** (germ-stable local order), verbatim
-from §6 of the accompanying drawing→map development. For every vertex `p` there exist a radius `r_p > 0`
+from §6 of the accompanying drawing→map development. For every vertex `p` there exist a radius
+`r_p > 0`
 and an angular-position function `α` on incident-ends × radii such that:
 
 * **(a)** for each incident end and each `0 < r ≤ r_p`, the value `α e r` is the

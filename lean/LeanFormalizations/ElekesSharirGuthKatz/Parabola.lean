@@ -23,7 +23,9 @@ open EuclideanGeometry
 noncomputable def parabolaPoint (k : ℕ) : ℝ² := !₂[(k : ℝ), (k : ℝ)^2]
 
 
-/-- For three pairwise-distinct naturals `a b c`, the parabola points `(a, a²), (b, b²), (c, c²) ∈ ℝ²` are non-collinear. The Vandermonde determinant `(b-a)(c-a)(c-b) ≠ 0` is the witness. -/
+/-- For three pairwise-distinct naturals `a b c`, the parabola points
+`(a, a²), (b, b²), (c, c²) ∈ ℝ²` are non-collinear. The Vandermonde determinant
+`(b-a)(c-a)(c-b) ≠ 0` is the witness. -/
 theorem parabolaPoint_not_collinear {a b c : ℕ} (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) :
     ¬ Collinear ℝ ({parabolaPoint a, parabolaPoint b, parabolaPoint c} : Set ℝ²) := by
   rw [← affineIndependent_iff_not_collinear_set]
@@ -79,7 +81,10 @@ theorem parabolaPoint_not_collinear {a b c : ℕ} (hab : a ≠ b) (hac : a ≠ c
   · exact hg2
 
 
-/-- For four pairwise-distinct naturals `a b c d`, the parabola points `(a, a²), (b, b²), (c, c²), (d, d²) ∈ ℝ²` are NOT cospherical (i.e., not cocircular). Classical identity: four points on `y = x²` are concyclic iff their x-coordinates sum to zero; four distinct naturals sum to ≥ 0+1+2+3 = 6 > 0, contradiction. -/
+/-- For four pairwise-distinct naturals `a b c d`, the parabola points
+`(a, a²), (b, b²), (c, c²), (d, d²) ∈ ℝ²` are NOT cospherical (i.e., not cocircular).
+Classical identity: four points on `y = x²` are concyclic iff their x-coordinates sum
+to zero; four distinct naturals sum to ≥ 0+1+2+3 = 6 > 0, contradiction. -/
 theorem parabolaPoint_not_cospherical {a b c d : ℕ} (hab : a ≠ b) (hac : a ≠ c) (had : a ≠ d) (hbc : b ≠ c) (hbd : b ≠ d) (hcd : c ≠ d) : ¬ Cospherical ({parabolaPoint a, parabolaPoint b, parabolaPoint c, parabolaPoint d} : Set ℝ²) := by
   intro hcosph
   obtain ⟨ctr, r, hctr⟩ := hcosph
@@ -216,7 +221,9 @@ noncomputable def parabolaConfig (n : ℕ) : Config n := fun i ↦ parabolaPoint
 theorem parabolaConfig_inj (n : ℕ) : Function.Injective (parabolaConfig n) := parabolaPoint_inj.comp Fin.val_injective
 
 
-/-- The parabola configuration on `n` points is in general position. Assembles `parabolaPoint_not_collinear` (no three on a line) and `parabolaPoint_not_cospherical` (no four on a circle) under the FCM `InGeneralPosition` predicate. -/
+/-- The parabola configuration on `n` points is in general position. Assembles
+`parabolaPoint_not_collinear` (no three on a line) and `parabolaPoint_not_cospherical`
+(no four on a circle) under the FCM `InGeneralPosition` predicate. -/
 theorem parabolaConfig_inGeneralPosition (n : ℕ) : InGeneralPosition (Config.toFinset (parabolaConfig n)) := by
   -- Unfold to NonTrilinear ∧ no four cospherical.
   refine ⟨?_, ?_⟩

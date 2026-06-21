@@ -24,11 +24,14 @@ namespace Esgk
 
 open EuclideanGeometry
 
-/-- For every `n`, an injective general-position `n`-point configuration exists. Internal helper for the `sInf` lower-bound transfer in `all_configs_lower_bound_to_hIndexed_lower_bound`; not in the public validation manifest. -/
+/-- For every `n`, an injective general-position `n`-point configuration exists.
+Internal helper for the `sInf` lower-bound transfer in
+`all_configs_lower_bound_to_hIndexed_lower_bound`; not in the public validation manifest. -/
 theorem gp_config_nonempty : ∀ n : ℕ, ∃ p : Config n, Function.Injective p ∧ InGeneralPosition (Config.toFinset p) := fun n ↦ ⟨parabolaConfig n, parabolaConfig_inj n, parabolaConfig_inGeneralPosition n⟩
 
 
-/-- Per-configuration upper bound: `hIndexed n ≤ #distances(p)` for any injective GP configuration. Direct from `Nat.sInf_le` applied to the defining set of `hIndexed`. -/
+/-- Per-configuration upper bound: `hIndexed n ≤ #distances(p)` for any injective GP
+configuration. Direct from `Nat.sInf_le` applied to the defining set of `hIndexed`. -/
 theorem hIndexed_le_of_config {n : ℕ} (p : Config n)
     (hp : Function.Injective p)
     (hgp : InGeneralPosition (Config.toFinset p)) :
@@ -37,7 +40,8 @@ theorem hIndexed_le_of_config {n : ℕ} (p : Config n)
   exact ⟨p, hp, hgp, rfl⟩
 
 
-/-- Bulk transfer of per-configuration lower bound to `hIndexed n` via `Nat.le_sInf`, discharging the nonemptiness side-condition with `gp_config_nonempty`. -/
+/-- Bulk transfer of per-configuration lower bound to `hIndexed n` via `Nat.le_sInf`,
+discharging the nonemptiness side-condition with `gp_config_nonempty`. -/
 theorem all_configs_lower_bound_to_hIndexed_lower_bound {n : ℕ} {B : ℕ}
     (hB : ∀ p : Config n, Function.Injective p →
       InGeneralPosition (Config.toFinset p) → B ≤ NumDistances p) :

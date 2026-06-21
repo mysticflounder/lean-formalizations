@@ -28,10 +28,13 @@ abbrev Point : Type := ℝ²
 /-- An indexed configuration of `n` points in the plane. -/
 abbrev Config (n : ℕ) : Type := Fin n → Point
 
-/-- Image-finset of an indexed configuration: the set of points that appear in `p`. Cardinality equals `n` exactly when `p` is injective (see `Config.toFinset_card`). -/
+/-- Image-finset of an indexed configuration: the set of points that appear in `p`.
+Cardinality equals `n` exactly when `p` is injective (see `Config.toFinset_card`). -/
 noncomputable def Config.toFinset {n : ℕ} (p : Config n) : Finset Point := Finset.image p Finset.univ
 
-/-- Indexed-shape minimum distinct-distance count over general-position configurations. Bridges to the canonical `Esgk.h` (Finset-shape) via `Bridge.hIndexed_eq_h`; equivalent on both sides via `Config.toFinset` / `Finset.equivFin`. -/
+/-- Indexed-shape minimum distinct-distance count over general-position configurations.
+Bridges to the canonical `Esgk.h` (Finset-shape) via `Bridge.hIndexed_eq_h`; equivalent
+on both sides via `Config.toFinset` / `Finset.equivFin`. -/
 noncomputable def hIndexed (n : ℕ) : ℕ := sInf {k : ℕ | ∃ p : Config n, Function.Injective p ∧
     InGeneralPosition (Config.toFinset p) ∧
     k = distinctDistances (Config.toFinset p)}

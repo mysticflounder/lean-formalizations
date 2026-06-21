@@ -50,7 +50,16 @@ namespace Esgk
 
 open EuclideanGeometry
 
-/-- **EsGk decomposition** (Tier B simplified interface): for every `n`-point planar configuration `p` (injective, in general position) there exists a finite `IsRichIsometryFamily` of direct isometries — i.e., a isoms that covers every isometry with `Richness p g ≥ 2` and contains no `Richness 0` element. The downstream Props (`CriticalScaleQuantifiedStatement`, `ControlledPacketsStatement`, `HighRichnessRedirectStatement`) consume this isoms via the `IsRichIsometryFamily` predicate. Source: `src-global-proof-interface-simplification-audit.md` §2 (ES/Guth-Katz decomposition simplified interface). Counter-example sanity: `n=0,1` vacuously satisfied with `isoms := ∅` (richness-≥2 set is empty); `n=2` injective + GP forces identity isometry into isoms (`Richness id = 2`). -/
+/-- **EsGk decomposition** (Tier B simplified interface): for every `n`-point planar
+configuration `p` (injective, in general position) there exists a finite
+`IsRichIsometryFamily` of direct isometries — i.e., a isoms that covers every isometry
+with `Richness p g ≥ 2` and contains no `Richness 0` element. The downstream Props
+(`CriticalScaleQuantifiedStatement`, `ControlledPacketsStatement`,
+`HighRichnessRedirectStatement`) consume this isoms via the `IsRichIsometryFamily` predicate.
+Source: `src-global-proof-interface-simplification-audit.md` §2 (ES/Guth-Katz decomposition
+simplified interface). Counter-example sanity: `n=0,1` vacuously satisfied with
+`isoms := ∅` (richness-≥2 set is empty); `n=2` injective + GP forces identity isometry
+into isoms (`Richness id = 2`). -/
 def EsGkDecompositionStatement : Prop := (∀ n : ℕ, ∀ p : Config n, Function.Injective p →
     InGeneralPosition (Config.toFinset p) →
       ∃ isoms : Finset (IsometryEquiv ℝ² ℝ²), IsRichIsometryFamily p isoms)

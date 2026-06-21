@@ -28,7 +28,8 @@ This file fixes the **statement surface** of Theorem 2.2: the real-zero-set
 vocabulary, the headline connected-components bound `MilnorThom22Statement`, and
 the finite-set corollary `MilnorThom22FiniteStatement` that `pdz` actually
 consumes (each point of a finite zero set is its own component). Under the
-project's Tier-B program these are accepted as named inputs (axiomatized) — the entire classical proof route (semialgebraic geometry / Morse
+project's Tier-B program these are accepted as named inputs (axiomatized) — the entire classical
+proof route (semialgebraic geometry / Morse
 theory / Sard) is absent from the pinned Mathlib. The `Prop`s here are the
 interface the §3 incidence assembly threads through.
 -/

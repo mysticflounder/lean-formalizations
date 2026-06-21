@@ -32,20 +32,27 @@ open EuclideanGeometry
 noncomputable def OrderedDistanceValues {n : ℕ} (p : Config n) : Finset ℝ := Finset.image (fun ij : Fin n × Fin n ↦ dist (p ij.1) (p ij.2))
     ((Finset.univ.product Finset.univ).filter (fun ij : Fin n × Fin n ↦ ij.1 ≠ ij.2))
 
-/-- Ordered multiplicity of distance value `r` in configuration `p` (counts `(i,j)` with `i ≠ j`). -/
+/-- Ordered multiplicity of distance value `r` in configuration `p` (counts `(i,j)`
+with `i ≠ j`). -/
 noncomputable def OrderedMultiplicity {n : ℕ} (p : Config n) (r : ℝ) : ℕ := (((Finset.univ.product Finset.univ).filter
     (fun ij : Fin n × Fin n ↦ ij.1 ≠ ij.2 ∧ dist (p ij.1) (p ij.2) = r))).card
 
-/-- Distance energy: `Σ_r m_r^2` over ordered-pair multiplicities. Excludes the diagonal `r = 0` via the `i ≠ j` predicate inside `OrderedDistanceValues` / `OrderedMultiplicity`. -/
+/-- Distance energy: `Σ_r m_r^2` over ordered-pair multiplicities. Excludes the diagonal
+`r = 0` via the `i ≠ j` predicate inside `OrderedDistanceValues` / `OrderedMultiplicity`. -/
 noncomputable def DistanceEnergy {n : ℕ} (p : Config n) : ℕ := ∑ r ∈ OrderedDistanceValues p, (OrderedMultiplicity p r)^2
 
-/-- Indexed distinct-distance count via the image-finset. Equals the canonical FCM `EuclideanGeometry.distinctDistances` applied to `Config.toFinset p`; inherits diagonal exclusion from `Finset.offDiag.image`. -/
+/-- Indexed distinct-distance count via the image-finset. Equals the canonical FCM
+`EuclideanGeometry.distinctDistances` applied to `Config.toFinset p`; inherits diagonal
+exclusion from `Finset.offDiag.image`. -/
 noncomputable def NumDistances {n : ℕ} (p : Config n) : ℕ := distinctDistances (Config.toFinset p)
 
-/-- Ordered-pair distance-value count: matches the Cauchy multiplicity proof. Equals `NumDistances p` under `Function.Injective p`; can be strictly larger when `p` has collisions (the dist=0 bucket appears here but is absent from `NumDistances`). -/
+/-- Ordered-pair distance-value count: matches the Cauchy multiplicity proof. Equals
+`NumDistances p` under `Function.Injective p`; can be strictly larger when `p` has
+collisions (the dist=0 bucket appears here but is absent from `NumDistances`). -/
 noncomputable def NumDistancesOrdered {n : ℕ} (p : Config n) : ℕ := (OrderedDistanceValues p).card
 
-/-- The image-finset distance count is bounded above by the ordered-pair distance count: every distance value arising from a distinct-image pair also arises from an ordered i≠j pair. -/
+/-- The image-finset distance count is bounded above by the ordered-pair distance count:
+every distance value arising from a distinct-image pair also arises from an ordered i≠j pair. -/
 theorem numDistances_le_numDistancesOrdered {n : ℕ} (p : Config n) :
     NumDistances p ≤ NumDistancesOrdered p := by
   unfold NumDistances NumDistancesOrdered OrderedDistanceValues distinctDistances Config.toFinset
@@ -70,7 +77,8 @@ theorem numDistances_le_numDistancesOrdered {n : ℕ} (p : Config n) :
     exact hpair_dist
 
 
-/-- Under injectivity the two counts agree: `i ≠ j ↔ p i ≠ p j` makes the ordered-pair distance set and the image-finset offDiag distance set equal. -/
+/-- Under injectivity the two counts agree: `i ≠ j ↔ p i ≠ p j` makes the
+ordered-pair distance set and the image-finset offDiag distance set equal. -/
 theorem numDistances_eq_numDistancesOrdered_of_injective {n : ℕ} {p : Config n}
     (hp : Function.Injective p) :
     NumDistances p = NumDistancesOrdered p := by
@@ -109,7 +117,11 @@ theorem numDistances_eq_numDistancesOrdered_of_injective {n : ℕ} {p : Config n
     · intro h; exact hij_ne (hp h)
 
 
-/-- Aggregate Tier A target: every indexed general-position configuration has o(n^3) ordered-pair distance energy. This is not a named theorem from the literature; it packages the standard distinct-distance energy strategy into the strengthened general-position subcubic statement required for this problem. General-position hypothesis uses the canonical FCM `InGeneralPosition` transported through `Config.toFinset`. -/
+/-- Aggregate Tier A target: every indexed general-position configuration has o(n^3)
+ordered-pair distance energy. This is not a named theorem from the literature; it packages
+the standard distinct-distance energy strategy into the strengthened general-position
+subcubic statement required for this problem. General-position hypothesis uses the canonical
+FCM `InGeneralPosition` transported through `Config.toFinset`. -/
 def GeneralPositionEqualDistanceEnergySavingStatement : Prop := ∀ ε : ℝ, 0 < ε →
     ∀ᶠ n in Filter.atTop,
       ∀ p : Config n,

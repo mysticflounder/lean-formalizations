@@ -43,28 +43,136 @@ open EuclideanGeometry
 open Filter Topology
 open scoped Pointwise
 
-/-- The full dyadic richness-level index set used by the energy decomposition: `{0, 1, …, ⌈log₂ n⌉}`. Use `IsCriticalLevel n k` to cut down to the critical range `2 ≤ k ≤ ⌈√n⌉` that the critical-scale-quantified-theorem (`:39`) actually bounds. -/
+/-- The full dyadic richness-level index set used by the energy decomposition:
+`{0, 1, …, ⌈log₂ n⌉}`. Use `IsCriticalLevel n k` to cut down to the critical range
+`2 ≤ k ≤ ⌈√n⌉` that the critical-scale-quantified-theorem (`:39`) actually bounds. -/
 def dyadicLevels (n : ℕ) : Finset ℕ := Finset.range (Nat.clog 2 n + 1)
 
-/-- A dyadic richness level `k` is *critical* for an `n`-point configuration if `2 ≤ k ≤ ⌈log₂ √n⌉ + 1`, interpreting `k` as the **dyadic exponent** of the level window `[2^k, 2^(k+1))` (Option 2A reshape, 2026-05-18; see `InRichnessLevel` docstring). The condition `k ≤ log₂(√n) + 1` is equivalent to `2^k ≤ 2 √n`, so a critical level is one whose lower endpoint `2^k` does not exceed `~2 √n` — the range over which the per-level energy bound `E_k < n³/L(n)` is the binding constraint. The count of such dyadic-value indices is `(1/2) log₂ n + O(1) = O(log n)`, matching the source spec at `src-critical-scale-quantified-theorem.md:14` ("there are `O(log n)` dyadic richness levels"). Source: critical-scale-quantified-theorem `:37-39` — `2 ≤ k ≤ C √n` (value bound interpreted on the integer dyadic exponent, where `k ≤ C √n` literally would admit `Θ(√n)` levels) and `:124-126` — "sum_{critical k} E_k ≤ O(log n) n^3/L(n) = o(n^3)" (count = `O(log n)`). **Defect history (2026-05-18, IsCriticalLevel audit at `internal-audit/iscritlevel-audit.md`):** the previous bound `k ≤ Nat.sqrt n + 1` admitted `Θ(√n)` integer values of `k`, which made `general_position_equal_distance_energy_saving_from_components` provably unclosable under `IsSlowlyGrowing L` (which only requires `L/log n → ∞`, e.g. `L = (log n)²`): summing `Θ(√n)` per-level bounds `E_k < n³/L(n)` gives `Θ(n^{7/2}/L(n))`, not `o(n³)`. The fix to `Nat.log 2 (Nat.sqrt n) + 1` gives `Θ(log n)` integer values of `k`, restoring `Θ(log n) · n³/L(n) = o(n³)` iff `L/log n → ∞`, matching `IsSlowlyGrowing` exactly. The fix is downstream-safe: the only proof using `IsCriticalLevel` directly is `controlled_packets_energy_saving`, which only uses the upper bound to derive `n ≥ 1` via `interval_cases n; simp at hkSqrt; omega` — under the new bound this strengthens to `n ≥ 0` (vacuous for `n = 0` since `Nat.sqrt 0 = Nat.log 2 0 = 0` and `2 ≤ k ≤ 0 + 1 = 1` is contradictory). The adjacent `EnergyAtLevel` filter has since been reshaped to the dyadic-exponent form `2^k ≤ r ∧ r < 2^(k+1)` (Option 2A, 2026-05-18) so that the windows tile ℕ and the dyadic decomposition is a true partition. -/
+/-- A dyadic richness level `k` is *critical* for an `n`-point configuration if
+`2 ≤ k ≤ ⌈log₂ √n⌉ + 1`, interpreting `k` as the **dyadic exponent** of the level
+window `[2^k, 2^(k+1))` (Option 2A reshape, 2026-05-18; see `InRichnessLevel` docstring).
+The condition `k ≤ log₂(√n) + 1` is equivalent to `2^k ≤ 2 √n`, so a critical level
+is one whose lower endpoint `2^k` does not exceed `~2 √n` — the range over which the
+per-level energy bound `E_k < n³/L(n)` is the binding constraint. The count of such
+dyadic-value indices is `(1/2) log₂ n + O(1) = O(log n)`, matching the source spec at
+`src-critical-scale-quantified-theorem.md:14` ("there are `O(log n)` dyadic richness
+levels"). Source: critical-scale-quantified-theorem `:37-39` —
+`2 ≤ k ≤ C √n` (value bound interpreted on the integer dyadic exponent, where
+`k ≤ C √n` literally would admit `Θ(√n)` levels) and `:124-126` —
+"sum_{critical k} E_k ≤ O(log n) n^3/L(n) = o(n^3)" (count = `O(log n)`).
+**Defect history (2026-05-18, IsCriticalLevel audit at
+`internal-audit/iscritlevel-audit.md`):** the previous bound `k ≤ Nat.sqrt n + 1`
+admitted `Θ(√n)` integer values of `k`, which made
+`general_position_equal_distance_energy_saving_from_components` provably unclosable under
+`IsSlowlyGrowing L` (which only requires `L/log n → ∞`, e.g. `L = (log n)²`): summing
+`Θ(√n)` per-level bounds `E_k < n³/L(n)` gives `Θ(n^{7/2}/L(n))`, not `o(n³)`.
+The fix to `Nat.log 2 (Nat.sqrt n) + 1` gives `Θ(log n)` integer values of `k`,
+restoring `Θ(log n) · n³/L(n) = o(n³)` iff `L/log n → ∞`, matching `IsSlowlyGrowing`
+exactly. The fix is downstream-safe: the only proof using `IsCriticalLevel` directly is
+`controlled_packets_energy_saving`, which only uses the upper bound to derive `n ≥ 1` via
+`interval_cases n; simp at hkSqrt; omega` — under the new bound this strengthens to
+`n ≥ 0` (vacuous for `n = 0` since `Nat.sqrt 0 = Nat.log 2 0 = 0` and
+`2 ≤ k ≤ 0 + 1 = 1` is contradictory). The adjacent `EnergyAtLevel` filter has since been
+reshaped to the dyadic-exponent form `2^k ≤ r ∧ r < 2^(k+1)` (Option 2A, 2026-05-18) so
+that the windows tile ℕ and the dyadic decomposition is a true partition. -/
 def IsCriticalLevel (n k : ℕ) : Prop := 2 ≤ k ∧ k ≤ Nat.log 2 (Nat.sqrt n) + 1
 
-/-- The isometry `g : ℝ² ≃ᵢ ℝ²` is *direct* (orientation-preserving, i.e. in `SE(2)`) iff the determinant of the linear part of its Mazur-Ulam affine extension is positive. The Lean encoding routes `IsometryEquiv ℝ² ℝ² → AffineIsometryEquiv ℝ ℝ² ℝ² → LinearIsometryEquiv ℝ ℝ² ℝ² → LinearEquiv ℝ ℝ² ℝ² → LinearMap`, then asks `0 < LinearMap.det`, mirroring `Mathlib/Analysis/InnerProductSpace/TwoDim.lean:158,309` (`areaForm_comp_linearIsometryEquiv`, `linearIsometryEquiv_comp_rightAngleRotation`) which use the same `0 < LinearMap.det (φ.toLinearEquiv : E →ₗ[ℝ] E)` idiom for "positively-oriented isometric automorphism" of a 2D oriented inner-product space. The ES-GK bridge identity `DistanceEnergy p = ∑_{g ∈ isoms} r(g)·(r(g)-1)` holds **only** when summing over direct isometries: see `internal-audit/esgk-bridge-identity.md` §1.3-1.4 and §4 (36/36 empirical verifications under direct-only restriction; counterexamples for equilateral triangle / square / regular pentagon over the full isometry group). This `IsDirect` predicate is therefore used to filter the energy summation in `EnergyAtLevel` and the coverage clause (i) of `IsRichIsometryFamily`. -/
+/-- The isometry `g : ℝ² ≃ᵢ ℝ²` is *direct* (orientation-preserving, i.e. in `SE(2)`)
+iff the determinant of the linear part of its Mazur-Ulam affine extension is positive.
+The Lean encoding routes
+`IsometryEquiv ℝ² ℝ² → AffineIsometryEquiv ℝ ℝ² ℝ² → LinearIsometryEquiv ℝ ℝ² ℝ² → LinearEquiv ℝ ℝ² ℝ² → LinearMap`,
+then asks `0 < LinearMap.det`, mirroring
+`Mathlib/Analysis/InnerProductSpace/TwoDim.lean:158,309`
+(`areaForm_comp_linearIsometryEquiv`, `linearIsometryEquiv_comp_rightAngleRotation`) which
+use the same `0 < LinearMap.det (φ.toLinearEquiv : E →ₗ[ℝ] E)` idiom for
+"positively-oriented isometric automorphism" of a 2D oriented inner-product space. The
+ES-GK bridge identity `DistanceEnergy p = ∑_{g ∈ isoms} r(g)·(r(g)-1)` holds **only**
+when summing over direct isometries: see `internal-audit/esgk-bridge-identity.md`
+§1.3-1.4 and §4 (36/36 empirical verifications under direct-only restriction;
+counterexamples for equilateral triangle / square / regular pentagon over the full isometry
+group). This `IsDirect` predicate is therefore used to filter the energy summation in
+`EnergyAtLevel` and the coverage clause (i) of `IsRichIsometryFamily`. -/
 noncomputable def IsDirect (g : IsometryEquiv ℝ² ℝ²) : Prop :=
   0 < LinearMap.det
     (g.toRealAffineIsometryEquiv.linearIsometryEquiv.toLinearEquiv : ℝ² →ₗ[ℝ] ℝ²)
 
-/-- Decidability of `IsDirect` (noncomputable; threads through `Real.decidableLT`). Local instance so `Finset.filter` over the `IsDirect g ∧ …` predicate in `EnergyAtLevel` synthesizes a `DecidablePred` without needing `Classical.propDecidable` at every call site. -/
+/-- Decidability of `IsDirect` (noncomputable; threads through `Real.decidableLT`).
+Local instance so `Finset.filter` over the `IsDirect g ∧ …` predicate in
+`EnergyAtLevel` synthesizes a `DecidablePred` without needing `Classical.propDecidable`
+at every call site. -/
 noncomputable instance instDecidableIsDirect (g : IsometryEquiv ℝ² ℝ²) : Decidable (IsDirect g) := by
   unfold IsDirect; infer_instance
 
-/-- Richness `r(g)` of an isometry `g` with respect to an indexed configuration `p : Config n`: the count of indices `i` whose image `g(p i)` lies in `Config.toFinset p`. This is the count `|{p ∈ P_n : g(p) ∈ P_n}|` from critical-scale-quantified-theorem `:25-27`, transported through the indexed-shape `Config` API (so that on injective configurations the count agrees with the source spec's set-shape definition). The definition is given over the full isometry group; the direct-isometry restriction enters at the energy / isoms-validity layer (`IsDirect` filter in `EnergyAtLevel` and clause (i) of `IsRichIsometryFamily`). -/
+/-- Richness `r(g)` of an isometry `g` with respect to an indexed configuration
+`p : Config n`: the count of indices `i` whose image `g(p i)` lies in
+`Config.toFinset p`. This is the count `|{p ∈ P_n : g(p) ∈ P_n}|` from
+critical-scale-quantified-theorem `:25-27`, transported through the indexed-shape
+`Config` API (so that on injective configurations the count agrees with the source
+spec's set-shape definition). The definition is given over the full isometry group; the
+direct-isometry restriction enters at the energy / isoms-validity layer (`IsDirect` filter
+in `EnergyAtLevel` and clause (i) of `IsRichIsometryFamily`). -/
 noncomputable def Richness {n : ℕ} (p : Config n) (g : IsometryEquiv ℝ² ℝ²) : ℕ := (Finset.univ.filter fun i : Fin n ↦ g (p i) ∈ Config.toFinset p).card
 
-/-- Membership in the dyadic richness level `G_k = {g : 2^k ≤ r(g) < 2^(k+1)}` for a configuration `p`. Predicate form; the energy aggregation `EnergyAtLevel` takes an explicit `Finset` of isometries (the ES/Guth-Katz decomposition output) and filters by this predicate. The parameter `k : ℕ` is the **dyadic exponent**, so the level windows `[2^k, 2^(k+1))` tile ℕ as `k = 0, 1, 2, …` — this is a genuine partition (unlike the previous lower-endpoint shape `[k, 2k)`, where e.g. `k = 3, 4` gave overlapping intervals `[3, 6)` and `[4, 8)`). Source: critical-scale-quantified-theorem `:29` — `G_k = {g : k ≤ r(g) < 2k}` in the prose spec, reformulated to the dyadic-exponent shape (Option 2A reshape, 2026-05-18) so the dyadic decomposition `∑_g r(g)(r(g) - 1) = ∑_k EnergyAtLevel p k isoms` is a true `Finset.sum_partition` instance. **Defect history (2026-05-18, Option 2A reshape):** the previous body `k ≤ Richness p g ∧ Richness p g < 2 * k` interpreted `k` as the lower endpoint of the dyadic window, which made the energy decomposition over consecutive integer `k` count many isometries multiple times (overlap at `r = 4, 5` between levels `k = 3` and `k = 4`, etc.). Switching to `2^k ≤ r ∧ r < 2^(k+1)` makes `k` the dyadic exponent and restores the partition. Consumer-facing implications: (a) `IsCriticalLevel n k` already advertises `k` as a dyadic exponent (post-`Nat.log 2 (Nat.sqrt n) + 1` fix 2026-05-18) so its semantics are unchanged; (b) `HighRichnessRedirectStatement`'s above-critical condition `Nat.log 2 (Nat.sqrt n) + 1 < k` now correctly identifies the levels where `Richness p g > √n` (since `2^k > 2^(log₂ √n + 1) ≥ 2 √n > √n`); (c) the `controlled_packets_energy_saving` proof uses only the upper bound `r(r-1) ≤ r^2` to dominate the filtered sum, which is independent of the level-window shape, so it typechecks unchanged. -/
+/-- Membership in the dyadic richness level `G_k = {g : 2^k ≤ r(g) < 2^(k+1)}` for a
+configuration `p`. Predicate form; the energy aggregation `EnergyAtLevel` takes an
+explicit `Finset` of isometries (the ES/Guth-Katz decomposition output) and filters by
+this predicate. The parameter `k : ℕ` is the **dyadic exponent**, so the level windows
+`[2^k, 2^(k+1))` tile ℕ as `k = 0, 1, 2, …` — this is a genuine partition (unlike the
+previous lower-endpoint shape `[k, 2k)`, where e.g. `k = 3, 4` gave overlapping intervals
+`[3, 6)` and `[4, 8)`). Source: critical-scale-quantified-theorem `:29` —
+`G_k = {g : k ≤ r(g) < 2k}` in the prose spec, reformulated to the dyadic-exponent
+shape (Option 2A reshape, 2026-05-18) so the dyadic decomposition
+`∑_g r(g)(r(g) - 1) = ∑_k EnergyAtLevel p k isoms` is a true `Finset.sum_partition`
+instance. **Defect history (2026-05-18, Option 2A reshape):** the previous body
+`k ≤ Richness p g ∧ Richness p g < 2 * k` interpreted `k` as the lower endpoint of the
+dyadic window, which made the energy decomposition over consecutive integer `k` count many
+isometries multiple times (overlap at `r = 4, 5` between levels `k = 3` and `k = 4`, etc.).
+Switching to `2^k ≤ r ∧ r < 2^(k+1)` makes `k` the dyadic exponent and restores the
+partition. Consumer-facing implications: (a) `IsCriticalLevel n k` already advertises
+`k` as a dyadic exponent (post-`Nat.log 2 (Nat.sqrt n) + 1` fix 2026-05-18) so its
+semantics are unchanged; (b) `HighRichnessRedirectStatement`'s above-critical condition
+`Nat.log 2 (Nat.sqrt n) + 1 < k` now correctly identifies the levels where
+`Richness p g > √n` (since `2^k > 2^(log₂ √n + 1) ≥ 2 √n > √n`); (c) the
+`controlled_packets_energy_saving` proof uses only the upper bound `r(r-1) ≤ r^2` to
+dominate the filtered sum, which is independent of the level-window shape, so it
+typechecks unchanged. -/
 def InRichnessLevel {n : ℕ} (p : Config n) (k : ℕ) (g : IsometryEquiv ℝ² ℝ²) : Prop := 2 ^ k ≤ Richness p g ∧ Richness p g < 2 ^ (k + 1)
 
-/-- Per-level energy `E_k = ∑_{g ∈ G_k ∩ isoms ∩ Direct} r(g)·(r(g) - 1)`, aggregated over the direct-isometry subset of an explicit finite `isoms` of isometries (supplied externally — in the proof this is the `ES/Guth-Katz` decomposition output). The parameter `k : ℕ` is the **dyadic exponent**: the level filter is `2^k ≤ r(g) < 2^(k+1)`, so the windows `[2^k, 2^(k+1))` tile ℕ as `k = 0, 1, 2, …` and the dyadic decomposition `∑_g r(g)(r(g)-1) = ∑_k EnergyAtLevel p k isoms` is a true `Finset.sum_partition` instance (Option 2A reshape, 2026-05-18; see `InRichnessLevel` docstring for the defect history). The `IsDirect g` predicate restricts the summation to orientation-preserving isometries, which is **essential** for the ES-GK bridge identity `DistanceEnergy p = ∑_g r(g)(r(g)-1)` to hold: the underlying bijection between ordered quadruples `(i,j,k,l)` at matching distance and direct isometries fails over the full isometry group (reflections double-count). See `internal-audit/esgk-bridge-identity.md` §3-§4 for the clean identity and 36/36 empirical verifications (vs. failure on symmetric configs without the direct-only restriction). Source: critical-scale-quantified-theorem `:31` — `E_k = sum_{g ∈ G_k} r(g)^2` in the prose spec, reformulated to the *falling-factorial* form `r(r-1)` per Tier B/C interface design recommendation 2026-05-18 (math-professor Q1A); the shift `r^2 → r(r-1)` does not affect any downstream consumer's bound `E_k < n^3 / L n` (`r(r-1) ≤ r^2` keeps WF3's `∑ r^2 ≤ 4 n^2` dominant). Returns `ℕ` (a sum of products of natural-number multiplicities; `r - 1` is monus, harmless because `EnergyAtLevel` is only consumed at critical levels where every summand has `r ≥ 2^k ≥ 2^2 = 4 > 0` so `r * (r - 1)` agrees with the integer `r^2 - r`); cast at the use-site for the `E_k < n^3 / L(n)` bound, matching the existing `DistanceEnergy` convention in `Esgk.Energy`. The `isoms` argument is the project's faithful rendering of the source spec's `g` ranging over direct isometries with `r(g) > 0`; indirect-isometry entries in `isoms` are filtered out and contribute zero to the energy. **Defect history (2026-05-18, math-professor isometry-classification audit):** the previous body summed over all (direct *or* indirect) isoms entries matching the dyadic level, which broke the ES-GK bridge identity on symmetric configurations — the `IsDirect g` filter restores soundness. **Defect history (2026-05-18, Option 2A reshape):** the previous filter `k ≤ Richness p g ∧ Richness p g < 2 * k` interpreted `k` as the lower endpoint of the dyadic window, which is not a partition over consecutive integers (e.g. levels `k = 3` and `k = 4` both contain richness `r = 4, 5`). Switching to `2^k ≤ r ∧ r < 2^(k+1)` makes the windows disjoint and exhaustive, restoring the dyadic partition needed by `BridgeIdentity`'s deferred `Finset.sum_partition` argument. -/
+/-- Per-level energy `E_k = ∑_{g ∈ G_k ∩ isoms ∩ Direct} r(g)·(r(g) - 1)`, aggregated
+over the direct-isometry subset of an explicit finite `isoms` of isometries (supplied
+externally — in the proof this is the `ES/Guth-Katz` decomposition output). The parameter
+`k : ℕ` is the **dyadic exponent**: the level filter is `2^k ≤ r(g) < 2^(k+1)`, so the
+windows `[2^k, 2^(k+1))` tile ℕ as `k = 0, 1, 2, …` and the dyadic decomposition
+`∑_g r(g)(r(g)-1) = ∑_k EnergyAtLevel p k isoms` is a true `Finset.sum_partition`
+instance (Option 2A reshape, 2026-05-18; see `InRichnessLevel` docstring for the defect
+history). The `IsDirect g` predicate restricts the summation to orientation-preserving
+isometries, which is **essential** for the ES-GK bridge identity
+`DistanceEnergy p = ∑_g r(g)(r(g)-1)` to hold: the underlying bijection between ordered
+quadruples `(i,j,k,l)` at matching distance and direct isometries fails over the full
+isometry group (reflections double-count). See `internal-audit/esgk-bridge-identity.md`
+§3-§4 for the clean identity and 36/36 empirical verifications (vs. failure on symmetric
+configs without the direct-only restriction). Source: critical-scale-quantified-theorem
+`:31` — `E_k = sum_{g ∈ G_k} r(g)^2` in the prose spec, reformulated to the
+*falling-factorial* form `r(r-1)` per Tier B/C interface design recommendation 2026-05-18
+(math-professor Q1A); the shift `r^2 → r(r-1)` does not affect any downstream consumer's
+bound `E_k < n^3 / L n` (`r(r-1) ≤ r^2` keeps WF3's `∑ r^2 ≤ 4 n^2` dominant). Returns
+`ℕ` (a sum of products of natural-number multiplicities; `r - 1` is monus, harmless
+because `EnergyAtLevel` is only consumed at critical levels where every summand has
+`r ≥ 2^k ≥ 2^2 = 4 > 0` so `r * (r - 1)` agrees with the integer `r^2 - r`); cast at
+the use-site for the `E_k < n^3 / L(n)` bound, matching the existing `DistanceEnergy`
+convention in `Esgk.Energy`. The `isoms` argument is the project's faithful rendering of
+the source spec's `g` ranging over direct isometries with `r(g) > 0`; indirect-isometry
+entries in `isoms` are filtered out and contribute zero to the energy.
+**Defect history (2026-05-18, math-professor isometry-classification audit):** the previous
+body summed over all (direct *or* indirect) isoms entries matching the dyadic level, which
+broke the ES-GK bridge identity on symmetric configurations — the `IsDirect g` filter
+restores soundness.
+**Defect history (2026-05-18, Option 2A reshape):** the previous filter
+`k ≤ Richness p g ∧ Richness p g < 2 * k` interpreted `k` as the lower endpoint of the
+dyadic window, which is not a partition over consecutive integers (e.g. levels `k = 3` and
+`k = 4` both contain richness `r = 4, 5`). Switching to `2^k ≤ r ∧ r < 2^(k+1)` makes
+the windows disjoint and exhaustive, restoring the dyadic partition needed by
+`BridgeIdentity`'s deferred `Finset.sum_partition` argument. -/
 noncomputable def EnergyAtLevel {n : ℕ} (p : Config n) (k : ℕ)
     (isoms : Finset (IsometryEquiv ℝ² ℝ²)) : ℕ := ∑ g ∈ isoms.filter (fun g ↦ IsDirect g ∧ 2 ^ k ≤ Richness p g ∧ Richness p g < 2 ^ (k + 1)),
     Richness p g * (Richness p g - 1)

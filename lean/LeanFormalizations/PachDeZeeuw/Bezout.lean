@@ -222,7 +222,8 @@ lemma coeff_root_ncard_resultant_le
     exact degreeOf_resultant_le p q hpdeg hqdeg
   exact le_trans hroot hdeg
 
-/-- The ordinary nonassociated factor-pair case has finite intersection and the expected crude bound. -/
+/-- The ordinary nonassociated factor-pair case has finite intersection and the expected crude
+bound. -/
 theorem primitive_nonvertical_pair_intersection_bound
     (p q : MvPolynomial (Fin 2) ℝ)
     {d₁ d₂ : ℕ}
@@ -540,7 +541,8 @@ lemma curry0_pderiv0 (p : PlanePoly) :
               Polynomial.derivative (Polynomial.C (MvPolynomial.X 0))
       simp [mul_comm]
 
-/-- A nonsingular point with nonzero partial in the second coordinate lies on an infinite zero set. -/
+/-- A nonsingular point with nonzero partial in the second coordinate lies on an infinite
+zero set. -/
 lemma nonsingular_point_has_infinite_zeroSet_of_partial1
     (h : PlanePoly) {z : Point2}
     (hz : z ∈ PlaneCurveZeroSet h)
@@ -656,7 +658,8 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
     fin_cases i <;> simp [mkPoint2]
   exact Set.Infinite.mono hsubset (Set.Infinite.image hg_inj hball_infinite)
 
-/-- A nonsingular point with a nonzero partial in the first coordinate lies on an infinite zero set. -/
+/-- A nonsingular point with a nonzero partial in the first coordinate lies on an infinite
+zero set. -/
 lemma nonsingular_point_has_infinite_zeroSet_of_partial0
     (h : PlanePoly) {z : Point2}
     (hz : z ∈ PlaneCurveZeroSet h)
@@ -749,7 +752,8 @@ lemma finite_zeroSet_subset_singularities
       simpa using h1)
     exact hfin.not_infinite hinf
 
-/-- A singular point of a product of factors lies on a singular factor or on an off-diagonal pairwise intersection. -/
+/-- A singular point of a product of factors lies on a singular factor or on an off-diagonal
+pairwise intersection. -/
 lemma singularPointSet_prod_subset
     (s : Finset PlanePoly) :
     SingularPointSet (∏ h ∈ s, h) ⊆
@@ -959,7 +963,8 @@ lemma irreducible_not_dvd_nonzero_partial
   have hle := MvPolynomial.totalDegree_le_of_dvd_of_isDomain hdiv hpi
   exact (not_lt_of_ge hle) hlt
 
-/-- A singular point lies in the zero set of some normalized factor of the chosen partial derivative. -/
+/-- A singular point lies in the zero set of some normalized factor of the chosen partial
+derivative. -/
 lemma singularPointSet_subset_partial_factor_union
     (h : PlanePoly) {i : Fin 2}
     (hpi : MvPolynomial.pderiv i h ≠ 0) :
@@ -989,7 +994,8 @@ lemma singularPointSet_subset_partial_factor_union
     refine Set.mem_iUnion.2 ⟨k, Set.mem_iUnion.2 ⟨hkmem, ?_⟩⟩
     exact ⟨hz0, hzk⟩
 
-/-- A normalized factor of the chosen partial derivative cannot be associated with the irreducible curve. -/
+/-- A normalized factor of the chosen partial derivative cannot be associated with the irreducible
+curve. -/
 lemma partial_factor_not_associated
     (h k : PlanePoly) (hh : Irreducible h) {i : Fin 2}
     (hpi : MvPolynomial.pderiv i h ≠ 0)
@@ -1017,7 +1023,8 @@ lemma primitive_bound_le_fourth_succ (d : ℕ) :
     ring_nf
     nlinarith [hd])
 
-/-- A normalized factor of the chosen partial derivative meets the irreducible curve in at most `(d + 1)^4` points. -/
+/-- A normalized factor of the chosen partial derivative meets the irreducible curve in at most
+`(d + 1)^4` points. -/
 lemma factor_intersection_bound
     (h : PlanePoly)
     (hh : Irreducible h)

@@ -13,7 +13,8 @@ convex-position isosceles-counting argument.
 
 **Geometric origin.** In the cap-decomposition argument, a convex
 point set `P` carries three "caps" `C₁, C₂, C₃` cut
-out by closed chains between three selected Moser vertices.  Each Moser vertex lies on exactly two opposite caps and
+out by closed chains between three selected Moser vertices.  Each Moser vertex lies on exactly two
+opposite caps and
 every other vertex on exactly one of the three chains, so
 
   `|C₁| + |C₂| + |C₃| = n + 3`

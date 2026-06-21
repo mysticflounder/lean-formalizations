@@ -20,7 +20,8 @@ namespace Esgk
 open Filter
 open Topology
 
-/-- Eventually `(n : ℝ) > 0` along `atTop`; trivial cast helper for division-by-`n` filter manipulations. -/
+/-- Eventually `(n : ℝ) > 0` along `atTop`; trivial cast helper for
+division-by-`n` filter manipulations. -/
 theorem eventually_pos_nat_cast : ∀ᶠ n : ℕ in Filter.atTop, (0 : ℝ) < (n : ℝ) := by
   filter_upwards [Filter.eventually_gt_atTop 0] with n hn
   exact_mod_cast hn

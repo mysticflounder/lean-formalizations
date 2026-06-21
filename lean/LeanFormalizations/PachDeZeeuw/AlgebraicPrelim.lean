@@ -1048,7 +1048,8 @@ theorem coeffline_nonvertical_pair_intersection_bound
       _ ≤ d₁ * d₂ := hunion_ncard
   exact ⟨hfinite, hncard⟩
 
-/-- If the coefficient roots have empty intersection, the corresponding coefficient-line intersections are empty. -/
+/-- If the coefficient roots have empty intersection, the corresponding coefficient-line
+intersections are empty. -/
 theorem coeffline_coeffline_pair_intersection_empty_of_no_common_real_root
     (a b : XCoeff)
     (hnoRoot : CoeffRootSet a ∩ CoeffRootSet b = ∅) :
@@ -1064,7 +1065,8 @@ theorem coeffline_coeffline_pair_intersection_empty_of_no_common_real_root
   · intro hz
     cases hz
 
-/-- An irreducible plane polynomial with positive eliminated-coordinate degree has primitive curry. -/
+/-- An irreducible plane polynomial with positive eliminated-coordinate degree has primitive
+curry. -/
 lemma curry_isPrimitive_of_irreducible_positive_natDegree
     (h : MvPolynomial (Fin 2) ℝ)
     (hh : Irreducible h)
@@ -1196,7 +1198,8 @@ lemma coeffLineFactor_dvd_of_curry_natDegree_zero_root
     simp [coeffEval, hxroot]
   exact coeffLineFactor_dvd_of_specialized_zero h x hspec
 
-/-- A coefficient-line factor cannot divide the second polynomial in the nonassociated zero-degree case. -/
+/-- A coefficient-line factor cannot divide the second polynomial in the nonassociated
+zero-degree case. -/
 lemma not_coeffLineFactor_dvd_of_root_left_zero_curry_nonassociated
     (h k : MvPolynomial (Fin 2) ℝ)
     (hh : Irreducible h) (hk : Irreducible k)
@@ -1328,7 +1331,8 @@ lemma helper_sum_sub_single_le (v : Fin 2 →₀ ℕ) (i : Fin 2) (hvi : v i ≠
     simp [Finsupp.sum_fintype]
     omega
 
-/-- A partial derivative drops the total degree by at most one when the curve has positive degree. -/
+/-- A partial derivative drops the total degree by at most one when the curve has positive
+degree. -/
 lemma totalDegree_pderiv_le_sub_one
     (h : MvPolynomial (Fin 2) ℝ) (i : Fin 2)
     (_hpos : 0 < h.totalDegree) :
@@ -1376,7 +1380,8 @@ lemma totalDegree_pderiv_le
     rw [hC]
     simp
 
-/-- A nonzero partial derivative of a positive-degree plane polynomial has strictly smaller degree. -/
+/-- A nonzero partial derivative of a positive-degree plane polynomial has strictly smaller
+degree. -/
 lemma totalDegree_pderiv_lt_of_nonzero
     (h : MvPolynomial (Fin 2) ℝ) {i : Fin 2}
     (hpos : 0 < h.totalDegree)
@@ -1510,7 +1515,8 @@ lemma zeroSet_subset_normalizedFactor_union
 /-- Bivariate real polynomials — the ambient ring for plane curves. -/
 abbrev PlanePoly := MvPolynomial (Fin 2) ℝ
 
-/-- A finite cover of a real plane curve by irreducible components coming from its normalized factors. -/
+/-- A finite cover of a real plane curve by irreducible components coming from its normalized
+factors. -/
 structure RealPlaneCurveComponentCover
     (d : ℕ) (C : Set Point2)
     (components : Finset (Sigma fun _e : ℕ => Set Point2)) : Prop where
