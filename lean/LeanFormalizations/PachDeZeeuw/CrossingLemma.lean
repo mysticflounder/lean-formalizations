@@ -47,6 +47,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearExists
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.MultigraphIncidenceEndgame
 -- Edge-B E1 inputs: bad-x fibre bound (≤ d) + |Bad h| ≤ (d+1)^5+d (def-independent cut-set cardinalities):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.BadPointBounds
+-- Edge-B drawn multigraph: edgeBMultigraph def + arc field + glue (card_V, numEdges_eq_sum) (curve port of stMultigraph):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultigraph
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion

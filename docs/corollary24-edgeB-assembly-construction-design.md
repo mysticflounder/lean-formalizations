@@ -44,7 +44,11 @@ this session from source**:
 
 I searched the whole `lean/` tree for an M-tolerant incidence endgame
 (`incidence_bound_of_multigraph*`, any incidence bound with `M` in its statement): **none exists**.
-`edgeBMultigraph`, `allCurveEdges`, `edgeB_crossingInput` are **ABSENT** from the tree.
+`edgeBMultigraph`, `allCurveEdges`, `edgeB_crossingInput` were **ABSENT** from the tree at
+the time of writing. **UPDATE (2026-06-21):** `edgeBMultigraph` + `allCurveEdges` + `classKeys`
++ discharges (i),(ii) are now **LANDED, axiom-clean** in `EdgeBMultigraph.lean`
+(`docs/corollary24-edgeBmultigraph-build.md`); `edgeB_crossingInput` and the (iii)–(vi)
+discharges remain to do.
 
 Two scratch computations were run (EMPIRICALLY VERIFIED, scopes stated inline): the
 multiplicity-≤-M class-pairing skeleton, and the M-tolerant endgame arithmetic / break point of the
@@ -752,13 +756,13 @@ NOT NEEDED: component_no_second_sheet  [OFF critical path, per the E1E2 verdict;
 | `incidence_bound_of_crossingLemma` (M=1) | line endgame; **requires mult≤1, const 64** | **PROVEN (landed), NOT applicable to curves** | SzemerediTrotter.lean:233 |
 | **multiplicity obstruction** | curve mult ≤ M > 1; no M-tolerant endgame in repo | **resolved (this doc §2): adopt R2 (M-form endgame, absorb M into C)** | §2.3 |
 | `incidence_bound_of_multigraphCrossingLemma` | M-form endgame, const `64·M` | **PROVEN (landed) — `MultigraphIncidenceEndgame.lean`; axiom-clean** | `CrossingLemmaMultigraphStatement` (parked) + port of `:163` |
-| `edgeBMultigraph` + `allCurveEdges` | curve analogue of `stMultigraph` | **CONJECTURED-constructible (ABSENT)** | landed leaves + `classKeys-enum` FLAG |
+| `edgeBMultigraph` + `allCurveEdges` + `classKeys` + discharges (i),(ii) | curve analogue of `stMultigraph` | **PROVEN (landed) — `EdgeBMultigraph.lean`, axiom-clean** | landed leaves; `classKeys-enum` resolved (`realBracketOfEReal` + `Classical.choose` extraction of the `Prop`-level components); `arc` field closed via the enriched `EdgeBEdge` payload; build `docs/corollary24-edgeBmultigraph-build.md` |
 | `edgeBMultigraph_multiplicity_le_M` | `hmult ≤ M` | **CONJECTURED-constructible (FLAG, LOW-MED)** | 2-DOF point–point + edgesOnSheet M2 port + sheetRank |
 | `edgeBMultigraph_wellDrawn` | `crossingCount ≤ M·|Γ|²` | **CONJECTURED-constructible (FLAG, MED)** | export_4b + curveArc_interior (landed) + 2-DOF curve–curve |
 | `edgeBMultigraph_arcsJoinEndpoints` | `ArcsJoinEndpoints` | **CONJECTURED-constructible (FLAG, LOW)** | export_4a + endAnchor_curveArc_* (landed) |
 | `edgeB_incidence_le_numEdges_add` | E1 edge bound `I ≤ numEdges + c(d)·|Γ|` | **CONJECTURED-constructible (FLAG, LOW)** | length_edgesOnSheet (landed) + §3 + bad-ncard/fibre-at-bad |
-| `fibre-card-le-at-bad` | bad-x fibre ≤ d points | **CONJECTURED-constructible (NEW small FLAG, LOW)** | shear no-vertical-factor + univariate roots |
-| `bad-ncard` | `|Bad h| ≤ d·(d+1)^4 + d` | **CONJECTURED-constructible (FLAG, LOW)** | factor_intersection_bound / bezout (landed) |
+| `fibre-card-le-at-bad` | bad-x fibre ≤ d points | **PROVEN (landed) — `BadPointBounds.lean` (`fibre_card_le_at_bad`), axiom-clean** | needs BOTH `hirr`+`hpy` (corrected); primitivity of `Curry1 h` + univariate roots; build `docs/corollary24-badpoint-bounds-build.md` |
+| `bad-ncard` | `|Bad h| ≤ (d+1)^5 + d` | **PROVEN (landed) — `BadPointBounds.lean` (`decomp_D1_bad_ncard`), axiom-clean** | constant `(d+1)^5+d` (cleaner than projected `d·(d+1)^4+d`; `finite_critX_of_irreducible_bound` already aggregates Bézout) + `ncard_yLeadCoeff_zeroSet_le` |
 | `edgeB_crossingInput` | top-level: incidence bound, const `C(d,M)` | **CONJECTURED-constructible, conditional on `CrossingLemmaMultigraphStatement`** | composition §5.4, all landed leaves + above FLAGs |
 | `component_no_second_sheet` | single-valued band-good component | **OPEN — NOT on critical path** | (do not prove for Edge B) |
 
