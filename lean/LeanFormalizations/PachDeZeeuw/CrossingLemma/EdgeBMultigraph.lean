@@ -124,43 +124,94 @@ theorem EdgeBEdge.arc_endAnchor {P : Finset (ℝ × ℝ)} (Ed : EdgeBEdge P) :
 
 /-! ### 3. Good intervals with real endpoints (the `classKeys-enum` FLAG) -/
 
+/-- An `x`-coordinate bound for the point set `P`: `R := xBound P` satisfies
+`∀ p ∈ P, |p.1| ≤ R` (`xBound_spec`). Built as the `max'` over `|p.1|` together with
+`0` (the `insert 0` keeps it nonempty even when `P = ∅`). This is the `R` the
+`P`-aware unbounded brackets use, so every good-`x` `P`-point falls inside its
+component's bracket (`realBracketOfEReal_covers`). -/
+noncomputable def xBound (P : Finset (ℝ × ℝ)) : ℝ :=
+  (insert (0 : ℝ) (P.image (fun p => |p.1|))).max' (Finset.insert_nonempty _ _)
+
+/-- Every `x`-coordinate of `P` is bounded in absolute value by `xBound P`. -/
+theorem xBound_spec (P : Finset (ℝ × ℝ)) : ∀ p ∈ P, |p.1| ≤ xBound P := by
+  intro p hp
+  apply Finset.le_max'
+  exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hp)
+
 /-- From an `EReal`-endpoint component `{x | a < x ∧ x < b}` of the good locus,
 produce a real bracket `(α,β)` together with `Set.Ioo α β ⊆ {x | a < x ∧ x < b}`.
-Case analysis on `a b : EReal` (`⊥ | ⊤ | (r:ℝ)`); unbounded sides are bracketed
-to a finite witness inside the component. -/
-noncomputable def realBracketOfEReal (a b : EReal) :
+Case analysis on `a b : EReal` (`⊥ | ⊤ | (r:ℝ)`); the **unbounded** sides are
+bracketed against the global `P`-bound `R` (the three `R+1` cases), so the bracket
+covers every good-`x` `P`-point in that component while staying inside it. The
+unsatisfiable EReal shapes (`⊥` on the upper side, `⊤` on the lower side) keep the
+empty bracket `(0,0)` (`Ioo 0 0 = ∅`). -/
+noncomputable def realBracketOfEReal (R : ℝ) (a b : EReal) :
     Σ' ab : ℝ × ℝ, Set.Ioo ab.1 ab.2 ⊆ {x : ℝ | a < (x : EReal) ∧ (x : EReal) < b} := by
-  -- The empty bracket `(0,0)` (`Ioo 0 0 = ∅`), used for the unsatisfiable cases.
   refine
     (match a, b with
       | ⊥, ⊥ => ⟨(0, 0), ?_⟩
-      | ⊥, ⊤ => ⟨(0, 0), ?_⟩
-      | ⊥, (s : ℝ) => ⟨(s - 1, s), ?_⟩
+      | ⊥, ⊤ => ⟨(-(R + 1), R + 1), ?_⟩
+      | ⊥, (s : ℝ) => ⟨(-(R + 1), s), ?_⟩
       | ⊤, _ => ⟨(0, 0), ?_⟩
       | (r : ℝ), ⊥ => ⟨(0, 0), ?_⟩
-      | (r : ℝ), ⊤ => ⟨(r, r + 1), ?_⟩
+      | (r : ℝ), ⊤ => ⟨(r, R + 1), ?_⟩
       | (r : ℝ), (s : ℝ) => ⟨(r, s), ?_⟩)
   all_goals intro x hx
   · -- ⊥, ⊥ : upper `x < ⊥` is false; `Ioo 0 0 = ∅`.
     simp only [Set.Ioo_self, Set.mem_empty_iff_false] at hx
-  · -- ⊥, ⊤ : both vacuous via empty `Ioo 0 0`.
-    simp only [Set.Ioo_self, Set.mem_empty_iff_false] at hx
+  · -- ⊥, ⊤ : both always hold (`bot_lt_coe`, `coe_lt_top`).
+    exact ⟨EReal.bot_lt_coe x, EReal.coe_lt_top x⟩
   · -- ⊥, s : lower always holds (`bot_lt_coe`), upper from `x < s`.
-    refine ⟨EReal.bot_lt_coe x, ?_⟩
-    exact (EReal.coe_lt_coe_iff).2 hx.2
+    exact ⟨EReal.bot_lt_coe x, (EReal.coe_lt_coe_iff).2 hx.2⟩
   · -- ⊤, _ : lower `⊤ < x` is false; `Ioo 0 0 = ∅`.
     simp only [Set.Ioo_self, Set.mem_empty_iff_false] at hx
   · -- r, ⊥ : `Ioo 0 0 = ∅`.
     simp only [Set.Ioo_self, Set.mem_empty_iff_false] at hx
   · -- r, ⊤ : lower from `r < x`, upper always (`coe_lt_top`).
-    refine ⟨(EReal.coe_lt_coe_iff).2 hx.1, EReal.coe_lt_top x⟩
+    exact ⟨(EReal.coe_lt_coe_iff).2 hx.1, EReal.coe_lt_top x⟩
   · -- r, s : both from `r < x < s`.
     exact ⟨(EReal.coe_lt_coe_iff).2 hx.1, (EReal.coe_lt_coe_iff).2 hx.2⟩
 
+/-- **Bracket coverage.** A point `x` lying in the EReal component `{y | a < y ∧ y < b}`
+with `|x| ≤ R` lies in the real bracket `realBracketOfEReal R a b`. This is the
+converse of the subset obligation and the per-component core of
+`goodIntervalsBundle_covers`: with `R = xBound P` no good-`x` `P`-point escapes its
+component's bracket. The unsatisfiable EReal shapes are vacuous (`not_lt_bot`,
+`not_top_lt`). -/
+theorem realBracketOfEReal_covers (R : ℝ) (a b : EReal) {x : ℝ}
+    (hxR : |x| ≤ R) (hcomp : a < (x : EReal) ∧ (x : EReal) < b) :
+    x ∈ Set.Ioo (realBracketOfEReal R a b).1.1 (realBracketOfEReal R a b).1.2 := by
+  have hxle : x ≤ R := le_trans (le_abs_self x) hxR
+  have hnxle : -x ≤ R := le_trans (neg_le_abs x) hxR
+  match a, b with
+  | ⊥, ⊥ => exact absurd hcomp.2 not_lt_bot
+  | ⊥, ⊤ =>
+    refine ⟨?_, ?_⟩
+    · show (-(R + 1)) < x; linarith
+    · show x < R + 1; linarith
+  | ⊥, (s : ℝ) =>
+    refine ⟨?_, ?_⟩
+    · show (-(R + 1)) < x; linarith
+    · show x < s; exact (EReal.coe_lt_coe_iff).1 hcomp.2
+  | ⊤, _ => exact absurd hcomp.1 not_top_lt
+  | (r : ℝ), ⊥ => exact absurd hcomp.2 not_lt_bot
+  | (r : ℝ), ⊤ =>
+    refine ⟨?_, ?_⟩
+    · show r < x; exact (EReal.coe_lt_coe_iff).1 hcomp.1
+    · show x < R + 1; linarith
+  | (r : ℝ), (s : ℝ) =>
+    refine ⟨?_, ?_⟩
+    · show r < x; exact (EReal.coe_lt_coe_iff).1 hcomp.1
+    · show x < s; exact (EReal.coe_lt_coe_iff).1 hcomp.2
+
 /-- The good-locus components of an `EdgeBCurve`, as a list of real-endpoint good
 intervals (each carrying its `Bad`-avoidance proof `hgood`). Extracted from
-`decomp_D1_goodLocus_components` via `realBracketOfEReal`. -/
-noncomputable def goodIntervalsBundle {d : ℕ} (H : EdgeBCurve d) :
+`decomp_D1_goodLocus_components` via `realBracketOfEReal`, now **`P`-aware**: the
+unbounded brackets are taken against `R := xBound P`, so every good-`x` `P`-point
+falls inside its component's bracket (`goodIntervalsBundle_covers`). The brackets
+stay inside their components, so all of `EdgeBWellDrawn.lean`'s disjointness lemmas
+transfer unchanged. -/
+noncomputable def goodIntervalsBundle {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
     List (Σ' ab : ℝ × ℝ, ∀ x ∈ Set.Ioo ab.1 ab.2, x ∉ Bad H.1) :=
   -- `decomp_D1_goodLocus_components` returns the components inside a `Prop`-level `∃`
   -- (over a `Type` `ι` and data `I`); since we build a `List` (in `Type`), we cannot
@@ -177,7 +228,7 @@ noncomputable def goodIntervalsBundle {d : ℕ} (H : EdgeBCurve d) :
     let b := Classical.choose (Classical.choose_spec (hI.1 j))
     let hIj : I j = {x : ℝ | a < (x : EReal) ∧ (x : EReal) < b} :=
       Classical.choose_spec (Classical.choose_spec (hI.1 j))
-    let br := realBracketOfEReal a b
+    let br := realBracketOfEReal (xBound P) a b
     ⟨br.1, fun x hx => by
       -- `x ∈ Ioo br ⊆ {y | a<y<b} = I j ⊆ ⋃ I = GoodLocus H.1 = (Bad H.1)ᶜ`.
       have hxIj : x ∈ I j := by rw [hIj]; exact br.2 hx
@@ -185,14 +236,54 @@ noncomputable def goodIntervalsBundle {d : ℕ} (H : EdgeBCurve d) :
       have hxGood : x ∈ GoodLocus H.1 := by rw [hI.2.2.1]; exact hxUnion
       exact hxGood⟩)
 
+/-- **Bracket coverage (the payoff of the `P`-aware fix).** Every good-`x` `P`-point
+on a curve `H` lies in some bundle bracket of `goodIntervalsBundle P H`. Concretely:
+if `p ∈ P` and `p.1 ∉ Bad H.1`, then `p.1` lies in the open bracket of some entry of
+`goodIntervalsBundle P H`. This is the concrete proof that the fix achieves coverage —
+the defect was that for unbounded components the old bracket missed `Θ(|P|)` such
+points; with `R = xBound P` none escape. E1 consumes this to bound the good-`x`
+incidence deficit by `#components` (a `poly(d)`), not `Θ(|P|)`. -/
+theorem goodIntervalsBundle_covers {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
+    ∀ p ∈ P, p.1 ∉ Bad H.1 →
+      ∃ gi ∈ goodIntervalsBundle P H, p.1 ∈ Set.Ioo gi.1.1 gi.1.2 := by
+  intro p hp hpbad
+  -- `p.1 ∈ GoodLocus H.1 = (Bad H.1)ᶜ`.
+  have hpgood : p.1 ∈ GoodLocus H.1 := hpbad
+  -- Reconstruct the `Classical.choose` chain `goodIntervalsBundle` uses.
+  set h0 := decomp_D1_goodLocus_components H.1 (edgeBCurve_bad_finite H) with hh0
+  set ι := Classical.choose h0 with hι
+  set instι : Fintype ι := Classical.choose (Classical.choose_spec h0) with hinstι
+  set I : ι → Set ℝ :=
+    Classical.choose (Classical.choose_spec (Classical.choose_spec h0)) with hIdef
+  set hI := Classical.choose_spec (Classical.choose_spec (Classical.choose_spec h0)) with hhI
+  -- `p.1 ∈ ⋃ k, I k`, so `p.1 ∈ I jcomp` for some component `jcomp`.
+  have hpUnion : p.1 ∈ ⋃ k, I k := by rw [← hI.2.2.1]; exact hpgood
+  obtain ⟨jcomp, hpIj⟩ := Set.mem_iUnion.1 hpUnion
+  -- Component `jcomp` is the EReal bracket `{x | a < x < b}`; `p.1` is in it.
+  set a := Classical.choose (hI.1 jcomp) with ha
+  set b := Classical.choose (Classical.choose_spec (hI.1 jcomp)) with hb
+  have hIj : I jcomp = {x : ℝ | a < (x : EReal) ∧ (x : EReal) < b} :=
+    Classical.choose_spec (Classical.choose_spec (hI.1 jcomp))
+  have hpcomp : a < (p.1 : EReal) ∧ (p.1 : EReal) < b := by
+    rw [hIj] at hpIj; exact hpIj
+  -- `|p.1| ≤ xBound P`, so the `P`-aware bracket of `jcomp` covers `p.1`.
+  have hpR : |p.1| ≤ xBound P := xBound_spec P p hp
+  have hcov := realBracketOfEReal_covers (xBound P) a b hpR hpcomp
+  -- The bundle entry at `jcomp` is in the list (the `.map` image of `jcomp ∈ univ`)
+  -- and its bracket is `(realBracketOfEReal (xBound P) a b).1`. Extract that entry, so
+  -- both the membership and `hcov`'s bracket are the entry's own `.1`.
+  refine ⟨_, List.mem_map_of_mem (Finset.mem_toList.2 (Finset.mem_univ jcomp)), ?_⟩
+  exact hcov
+
 /-! ### 4. The class index per curve, and the global edge list -/
 
 /-- The (good-interval, rank) class keys of one curve `H`: each real good interval
-of `goodIntervalsBundle H`, paired with every rank `j ∈ Finset.range (d+1)`. The
-`Bad`-avoidance proof rides along so the per-edge payload can be assembled. -/
-noncomputable def classKeys (d : ℕ) (H : EdgeBCurve d) :
+of `goodIntervalsBundle P H`, paired with every rank `j ∈ Finset.range (d+1)`. The
+`Bad`-avoidance proof rides along so the per-edge payload can be assembled. Threads
+`P` so the `P`-aware brackets propagate. -/
+noncomputable def classKeys (d : ℕ) (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
     List (Σ' ab : ℝ × ℝ, PProd (∀ x ∈ Set.Ioo ab.1 ab.2, x ∉ Bad H.1) ℕ) :=
-  (goodIntervalsBundle H).flatMap (fun gi =>
+  (goodIntervalsBundle P H).flatMap (fun gi =>
     (List.range (d + 1)).map (fun j => ⟨gi.1, ⟨gi.2, j⟩⟩))
 
 /-- All consecutive on-curve edges over every (curve, good-interval, rank) class.
@@ -203,7 +294,7 @@ is taken via `List.attach`, so the carried membership proof `se.2` supplies the
 noncomputable def allCurveEdges (d : ℕ) (P : Finset (ℝ × ℝ)) (Γ : Finset (EdgeBCurve d)) :
     List (EdgeBEdge P) :=
   Γ.toList.flatMap (fun H =>
-    (classKeys d H).flatMap (fun key =>
+    (classKeys d P H).flatMap (fun key =>
       (edgesOnSheet P H.1 key.1.1 key.1.2 key.2.2).attach.map (fun se =>
         { h := H.1, α := key.1.1, β := key.1.2, hgood := key.2.1, j := key.2.2,
           e := se.1, hmem := se.2 })))
@@ -247,7 +338,7 @@ curves and class keys, of the per-class edge counts. Analogue `numEdges_eq_sum`
 theorem edgeBMultigraph_numEdges_eq_sum
     (d M : ℕ) (P : Finset (ℝ × ℝ)) (Γ : Finset (EdgeBCurve d)) :
     (edgeBMultigraph d M P Γ).numEdges
-      = ∑ H ∈ Γ, ((classKeys d H).map
+      = ∑ H ∈ Γ, ((classKeys d P H).map
           (fun key => (edgesOnSheet P H.1 key.1.1 key.1.2 key.2.2).length)).sum := by
   rw [edgeBMultigraph_numEdges, allCurveEdges]
   -- The outer + inner `flatMap` lengths collapse via `List.length_flatMap` (twice);

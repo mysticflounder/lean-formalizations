@@ -191,28 +191,30 @@ noncomputable def compSet {d : ℕ} (H : EdgeBCurve d) : compIdx H → Set ℝ :
   Classical.choose (Classical.choose_spec
     (Classical.choose_spec (decomp_D1_goodLocus_components H.1 (edgeBCurve_bad_finite H))))
 
-/-- The deterministic real bracket of component `jcomp`: `realBracketOfEReal` of the
-chosen EReal endpoints of `compSet H jcomp`. The bracket `goodIntervalsBundle` stores
-for an entry from `jcomp` is exactly this — so `jcomp` determines the bracket value. -/
-noncomputable def bracketOfComp {d : ℕ} (H : EdgeBCurve d) (jcomp : compIdx H) : ℝ × ℝ :=
+/-- The deterministic real bracket of component `jcomp`: `realBracketOfEReal (xBound P)`
+of the chosen EReal endpoints of `compSet H jcomp`. The bracket `goodIntervalsBundle P H`
+stores for an entry from `jcomp` is exactly this — so `jcomp` (with `P`) determines the
+bracket value. Threads `P` to match the `P`-aware brackets. -/
+noncomputable def bracketOfComp {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d)
+    (jcomp : compIdx H) : ℝ × ℝ :=
   let hIfull := Classical.choose_spec (Classical.choose_spec
     (Classical.choose_spec (decomp_D1_goodLocus_components H.1 (edgeBCurve_bad_finite H))))
-  (realBracketOfEReal (Classical.choose (hIfull.1 jcomp))
+  (realBracketOfEReal (xBound P) (Classical.choose (hIfull.1 jcomp))
     (Classical.choose (Classical.choose_spec (hIfull.1 jcomp)))).1
 
-/-- `compSet H jcomp` is the open EReal-bracket interval whose `realBracketOfEReal` is
-`bracketOfComp H jcomp`. -/
-lemma compSet_eq {d : ℕ} (H : EdgeBCurve d) (jcomp : compIdx H) :
+/-- `compSet H jcomp` is the open EReal-bracket interval whose `realBracketOfEReal (xBound P)`
+is `bracketOfComp P H jcomp`. -/
+lemma compSet_eq {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) (jcomp : compIdx H) :
     ∃ a b : EReal, compSet H jcomp = {x : ℝ | a < (x : EReal) ∧ (x : EReal) < b} ∧
-      bracketOfComp H jcomp = (realBracketOfEReal a b).1 ∧
-      Set.Ioo (bracketOfComp H jcomp).1 (bracketOfComp H jcomp).2 ⊆ compSet H jcomp := by
+      bracketOfComp P H jcomp = (realBracketOfEReal (xBound P) a b).1 ∧
+      Set.Ioo (bracketOfComp P H jcomp).1 (bracketOfComp P H jcomp).2 ⊆ compSet H jcomp := by
   set hIfull := Classical.choose_spec (Classical.choose_spec
     (Classical.choose_spec (decomp_D1_goodLocus_components H.1 (edgeBCurve_bad_finite H)))) with hh
   refine ⟨Classical.choose (hIfull.1 jcomp),
     Classical.choose (Classical.choose_spec (hIfull.1 jcomp)), ?_, rfl, ?_⟩
   · exact Classical.choose_spec (Classical.choose_spec (hIfull.1 jcomp))
   · -- `Ioo bracket ⊆ {x | a<x<b} = compSet H jcomp`.
-    have hbr := (realBracketOfEReal (Classical.choose (hIfull.1 jcomp))
+    have hbr := (realBracketOfEReal (xBound P) (Classical.choose (hIfull.1 jcomp))
       (Classical.choose (Classical.choose_spec (hIfull.1 jcomp)))).2
     have hcomp : compSet H jcomp = {x : ℝ | (Classical.choose (hIfull.1 jcomp)) < (x : EReal) ∧
         (x : EReal) < (Classical.choose (Classical.choose_spec (hIfull.1 jcomp)))} :=
@@ -230,8 +232,8 @@ lemma compSet_pairwise_disjoint {d : ℕ} (H : EdgeBCurve d) :
 `goodIntervalsBundle H` at distinct list positions have disjoint `Ioo` brackets
 (`compSet_pairwise_disjoint` + each bracket `⊆` its component). The structural fact
 behind `allCurveEdges` nodup. -/
-lemma goodIntervalsBundle_pairwise_disjoint_Ioo {d : ℕ} (H : EdgeBCurve d) :
-    (goodIntervalsBundle H).Pairwise
+lemma goodIntervalsBundle_pairwise_disjoint_Ioo {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
+    (goodIntervalsBundle P H).Pairwise
       (fun gi₁ gi₂ => Disjoint (Set.Ioo gi₁.1.1 gi₁.1.2) (Set.Ioo gi₂.1.1 gi₂.1.2)) := by
   -- Pairwise over the underlying `univ.toList` (nodup) mapped to entries; distinct
   -- component indices give disjoint components, hence disjoint sub-brackets.
@@ -239,8 +241,8 @@ lemma goodIntervalsBundle_pairwise_disjoint_Ioo {d : ℕ} (H : EdgeBCurve d) :
   have hnd : (Finset.univ : Finset (compIdx H)).toList.Pairwise (· ≠ ·) := Finset.nodup_toList _
   apply hnd.imp_of_mem
   intro jc₁ jc₂ _ _ hjne
-  obtain ⟨_, _, _, _, hsub₁⟩ := compSet_eq H jc₁
-  obtain ⟨_, _, _, _, hsub₂⟩ := compSet_eq H jc₂
+  obtain ⟨_, _, _, _, hsub₁⟩ := compSet_eq P H jc₁
+  obtain ⟨_, _, _, _, hsub₂⟩ := compSet_eq P H jc₂
   have hdisjC : Disjoint (compSet H jc₁) (compSet H jc₂) := compSet_pairwise_disjoint H hjne
   -- The mapped entry's `.1` bracket is `bracketOfComp H jc` by `rfl` (same choose chain).
   refine Set.disjoint_left.mpr (fun x hx₁ hx₂ => ?_)
@@ -249,29 +251,29 @@ lemma goodIntervalsBundle_pairwise_disjoint_Ioo {d : ℕ} (H : EdgeBCurve d) :
 /-- For each entry `gi` of `goodIntervalsBundle H`, there is a component index `jcomp`
 with `gi.1 = bracketOfComp H jcomp` and `Ioo gi.1 ⊆ compSet H jcomp`. Re-derives the
 component containment `goodIntervalsBundle`'s own proof discards. -/
-lemma goodIntervalsBundle_mem_component {d : ℕ} (H : EdgeBCurve d)
+lemma goodIntervalsBundle_mem_component {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d)
     {gi : Σ' ab : ℝ × ℝ, ∀ x ∈ Set.Ioo ab.1 ab.2, x ∉ Bad H.1}
-    (hgi : gi ∈ goodIntervalsBundle H) :
-    ∃ jcomp : compIdx H, gi.1 = bracketOfComp H jcomp ∧
+    (hgi : gi ∈ goodIntervalsBundle P H) :
+    ∃ jcomp : compIdx H, gi.1 = bracketOfComp P H jcomp ∧
       Set.Ioo gi.1.1 gi.1.2 ⊆ compSet H jcomp := by
   rw [goodIntervalsBundle, List.mem_map] at hgi
   obtain ⟨jcomp, _hjcomp, hgieq⟩ := hgi
   refine ⟨jcomp, ?_, ?_⟩
-  · -- `gi.1 = (realBracketOfEReal a b).1 = bracketOfComp H jcomp`, by unfolding both.
+  · -- `gi.1 = (realBracketOfEReal (xBound P) a b).1 = bracketOfComp P H jcomp`, by unfolding both.
     rw [← hgieq]; rfl
-  · obtain ⟨a, b, _hcompeq, hval, hsub⟩ := compSet_eq H jcomp
-    have hgi1 : gi.1 = bracketOfComp H jcomp := by rw [← hgieq]; rfl
+  · obtain ⟨a, b, _hcompeq, hval, hsub⟩ := compSet_eq P H jcomp
+    have hgi1 : gi.1 = bracketOfComp P H jcomp := by rw [← hgieq]; rfl
     rw [hgi1]; exact hsub
 
 /-- **No overlap ⟹ equal bracket.** Two entries `gi₁, gi₂` of `goodIntervalsBundle H`
 whose open brackets both contain `x` have equal bracket value `gi₁.1 = gi₂.1`. -/
-lemma goodIntervalsBundle_no_overlap {d : ℕ} (H : EdgeBCurve d)
+lemma goodIntervalsBundle_no_overlap {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d)
     {gi₁ gi₂ : Σ' ab : ℝ × ℝ, ∀ x ∈ Set.Ioo ab.1 ab.2, x ∉ Bad H.1}
-    (hgi₁ : gi₁ ∈ goodIntervalsBundle H) (hgi₂ : gi₂ ∈ goodIntervalsBundle H)
+    (hgi₁ : gi₁ ∈ goodIntervalsBundle P H) (hgi₂ : gi₂ ∈ goodIntervalsBundle P H)
     {x : ℝ} (hx₁ : x ∈ Set.Ioo gi₁.1.1 gi₁.1.2) (hx₂ : x ∈ Set.Ioo gi₂.1.1 gi₂.1.2) :
     gi₁.1 = gi₂.1 := by
-  obtain ⟨jc₁, hval₁, hsub₁⟩ := goodIntervalsBundle_mem_component H hgi₁
-  obtain ⟨jc₂, hval₂, hsub₂⟩ := goodIntervalsBundle_mem_component H hgi₂
+  obtain ⟨jc₁, hval₁, hsub₁⟩ := goodIntervalsBundle_mem_component P H hgi₁
+  obtain ⟨jc₂, hval₂, hsub₂⟩ := goodIntervalsBundle_mem_component P H hgi₂
   -- Shared `x` lands in both components, so they coincide by pairwise disjointness.
   have hxc₁ : x ∈ compSet H jc₁ := hsub₁ hx₁
   have hxc₂ : x ∈ compSet H jc₂ := hsub₂ hx₂
@@ -295,7 +297,7 @@ lemma allCurveEdges_provenance {d : ℕ} {P : Finset (ℝ × ℝ)} {Γ : Finset 
     {Ed : EdgeBEdge P} (hEd : Ed ∈ allCurveEdges d P Γ) :
     ∃ H ∈ Γ, Ed.h = H.1 ∧
       ∃ gi : Σ' ab : ℝ × ℝ, ∀ x ∈ Set.Ioo ab.1 ab.2, x ∉ Bad H.1,
-        gi ∈ goodIntervalsBundle H ∧ Ed.α = gi.1.1 ∧ Ed.β = gi.1.2 := by
+        gi ∈ goodIntervalsBundle P H ∧ Ed.α = gi.1.1 ∧ Ed.β = gi.1.2 := by
   rw [allCurveEdges, List.mem_flatMap] at hEd
   obtain ⟨H, hHmem, hEd2⟩ := hEd
   rw [List.mem_flatMap] at hEd2
@@ -359,11 +361,11 @@ lemma innerEdgeList_nodup {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d)
 `flatMap` equals a `goodIntervalsBundle`-then-`range` double `flatMap` of
 `innerEdgeList`. From `classKeys`'s definition + `flatMap`/`map` reassociation. -/
 lemma curveBlock_eq {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
-    ((classKeys d H).flatMap (fun key =>
+    ((classKeys d P H).flatMap (fun key =>
       (edgesOnSheet P H.1 key.1.1 key.1.2 key.2.2).attach.map (fun se =>
         ({ h := H.1, α := key.1.1, β := key.1.2, hgood := key.2.1, j := key.2.2,
            e := se.1, hmem := se.2 } : EdgeBEdge P))))
-      = (goodIntervalsBundle H).flatMap (fun gi =>
+      = (goodIntervalsBundle P H).flatMap (fun gi =>
           (List.range (d + 1)).flatMap (fun j => innerEdgeList P H gi j)) := by
   rw [classKeys, List.flatMap_assoc]
   congr 1; ext gi
@@ -375,7 +377,7 @@ Distinct ranks give different `.j` (`nodup_range`); distinct bundle positions gi
 disjoint brackets (`goodIntervalsBundle_pairwise_disjoint_Ioo`), so a shared edge —
 whose left endpoint lies in both brackets — is impossible. -/
 lemma curveBlock_nodup {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
-    ((goodIntervalsBundle H).flatMap (fun gi =>
+    ((goodIntervalsBundle P H).flatMap (fun gi =>
       (List.range (d + 1)).flatMap (fun j => innerEdgeList P H gi j))).Nodup := by
   rw [List.nodup_flatMap]
   refine ⟨?_, ?_⟩
@@ -392,7 +394,7 @@ lemma curveBlock_nodup {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeBCurve d) :
     have hf₂ := innerEdgeList_fields P H gi j₂ hEd₂
     exact hjne (by rw [← hf₁.2.2.2, hf₂.2.2.2])
   · -- Distinct bundle positions ⟹ disjoint brackets ⟹ disjoint edge blocks.
-    apply (goodIntervalsBundle_pairwise_disjoint_Ioo H).imp_of_mem
+    apply (goodIntervalsBundle_pairwise_disjoint_Ioo P H).imp_of_mem
     intro gi₁ gi₂ _ _ hdisj
     rw [Function.onFun, List.disjoint_left]
     intro Ed hEd₁ hEd₂
@@ -503,7 +505,7 @@ lemma edgeB_same_curve_shared_point_params {d : ℕ} {P : Finset (ℝ × ℝ)} {
   have hz1_gi₁ : z.1 ∈ Set.Ioo gi₁.1.1 gi₁.1.2 := by rwa [hα₁, hβ₁] at hz1_io₁
   have hz1_gi₂ : z.1 ∈ Set.Ioo gi₂.1.1 gi₂.1.2 := by rwa [hα₂, hβ₂] at hz1_io₂
   have hbracket : gi₁.1 = gi₂.1 :=
-    goodIntervalsBundle_no_overlap H₁ hgi₁ hgi₂ hz1_gi₁ hz1_gi₂
+    goodIntervalsBundle_no_overlap P H₁ hgi₁ hgi₂ hz1_gi₁ hz1_gi₂
   exact ⟨hjeq, by rw [hα₁, hα₂, hbracket], by rw [hβ₁, hβ₂, hbracket]⟩
 
 /-- **Same-curve disjointness.** Two edges of `allCurveEdges` on the same curve

@@ -4,8 +4,13 @@ Author: Adam McKenna (orchestrator-verified; defect surfaced by the E1 discharge
 math-prover, independently confirmed by a claude-deep-thinker and by an orchestrator
 Lean check).
 Date: 2026-06-21
-Status: **OPEN defect in the landed `EdgeBMultigraph.lean`** — blocks the E1 edge
-bound (task #43 discharge iii) and hence `edgeB_crossingInput`. Fix specified below.
+Status: **RESOLVED (phase 1, landed)** — the P-aware fix below is implemented in
+`EdgeBMultigraph.lean` (build record `docs/corollary24-edgeB-bracket-fix-build.md`):
+`realBracketOfEReal` now takes `R = xBound P` and covers unbounded components;
+`goodIntervalsBundle_covers` (PROVEN, axiom-clean) is the formal coverage guarantee;
+(vi) `WellDrawn` and (v) `ArcsJoinEndpoints` re-validated green against the fixed
+definition. Remaining (phase 2): re-derive (iv) multiplicity + the E1 edge bound
+(which consumes `goodIntervalsBundle_covers`), then `edgeB_crossingInput`.
 
 ## The defect (verified)
 
