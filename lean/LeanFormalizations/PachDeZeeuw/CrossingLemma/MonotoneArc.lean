@@ -870,7 +870,8 @@ theorem exists_witness_Ico
     have htIco : t ∈ Set.Ico xP m := ⟨ht.1, htm⟩
     have hcurve : evalPlane h (t, (wit x) t) = 0 := (hwit_spec x hx).2.2 t ht
     exact hband t htIco _ hcurve
-  -- Key agreement: for x, x' ∈ Ico, `wit x` and `wit x'` agree on `Icc xP (min (apick x) (apick x'))`.
+  -- Key agreement: for x, x' ∈ Ico, `wit x` and `wit x'` agree on
+  -- `Icc xP (min (apick x) (apick x'))`.
   have hagree : ∀ x (hx : x ∈ Set.Ico xP m) x' (hx' : x' ∈ Set.Ico xP m),
       ∀ t ∈ Set.Icc xP (min (apick x) (apick x')), (wit x) t = (wit x') t := by
     intro x hx x' hx' t ht
