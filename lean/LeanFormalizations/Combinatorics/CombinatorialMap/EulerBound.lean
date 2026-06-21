@@ -1,4 +1,8 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+
 Euler characteristic bound for a connected combinatorial map.
 
 Goal: a *connected* combinatorial map has Euler characteristic ≤ 2.

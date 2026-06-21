@@ -1,4 +1,8 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+
 Local arc-separation (MS): the geometric residual of the drawing→map bridge.
 
 # What this file is

@@ -1,4 +1,8 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+
 Polygonal (PL) arcs and the segment side-functional — foundations for the
 route-(c) discharge of the crosscut residual `exists_twoSidedPartition_of_arc`
 (see `docs/ROUTE_C_PLAN.md`).

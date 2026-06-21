@@ -1,4 +1,8 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+
 Route (c), G-nodes: the abstract ℤ/2 two-chart separation lemma.
 
 # What this file is

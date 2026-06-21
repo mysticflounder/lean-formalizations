@@ -2,6 +2,13 @@
 Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
+-/
+import Mathlib
+import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
+import LeanFormalizations.ElekesSharirGuthKatz.Foundation
+
+/-!
+# Parabola configuration
 
 Parabola configuration: p_k = (k, k^2) for k = 0, ..., n-1 witnesses
 that general-position n-point configurations exist for every n (used by
@@ -10,10 +17,6 @@ the definitions and trivial injectivity facts; the non-collinearity and
 non-cospherical content for general position is handled in companion
 modules.
 -/
-
-import Mathlib
-import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
-import LeanFormalizations.ElekesSharirGuthKatz.Foundation
 
 namespace Esgk
 

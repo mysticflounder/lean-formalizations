@@ -1,5 +1,13 @@
 /-
-Euler's formula and the planar (multi)graph edge bound.
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+-/
+import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
+import Mathlib.Data.Sym.Sym2
+
+/-!
+# Euler's formula and the planar (multi)graph edge bound
 
 On the vendored `CombinatorialMap` carrier, this proves the simple-graph edge
 bound `e ≤ 3v − 6` from Euler's formula `v − e + f = 2` (genus zero), via the
@@ -18,8 +26,6 @@ The connectivity and simplicity predicates (`Connected`, `IsSimple`) enter the
 counting theorems only as hypotheses, so the development is robust to a different
 encoding of them.
 -/
-import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
-import Mathlib.Data.Sym.Sym2
 
 open scoped BigOperators
 

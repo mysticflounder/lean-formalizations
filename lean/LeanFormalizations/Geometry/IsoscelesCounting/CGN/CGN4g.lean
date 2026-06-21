@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+-/
 import LeanFormalizations.Geometry.IsoscelesCounting.CGN.CGN
 import LeanFormalizations.Geometry.IsoscelesCounting.CircumcenterSide
 import LeanFormalizations.Geometry.IsoscelesCounting.CircumscribedMECPacket
@@ -7,10 +12,6 @@ import LeanFormalizations.Geometry.IsoscelesCounting.OangleBridge
 import Mathlib
 
 /-!
-Copyright (c) 2026 Adam McKenna. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Adam McKenna
-
 # CGN4g: ordered-cap block packaging
 
 This file adds the closure-plan data carrier for the ordered-cap block cut out

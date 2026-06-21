@@ -1,4 +1,15 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+-/
+import Mathlib
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
+import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
+
+/-!
+# Abstractize: forgetful map to the abstract multigraph
+
 The forgetful map from a plane drawing
 (`DrawnMultigraph`) to the abstract finite multigraph (`AbstractPlanarizedMultigraph`)
 consumed by the EU planar edge bound, with its cardinality identities.
@@ -6,9 +17,6 @@ consumed by the EU planar edge bound, with its cardinality identities.
 Axiom status: this file is sorry-free and axiom-clean
 (`[propext, Classical.choice, Quot.sound]`).
 -/
-import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
-import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 namespace CrossingLemma
 

@@ -1,4 +1,8 @@
 /-
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+
 Combinatorial orbit-delta engine for the drawing→combinatorial-map bridge.
 
 A reusable orbit-count engine for the drawing→combinatorial-map bridge,

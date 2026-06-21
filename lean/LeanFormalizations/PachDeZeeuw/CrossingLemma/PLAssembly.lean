@@ -1,7 +1,16 @@
 /-
-Route (c), assembly: the abstract collar ⇒ two-sided partition reduction.
+Copyright (c) 2026 Adam McKenna. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Adam McKenna
+-/
+import Mathlib
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCover
 
-# What this file is
+/-!
+# Route (c) assembly: abstract collar ⇒ two-sided partition reduction
+
+## What this file is
 
 The geometry-free *assembly* step of `exists_twoSidedPartition_of_arc`.  It glues
 the covering-space output of `PLCover` (the abstract ℤ/2 separation lemma) to the
@@ -20,7 +29,7 @@ Everything else (openness, the union `Tp ∪ Tm = T ∖ C`, disjointness, nonemp
 the cover `R ∩ C ⊆ T`) is already supplied by the collar's proved `P1`–`P4` and the
 crosscut hypotheses.
 
-# The construction
+## The construction
 
 `B := ↥R` (simply connected), two charts `V₀ := R ∖ C`, `V₁ := T` covering `R`,
 overlapping in `V₀ ∩ V₁ = T ∖ C = Tp ⊔ Tm`.  `PLCover.exists_separating_fun`
@@ -29,9 +38,6 @@ sides are then the *connected components* of `R ∖ C` through a `Tp`-point and 
 `Tm`-point; `σ` forces them disjoint, while `P5` plus the derived neighborhood
 reachability of `T ∖ C` force them to cover.
 -/
-import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCover
 
 namespace CrossingLemma.PlaneArcSeparation
 
