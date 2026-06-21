@@ -5,6 +5,7 @@ Authors: Adam McKenna
 -/
 import LeanFormalizations.PachDeZeeuw.PachSharir.Theorem23
 import LeanFormalizations.PachDeZeeuw.PachSharir.SzemerediTrotter
+import LeanFormalizations.PachDeZeeuw.PachSharir.GenericProjection
 
 /-!
 # The Pach–Sharir incidence bound
