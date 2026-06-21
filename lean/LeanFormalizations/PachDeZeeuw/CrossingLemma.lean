@@ -45,6 +45,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearIrreducible
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearExists
 -- Edge-B endgame: M-tolerant incidence bound from CrossingLemmaMultigraphStatement (multiplicity ≤ M):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.MultigraphIncidenceEndgame
+-- Edge-B E1 inputs: bad-x fibre bound (≤ d) + |Bad h| ≤ (d+1)^5+d (def-independent cut-set cardinalities):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.BadPointBounds
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
