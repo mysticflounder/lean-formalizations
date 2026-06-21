@@ -15,6 +15,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.MonotoneArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.StripCompact
 -- Shared cut-set / fibre vocabulary for the decomposition assembly (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionDefs
+-- Infinity-cut: topological asymptote set ⊆ {lc_y=0}, finite, U_∞ ≤ d (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.InfinityCut
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
