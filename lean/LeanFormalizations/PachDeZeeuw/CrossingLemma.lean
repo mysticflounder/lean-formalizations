@@ -35,6 +35,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetEdges
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear
 -- export-4a: each consecutive edgesOnSheet pair is a pinned connecting arc (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeArc
+-- curveArc + export-4b interior-disjointness (SimpleCurveArc from a graph; disjoint sheets/intervals) (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.CurveArc
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
