@@ -41,6 +41,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CurveArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearPartialY
 -- generic-rotation: irreducibility is preserved by the shear (AlgEquiv transfer) (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearIrreducible
+-- generic-rotation step 4: exists_good_shear — finite-avoidance glue picking one good scalar (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearExists
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion

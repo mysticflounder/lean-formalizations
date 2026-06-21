@@ -355,8 +355,9 @@ NEEDS-CONSTRUCTION-routine.
 
 ## 7. What next (ranked)
 
-**Status (2026-06-21).** Items 1–3 + the Irreducible row are LANDED, all axiom-clean
-(`[propext, Classical.choice, Quot.sound]`), gated on main:
+**Status (2026-06-21).** Items 1–4 + the Irreducible row are LANDED, all axiom-clean
+(`[propext, Classical.choice, Quot.sound]`), gated on main. The entire generic-rotation
+(shear WLOG) layer is complete:
 - Item 1 (shear + coherence): `Shear.lean` — `shearPoly`, `shearPoint`,
   `evalPlane_shearPoly_shearPoint`, `shearPoint_bijective`, `shearPoint_curve_iff`.
 - Item 2 (Obstruction GR-1, degree bound): `Shear.lean` — `totalDegree_aeval_le`,
@@ -367,9 +368,12 @@ NEEDS-CONSTRUCTION-routine.
 - Irreducible row (§3.4): `ShearIrreducible.lean` — `irreducible_shearPoly_iff` via
   `shearAlgEquiv` + `MulEquiv.irreducible_iff`. Build doc
   `docs/corollary24-shearirreducible-build.md`.
+- Item 4 (`exists_good_shear`, the glue): `ShearExists.lean` — `exists_good_shear`
+  assembling B₁ (∂_y bad set) ∪ B₂ (x-separation roots via `sepPoly`) over
+  `Set.Finite.biUnion`/`Set.Finite.exists_notMem`, discharging all four clauses. Build doc
+  `docs/corollary24-shearexists-build.md`.
 
-Remaining: **item 4** (`exists_good_shear`, the glue) then **item 5** (incidence
-transfer-back into `edgeB_crossingInput`).
+Remaining: **item 5** (incidence transfer-back into `edgeB_crossingInput`; task #43).
 
 1. **`shearPoly` / `shearPoint` + coherence (`evalPlane_shearPoly_shearPoint`,
    `shearPoint_bijective`).** The substitution and its curve-preservation. Gates everything
@@ -390,7 +394,8 @@ transfer-back into `edgeB_crossingInput`).
    engine (`Polynomial.finite_setOf_isRoot`, `Set.Finite.biUnion`,
    `Set.Finite.exists_notMem`) over the bad-scalar union (top-form roots per curve +
    separation roots per point-pair) + `Irreducible.map`. This is the headline lemma. Risk
-   MED (glue volume, no new analysis).
+   MED (glue volume, no new analysis). **[LANDED — `ShearExists.lean`; the x-separation
+   bad set uses the directly-built degree-≤1 `sepPoly` rather than `momentPoly`.]**
 
 5. **Incidence transfer-back** into `edgeB_crossingInput`. Gates on the Edge-B incidence
    count definition (design §5.1, not yet landed) and the pairing layer (design §4 FLAGs).
