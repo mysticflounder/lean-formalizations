@@ -43,6 +43,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearPartialY
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearIrreducible
 -- generic-rotation step 4: exists_good_shear — finite-avoidance glue picking one good scalar (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.ShearExists
+-- Edge-B endgame: M-tolerant incidence bound from CrossingLemmaMultigraphStatement (multiplicity ≤ M):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.MultigraphIncidenceEndgame
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion

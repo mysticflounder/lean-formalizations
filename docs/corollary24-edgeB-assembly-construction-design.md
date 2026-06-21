@@ -665,7 +665,7 @@ nodes** (do NOT fold into Edge B):
 ## 6. New sub-lemmas this design surfaces (FLAGs), ranked hardest-first
 
 ```
-FLAG FOR IMPLEMENTER: multigraph-incidence-endgame   [THE genuinely new obligation; no line analogue]
+FLAG FOR IMPLEMENTER: multigraph-incidence-endgame   [LANDED — MultigraphIncidenceEndgame.lean, axiom-clean]
   Lemma incidence_bound_of_multigraphCrossingLemma (§2.3 R2). From CrossingLemmaMultigraphStatement,
   with hmult ≤ M, hcr ≤ M·n², he ≤ numEdges+n, derive I ≤ (64·M)·(m^{2/3}n^{2/3}+m+n).
   Content: PORT incidence_bound_of_crossingBound (SzemerediTrotter.lean:163) threading M:
@@ -751,7 +751,7 @@ NOT NEEDED: component_no_second_sheet  [OFF critical path, per the E1E2 verdict;
 | `bezout` / `factor_intersection_bound` | curve-pair / curve-vs-factor intersection finite, `≤ poly(d)` | **PROVEN (landed)** | Bezout.lean:1315, 1028 |
 | `incidence_bound_of_crossingLemma` (M=1) | line endgame; **requires mult≤1, const 64** | **PROVEN (landed), NOT applicable to curves** | SzemerediTrotter.lean:233 |
 | **multiplicity obstruction** | curve mult ≤ M > 1; no M-tolerant endgame in repo | **resolved (this doc §2): adopt R2 (M-form endgame, absorb M into C)** | §2.3 |
-| `incidence_bound_of_multigraphCrossingLemma` | M-form endgame, const `64·M` | **CONJECTURED-constructible (NEW; FLAG, MED)** | `CrossingLemmaMultigraphStatement` (parked) + port of `:163` |
+| `incidence_bound_of_multigraphCrossingLemma` | M-form endgame, const `64·M` | **PROVEN (landed) — `MultigraphIncidenceEndgame.lean`; axiom-clean** | `CrossingLemmaMultigraphStatement` (parked) + port of `:163` |
 | `edgeBMultigraph` + `allCurveEdges` | curve analogue of `stMultigraph` | **CONJECTURED-constructible (ABSENT)** | landed leaves + `classKeys-enum` FLAG |
 | `edgeBMultigraph_multiplicity_le_M` | `hmult ≤ M` | **CONJECTURED-constructible (FLAG, LOW-MED)** | 2-DOF point–point + edgesOnSheet M2 port + sheetRank |
 | `edgeBMultigraph_wellDrawn` | `crossingCount ≤ M·|Γ|²` | **CONJECTURED-constructible (FLAG, MED)** | export_4b + curveArc_interior (landed) + 2-DOF curve–curve |
@@ -766,13 +766,16 @@ NOT NEEDED: component_no_second_sheet  [OFF critical path, per the E1E2 verdict;
 
 ## 8. What next (ranked, hardest-first)
 
-1. **`multigraph-incidence-endgame` (FLAG, MED — the single hardest sub-brick, and a genuine new
-   obligation).** `incidence_bound_of_multigraphCrossingLemma` (§2.3 R2). This is the **one piece with
-   no line-case analogue**: the repo has no M-tolerant incidence endgame, and the curve multigraph
-   *cannot* use the M=1 endgame (hypothesis mismatch, §2.2). Port `incidence_bound_of_crossingBound`
-   (`:163`) threading `M` through threshold/cube/constant; the cube-root arithmetic is the M=1 proof's
-   (lines 194–230) with `M`. Do **first** — everything else is glue once this exists. Arithmetic
-   EMPIRICALLY VERIFIED; constant `64·M`. **This is the brick that is NOT pure bookkeeping.**
+1. **`multigraph-incidence-endgame` — LANDED (was the single hardest sub-brick).**
+   `incidence_bound_of_multigraphCrossingLemma` + its geometry-free core
+   `incidence_bound_of_multigraphCrossingBound` are shipped in `MultigraphIncidenceEndgame.lean`,
+   axiom-clean (`[propext, Classical.choice, Quot.sound]`), wired into the `CrossingLemma.lean`
+   aggregator. It was the **one piece with no line-case analogue** (the repo had no M-tolerant
+   incidence endgame, and the curve multigraph *cannot* use the M=1 endgame — hypothesis mismatch,
+   §2.2). Port of `incidence_bound_of_crossingBound` (`:163`) threading `M` through
+   threshold/cube/constant; constant `C M = 64·M` (PROVEN, Lean-accepted; both regimes fold via
+   `M^{2/3} ≤ M`). Build record: `docs/corollary24-multigraph-endgame-build.md`. The remaining
+   items below are glue over landed leaves or small counting lemmas.
 
 2. **`edgeB-welldrawn` (FLAG, MED — largest by volume).** The cross-curve crossing count
    `crossingCount ≤ M·|Γ|²`. Same-curve sub-case is **fully landed** (export-4b +
