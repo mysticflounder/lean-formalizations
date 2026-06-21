@@ -595,9 +595,9 @@ FLAG FOR IMPLEMENTER: sheet-maps              [LOW priority; assessed OFF critic
 | D3b local constancy | `decomp_D3b_locally_constant` | **CONJECTURED-constructible (full skeleton)** | IFT box (MonotoneArc) + LEAF B — FLAG `fibre-local-constant` (hardest here) |
 | D3b constancy | `decomp_D3b_fibre_card_const` | **PROVEN-modulo (topology)** | `fibre-local-constant` + `IsPreconnected` |
 | D3 sheets | `decomp_D3_sheets` | **CONJECTURED-constructible** | D3a + D3b |
-| D1a InfRoot finite | `decomp_D1_infroot_finite` | **PROVEN-trivial-modulo** | `yLeadCoeff ≠ 0` + `setOf_isRoot_finite` — FLAG `infroot-finite` |
-| D1b Crit finite | `decomp_D1_crit_finite` | **CONJECTURED-constructible (plumbing)** | `B-crit` + `chart-bridge` (in-flight) — FLAG `crit-finite-projection` |
-| D1 Bad finite | `decomp_D1_bad_finite` | **CONJECTURED-constructible** | D1a + D1b |
+| D1a InfRoot finite | `decomp_D1_infroot_finite` | **PROVEN (landed)** | `finite_yLeadCoeff_zeroSet` unfolded (DecompositionD1.lean, axiom-clean); takes `yLeadCoeff h ≠ 0` |
+| D1b Crit finite | `decomp_D1_crit_finite` | **PROVEN (landed)** | B-crit `finite_critX_of_irreducible_bound` transported via chart-bridge `critX_eq_image_critPointSet` (DecompositionD1.lean, axiom-clean) |
+| D1 Bad finite | `decomp_D1_bad_finite` | **PROVEN (landed)** | D1a ∪ D1b; `yLeadCoeff ≠ 0` derived from `∂_y h ≠ 0` via `yLeadCoeff_ne_zero_of_partialY_ne_zero` — needs only B-crit hyps |
 | D1c components | `decomp_D1_goodLocus_components` | **PROVEN (landed)** | generic `finite_compl_eq_iUnion_Ioo` (GoodLocusComponents.lean, axiom-clean); takes `(Bad h).Finite` as hyp |
 | export-1 | `export_1_bad_finite` | = D1 | as D1 |
 | endpoint-pin (ψ xQ filler) | `export_3_endpoint_pin` | **CONJECTURED-constructible (full skeleton)** | continuation-uniqueness (MonotoneArc) — FLAG `endpoint-pin` |

@@ -19,6 +19,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionDefs
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.InfinityCut
 -- Good-locus components: finite S ⊆ ℝ ⟹ Sᶜ a finite disjoint ⋃ of open intervals (Edge-B, D1c):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.GoodLocusComponents
+-- D1 finiteness: Bad h = Crit_x ∪ InfRoot_x finite (B-crit transported + infroot root-set) (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD1
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
