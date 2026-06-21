@@ -66,6 +66,7 @@ import LeanFormalizations.ElekesSharirGuthKatz
 -- paper-faithful inputs it reduces to. Mostly statement-surfaces / work in
 -- progress with `sorry`; see README for the per-module VERIFIED/PARTIAL triage.
 import LeanFormalizations.PachDeZeeuw.Bezout
+import LeanFormalizations.PachDeZeeuw.CriticalPointBound
 import LeanFormalizations.PachDeZeeuw.MilnorThom
 import LeanFormalizations.PachDeZeeuw.CurveSymmetries
 import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
