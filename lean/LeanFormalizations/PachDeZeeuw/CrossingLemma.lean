@@ -51,6 +51,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.BadPointBounds
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultigraph
 -- Edge-B WellDrawn discharge (vi): crossingCount ≤ M·|Γ|² (same-curve disjoint + cross-curve ≤M-per-pair injection):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBWellDrawn
+-- Edge-B ArcsJoinEndpoints discharge (v): lift EdgeBEdge.arc_endAnchor over the global edge index:
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBArcsJoin
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
