@@ -585,11 +585,11 @@ FLAG FOR IMPLEMENTER: sheet-maps              [LOW priority; assessed OFF critic
 |---|---|---|---|
 | LEAF A | `exists_monotoneArc_single_psi` | **PROVEN (landed)** | — (MonotoneArc.lean:1015, axiom-clean) |
 | LEAF B | `isCompact_strip` | **PROVEN (landed)** | — (StripCompact.lean:247, axiom-clean) |
-| D2a band (open) | `decomp_D2a_band` | **PROVEN-modulo (glue written)** | `Crit_x` def only — 2-line contrapositive, no leaf |
-| D2a band (closed) | `decomp_D2a_band_closed` | **PROVEN-modulo (glue written)** | D2a |
-| D2b compact | `decomp_D2b_compact` | **PROVEN-modulo (glue written)** | LEAF B (landed) + `InfRoot_x ⊆ Bad` |
-| D2 strip-is-K | `decomp_D2_strip_isK` | **PROVEN-modulo (glue written)** | D2b + `strip` def |
-| arc-on-good | `decomp_arc_on_good` | **PROVEN-modulo (glue written)** | LEAF A + LEAF B (both landed) |
+| D2a band (open) | `decomp_D2a_band` | **PROVEN (landed)** | `Crit_x` def only — contrapositive (DecompositionD2.lean, axiom-clean) |
+| D2a band (closed) | `decomp_D2a_band_closed` | **PROVEN (landed)** | D2a (DecompositionD2.lean) |
+| D2b compact | `decomp_D2b_compact` | **PROVEN (landed)** | LEAF B + `InfRoot_x ⊆ Bad` (DecompositionD2.lean) |
+| D2 strip-is-K | `decomp_D2_strip_isK` | **PROVEN (landed)** | D2b + `strip` def (DecompositionD2.lean) |
+| arc-on-good | `decomp_arc_on_good` | **PROVEN (landed)** | LEAF A + LEAF B + D2 (DecompositionD2.lean, axiom-clean) |
 | export-2 | `export_2_band_compact` | **PROVEN-modulo (glue written)** | D2a' + D2_strip_isK |
 | D3a fibre card | `decomp_D3a_fibre_card_le` | **PROVEN-shaped** | mathlib roots + StripCompact internals — FLAG `fibre-card` |
 | D3b local constancy | `decomp_D3b_locally_constant` | **CONJECTURED-constructible (full skeleton)** | IFT box (MonotoneArc) + LEAF B — FLAG `fibre-local-constant` (hardest here) |

@@ -21,6 +21,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.InfinityCut
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.GoodLocusComponents
 -- D1 finiteness: Bad h = Crit_x ∪ InfRoot_x finite (B-crit transported + infroot root-set) (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD1
+-- D2 band + compact strip on each good interval, composed with LEAF A → single-ψ arc (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD2
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
