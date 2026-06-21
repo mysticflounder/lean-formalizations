@@ -9,6 +9,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 -- Local IFT arc (Proposition L, Edge-B GO brick):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.LocalArc
+-- Per-arc interval-clopen single-ψ analytic atoms (Edge-B, conditional on the band):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.MonotoneArc
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
