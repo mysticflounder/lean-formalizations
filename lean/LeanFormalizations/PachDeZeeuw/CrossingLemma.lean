@@ -7,6 +7,8 @@ Authors: Adam McKenna
 -- Statement + amplification:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
+-- Local IFT arc (Proposition L, Edge-B GO brick):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.LocalArc
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
