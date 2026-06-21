@@ -65,7 +65,11 @@ a point). The decomposition spec must thread this `E` to move a `Point2`-finiten
 fact (e.g. "the critical set is finite") to an `ℝ×ℝ`-fact (e.g. "the set of critical
 x-values is finite"). This is genuine but bounded Lean work (one `Homeomorph`,
 preserving: polynomial vanishing, `.Finite`, `IsCompact`, first-coordinate). See
-FLAG `chart-bridge` in §4.
+FLAG `chart-bridge` in §4. **DONE (2026-06-20, PROVEN, sorry-free + axiom-clean):**
+`lean/LeanFormalizations/PachDeZeeuw/ChartBridge.lean`
+(`chartEquiv` + `eval_eq_evalPlane_chart` + `chartEquiv_image_planeCurveZeroSet` +
+`chartEquiv_image_finite_iff` / `chartEquiv_image_isCompact_iff` +
+`chartEquiv_xproj_image`); record `docs/corollary24-chartbridge-build.md`.
 
 ---
 
@@ -475,12 +479,18 @@ sheet = roots).
 ## 4. Implementer flags
 
 ```
-FLAG FOR IMPLEMENTER: chart-bridge
+FLAG FOR IMPLEMENTER: chart-bridge  [CLOSED — PROVEN, sorry-free + axiom-clean]
   Construct E : EuclideanSpace ℝ (Fin 2) ≃ₜ ℝ × ℝ, x ↦ (x 0, x 1), and prove it
   intertwines `eval (i ↦ x i) p` with `evalPlane p`, and preserves `.Finite`,
   `IsCompact`, first-coordinate. Needed to move `Point2`-side finiteness bounds
   (factor_intersection_bound, finite_singularities) to ℝ×ℝ-side band/strip facts.
   Bounded; one Homeomorph + transport lemmas. Bezout.lean:633 has the pointwise seed.
+  DONE: lean/LeanFormalizations/PachDeZeeuw/ChartBridge.lean (chartEquiv =
+  (EuclideanSpace.equiv (Fin 2) ℝ).toHomeomorph.trans Homeomorph.finTwoArrow).
+  Intertwining = eval_eq_evalPlane_chart; image = chartEquiv_image_planeCurveZeroSet;
+  preservation = chartEquiv_image_finite_iff / chartEquiv_image_isCompact_iff (+ forward
+  forms); first-coord = chartEquiv_fst, x-proj transport = chartEquiv_xproj_image.
+  Build record: docs/corollary24-chartbridge-build.md.
 
 FLAG FOR IMPLEMENTER: lc-bound  [THE HARDEST SUB-OBLIGATION]
   Lemma: h : PlanePoly, write h = ∑_{j} a_j(x)·y^j with a_D = lc_y(h) ≠ 0 (D = deg_y h).
@@ -539,9 +549,10 @@ FLAG FOR IMPLEMENTER: generic-rotation  (what-next #4)
    (d+1)^5` and (with the chart bridge) the finite critical-x-set. Independent of #1; can
    proceed in parallel.
 
-3. **`chart-bridge` (§0).** The `EuclideanSpace ℝ (Fin 2) ≃ₜ ℝ × ℝ` transport. Needed to
-   connect every `Point2`-side bound (#2, Bézout, 2-DOF) to the `ℝ×ℝ`-side per-arc
-   machinery. Bounded, mechanical; do alongside #2.
+3. **`chart-bridge` (§0). DONE — PROVEN, sorry-free + axiom-clean
+   (`ChartBridge.lean`, 2026-06-20).** The `EuclideanSpace ℝ (Fin 2) ≃ₜ ℝ × ℝ`
+   transport, connecting every `Point2`-side bound (#2, Bézout, 2-DOF) to the
+   `ℝ×ℝ`-side per-arc machinery. Record `docs/corollary24-chartbridge-build.md`.
 
 4. **`sheet-count` + the decomposition assembly (D1–D3, §1.3).** Assemble #1+#2+#3 into
    the (D1) finiteness of `Bad`, (D2) band+compact per good interval, (D3) sheet
@@ -581,4 +592,4 @@ designed to avoid needing them.
 | Harnack / Thom–Milnor / semialgebraic / projective Bézout | **ABSENT from mathlib v4.30 AND wrong tool** (EMPIRICALLY VERIFIED search) |
 | E1, E2 | **PROVEN modulo `export-1..4`**; `export-1,2` = the per-arc lemma's hypotheses (§3) |
 | Generic-rotation reduction | **CONJECTURED-tractable** (finite avoidance, not curve topology) — FLAG `generic-rotation` |
-| chart bridge `Point2 ≃ₜ ℝ×ℝ` | **CONJECTURED-constructible, bounded** — FLAG `chart-bridge` |
+| chart bridge `Point2 ≃ₜ ℝ×ℝ` | **PROVEN** (sorry-free, axiom-clean) — `ChartBridge.lean`; was FLAG `chart-bridge` |

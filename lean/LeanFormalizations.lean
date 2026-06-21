@@ -72,6 +72,7 @@ import LeanFormalizations.PachDeZeeuw.AlgebraicPrelim
 import LeanFormalizations.PachDeZeeuw.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.PachSharir
 import LeanFormalizations.PachDeZeeuw.ComponentSplit
+import LeanFormalizations.PachDeZeeuw.ChartBridge
 import LeanFormalizations.PachDeZeeuw
 import LeanFormalizations.PachDeZeeuw.IncidenceAssembly
 
