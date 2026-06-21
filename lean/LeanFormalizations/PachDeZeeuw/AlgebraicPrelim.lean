@@ -1507,7 +1507,7 @@ lemma zeroSet_subset_normalizedFactor_union
   simpa [PlaneCurveZeroSet] using hhz
 
 
-/-- A finite cover of a real plane curve by irreducible components coming from its normalized factors. -/
+/-- Bivariate real polynomials — the ambient ring for plane curves. -/
 abbrev PlanePoly := MvPolynomial (Fin 2) ℝ
 
 /-- A finite cover of a real plane curve by irreducible components coming from its normalized factors. -/

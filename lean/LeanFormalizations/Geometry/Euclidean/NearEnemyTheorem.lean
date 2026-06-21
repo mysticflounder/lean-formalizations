@@ -273,7 +273,7 @@ theorem eq_or_eq_neg_of_forall_inner_sub_mul_inner_add {v w : V}
     exact this.symm
 
 /-- **Parallelism lemma** (Cauchy–Binet step in instantiation form): if the
-`2×2` "projected determinant" `⟪p, v⟫⟪q, w⟫ - ⟪p, w⟫⟪q, v⟫` vanishes for ALL
+`2×2` "projected determinant" `⟪p, v⟫⟪q, w⟫ - ⟪p, w⟫⟪q, v⟫` vanishes for all
 row vectors `p, q`, then `v` and `w` are linearly dependent.  Proved without
 the Cauchy–Schwarz equality case, via the Gram–Schmidt vector
 `u := ⟪v,v⟫ • w - ⟪v,w⟫ • v`. -/
@@ -549,7 +549,7 @@ theorem not_collinear_of_mem_sphere
 /-- **Per-quadruple certificate, rigidity-parameterized core**: for two
 distinct pairs (the first nondegenerate) subject to a line-rigidity
 hypothesis, the two identical-vanishing conditions that a
-bisector-coincidence under projection would force cannot BOTH hold: the
+bisector-coincidence under projection would force cannot both hold: the
 projected-determinant form (parallelism) and the orthogonality form
 (midpoint relation) are not simultaneously identically zero over all row
 vectors.

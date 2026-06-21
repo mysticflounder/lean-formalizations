@@ -22,7 +22,7 @@ only `D = Ω(n)`. It is **not** progress toward the open target `E = o(n³)`
 `log` elementarily — the `log` is a cocircularity artifact. See
 `docs/03-rotation-channel.md` and `docs/01-state-of-the-art.md`.
 
-The "hard geometry" is the hypothesis itself: four points at a common distance
+The geometric content sits entirely in the hypothesis itself: four points at a common distance
 `r` from a center `c` are `Cospherical` (witness `⟨c, r⟩`), so the
 no-four-cocircular clause forbids a fourth. No imported geometry beyond Mathlib's
 `Cospherical`.

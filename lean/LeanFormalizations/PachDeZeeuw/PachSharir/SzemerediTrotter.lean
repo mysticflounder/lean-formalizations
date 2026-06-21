@@ -488,7 +488,7 @@ noncomputable def stMultigraph
   arc := fun i => segmentArc ((allEdges P L)[i].1).1 ((allEdges P L)[i].1).2 (allEdges P L)[i].2
   crossings := L.card ^ 2
 
-/-! ### Task 6 — Discharge the five Phase-1 hypotheses for `stMultigraph` -/
+/-! ### Task 6 — Discharge the six Phase-1 hypotheses for `stMultigraph` -/
 
 /-- **Hypothesis `hv`.** Vertices are `P`, so `|V| = |P|` by definition. -/
 @[simp] lemma stMultigraph_card_V (P : Finset (ℝ × ℝ)) (L : Finset (Set (ℝ × ℝ))) :
@@ -4903,9 +4903,10 @@ theorem szemerediTrotter_of_straightLineCrossingFreeComponentwisePlanarization
 /-- **Szemerédi–Trotter**, conditional on the simple crossing lemma `hCL`.
 
 Assembled from the Phase-1 combinatorial core `incidence_bound_of_crossingLemma`
-and the geometric realization `stMultigraph` with its five discharged hypotheses
-(`stMultigraph_card_V`, `stMultigraph_multiplicity_le_one`, `stMultigraph_wellDrawn`,
-`incidences_le_numEdges_add`, `stMultigraph_crossings_le`) — all PROVEN sorry-free.
+and the geometric realization `stMultigraph` with its six discharged hypotheses
+(`stMultigraph_card_V`, `stMultigraph_multiplicity_le_one`, `stMultigraph_arcsJoinEndpoints`,
+`stMultigraph_wellDrawn`, `incidences_le_numEdges_add`, `stMultigraph_crossings_le`) — all
+PROVEN sorry-free.
 So this is Szemerédi–Trotter conditional on the simple crossing lemma alone; the
 `hCL` hypothesis threads the crossing lemma at the type level (no `sorryAx`).
 

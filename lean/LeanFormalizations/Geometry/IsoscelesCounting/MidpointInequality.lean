@@ -18,7 +18,7 @@ This is foundational scaffolding for Obligation B of the MEC arc-angle
 chain. The geometric work of lifting from MEC arc structure / the
 inscribed-angle theorem to the inner-product nonnegativity hypothesis
 lives in the sibling cap-arc inner-product nonnegativity step;
-THIS lemma is purely the algebraic step.
+this lemma is purely the algebraic step.
 -/
 
 open scoped EuclideanGeometry InnerProductSpace

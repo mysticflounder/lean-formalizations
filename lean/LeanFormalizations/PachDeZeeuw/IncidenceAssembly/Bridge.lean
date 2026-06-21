@@ -56,8 +56,10 @@ theorem positiveAuxiliaryIncidenceCardBound_of_corollary24
 Conditional assembly of Pach–de Zeeuw Theorem 1.1 from the exact paper statement
 of Pach–Sharir Corollary 2.4.
 
-This theorem is axiom-free apart from the explicit hypothesis `h24`; the only
-remaining unfinished work is the bridge theorem above.
+Given `h24`, this theorem reduces Pach–de Zeeuw Theorem 1.1 to the bridge theorem
+above (`positiveAuxiliaryIncidenceCardBound_of_corollary24`); it currently inherits
+that theorem's `sorry`, so its axiom closure contains `sorryAx`. Closing the bridge
+theorem is the only remaining work.
 -/
 theorem irreducibleCurve_distinctDistances_of_corollary24
     (h24 : PachSharir.Corollary24Statement) :

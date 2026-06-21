@@ -56,34 +56,30 @@ isometry's contribution on the RHS).
 * `phiQuadruple_mem_quadruplePos` — **Claim A**: `Φ` is well-defined,
   mapping `(g, (i,j))` with `i ≠ j` into `quadruplePos p`.
 
-**What's left:**
+**The rest of the bridge (now proven in this module):**
 
-The full bridge identity
-(`DistanceEnergy p = ∑_g r(g)(r(g)-1)`) requires two further pieces of
-the bijection Φ:
+The remaining pieces of the bijection Φ that complete the bridge identity
+(`DistanceEnergy p = ∑_g r(g)(r(g)-1)`):
 
-* **Claim B (injectivity on direct isometries)**: if two direct `g₁, g₂`
-  send the same point pair `(p_i, p_j) ↦ (p_k, p_l)`, then `g₁ = g₂`.
-  Requires the 2D direct-isometry rigidity lemma (a direct linear
-  isometry fixing a nonzero vector is the identity). Reducible to the
-  `linearIsometry_J_eq_or` machinery in
+* **Claim B (injectivity on direct isometries)** —
+  `direct_isometryEquiv_eq_of_send_pair`: if two direct `g₁, g₂` send the same
+  point pair `(p_i, p_j) ↦ (p_k, p_l)`, then `g₁ = g₂`. Uses the 2D
+  direct-isometry rigidity lemma (a direct linear isometry fixing a nonzero
+  vector is the identity), via the `linearIsometry_J_eq_or` machinery in
   `LeanFormalizations.Geometry.Euclidean.IsometryClassification`.
-* **Claim C (surjectivity / existence)**: for every `(i,j,k,l) ∈ Q⁺(p)`,
-  there exists a direct `g` with `g p_i = p_k` and `g p_j = p_l`. Built
-  via complex-multiplication-by-unit-complex (`Mathlib.Analysis.Complex.
-  Isometry.rotation`) and `AffineIsometryEquiv.vaddConst`. This was the
-  load-bearing missing piece before the bridge was closed.
+* **Claim C (surjectivity / existence)** —
+  `exists_direct_isometryEquiv_of_dist_eq`: for every `(i,j,k,l) ∈ Q⁺(p)`,
+  there exists a direct `g` with `g p_i = p_k` and `g p_j = p_l`. Built via
+  rotation by a unit complex (`Mathlib.Analysis.Complex.Isometry.rotation`) and
+  `AffineIsometryEquiv.vaddConst`.
+* **Bridge identity** — `distanceEnergy_eq_sum_richness_falling`: `Finset.sum_bij`
+  over `phiQuadruple` gives `DistanceEnergy p = ∑_g r(g)(r(g)-1)`.
 
-Once both land, `Finset.sum_bij` over `phiQuadruple` closes the bridge
-identity.
-
-The dyadic decomposition `∑_g r(g)(r(g)-1) = ∑_k EnergyAtLevel p k isoms`
-is a separate `Finset.sum_partition` argument independent of the bridge
-identity itself; it is *not* implemented here because the existing
-`InRichnessLevel` predicate `k ≤ Richness p g ∧ Richness p g < 2 * k`
-in `RichnessLevels.lean` does not give a dyadic partition for the
-linear-`k` parameterization (the intervals `[k, 2k)` overlap). The
-decomposition lemma awaits clarification of the level convention.
+The dyadic decomposition `∑_g r(g)(r(g)-1) = ∑_k EnergyAtLevel p k isoms` is also
+proven here (`energy_dyadic_partition`, and end-to-end via
+`distanceEnergy_eq_sum_energyAtLevel`): `InRichnessLevel` in `RichnessLevels.lean`
+now uses the dyadic-exponent windows `2^k ≤ Richness p g < 2^(k+1)`, which tile ℕ,
+so the partition is exact.
 -/
 
 namespace Esgk

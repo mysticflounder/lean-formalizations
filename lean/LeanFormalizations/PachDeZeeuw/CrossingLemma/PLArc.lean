@@ -1631,8 +1631,8 @@ theorem abs_sideForm_le_dist_of_mem_segment {v b q : Plane}
 
 /-- **Sharp transverse bound (to the whole segment).**  `|sideForm v b z|` is at most
 `‖b−v‖₁ · infDist z [v,b]`.  In a tube of half-width `δ₀` around the carrier this is
-`< ‖b−v‖₁ · δ₀`, *independent of the corner angle* — the estimate that dissolves the
-`tan θ` glue wall of the discarded local architecture. -/
+`< ‖b−v‖₁ · δ₀`, *independent of the corner angle* — the estimate that removes the
+angle-dependent (`tan θ`) glue obstruction of the discarded local architecture. -/
 theorem abs_sideForm_le_M_infDist (v b z : Plane) :
     |sideForm v b z|
       ≤ (|b.1 - v.1| + |b.2 - v.2|) * Metric.infDist z (segment ℝ v b) := by
@@ -2829,7 +2829,7 @@ edge — rather than the *intersection* of the two edge tubes (the earlier
 `δ₀-corner-tube-overlap` form, 2026-06-13).
 
 Why the union, not the intersection (region-face-bridge-plan §9): the *intersection* form
-is a **structural NO-GO** for gentle corners.  Reach (`sectorPlus i ∩ bandStripPlus i ≠ ∅`,
+is structurally incompatible with gentle corners.  Reach (`sectorPlus i ∩ bandStripPlus i ≠ ∅`,
 needed for collar connectivity) forces `δ₀ > αL/2` — a band point has `footParam ∈ (α,1−α)`,
 so it is `≥ αL` from the shared vertex along edge `i`, and for a gentle turn its foot onto
 edge `i+1` falls outside that segment, so being within `δ₀` of edge `i+1` *too* (the

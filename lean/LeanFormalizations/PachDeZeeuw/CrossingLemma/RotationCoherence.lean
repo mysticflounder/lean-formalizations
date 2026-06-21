@@ -57,7 +57,7 @@ The hypotheses are minimal and exactly pin `L'`:
 ## Proof architecture
 
 * `succAbove_val`, `val_add_one_val` — value (`Fin.val`) normal forms.
-* `crux`, `crux_fire` — the two `Fin (n+1)` index identities relating the
+* `succAbove_add_one`, `succAbove_add_one_fire` — the two `Fin (n+1)` index identities relating the
   `Fin (n+1)`-successor `(·+1)` to the `Fin n`-successor through `Fin.succAbove`,
   off and at the wrap/insertion point. (Verified for `n ≤ 8` before formalizing.)
 * `finRotate_finCongr`, `permOfEquiv_finCongr` — `finRotate` is natural under the
@@ -69,7 +69,7 @@ The hypotheses are minimal and exactly pin `L'`:
   `Finset.orderEmbOfFin_unique`).
 * `rotationOfOrder_splice` — the main theorem, assembled by `Equiv.ext` and a
   three-way case split (the new element `x`; the predecessor slot, where the swap
-  fires; the generic slot, handled by `crux`).
+  fires; the generic slot, handled by `succAbove_add_one`).
 -/
 
 set_option linter.style.longLine false

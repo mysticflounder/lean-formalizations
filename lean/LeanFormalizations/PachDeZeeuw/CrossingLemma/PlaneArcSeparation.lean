@@ -41,8 +41,8 @@ loudly-marked geometric residual.  Concretely:
                                                                     [statement PROVEN-to-elaborate;
                                                                      residual CONJECTURED, sorry]
 
-See the bottom-of-file gap report for the precise residual obligation and why it
-is the genuinely hard, non-elementary part.
+See the bottom-of-file gap report for the precise residual obligation and why a
+complete proof of it requires Jordan-strength reasoning beyond the pinned mathlib.
 -/
 import Mathlib
 
@@ -383,7 +383,7 @@ theorem exists_twoSidedPartition_of_arc {A R : Set Plane} {β : SimpleArc Plane}
 /-- **(MS) — local arc-separation lemma.**  Assembled from the sorry-free
 componentology (§3) and the geometric residual (§5).  Because it consumes
 `exists_twoSidedPartition_of_arc`, this theorem currently inherits that lemma's
-`sorry`; it is NOT axiom-clean.  The *statement* is the deliverable; its proof is
+`sorry`; it is not axiom-clean.  The *statement* is the deliverable; its proof is
 complete **modulo** the single residual. -/
 theorem local_arc_separation {A R : Set Plane} {β : SimpleArc Plane}
     (h : ArcInRegion A R β) :
@@ -416,8 +416,8 @@ residual; it carries `sorryAx` solely through `exists_twoSidedPartition_of_arc`.
 
 This is the **crosscut theorem** for a simply connected planar domain (Newman,
 *Elements of the Topology of Plane Sets of Points*; Pommerenke, *Boundary
-Behaviour of Conformal Maps*, Prop. 2.12).  It is TRUE, and it is genuinely
-non-elementary.
+Behaviour of Conformal Maps*, Prop. 2.12).  It is true; the obstruction to an
+elementary proof in the pinned mathlib is set out below.
 
 **Why simple connectivity does not make it elementary in mathlib v4.27.0.**
 The classical proofs go through one of:
