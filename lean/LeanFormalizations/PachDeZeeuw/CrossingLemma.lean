@@ -25,6 +25,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD1
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DecompositionD2
 -- D3 sheet-count: fibre finite + ncard locally constant = constant on a good interval (Edge-B):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.SheetCount
+-- export-3: connecting-arc glue (decomp_arc_on_good + endpoint_pin) for the E1 pairing (Edge-B):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.ConnectingArc
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
