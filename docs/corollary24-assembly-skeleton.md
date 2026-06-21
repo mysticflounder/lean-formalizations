@@ -461,6 +461,17 @@ deliver the *hypotheses* (`hband`, `hK`, `hKsub`) of LEAF A; the *output* `ψ` a
 behavior is consumed by **E1**, not by export-1,2. So there is **no gap in the export-1,2 contract**
 from the missing `ψ xQ`.
 
+> **SUPERSEDED (2026-06-21) — read `docs/corollary24-E1E2-assembly-design.md` first.** The
+> `SameSheet`/connected-component form of `export_3_endpoint_pin` sketched below is NOT the route
+> taken. The endpoint pin landed instead in **connecting-graph form**:
+> `endpoint_pin_of_connectingGraph` (`SheetCount.lean:128`) + `reach_of_some_continuation` /
+> `export_3_connecting_arc` (`ConnectingArc.lean`, landed, axiom-clean). The E1/E2 verdict (Design I)
+> groups incident points by **fibrewise sheet rank**, so the right-endpoint datum is discharged by
+> `sheet-rank-monotone` (`SheetRank.lean`, in progress), NOT by a single-valued-component lemma. The
+> OPEN `component_no_second_sheet` (the `SameSheet` form's `sorry` below) is therefore **off the
+> critical path** and should not be proved for Edge B. The block below is kept as the historical
+> framing of the gap.
+
 **Where the missing `ψ xQ` does bite: E1, and `export-3` covers it.** E1 needs, per consecutive
 incident pair `(p_i, p_{i+1})` on the **same sheet** in the **same good interval**, an arc from `p_i`
 to `p_{i+1}` — i.e. it needs `ψ(p_{i+1}.1) = p_{i+1}.2` (the right endpoint pinned). LEAF A gives only
