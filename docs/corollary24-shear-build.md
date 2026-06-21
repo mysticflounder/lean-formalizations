@@ -219,3 +219,31 @@ wire this file in, add
 `import LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear` to the aggregator during
 validation. Build the module standalone with
 `./lake-build.sh LeanFormalizations.PachDeZeeuw.CrossingLemma.Shear`.
+
+## Addendum (orchestrator-direct): Obstruction GR-1 — shear total-degree bound
+
+Three declarations added after `shearPoint_curve_iff`, realizing scope doc §5 / §7 item 2
+(the one item with no packaged mathlib lemma):
+
+* `totalDegree_aeval_le (f) (hf : ∀ i, (f i).totalDegree ≤ 1) (p) :
+  (aeval f p).totalDegree ≤ p.totalDegree` — the general degree-`≤ 1` substitution bound.
+  Proof: `p.as_sum` + `map_sum` push `aeval` through the support sum; each term
+  `aeval f (monomial v c) = C c · ∏ᵢ (f i)^(vᵢ)` (`aeval_monomial` + `algebraMap_eq`) has
+  total degree `≤ ∑ᵢ vᵢ·totalDegree (f i) ≤ ∑ᵢ vᵢ = v.sum (·) ≤ totalDegree p`
+  (`totalDegree_finsetProd`, `totalDegree_pow`, `hf`, `le_totalDegree`); the support
+  supremum is `≤ totalDegree p` (`totalDegree_finsetSum_le`). General over any
+  `CommSemiring R`, `σ`, `τ` — reusable.
+* `shearVars_totalDegree_le (s) (i) : (shearVars s i).totalDegree ≤ 1` — `X₀ + s·X₁` and
+  `X₁` are linear (`totalDegree_add`/`_mul`/`_C`/`_X`).
+* `shearPoly_totalDegree_le (s) (h) : (shearPoly s h).totalDegree ≤ h.totalDegree` — GR-1, the
+  consumed corollary. With `h.totalDegree ≤ d` it gives `(shearPoly s h).totalDegree ≤ d` by
+  transitivity.
+
+**Only the `≤` direction is shipped.** The scope doc states GR-1 as equality, but the
+decomposition leaf stack consumes only `(shearPoly s h).totalDegree ≤ d` (via `hdeg`), which
+`≤ h.totalDegree` + `h.totalDegree ≤ d` discharges. Equality would require the deferred
+inverse-shear `aeval`-composition (above), which is not on the critical path — not proved.
+
+Gate: builds green via the aggregator (8518 jobs); independent `#print axioms` on all three
+= `[propext, Classical.choice, Quot.sound]`; no `sorry`/`native_decide`/`unsafe`/
+`@[implemented_by]`/`@[extern]`/`#print`.

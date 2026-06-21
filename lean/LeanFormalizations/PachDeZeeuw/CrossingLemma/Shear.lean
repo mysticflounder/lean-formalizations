@@ -138,4 +138,61 @@ theorem shearPoint_curve_iff (s : ℝ) (h : PlanePoly) (p : ℝ × ℝ) :
     p ∈ evalPlaneZeroSet h ↔ shearPoint s p ∈ evalPlaneZeroSet (shearPoly s h) := by
   rw [mem_evalPlaneZeroSet, mem_evalPlaneZeroSet, evalPlane_shearPoly_shearPoint]
 
+/-! ### Total-degree bound under the shear (Obstruction GR-1)
+
+The scope doc §5 deliverable: the shear does not raise total degree, so a degree-`≤ d`
+arrangement stays degree-`≤ d` after shearing (the `(shearPoly s h).totalDegree ≤ d` clause
+of `exists_good_shear`, consumed by the decomposition leaf stack via `hdeg`). Only the `≤`
+direction is needed — with `h.totalDegree ≤ d` it gives `(shearPoly s h).totalDegree ≤ d` by
+transitivity, no inverse-shear equality required. Mathlib has no packaged `aeval`/`bind₁`
+total-degree bound (§3.4), so the general lemma is proved here from the standard pieces
+(`aeval_monomial`, `totalDegree_finsetProd`, `totalDegree_pow`, `le_totalDegree`). -/
+
+/-- **Total degree does not increase under an `aeval` by degree-`≤ 1` entries.** If every
+substituted variable `f i` has `totalDegree ≤ 1`, then `(aeval f p).totalDegree ≤ p.totalDegree`.
+
+`aeval f` sends a support monomial `∏ᵢ Xᵢ^(vᵢ)` to `C (coeff v p) · ∏ᵢ (f i)^(vᵢ)`, whose
+total degree is `≤ ∑ᵢ vᵢ·totalDegree (f i) ≤ ∑ᵢ vᵢ = v.sum (·)`, and `v.sum (·) ≤ totalDegree p`
+since `v ∈ p.support` (`le_totalDegree`). The supremum over the support is then `≤ totalDegree p`. -/
+theorem totalDegree_aeval_le {R : Type*} [CommSemiring R] {σ τ : Type*}
+    (f : σ → MvPolynomial τ R) (hf : ∀ i, (f i).totalDegree ≤ 1) (p : MvPolynomial σ R) :
+    (MvPolynomial.aeval f p).totalDegree ≤ p.totalDegree := by
+  have hsum : MvPolynomial.aeval f p
+      = ∑ v ∈ p.support, MvPolynomial.aeval f (MvPolynomial.monomial v (MvPolynomial.coeff v p)) := by
+    conv_lhs => rw [p.as_sum]
+    rw [map_sum]
+  rw [hsum]
+  refine MvPolynomial.totalDegree_finsetSum_le ?_
+  intro v hv
+  rw [MvPolynomial.aeval_monomial, MvPolynomial.algebraMap_eq]
+  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+  rw [MvPolynomial.totalDegree_C, zero_add, Finsupp.prod]
+  refine (MvPolynomial.totalDegree_finsetProd _ _).trans ?_
+  calc ∑ i ∈ v.support, (f i ^ v i).totalDegree
+      ≤ ∑ i ∈ v.support, v i * (f i).totalDegree :=
+        Finset.sum_le_sum (fun i _ => MvPolynomial.totalDegree_pow _ _)
+    _ ≤ ∑ i ∈ v.support, v i * 1 :=
+        Finset.sum_le_sum (fun i _ => Nat.mul_le_mul (le_refl (v i)) (hf i))
+    _ = v.sum (fun _ e => e) := by simp only [mul_one]; rfl
+    _ ≤ p.totalDegree := MvPolynomial.le_totalDegree hv
+
+/-- Each shear-substitution entry `shearVars s i` has total degree `≤ 1`
+(`X₀ + s·X₁` and `X₁` are linear). -/
+lemma shearVars_totalDegree_le (s : ℝ) (i : Fin 2) : (shearVars s i).totalDegree ≤ 1 := by
+  unfold shearVars
+  split
+  · refine (totalDegree_add _ _).trans (max_le ?_ ?_)
+    · exact le_of_eq (totalDegree_X 0)
+    · exact (totalDegree_mul _ _).trans (le_of_eq (by rw [totalDegree_C, totalDegree_X]))
+  · exact le_of_eq (totalDegree_X 1)
+
+/-- **Obstruction GR-1 (shear total-degree bound).** The shear does not raise total degree:
+`(shearPoly s h).totalDegree ≤ h.totalDegree`. Immediate from `totalDegree_aeval_le` and the
+degree-`≤ 1` entry bound `shearVars_totalDegree_le`. With `h.totalDegree ≤ d` this gives the
+`(shearPoly s h).totalDegree ≤ d` clause the decomposition leaf stack consumes. -/
+theorem shearPoly_totalDegree_le (s : ℝ) (h : PlanePoly) :
+    (shearPoly s h).totalDegree ≤ h.totalDegree := by
+  unfold shearPoly
+  exact totalDegree_aeval_le (shearVars s) (shearVars_totalDegree_le s) h
+
 end PachDeZeeuw.Algebraic
