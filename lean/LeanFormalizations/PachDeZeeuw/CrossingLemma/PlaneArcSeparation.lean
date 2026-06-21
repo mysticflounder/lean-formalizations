@@ -363,10 +363,11 @@ theorem regionMinusArc_isOpen {R : Set Plane} (β : SimpleArc Plane)
 
 Everything above is sorry-free.  The remaining content of (MS) is the production
 of a two-sided open partition of `regionMinusArc R β` from the arc geometry +
-simple connectivity of `R`.  This is the crosscut (Jordan-strength) obligation for simply connected planar domains, and
-is the *only* `sorry` in this file.  See the gap report at the bottom for why it
-requires Jordan-strength reasoning even with the simply-connected hypothesis, and for the precise
-sub-obligations a future proof must discharge. -/
+simple connectivity of `R`.  This is the crosscut (Jordan-strength) obligation
+for simply connected planar domains, and is the *only* `sorry` in this file.  See
+the gap report at the bottom for why it requires Jordan-strength reasoning even
+with the simply-connected hypothesis, and for the precise sub-obligations a
+future proof must discharge. -/
 
 /-- **THE GEOMETRIC RESIDUAL (CONJECTURED; `sorry`).**  Under the (MS)
 hypotheses, the region-minus-arc admits a two-sided open partition.

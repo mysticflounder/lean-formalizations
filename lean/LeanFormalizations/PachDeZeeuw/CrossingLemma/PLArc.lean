@@ -36,7 +36,10 @@ This is the bottom of the route-(c) node DAG:
   The coercion `PolyArc → SimpleArc` and the collar (L3) are built on top in
   later work.                                                         [definitions]
 
-The multi-segment P2 union proof (`union_collarPlus_collarMinus`, line ~3140) carries one labelled `sorry` in its interior-vertex disk branch; the single-segment variant is `sorry`-free. It imports the proven core of `PlaneArcSeparation`.
+The multi-segment P2 union proof (`union_collarPlus_collarMinus`, line ~3140)
+carries one labelled `sorry` in its interior-vertex disk branch; the
+single-segment variant is `sorry`-free. It imports the proven core of
+`PlaneArcSeparation`.
 -/
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
@@ -3075,7 +3078,8 @@ theorem mem_openSegment_of_sideForm_zero_ball' {s t z : Plane} (h : t ≠ s)
   · rw [footParam_swap_eq h]; linarith
   · rwa [dist_comm s t] at hball
 
-/-- **P2 (union).** The interior-vertex disk branch (line ~3140) carries one labelled `sorry`; band and endpoint branches are proven. -/
+/-- **P2 (union).** The interior-vertex disk branch (line ~3140) carries one labelled
+`sorry`; band and endpoint branches are proven. -/
 theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
     (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
     (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
