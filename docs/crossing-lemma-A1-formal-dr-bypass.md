@@ -17,12 +17,38 @@ thing that would benefit from a build (type-checking the formal-`dr`
 instantiation) is identified in §6 as a low-risk confirmation, not a load-bearing
 gap.
 
+> **2026-06-22 skeptic validation + label correction.** A math-skeptic adversarial
+> pass (`docs/skeptic-crossing-lemma-A1-formal-dr-bypass-2026-06-22` — returned
+> inline, not written to file) confirmed the technical findings (§2/§3/§4 PROVEN
+> by source) and the orchestrator independently re-verified the load-bearing
+> mechanism: `face_mk_eq_iff` (`PlanarEdgeBound.lean:229`) is sorry-free, and the
+> harness passes `_hconst` into `hgeo` (`EdmondsSameRegion.lean:475`), so
+> `hregion := _hconst c₁ c₂ (face_mk_eq_iff.mp A1★)` — the single geometric input
+> is co-faciality **A1★** (`Face_mk c₁ = Face_mk c₂` at level `m`); everything else
+> (`hsame`, `hregion`, `hvertex`, `hinj` via formal `Wleft,Wright`, `hfactor`)
+> assembles combinatorially. **Net validated result:** A1 does **not** CLOSE — A1★
+> is an open obligation (CONJECTURED-constructible, residual leaf N1a′). What the
+> formal `dr` *does* establish is that the distinctness obstruction
+> `crosscut_separates_global` **and** the `hreal` realization node are both
+> eliminated from the A1 path; `hgeo` reduces to A1★ alone. The headline word
+> "CLOSES" below is corrected to "REDUCES to A1★".
+>
+> **Label convention.** "CONSTRUCTIBLE" below means one of two distinct tiers:
+> (a) **PROVEN-on-paper modulo a named trivial mathlib assembly** (e.g. §2.3
+> fresh-set existence) — not yet built but with the lemmas name-checked; or
+> (b) **CONJECTURED, no absent infra** (A1★) — believed constructible in
+> mathlib v4.30 with no missing foundational theory, but not yet proven even on
+> paper to the leaf. The A1★ row is tier (b) = **CONJECTURED**.
+
 ---
 
 ## 0. The headline verdict
 
-> **A1 CLOSES WITHOUT the named obstruction `crosscut_separates_global`.** Both
-> sub-questions resolve in favour of a formal (non-geometric) `dr`:
+> **A1 REDUCES to a single open co-faciality equality (A1★); the named
+> obstruction `crosscut_separates_global` is eliminated from the A1 path.** (A1★ =
+> `Face_mk c₁ = Face_mk c₂` at level `m`, CONJECTURED-constructible — A1 is NOT
+> closed; see the 2026-06-22 correction banner above.) Both sub-questions resolve
+> in favour of a formal (non-geometric) `dr`:
 >
 > 1. **Combinatorial `hinj` (`Wleft,Wright` formal) — CONSTRUCTIBLE.** `hgeo` has
 >    full freedom to supply `Wleft,Wright` as **formal fresh sets** (two distinct
@@ -456,9 +482,9 @@ affect the §2/§3 verdicts (those concern the bundle algebra, not the partition
 | `hvertex` is unconditional (no `hsame`) | **PROVEN** | `RM:3310` invoked at `RM:4313` without `hsame` |
 | Co-faciality A1★ is the SameRegion EQUALITY, distinct from `crosscut_separates_global` (distinctness) | **PROVEN** | `B1-hsplit-design §7` (REFUTE "two faces of one fact"); equality vs inequality |
 | No purely-combinatorial *producer* of A1★ in repo (cotree layer consumes co-faciality) | **PROVEN** | `RM:9670`/`VG:2149`/`VG:2210` take co-faciality as hypothesis |
-| A1★ is CONSTRUCTIBLE (equality half, `regionAt_eq_of_mem_isPreconnected`, no Jordan); residual leaf = N1a′ sector point | **CONSTRUCTIBLE** (CONJECTURED no-absent-infra) | `RFB:131` sorry-free; `N1-dartsectorpoint §2-§3` |
+| A1★ believed constructible (equality half, `regionAt_eq_of_mem_isPreconnected`, no Jordan); residual leaf = N1a′ sector point | **CONJECTURED** (no absent infra; not yet proven to leaf) | `RFB:131` sorry-free; `N1-dartsectorpoint §2-§3` |
 | Harness needs NO edit (formal `dr` plugs into the existing `∅`-base harness) | **PROVEN** | `exists_dr_hstepCrosscut` consumes only `PerStepCrosscutInput`; `∅` base survives |
-| **Overall: A1 CLOSES without `crosscut_separates_global`; residual = co-faciality A1★ (equality, CONSTRUCTIBLE)** | **VERDICT** | §0; §2 + §3 + §4 |
+| **Overall: A1 REDUCES to one open co-faciality equality A1★ (CONJECTURED-constructible); `crosscut_separates_global` distinctness + `hreal` realization eliminated from the A1 path** | **VERDICT** | §0; §2 + §3 + §4 |
 
 ---
 
