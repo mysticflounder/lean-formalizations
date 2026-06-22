@@ -63,6 +63,10 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBCrossingInput
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBComponentReduce
 -- Edge-B downstream node (shear-apply): edgeB_crossingInput_unsheared — removes the ∂_y≠0 precondition via exists_good_shear:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBShearApply
+-- Edge-B downstream node (chart-bridge): edgeB_crossingInput_euclidean — transports the bound to EuclideanSpace ℝ (Fin 2) via chartEquiv:
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBChartBridge
+-- Edge-B corollary-lift support (Lemma A): not_associated_of_ne_evalPlaneZeroSet — distinct real zero sets ⇒ ¬Associated (dedup engine):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBDedup
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
