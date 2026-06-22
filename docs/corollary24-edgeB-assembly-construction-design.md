@@ -46,9 +46,13 @@ I searched the whole `lean/` tree for an M-tolerant incidence endgame
 (`incidence_bound_of_multigraph*`, any incidence bound with `M` in its statement): **none exists**.
 `edgeBMultigraph`, `allCurveEdges`, `edgeB_crossingInput` were **ABSENT** from the tree at
 the time of writing. **UPDATE (2026-06-21):** `edgeBMultigraph` + `allCurveEdges` + `classKeys`
-+ discharges (i),(ii) are now **LANDED, axiom-clean** in `EdgeBMultigraph.lean`
-(`docs/corollary24-edgeBmultigraph-build.md`); `edgeB_crossingInput` and the (iii)–(vi)
-discharges remain to do.
+and **all six discharges are now LANDED, axiom-clean**: (i) `card_V`, (ii) `numEdges_eq_sum`
+(`EdgeBMultigraph.lean`); (iii) E1 `edgeB_incidence_le_numEdges_add` (`EdgeBE1.lean`,
+`docs/corollary24-edgeB-e1-build.md`); (iv) `multiplicity_le_M` (`EdgeBMultiplicity.lean`);
+(v) `arcsJoinEndpoints` (`EdgeBArcsJoin.lean`); (vi) `wellDrawn` (`EdgeBWellDrawn.lean`). The
+P-aware bracket-coverage fix (`1aabcf2`, `docs/corollary24-edgeB-bracket-coverage-fix.md`) that
+E1 consumes via `goodIntervalsBundle_covers` also landed. Only `edgeB_crossingInput` (the §5.2
+composition of all six + the M-form endgame) remains to do for the top-level Edge-B output.
 
 Two scratch computations were run (EMPIRICALLY VERIFIED, scopes stated inline): the
 multiplicity-≤-M class-pairing skeleton, and the M-tolerant endgame arithmetic / break point of the
@@ -490,10 +494,12 @@ Glue: port `numEdges_eq_sum` (`:992`) — `allCurveEdges` is a double `flatMap`,
 ### (iii) E1 edge bound `he`
 
 `edgeB_incidence_le_numEdges_add` of §3.
-**Status: CONJECTURED-constructible** (PROVEN-modulo landed `length_edgesOnSheet`,
-`decomp_D1_goodLocus_components`, `decomp_D3_sheet_count`, `decomp_D1_bad_finite`; + FLAGs
-`bad-ncard`, `fibre-card-le-at-bad` for the explicit `c(d)`). Glue: per-class `length_edgesOnSheet`
-(landed) summed; bad-x leftover bounded by §3.2. Routes through §3.
+**Status: LANDED, axiom-clean** (`EdgeBE1.lean`, `docs/corollary24-edgeB-e1-build.md`, commit on
+`8bbe10b`+). `I := incidenceCount P (Γ.image (fun H => evalPlaneZeroSet H.1)) ≤ numEdges + cConst d · |Γ|`
+with `cConst d = ((d+1)^5+d+1)·(d+1) + ((d+1)^5+d)·d` (poly(d) only). Good-x incidences bounded via the
+P-aware `goodIntervalsBundle_covers` (the `1aabcf2` fix) + `length_edgesOnSheet`; bad-x via
+`fibre_card_le_at_bad` + `decomp_D1_bad_ncard` (§3.2). The good-x slack carries the `(d+1)` rank factor
+(§3.2 `(|Bad h|+1)·(d+1)`), not the coverage-fix doc's `((d+1)^5+d+1)` — documented in the build record.
 
 ### (iv) Multiplicity `hmult` (≤ M)
 

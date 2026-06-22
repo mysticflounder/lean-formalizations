@@ -55,6 +55,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBWellDrawn
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBArcsJoin
 -- Edge-B multiplicity discharge (iv): multiplicity ≤ M from the point–point 2-DOF clause (countP, ≤1-per-curve):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultiplicity
+-- Edge-B E1 discharge (iii): incidenceCount ≤ numEdges + c(d)·|Γ| (good-x coverage + bad-x fibre bound):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBE1
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
