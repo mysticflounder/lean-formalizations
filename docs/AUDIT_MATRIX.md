@@ -206,7 +206,8 @@ Kernel status: **WIP.** Actual on-path tactic-`sorry`s (earlier "Bridge 9 /
 Theorem23 4 / SzemerediTrotter 2" counted prose mentions of the word, not tactic
 uses): **Bridge 1** — Gap B, `IncidenceAssembly/Bridge.lean:69`
 `positiveAuxiliaryIncidenceCardBound_of_theorem23`; **SzemerediTrotter 1** —
-`:4644`, the straight-line ARR planarity residual; **ComponentSplit 3** —
+`:4649`, the per-step producer `hgeo` (former `:4644` A1 monolith reduced — see
+the A1 bullet below); **ComponentSplit 3** —
 `PachDeZeeuw/ComponentSplit.lean:72/:96/:117`, the auxCurve component-counting
 lemmas feeding Gap B. `Theorem23` is statement-only (0 tactic-`sorry`). Top-level
 Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL`.
@@ -227,6 +228,22 @@ Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL
   unbuilt Tier-B span (curved genus-0 map B1, ARR for algebraic arcs B2, M-form
   averaging lift B3). `exists_twoSidedPartition_of_arc` (`:385`) and `PLArc.lean:3148`
   are OFF the wired path. Audit deferred until proofs land.
+- Node A1 (2026-06-22): the former monolithic A1 `sorry`
+  (`SzemerediTrotter.lean:4644`, straight-line ARR residual-map planarity) is now
+  structured Lean. The mutually-recursive `dr` family (sub-obligation B0) is
+  discharged by the sorry-free, axiom-clean harness
+  `CrossingLemma.exists_dr_hstepCrosscut` (`CrossingLemma/EdmondsSameRegion.lean`),
+  with the sorry-free per-step assembler `mkPrefixStepCrosscutData`, the
+  `poolRegion` injectivity combinator, the `hconst` transport, and the B2
+  region-equality transport `prefixStepSameRegion` (all `[propext,
+  Classical.choice, Quot.sound]`). The single remaining A1 `sorry` is the per-step
+  producer `hgeo : CrossingLemma.PerStepCrosscutInput`
+  (`SzemerediTrotter.lean:4649`), carrying only the extractor `hsplit` (B1, angular
+  co-faciality) and the partition geometry (B2 witness existence + global-side
+  distinctness) — strictly smaller than the former monolith. The naive "two
+  predecessor corners collapse" reading of B1 is provably false (the corners land
+  on opposite split sides); the true B1 is the extractor's `hsplit` on the
+  entered-sector corners. Design + inventory: `docs/crossing-lemma-A1-edmonds-sameregion.md`.
 
 ---
 

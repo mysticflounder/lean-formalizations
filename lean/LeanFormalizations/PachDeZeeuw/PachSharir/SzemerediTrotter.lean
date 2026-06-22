@@ -8,6 +8,7 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemmaAmplification
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeSetDrawing
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsSameRegion
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCollarSeparation
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
@@ -4607,41 +4608,46 @@ theorem straightLineCanonicalComponentResidualMapPlanarityOfARR :
     let G' := G.permuteEdges π
     -- Target 1 (collar item #14 / Obligation B gluing): construct the region
     -- family `dr` over every prefix level together with one
-    -- `PrefixStepCrosscutData` per step `start ≤ m < N`.  This remains a single
-    -- well-typed `sorry` because the bundle is irreducibly mutually-recursive and
-    -- two of its inputs are not yet available in the codebase.  The precise open
-    -- sub-obligations, per cotree step `m` (verified 2026-06-18):
+    -- `PrefixStepCrosscutData` per step `start ≤ m < N`.
     --
-    --   (B0) `dr` is FORCED, not free.  `PrefixStepCrosscutData.hfactor`
-    --        (EdmondsConstruction.lean:124) pins `dr (m+1) d =
-    --        poolRegion (insertedFaceSplitPoolEquiv … d)` and `hinj` makes
-    --        `poolRegion` injective, so `dr (m+1) = poolRegion ∘ splitClass` and
-    --        `dr` must be built by recursion on the prefix level — `dr` and the
-    --        per-step `poolRegion` are a single mutually-recursive object.
+    -- The mutually-recursive bundle (sub-obligation B0) is now DISCHARGED by the
+    -- sorry-free harness `CrossingLemma.exists_dr_hstepCrosscut`
+    -- (EdmondsSameRegion.lean): it builds `dr` by a simultaneous recursion that
+    -- maintains region-separation and face-constancy at every level, consuming a
+    -- single per-step producer `PerStepCrosscutInput`.  All of the assembly between
+    -- that producer and the recursion is sorry-free and axiom-clean
+    -- (`mkPrefixStepCrosscutData`, `prefixStepSameRegion_poolRegion_injective`,
+    -- `stepRegionFamily_hconst`, `nonempty_prefixStepCrosscut_of_data`), and the B2
+    -- region equality is the sorry-free transport `CrossingLemma.prefixStepSameRegion`.
     --
-    --   (B1) per-step combinatorial witness `c₁, c₂, hc, hvertex`.  The extractor
-    --        `exists_residualMapPrefixStepSameFaceData_…` (ResidualMapProperties)
-    --        supplies these only at the FIRST cotree step (via `card Face = 1`,
-    --        RM:4745); at a general step it itself demands the vertex-rotation
-    --        `hsplit` identity (RM:5813-5867), which is the angular co-faciality
-    --        content and is not independently available.
+    -- What remains is exactly the per-step producer `hgeo` — *one* cotree-step
+    -- bundle from `dr m` + its two invariants.  Its genuine open content (true with
+    -- the new-edge endpoint data in scope here):
+    --   (B1) the extractor's `hsplit` identity — the entered angular sectors at the
+    --        two endpoints land on the same split side (the *rotation-chosen*
+    --        endpoint corners, NOT the bundle's predecessor corners, which lie on
+    --        opposite sides);
+    --        feeds `exists_residualMapPrefixStepSameFaceData_…`
+    --        (ResidualMapProperties.lean:5785, lines 5813-5867); and
+    --   (B2) the existence of the preconnected complement witness `S` and sector
+    --        points realising the two corner regions, feeding `prefixStepSameRegion`,
+    --        plus the global-side distinctness `hWne`/`hWold` from
+    --        `exists_twoSidedPartition_prefixStep`.
     --
-    --   (B2) the region gluing `hregion`/`poolRegion`/`hinj`/`hfactor` from the
-    --        two sides `U, V` of `exists_twoSidedPartition_prefixStep`
-    --        (PLCollarSeparation.lean:879, Obligation A — CLOSED).  This is the
-    --        local→global step: identify `U, V` with the two DISTINCT global
-    --        complement components realising the split-pool `Fin 2` summands, send
-    --        every non-cut face back to its old `dr m` region (the `Sum.inl`
-    --        summand), prove the resulting `poolRegion` injective, and derive
-    --        `hregion : dr m c₁ = dr m c₂` (both inserted-edge corners face the
-    --        single crosscut region — the Edmonds direction, the genuine use of
-    --        crossing-freeness `hfree`, which the surrounding proof does not yet
-    --        consume).  This producer does not exist in the codebase.
-    --
-    -- Downstream consumers (`hcard1` ST:4618, the bridge
-    -- `regionSeparates_prefix_of_crosscut` at ST:4690/4702, and the cotree branch
-    -- of `hstep`) are already wired to consume `dr`/`hstepCrosscut`.
-    sorry
+    -- `hgeo` is strictly smaller than the former monolithic `sorry`: the recursion
+    -- (B0) is gone, the region transport (B2 equality) and injectivity are
+    -- discharged, and only the extractor/partition geometry remains.  See
+    -- docs/crossing-lemma-A1-edmonds-sameregion.md.
+    have hcard1' : ∀ h : start ≤ G'.numEdges,
+        Fintype.card (residualMap (G'.prefixEdges start h)
+          (hARRprefix start h)).Face = 1 := by
+      intro h
+      apply G.residualMap_face_card_one_permuted_treePrefix_of_leafOrder
+        hjoin hmult Tvertex hTvertex_sub hlvertex_nodup hlvertex_len hlvertex_two
+        parentVertex hparentVertex hπtree_simple h hARRprefix
+    have hgeo : CrossingLemma.PerStepCrosscutInput G' start hARRprefix := by
+      sorry
+    exact CrossingLemma.exists_dr_hstepCrosscut G' start hARRprefix hstartG hcard1' hgeo
   obtain ⟨dr, hstepCrosscut, _⟩ := h_exists_target1
   let G' := G.permuteEdges π
   have hcard1 : ∀ h : start ≤ (G.permuteEdges π).numEdges,
