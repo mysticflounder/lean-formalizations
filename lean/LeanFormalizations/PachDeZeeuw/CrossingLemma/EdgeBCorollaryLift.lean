@@ -9,13 +9,16 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBDedup
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBChartBridge
 
 /-!
-# Edge-B corollary lift — reducing `Theorem23Statement` to two stated obligations
+# Edge-B corollary lift — `CrossingLemmaMultigraphStatement → Theorem23Statement`
 
 This file assembles the landed Edge-B incidence bound
 (`edgeB_crossingInput_unsheared`, `EdgeBShearApply.lean`) into the paper-faithful
-`PachSharir.Theorem23Statement`. `deduped_pp` (R-3) is now PROVEN; one stated `sorry`
-obligation (`origIncidence_le_deduped`, R-2) remains, with everything else PROVEN.
-The design is `docs/corollary24-hinj-discharge-analysis.md`.
+`PachSharir.Theorem23Statement`. Both former obligations — `deduped_pp` (R-3) and
+`origIncidence_le_deduped` (R-2) — are now PROVEN, so the whole file is `sorry`-free.
+`theorem23_of_crossingLemma : CrossingLemmaMultigraphStatement → PachSharir.Theorem23Statement`
+holds with axiom closure `[propext, Classical.choice, Quot.sound]` (no `sorryAx`),
+conditional only on the hypothesis `hCL`. The design is
+`docs/corollary24-hinj-discharge-analysis.md` and `docs/corollary24-incidence-translation.md`.
 
 ## The reduction
 
@@ -42,22 +45,24 @@ multiplicity `M` — we:
    `M' := max ((2*d+1)^4) (M*d)`.
 
 4. Feed `Γ₀`, `hcc₀`, the irreducibility/degree facts, and the point–point clause `hpp₀`
-   (`deduped_pp`, PROVEN) into `edgeB_crossingInput_unsheared`, then translate the resulting
+   (`deduped_pp`) into `edgeB_crossingInput_unsheared`, then translate the resulting
    bound on `incidenceCount P' 𝒵` back to the original `incidenceCount P' origCurves` via
-   the finite-locus incidence correction (`origIncidence_le_deduped`, a stated `sorry`), and
-   absorb the additive term and the `|Γ₀| ≤ allFactors.card ≤ d·|Γ|` factor into a single
-   constant `C`.
+   the finite-locus incidence correction (`origIncidence_le_deduped`), and absorb the additive
+   term and the `|Γ₀| ≤ allFactors.card ≤ d·|Γ|` factor into a single constant `C`.
 
-## The obligations
+## The two lemmas (both PROVEN)
 
-* `deduped_pp` (Proposition 3 / R-3) — PROVEN. The point–point multiplicity of the deduped
+* `deduped_pp` (Proposition 3 / R-3) — the point–point multiplicity of the deduped
   family is `≤ M*d`. A cover argument over the `≤ M` original curves through both points,
   each contributing `≤ d` factor zero sets.
-* `origIncidence_le_deduped` (R-2) — the one remaining `sorry`. The original curve incidence
-  count is bounded by the deduped count plus a degree-only finite-locus correction.
+* `origIncidence_le_deduped` (R-2) — the original curve incidence count is bounded by the
+  deduped count plus a degree-only finite-locus correction `d·(d+1)^5·|Γ|`. The original
+  curve–curve clause `hcc` is load-bearing: the original→deduped injection is injective
+  because an infinite shared factor locus forces a single owning curve (else two distinct
+  original curves would meet in an infinite set, `encard = ⊤ > M`). See
+  `docs/corollary24-incidence-translation.md`.
 
-`origIncidence_le_deduped` is the sole `sorry`-backed `theorem` (exact signature the R-2 fill
-targets); everything else in this file is `sorry`-free. Conditional on the parked
+Everything in this file is `sorry`-free. Conditional on the parked
 `CrossingLemmaMultigraphStatement` (kept as the hypothesis `hCL`).
 -/
 
@@ -290,12 +295,11 @@ carrier, at most `(d+1)^5` singular points (`finite_singularities_of_irreducible
 and at most `d` such carriers per original curve. -/
 def finiteLocusConst (d : ℕ) : ℕ := d * (d + 1) ^ 5
 
-/-! ### Step 3 — the point–point clause (stated obligation, R-3 / Proposition 3)
+/-! ### Step 3 — the point–point clause (R-3 / Proposition 3, PROVEN)
 
 This is the cover combinatorics: a deduped set through two points comes from a factor of
 some original curve through both points; bound by the `≤ M` original curves through the
-pair, each contributing `≤ d` factor zero sets. Stated as an obligation with the exact
-interface; the fill agent proves it from `hpp_orig` and the degree facts. -/
+pair, each contributing `≤ d` factor zero sets. Proven from `hpp_orig` and the degree facts. -/
 
 /-- **Factor locus ⊆ product locus.** If `h ∣ f`, the zero set of `h` is contained in the zero
 set of `f`: writing `f = h * g`, `evalPlane f xy = evalPlane h xy · evalPlane g xy` (via `map_mul`
@@ -373,12 +377,179 @@ theorem deduped_pp {F : Finset PlanePoly} {d M : ℕ}
         apply Nat.mul_le_mul_right
         rw [hFpq]; exact hpp_orig p hp q hq hpq
 
-/-! ### Step 4 — the finite-locus incidence translation (stated obligation, R-2)
+/-! ### Step 4 — the finite-locus incidence translation (R-2, PROVEN)
 
 The original curve incidence count is bounded by the deduplicated count plus a degree-only
-finite-locus correction. Stated as an obligation with the exact interface; the fill agent
-proves it from the landed `finite_singularities_of_irreducible_bound` /
-`nonsingular_point_has_infinite_zeroSet` / `finite_zeroSet_subset_singularities`. -/
+finite-locus correction. Proven from the landed `finite_singularities_of_irreducible_bound` /
+`nonsingular_point_has_infinite_zeroSet` / `finite_zeroSet_subset_singularities`, the
+unique-ownership injection (`hcc`), and the new char-0 leaf
+`exists_pderiv_ne_zero_of_one_le_totalDegree`. -/
+
+/-! #### R-2 helpers (`docs/corollary24-incidence-translation.md` §2–§6)
+
+The injection skeleton and the single new char-0 leaf. All axiom-clean
+(`[propext, Classical.choice, Quot.sound]`). -/
+
+open MvPolynomial in
+/-- A variable appearing in `f` has nonzero partial derivative (char-0, over `ℝ`). The leading
+monomial in `i` survives differentiation because its coefficient picks up a nonzero `ℕ`-cast.
+`docs/corollary24-incidence-translation.md` §6. -/
+lemma pderiv_ne_zero_of_mem_vars (f : PlanePoly) (i : Fin 2)
+    (hi : i ∈ f.vars) : pderiv i f ≠ 0 := by
+  classical
+  rw [mem_vars_iff_degreeOf_ne_zero] at hi
+  set n := f.degreeOf i with hn
+  have hsup : n = (f.support.sup fun m => m i) := by
+    rw [hn, degreeOf_eq_sup]
+  have hne : f.support.Nonempty := by
+    rw [Finset.nonempty_iff_ne_empty]
+    intro hempty
+    rw [MvPolynomial.support_eq_empty] at hempty
+    rw [hempty] at hn
+    simp only [degreeOf_zero] at hn
+    exact hi hn
+  obtain ⟨m, hmmem, hmeq⟩ := Finset.exists_mem_eq_sup f.support hne (fun m => m i)
+  rw [← hsup] at hmeq
+  have hmi : m i = n := hmeq.symm
+  have hmi_ne : m i ≠ 0 := by rw [hmi]; exact hi
+  have hcoeff : f.coeff m ≠ 0 := by
+    rwa [← MvPolynomial.mem_support_iff]
+  intro hzero
+  have hcc : MvPolynomial.coeff (m - Finsupp.single i 1) (pderiv i f) = 0 := by
+    rw [hzero]; simp
+  have hexpand : pderiv i f
+      = ∑ m' ∈ f.support, monomial (m' - Finsupp.single i 1) (f.coeff m' * m' i) := by
+    conv_lhs => rw [f.as_sum]
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro m' _
+    rw [pderiv_monomial]
+  rw [hexpand, MvPolynomial.coeff_sum] at hcc
+  have honly : (∑ m' ∈ f.support,
+      MvPolynomial.coeff (m - Finsupp.single i 1)
+        (monomial (m' - Finsupp.single i 1) (f.coeff m' * m' i)))
+      = f.coeff m * (m i) := by
+    rw [Finset.sum_eq_single m]
+    · rw [MvPolynomial.coeff_monomial]; simp
+    · intro m' hm'mem hm'ne
+      rw [MvPolynomial.coeff_monomial]
+      by_cases hm'i : (m' i : ℕ) = 0
+      · simp [hm'i]
+      · rw [if_neg]
+        intro hsub
+        apply hm'ne
+        have h1 := Finsupp.sub_add_single_one_cancel (i := i) (u := m') hm'i
+        have h2 := Finsupp.sub_add_single_one_cancel (i := i) (u := m) hmi_ne
+        rw [← h1, ← h2, hsub]
+    · intro hnotmem
+      exact absurd hmmem hnotmem
+  rw [honly] at hcc
+  have hmi_real : ((m i : ℕ) : ℝ) ≠ 0 := by
+    rw [Nat.cast_ne_zero]; exact hmi_ne
+  exact (mul_ne_zero hcoeff hmi_real) hcc
+
+open MvPolynomial in
+/-- **§6 — positive total degree gives some nonzero partial** (char-0, over `ℝ`). The one new
+mathlib-side leaf R-2 needs; everything else is landed. Constructible from
+`MvPolynomial.totalDegree_eq_zero_iff_eq_C` + `pderiv` facts.
+`docs/corollary24-incidence-translation.md` §6. -/
+lemma exists_pderiv_ne_zero_of_one_le_totalDegree (C : PlanePoly)
+    (hC : 1 ≤ C.totalDegree) : ∃ i : Fin 2, pderiv i C ≠ 0 := by
+  classical
+  by_contra hcon
+  push Not at hcon
+  have hvars : C.vars = ∅ := by
+    rw [Finset.eq_empty_iff_forall_notMem]
+    intro i hi
+    exact pderiv_ne_zero_of_mem_vars C i hi (hcon i)
+  rw [vars_eq_empty_iff_eq_C] at hvars
+  rw [hvars] at hC
+  rw [totalDegree_C] at hC
+  exact absurd hC (by norm_num)
+
+/-- Transported component selection (`docs/corollary24-incidence-translation.md` §3.2): a point
+on `evalPlaneZeroSet f` lies on the zero set of some normalized factor `C` of `f` (in `ℝ × ℝ`).
+The `Point2`-side `zeroSet_subset_normalizedFactor_union` pulled across `chartEquiv`. -/
+lemma exists_factor_mem_zeroSet {f : PlanePoly} (hf0 : f ≠ 0) {xy : ℝ × ℝ}
+    (hxy : xy ∈ evalPlaneZeroSet f) :
+    ∃ C ∈ (UniqueFactorizationMonoid.normalizedFactors f).toFinset,
+      xy ∈ evalPlaneZeroSet C := by
+  classical
+  have hpre : chartEquiv.symm xy ∈ PlaneCurveZeroSet f := by
+    rw [← chartEquiv_preimage_evalPlaneZeroSet f, Set.mem_preimage, Homeomorph.apply_symm_apply]
+    exact hxy
+  have hcov := zeroSet_subset_normalizedFactor_union hf0 hpre
+  rw [Set.mem_iUnion] at hcov
+  obtain ⟨C, hC⟩ := hcov
+  rw [Set.mem_iUnion] at hC
+  obtain ⟨hCmem, hCz⟩ := hC
+  refine ⟨C, hCmem, ?_⟩
+  rw [← chartEquiv_preimage_evalPlaneZeroSet C, Set.mem_preimage, Homeomorph.apply_symm_apply] at hCz
+  exact hCz
+
+/-- **Proposition 4 ingredient.** A finite-locus member of `allFactors F` has `≤ (d+1)^5` points
+in its `ℝ×ℝ` zero set: chart-transport finiteness, then the landed singular bound. -/
+lemma finite_factor_locus_ncard_le {F : Finset PlanePoly} {d : ℕ}
+    (hF0 : ∀ f ∈ F, f ≠ 0) (hFd : ∀ f ∈ F, f.totalDegree ≤ d)
+    {C : PlanePoly} (hC : C ∈ allFactors F) (hfin : (evalPlaneZeroSet C).Finite) :
+    (evalPlaneZeroSet C).ncard ≤ (d + 1) ^ 5 := by
+  classical
+  have hirr : Irreducible C := allFactors_irreducible hC
+  have hdeg : C.totalDegree ≤ d := allFactors_degree_le hF0 hFd hC
+  have hpos : 1 ≤ C.totalDegree := allFactors_one_le_degree hC
+  have hPfin : (PlaneCurveZeroSet C).Finite := by
+    rw [← chartEquiv_image_planeCurveZeroSet C] at hfin
+    exact chartEquiv_image_finite_iff.mp hfin
+  obtain ⟨i, hpi⟩ := exists_pderiv_ne_zero_of_one_le_totalDegree C hpos
+  obtain ⟨hsfin, hsbound⟩ := finite_singularities_of_irreducible_bound C hirr hdeg hpi
+  have hsub : PlaneCurveZeroSet C ⊆ SingularPointSet C :=
+    finite_zeroSet_subset_singularities C hPfin
+  have hPncard : (PlaneCurveZeroSet C).ncard ≤ (d + 1) ^ 5 :=
+    le_trans (Set.ncard_le_ncard hsub hsfin) hsbound
+  rw [← chartEquiv_image_planeCurveZeroSet C, Set.ncard_image_of_injective _ chartEquiv.injective]
+  exact hPncard
+
+/-- **Proposition 4.** The union of the finite-locus factor zero sets of `f ∈ F` is a finite set
+of `≤ d·(d+1)^5 = finiteLocusConst d` points: `≤ d` factors each contributing `≤ (d+1)^5`. -/
+lemma finiteLocusUnion_ncard_le {F : Finset PlanePoly} {d : ℕ}
+    (hF0 : ∀ f ∈ F, f ≠ 0) (hFd : ∀ f ∈ F, f.totalDegree ≤ d)
+    {f : PlanePoly} (hf : f ∈ F) :
+    (⋃ C ∈ ((UniqueFactorizationMonoid.normalizedFactors f).toFinset.filter
+        (fun C => (evalPlaneZeroSet C).Finite)),
+        evalPlaneZeroSet C).ncard ≤ finiteLocusConst d := by
+  classical
+  set T : Finset PlanePoly := (UniqueFactorizationMonoid.normalizedFactors f).toFinset.filter
+      (fun C => (evalPlaneZeroSet C).Finite) with hT
+  have hmem_allF : ∀ C ∈ T, C ∈ allFactors F := by
+    intro C hCT
+    rw [hT, Finset.mem_filter, Multiset.mem_toFinset] at hCT
+    exact mem_allFactors.mpr ⟨f, hf, hCT.1⟩
+  have hfin : ∀ C ∈ T, (evalPlaneZeroSet C).Finite := by
+    intro C hCT
+    rw [hT, Finset.mem_filter] at hCT
+    exact hCT.2
+  have hncard : ∀ C ∈ T, (evalPlaneZeroSet C).ncard ≤ (d + 1) ^ 5 := by
+    intro C hCT
+    exact finite_factor_locus_ncard_le hF0 hFd (hmem_allF C hCT) (hfin C hCT)
+  calc (⋃ C ∈ T, evalPlaneZeroSet C).ncard
+      ≤ ∑ C ∈ T, (evalPlaneZeroSet C).ncard := Finset.set_ncard_biUnion_le T _
+    _ ≤ ∑ _C ∈ T, (d + 1) ^ 5 := Finset.sum_le_sum hncard
+    _ = T.card * (d + 1) ^ 5 := by rw [Finset.sum_const, smul_eq_mul]
+    _ ≤ d * (d + 1) ^ 5 := by
+        apply Nat.mul_le_mul_right
+        calc T.card ≤ ((UniqueFactorizationMonoid.normalizedFactors f).toFinset).card :=
+              Finset.card_filter_le _ _
+          _ ≤ (UniqueFactorizationMonoid.normalizedFactors f).card := Multiset.toFinset_card_le _
+          _ ≤ f.totalDegree := card_normalizedFactors_le_totalDegree (hF0 f hf)
+          _ ≤ d := hFd f hf
+    _ = finiteLocusConst d := rfl
+
+/-- The infinite-branch predicate on an incidence pair `(p, S)`: some infinite-locus factor
+of `F` is contained in `S` and passes through `p`. The split point of the R-2 injection
+(`docs/corollary24-incidence-translation.md` §3.2). -/
+def InfBranch (F : Finset PlanePoly) (pS : (ℝ × ℝ) × Set (ℝ × ℝ)) : Prop :=
+  ∃ C ∈ allFactors F, evalPlaneZeroSet C ⊆ pS.2 ∧ pS.1 ∈ evalPlaneZeroSet C ∧
+    (evalPlaneZeroSet C).Infinite
 
 /-- **Obligation R-2 (`origIncidence_le_deduped`).** The Pach–Sharir incidence count of `P'`
 against the original `ℝ × ℝ` curve family `F.image evalPlaneZeroSet` is at most the incidence
@@ -399,7 +570,168 @@ theorem origIncidence_le_deduped {F : Finset PlanePoly} {d M : ℕ}
     incidenceCount P' (F.image (fun f => evalPlaneZeroSet f))
       ≤ incidenceCount P' (zeroSets F)
         + finiteLocusConst d * (F.image (fun f => evalPlaneZeroSet f)).card := by
-  sorry
+  classical
+  set OC : Finset (Set (ℝ × ℝ)) := F.image (fun f => evalPlaneZeroSet f) with hOC
+  set ZS : Finset (Set (ℝ × ℝ)) := zeroSets F with hZS
+  -- The incidence-pair finsets.
+  set LHSpairs : Finset ((ℝ × ℝ) × Set (ℝ × ℝ)) :=
+    (P' ×ˢ OC).filter (fun pγ => pγ.1 ∈ pγ.2) with hLHSpairs
+  set RHSpairs : Finset ((ℝ × ℝ) × Set (ℝ × ℝ)) :=
+    (P' ×ˢ ZS).filter (fun pγ => pγ.1 ∈ pγ.2) with hRHSpairs
+  -- incidenceCount unfolds to these.
+  have hLHScard : incidenceCount P' OC = LHSpairs.card := rfl
+  have hRHScard : incidenceCount P' ZS = RHSpairs.card := rfl
+  rw [hLHScard, hRHScard]
+  -- Split LHSpairs into infinite and finite branches.
+  set infPairs : Finset ((ℝ × ℝ) × Set (ℝ × ℝ)) :=
+    LHSpairs.filter (fun pS => InfBranch F pS) with hinfPairs
+  set finPairs : Finset ((ℝ × ℝ) × Set (ℝ × ℝ)) :=
+    LHSpairs.filter (fun pS => ¬ InfBranch F pS) with hfinPairs
+  have hsplit : infPairs.card + finPairs.card = LHSpairs.card :=
+    Finset.card_filter_add_card_filter_not _
+  rw [← hsplit]
+  -- The infinite branch: an injection into the deduped incidences (unique ownership).
+  have hinf_le : infPairs.card ≤ RHSpairs.card := by
+    -- The choice function: send (p, S) to (p, the chosen infinite factor set S').
+    set Φ : (ℝ × ℝ) × Set (ℝ × ℝ) → (ℝ × ℝ) × Set (ℝ × ℝ) :=
+      fun pS => (pS.1,
+        if h : InfBranch F pS then evalPlaneZeroSet (Classical.choose h) else pS.2) with hΦ
+    -- The spec of the chosen set on the infinite branch.
+    have hΦspec : ∀ pS, InfBranch F pS →
+        (Φ pS).2 ∈ zeroSets F ∧ pS.1 ∈ (Φ pS).2 ∧ (Φ pS).2 ⊆ pS.2 ∧ ((Φ pS).2).Infinite := by
+      intro pS hInf
+      have hchoose := Classical.choose_spec hInf
+      obtain ⟨hCmem, hCsub, hCp, hCinf⟩ := hchoose
+      have hval : (Φ pS).2 = evalPlaneZeroSet (Classical.choose hInf) := by
+        simp only [hΦ, dif_pos hInf]
+      refine ⟨?_, ?_, ?_, ?_⟩
+      · rw [hval]; exact mem_zeroSets.mpr ⟨Classical.choose hInf, hCmem, rfl⟩
+      · rw [hval]; exact hCp
+      · rw [hval]; exact hCsub
+      · rw [hval]; exact hCinf
+    apply Finset.card_le_card_of_injOn Φ
+    · -- MapsTo Φ infPairs RHSpairs
+      intro pS hpS
+      rw [Finset.mem_coe, hinfPairs, Finset.mem_filter] at hpS
+      obtain ⟨hpSLHS, hInf⟩ := hpS
+      rw [hLHSpairs, Finset.mem_filter, Finset.mem_product] at hpSLHS
+      obtain ⟨⟨hp1P, _⟩, _⟩ := hpSLHS
+      obtain ⟨hmemZS, hpmem, _, _⟩ := hΦspec pS hInf
+      rw [Finset.mem_coe, hRHSpairs, Finset.mem_filter, Finset.mem_product]
+      refine ⟨⟨?_, ?_⟩, hpmem⟩
+      · exact hp1P
+      · rw [hZS]; exact hmemZS
+    · -- InjOn Φ infPairs
+      intro pS₁ hpS₁ pS₂ hpS₂ hΦeq
+      rw [Finset.mem_coe, hinfPairs, Finset.mem_filter] at hpS₁ hpS₂
+      obtain ⟨hpS₁LHS, hInf₁⟩ := hpS₁
+      obtain ⟨hpS₂LHS, hInf₂⟩ := hpS₂
+      rw [hLHSpairs, Finset.mem_filter, Finset.mem_product] at hpS₁LHS hpS₂LHS
+      obtain ⟨⟨_, hp1OC⟩, _⟩ := hpS₁LHS
+      obtain ⟨⟨_, hp2OC⟩, _⟩ := hpS₂LHS
+      -- First coordinates agree.
+      have hfst : pS₁.1 = pS₂.1 := (Prod.ext_iff.mp hΦeq).1
+      -- The chosen sets agree.
+      have hsnd : (Φ pS₁).2 = (Φ pS₂).2 := (Prod.ext_iff.mp hΦeq).2
+      obtain ⟨_, _, hsub₁, hinf₁⟩ := hΦspec pS₁ hInf₁
+      obtain ⟨_, _, hsub₂, _⟩ := hΦspec pS₂ hInf₂
+      -- Second coordinates agree (unique ownership).
+      have hsnd2 : pS₁.2 = pS₂.2 := by
+        by_contra hne
+        -- pS₁.2, pS₂.2 are original curves; distinct ⟹ encard ≤ M.
+        rw [hOC, Finset.mem_image] at hp1OC hp2OC
+        obtain ⟨f₁, hf₁F, hf₁eq⟩ := hp1OC
+        obtain ⟨f₂, hf₂F, hf₂eq⟩ := hp2OC
+        have hZne : evalPlaneZeroSet f₁ ≠ evalPlaneZeroSet f₂ := by
+          rw [hf₁eq, hf₂eq]; exact hne
+        have hbound := hcc f₁ hf₁F f₂ hf₂F hZne
+        -- S' = (Φ pS₁).2 ⊆ pS₁.2 ∩ pS₂.2, S' infinite.
+        have hS'sub : (Φ pS₁).2 ⊆ pS₁.2 ∩ pS₂.2 := by
+          apply Set.subset_inter hsub₁
+          rw [hsnd]; exact hsub₂
+        have hInterInf : (pS₁.2 ∩ pS₂.2).Infinite := hinf₁.mono hS'sub
+        rw [← hf₁eq, ← hf₂eq] at hInterInf
+        have htop : (evalPlaneZeroSet f₁ ∩ evalPlaneZeroSet f₂).encard = ⊤ :=
+          Set.Infinite.encard_eq hInterInf
+        rw [htop] at hbound
+        exact absurd hbound (by simp)
+      exact Prod.ext hfst hsnd2
+  -- The finite branch: a per-curve fiber bound by `finiteLocusConst d`.
+  have hfin_le : finPairs.card ≤ finiteLocusConst d * OC.card := by
+    apply Finset.card_le_mul_card_image_of_maps_to (f := fun pS => pS.2)
+    · -- Hf: second coord of a finPair lies in OC.
+      intro pS hpS
+      rw [hfinPairs, Finset.mem_filter, hLHSpairs, Finset.mem_filter, Finset.mem_product] at hpS
+      exact hpS.1.1.2
+    · -- fiber bound
+      intro b hb
+      -- b = evalPlaneZeroSet f for some f ∈ F.
+      rw [hOC, Finset.mem_image] at hb
+      obtain ⟨f, hfF, hfb⟩ := hb
+      -- The finite-locus union for f.
+      set U : Set (ℝ × ℝ) :=
+        ⋃ C ∈ ((UniqueFactorizationMonoid.normalizedFactors f).toFinset.filter
+            (fun C => (evalPlaneZeroSet C).Finite)), evalPlaneZeroSet C with hU
+      have hUncard : U.ncard ≤ finiteLocusConst d := finiteLocusUnion_ncard_le hF0 hFd hfF
+      have hUfin : U.Finite := by
+        rw [hU]
+        apply Set.Finite.biUnion (Finset.finite_toSet _)
+        intro C hC
+        rw [Finset.mem_coe, Finset.mem_filter] at hC
+        exact hC.2
+      -- The fiber finset.
+      set Fib : Finset ((ℝ × ℝ) × Set (ℝ × ℝ)) :=
+        finPairs.filter (fun pS => pS.2 = b) with hFib
+      -- Prod.fst injective on Fib (all second coords = b).
+      have hInjFst : Set.InjOn (fun pS : (ℝ × ℝ) × Set (ℝ × ℝ) => pS.1) ↑Fib := by
+        intro a ha b' hb' hab
+        rw [Finset.mem_coe, hFib, Finset.mem_filter] at ha hb'
+        apply Prod.ext hab
+        rw [ha.2, hb'.2]
+      -- image of fst lies in U.
+      have hImgSub : ↑(Fib.image (fun pS : (ℝ × ℝ) × Set (ℝ × ℝ) => pS.1)) ⊆ U := by
+        intro p hp
+        rw [Finset.coe_image, Set.mem_image] at hp
+        obtain ⟨pS, hpS, rfl⟩ := hp
+        rw [Finset.mem_coe, hFib, Finset.mem_filter] at hpS
+        obtain ⟨hpSfin, hpS2⟩ := hpS
+        -- pS ∈ finPairs: p ∈ b, ¬InfBranch.
+        rw [hfinPairs, Finset.mem_filter] at hpSfin
+        obtain ⟨hpSLHS, hnoInf⟩ := hpSfin
+        rw [hLHSpairs, Finset.mem_filter, Finset.mem_product] at hpSLHS
+        obtain ⟨⟨hp1P, hp2OC⟩, hp1mem⟩ := hpSLHS
+        -- p ∈ pS.2 = b = evalPlaneZeroSet f.
+        have hp_in_f : pS.1 ∈ evalPlaneZeroSet f := by
+          rw [hfb]; rw [hpS2] at hp1mem; exact hp1mem
+        -- some factor C of f through p.
+        obtain ⟨C, hCmem, hCp⟩ := exists_factor_mem_zeroSet (hF0 f hfF) hp_in_f
+        -- that C has finite locus (else InfBranch).
+        have hCdvd : C ∣ f := UniqueFactorizationMonoid.dvd_of_mem_normalizedFactors
+          (Multiset.mem_toFinset.mp hCmem)
+        have hCsub : evalPlaneZeroSet C ⊆ pS.2 := by
+          rw [hpS2, ← hfb]; exact evalPlaneZeroSet_subset_of_dvd hCdvd
+        have hCfin : (evalPlaneZeroSet C).Finite := by
+          by_contra hCinf
+          apply hnoInf
+          refine ⟨C, mem_allFactors.mpr ⟨f, hfF, Multiset.mem_toFinset.mp hCmem⟩, hCsub, hCp, ?_⟩
+          exact Set.not_finite.mp hCinf
+        -- so p ∈ U.
+        rw [hU, Set.mem_iUnion]
+        refine ⟨C, ?_⟩
+        rw [Set.mem_iUnion]
+        refine ⟨?_, hCp⟩
+        rw [Finset.mem_filter]
+        exact ⟨hCmem, hCfin⟩
+      -- Combine: #Fib = #(image fst) ≤ U.ncard ≤ finiteLocusConst d.
+      calc (finPairs.filter (fun pS => pS.2 = b)).card
+          = Fib.card := rfl
+        _ = (Fib.image (fun pS : (ℝ × ℝ) × Set (ℝ × ℝ) => pS.1)).card :=
+              (Finset.card_image_of_injOn hInjFst).symm
+        _ = (↑(Fib.image (fun pS : (ℝ × ℝ) × Set (ℝ × ℝ) => pS.1)) : Set (ℝ × ℝ)).ncard :=
+              (Set.ncard_coe_finset _).symm
+        _ ≤ U.ncard := Set.ncard_le_ncard hImgSub hUfin
+        _ ≤ finiteLocusConst d := hUncard
+  exact Nat.add_le_add hinf_le hfin_le
 
 /-! ### Closing real-arithmetic helpers (PROVEN, no sorry)
 
@@ -521,8 +853,8 @@ plane polynomials of degree `≤ d` and a finite point set `P'`, with the origin
 multiplicity bounded by `M` (`hpp_orig`), the Pach–Sharir incidence count of `P'` against the
 curve family `F.image evalPlaneZeroSet` is at most `liftConst d M · (|P'|^{2/3}·|F|^{2/3} + |P'| + |F|)`.
 
-Conditional on the parked `CrossingLemmaMultigraphStatement` (`hCL`); incomplete only through
-the two obligations `deduped_pp` (R-3) and `origIncidence_le_deduped` (R-2). -/
+Conditional only on the parked `CrossingLemmaMultigraphStatement` (`hCL`); fully proven
+(`sorry`-free), with `deduped_pp` (R-3) and `origIncidence_le_deduped` (R-2) discharged. -/
 theorem edgeB_origFamily_bound
     (hCL : CrossingLemma.CrossingLemmaMultigraphStatement)
     (d M : ℕ)
@@ -612,9 +944,10 @@ family `F` is in zero-set bijection with `Γ`), supply the original point–poin
 
 /-- **Theorem 2.3 from the multigraph crossing lemma.** Conditional on the parked
 `CrossingLemmaMultigraphStatement`, the paper-faithful Pach–Sharir incidence bound
-`Theorem23Statement` holds. The only incomplete steps are the two stated obligations
+`Theorem23Statement` holds. Fully proven (`sorry`-free); both supporting lemmas
 `deduped_pp` (R-3, the point–point cover count) and `origIncidence_le_deduped` (R-2, the
-finite-locus incidence translation); everything else is proved. -/
+finite-locus incidence translation) are discharged. Axiom closure
+`[propext, Classical.choice, Quot.sound]`. -/
 theorem theorem23_of_crossingLemma
     (hCL : CrossingLemma.CrossingLemmaMultigraphStatement) :
     PachSharir.Theorem23Statement := by

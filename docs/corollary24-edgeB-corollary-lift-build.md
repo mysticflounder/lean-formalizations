@@ -1,5 +1,19 @@
 # Corollary 24 / Theorem 2.3 — Edge-B corollary lift build record
 
+> **Status update (2026-06-21): both obligations DISCHARGED — file is `sorry`-free.**
+> `deduped_pp` (R-3) and `origIncidence_le_deduped` (R-2) are now proven.
+> `theorem23_of_crossingLemma : CrossingLemmaMultigraphStatement → PachSharir.Theorem23Statement`
+> and `edgeB_origFamily_bound` both have axiom closure
+> `[propext, Classical.choice, Quot.sound]` (NO `sorryAx`), conditional only on the
+> hypothesis `hCL`. `deduped_pp` is a cover (not injection): each deduped factor through
+> both points divides an original curve through both points (`≤ M` of those × `≤ d` factors).
+> `origIncidence_le_deduped` follows `docs/corollary24-incidence-translation.md`: an
+> injection on the infinite branch (unique ownership via the `hcc` curve–curve clause) plus a
+> per-curve finite-locus fiber bound `d·(d+1)^5`; the one new char-0 leaf
+> `exists_pderiv_ne_zero_of_one_le_totalDegree` is proven from
+> `vars_eq_empty_iff_eq_C` + `pderiv` facts. Build `✔` (8535 jobs), no `sorry` warning.
+> The sections below are the original skeleton build record (when the two were stated `sorry`s).
+
 Node: `edgeB-corollary-lift`. File:
 `lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/EdgeBCorollaryLift.lean`
 (namespace `PachDeZeeuw.Algebraic`). Toolchain `leanprover/lean4:v4.30.0`, mathlib
