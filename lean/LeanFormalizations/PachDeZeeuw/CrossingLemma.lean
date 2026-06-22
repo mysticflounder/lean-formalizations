@@ -59,6 +59,10 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultiplicity
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBE1
 -- Edge-B top-level output: edgeB_crossingInput — composes the 6 discharges + M-form endgame → C(d,M) incidence bound:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBCrossingInput
+-- Edge-B downstream node (component-reduce): edgeB_crossingInput_2dof — TwoDegreesOfFreedom + InjOn ⇒ hpp/hcc bridge:
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBComponentReduce
+-- Edge-B downstream node (shear-apply): edgeB_crossingInput_unsheared — removes the ∂_y≠0 precondition via exists_good_shear:
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBShearApply
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
