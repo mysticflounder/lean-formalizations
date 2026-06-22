@@ -4,7 +4,10 @@ slug = "lean-formalizations"
 
 [paths]
 db       = "data/proof-blueprint.db"
-lean_lib = "."
+# srcDir of the LeanFormalizations lake_lib. The Lake package root (lakefile +
+# .lake) is auto-detected by walking up from here, so this points at the source
+# root, not the repo root.
+lean_lib = "lean"
 
 [publish]
 # Multi-theorem library — no single target_symbol.
