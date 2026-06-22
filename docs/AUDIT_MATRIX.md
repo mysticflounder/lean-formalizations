@@ -265,6 +265,26 @@ Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL
   Foundation `exists_twoSidedPartition_prefixStep`/`_of_straightArc`
   (`PLCollarSeparation.lean:879`/`:480`) re-certified axiom-clean `[propext,
   Classical.choice, Quot.sound]`. Detail: `docs/crossing-lemma-A1-N1-dartsectorpoint.md`.
+- Node A1 — Edmonds-bridge node = NAMED OBSTRUCTION, potentially sidesteppable
+  (2026-06-22): a feasibility pass (math-professor, validated against source)
+  found the larger node (N5/`hreal`) routes through a **named obstruction**
+  `crosscut_separates_global` — the (MS) crosscut-separation **distinctness** half
+  (`Wleft ≠ Wright` as GLOBAL complement components) for a straight chord in the
+  simply-connected tube. Mathlib v4.30 lacks it (no Riemann mapping, no
+  Jordan/Schoenflies, no Mayer–Vietoris/π₀-of-complement; documented
+  `PlaneArcSeparation.lean:398–467`); it is strictly weaker than the general arc
+  sorry `exists_twoSidedPartition_of_arc` (`:382`, never invoked on the straight
+  path) but still a from-scratch planar-separation development. The other two
+  sub-obligations (non-cut-face cross-level region invariance; non-`∅` base) and
+  the *equality* half (`Wleft = regionAt ∘ dartSectorPoint`) are CONSTRUCTIBLE.
+  **Potential sidestep (confirmed premise, open resolution):** A1's planarity
+  conclusion routes through `regionSeparates_prefix_of_crosscut`
+  (`EdmondsConstruction.lean:148`), NOT `edmondsCompatibleAtPrefix` (`:194`), so it
+  does NOT need geometric `dr`/`hcomp` (orchestrator-verified
+  `SzemerediTrotter.lean:4651–4752`). If `hgeo` can use a FORMAL `dr` (combinatorial
+  `hinj` via formal distinct `Wleft/Wright`) with `hregion` = co-faciality
+  (connectedness direction), the obstruction is avoided. Make-or-break question
+  pending. Detail: `docs/crossing-lemma-A1-edmonds-bridge-feasibility.md` §12.
 
 ---
 
