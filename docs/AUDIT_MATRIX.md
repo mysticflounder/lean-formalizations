@@ -285,6 +285,30 @@ Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL
   `hinj` via formal distinct `Wleft/Wright`) with `hregion` = co-faciality
   (connectedness direction), the obstruction is avoided. Make-or-break question
   pending. Detail: `docs/crossing-lemma-A1-edmonds-bridge-feasibility.md` §12.
+- Node A1 — crux RESOLVED; `hgeo` reduces to single obligation A1★ (2026-06-22,
+  skeptic + math-professor, both orchestrator-validated): the make-or-break is
+  settled. (i) Co-faciality on the live A1 path is COMBINATORIAL via
+  `regionSeparates_prefix_of_crosscut` (`EdmondsConstruction.lean:148`; base
+  `:170` = sorry-free `facePerm_sameCycle_of_card_face_eq_one`); it never touches
+  the obstruction direction. (ii) The distinctness obstruction
+  `crosscut_separates_global` **and** the `hreal` realization node are ELIMINATED
+  from the A1 path — `hinj` is met by FORMAL fresh `Wleft/Wright` (regions never
+  required to be genuine components; `edmondsCompatibleAtPrefix`/`hcomp` dead, 0
+  call sites). (iii) `hgeo` (`SzemerediTrotter.lean:4649`, the lone A1 sorry)
+  reduces to a SINGLE open obligation **A1★** = `Face_mk c₁ = Face_mk c₂` (the new
+  cotree edge's two ARR-entered corners are co-facial at level `m`); all other
+  bundle fields assemble combinatorially (`hregion := _hconst c₁ c₂
+  (face_mk_eq_iff.mp A1★)`), no harness edit. **Residual:** A1★ is NOT a thin
+  `regionAt` transport — `regionAt_eq_of_mem_isPreconnected` (`RFB:131`) gives only
+  a **region** equality; the **face** equality A1★ needs the region↔face bridge
+  `facePerm_sameCycle_of_sameRegion` (`RFB:273`) = the `EdmondsCompatible.region_separates`
+  clause = the project's pre-existing geometric Edmonds direction (no other
+  region→face producer exists, grep-confirmed). So A1★ is CONJECTURED-constructible,
+  logically distinct from `crosscut_separates_global` but NOT yet shown
+  v4.30-closable; the right target is region-free single-pair co-faciality from the
+  arc germ + rotation system (OPEN; `IsPlanar`-at-`m` is PROVEN circular). Detail:
+  `docs/crossing-lemma-A1-formal-dr-bypass.md` (corrected) +
+  `docs/crossing-lemma-A1star-equality-feasibility.md`.
 
 ---
 

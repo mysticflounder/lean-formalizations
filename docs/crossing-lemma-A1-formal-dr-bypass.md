@@ -33,6 +33,30 @@ gap.
 > eliminated from the A1 path; `hgeo` reduces to A1★ alone. The headline word
 > "CLOSES" below is corrected to "REDUCES to A1★".
 >
+> **2026-06-22 follow-up (math-professor feasibility, validated) — A1★'s residual
+> is the region↔face bridge, NOT a thin `regionAt` transport.** A deep pass
+> (`docs/crossing-lemma-A1star-equality-feasibility.md`, orchestrator-validated
+> against source) refutes the §5.2 label "A1★ is CONSTRUCTIBLE via
+> `regionAt_eq_of_mem_isPreconnected`, no Jordan": that combinator
+> (`RegionFaceBridge.lean:131`) concludes a **region** equality
+> `regionAt q₁ = regionAt q₂`, whereas A1★ is a **face** equality
+> `Face_mk c₁ = Face_mk c₂`. The only repo/mathlib bridge from region-equality to
+> face-equality is `facePerm_sameCycle_of_sameRegion` (`RegionFaceBridge.lean:273`)
+> = the `EdmondsCompatible.region_separates` clause = the project's pre-existing
+> **geometric Edmonds direction** (RM:8990 base / RM:1757 step), which needs a
+> geometric assignment `E`. Exhaustive grep returns NO other region→face/`SameCycle`
+> producer; the N1a′ `angleAt` sector point feeds route α (the region layer), so it
+> does NOT by itself deliver the face-level A1★. **Net:** A1★ is
+> CONJECTURED-constructible with one identified residual = the region↔face equality
+> bridge under ARR (equivalently: single-pair co-faciality proven combinatorially
+> from the arc germ + rotation system, region-free — the right target, but OPEN; no
+> repo producer, and using `IsPlanar` at level `m` is PROVEN circular). The
+> distinctness elimination still holds and A1★ is logically distinct from
+> `crosscut_separates_global`, but A1★ is NOT yet shown mathlib-v4.30-closable. The
+> §5.2 / §7 "CONSTRUCTIBLE" claims are too strong for the face-level statement: read
+> them as "the **region sub-fact** is constructible; the region→face step is the
+> open Edmonds bridge."
+>
 > **Label convention.** "CONSTRUCTIBLE" below means one of two distinct tiers:
 > (a) **PROVEN-on-paper modulo a named trivial mathlib assembly** (e.g. §2.3
 > fresh-set existence) — not yet built but with the lemmas name-checked; or
