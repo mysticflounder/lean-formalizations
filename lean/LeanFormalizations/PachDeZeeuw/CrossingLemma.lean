@@ -53,6 +53,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultigraph
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBWellDrawn
 -- Edge-B ArcsJoinEndpoints discharge (v): lift EdgeBEdge.arc_endAnchor over the global edge index:
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBArcsJoin
+-- Edge-B multiplicity discharge (iv): multiplicity ≤ M from the point–point 2-DOF clause (countP, ≤1-per-curve):
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultiplicity
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
