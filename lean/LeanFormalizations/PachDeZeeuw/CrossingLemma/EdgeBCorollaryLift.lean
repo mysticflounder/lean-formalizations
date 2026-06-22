@@ -13,8 +13,9 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBChartBridge
 
 This file assembles the landed Edge-B incidence bound
 (`edgeB_crossingInput_unsheared`, `EdgeBShearApply.lean`) into the paper-faithful
-`PachSharir.Theorem23Statement`, leaving exactly TWO clearly-stated `sorry`
-obligations and PROVING everything else. The design is `docs/corollary24-hinj-discharge-analysis.md`.
+`PachSharir.Theorem23Statement`. `deduped_pp` (R-3) is now PROVEN; one stated `sorry`
+obligation (`origIncidence_le_deduped`, R-2) remains, with everything else PROVEN.
+The design is `docs/corollary24-hinj-discharge-analysis.md`.
 
 ## The reduction
 
@@ -41,21 +42,22 @@ multiplicity `M` — we:
    `M' := max ((2*d+1)^4) (M*d)`.
 
 4. Feed `Γ₀`, `hcc₀`, the irreducibility/degree facts, and the point–point clause `hpp₀`
-   (a stated `sorry`) into `edgeB_crossingInput_unsheared`, then translate the resulting
+   (`deduped_pp`, PROVEN) into `edgeB_crossingInput_unsheared`, then translate the resulting
    bound on `incidenceCount P' 𝒵` back to the original `incidenceCount P' origCurves` via
-   the finite-locus incidence correction (a stated `sorry`), and absorb the additive term
-   and the `|Γ₀| ≤ allFactors.card ≤ d·|Γ|` factor into a single constant `C`.
+   the finite-locus incidence correction (`origIncidence_le_deduped`, a stated `sorry`), and
+   absorb the additive term and the `|Γ₀| ≤ allFactors.card ≤ d·|Γ|` factor into a single
+   constant `C`.
 
-## The two obligations
+## The obligations
 
-* `deduped_pp` (Proposition 3 / R-3) — the point–point multiplicity of the deduped family
-  is `≤ M*d`. A cover argument over the `≤ M` original curves through both points, each
-  contributing `≤ d` factor zero sets.
-* `origIncidence_le_deduped` (R-2) — the original curve incidence count is bounded by the
-  deduped count plus a degree-only finite-locus correction.
+* `deduped_pp` (Proposition 3 / R-3) — PROVEN. The point–point multiplicity of the deduped
+  family is `≤ M*d`. A cover argument over the `≤ M` original curves through both points,
+  each contributing `≤ d` factor zero sets.
+* `origIncidence_le_deduped` (R-2) — the one remaining `sorry`. The original curve incidence
+  count is bounded by the deduped count plus a degree-only finite-locus correction.
 
-Both are `sorry`-backed `theorem`s with the exact signatures the fill agents will target;
-everything else in this file is `sorry`-free. Conditional on the parked
+`origIncidence_le_deduped` is the sole `sorry`-backed `theorem` (exact signature the R-2 fill
+targets); everything else in this file is `sorry`-free. Conditional on the parked
 `CrossingLemmaMultigraphStatement` (kept as the hypothesis `hCL`).
 -/
 
@@ -295,9 +297,28 @@ some original curve through both points; bound by the `≤ M` original curves th
 pair, each contributing `≤ d` factor zero sets. Stated as an obligation with the exact
 interface; the fill agent proves it from `hpp_orig` and the degree facts. -/
 
+/-- **Factor locus ⊆ product locus.** If `h ∣ f`, the zero set of `h` is contained in the zero
+set of `f`: writing `f = h * g`, `evalPlane f xy = evalPlane h xy · evalPlane g xy` (via `map_mul`
+on `MvPolynomial.eval`), so `evalPlane h xy = 0 ⟹ evalPlane f xy = 0`. -/
+lemma evalPlaneZeroSet_subset_of_dvd {h f : PlanePoly} (hdvd : h ∣ f) :
+    evalPlaneZeroSet h ⊆ evalPlaneZeroSet f := by
+  obtain ⟨g, rfl⟩ := hdvd
+  intro xy hmem
+  rw [mem_evalPlaneZeroSet] at hmem ⊢
+  unfold evalPlane at hmem ⊢
+  rw [map_mul, hmem, zero_mul]
+
 /-- **Obligation R-3 (`deduped_pp`).** For distinct points `p, q ∈ P'`, the number of
 deduplicated factor zero sets through both is at most `M·d`, where `M` bounds the original
-curves through `p, q` (`hpp_orig`) and `d` bounds the factors per original curve. -/
+curves through `p, q` (`hpp_orig`) and `d` bounds the factors per original curve.
+
+Proof: a cover, NOT an injection. Each deduped factor `h` through both points is a normalized
+irreducible factor of some original `f ∈ F` (`dedupFactors_subset_allFactors` + `mem_allFactors`);
+since `h ∣ f` (`dvd_of_mem_normalizedFactors`) and `evalPlaneZeroSet h ⊆ evalPlaneZeroSet f`
+(`evalPlaneZeroSet_subset_of_dvd`), that `f` lies in `F.filter (through both)` — a set of card
+`≤ M` by `hpp_orig`. Choosing such an `f` per `h` exhibits the filtered `dedupFactors` as a SUBSET
+of `(F.filter (through both)).biUnion (normalizedFactors · |>.toFinset)`. By `card_le_card` and
+`card_biUnion_le`, its card is `≤ Σ card((normalizedFactors f).toFinset) ≤ Σ d = card · d ≤ M·d`. -/
 theorem deduped_pp {F : Finset PlanePoly} {d M : ℕ}
     (hF0 : ∀ f ∈ F, f ≠ 0) (hFd : ∀ f ∈ F, f.totalDegree ≤ d)
     (P' : Finset (ℝ × ℝ))
@@ -306,7 +327,51 @@ theorem deduped_pp {F : Finset PlanePoly} {d M : ℕ}
     {p q : ℝ × ℝ} (hp : p ∈ P') (hq : q ∈ P') (hpq : p ≠ q) :
     ((dedupFactors F).filter
         (fun h => p ∈ evalPlaneZeroSet h ∧ q ∈ evalPlaneZeroSet h)).card ≤ M * d := by
-  sorry
+  classical
+  -- The set of original curves through both `p, q` — card `≤ M` by `hpp_orig`.
+  set Fpq : Finset PlanePoly :=
+    F.filter (fun f => p ∈ evalPlaneZeroSet f ∧ q ∈ evalPlaneZeroSet f) with hFpq
+  -- The cover: the biUnion of the normalized factors of those original curves.
+  set cover : Finset PlanePoly :=
+    Fpq.biUnion (fun f => (UniqueFactorizationMonoid.normalizedFactors f).toFinset) with hcover
+  -- Step 1: the filtered deduped family is a SUBSET of the cover.
+  have hsubset :
+      (dedupFactors F).filter (fun h => p ∈ evalPlaneZeroSet h ∧ q ∈ evalPlaneZeroSet h) ⊆ cover := by
+    intro h hh
+    rw [Finset.mem_filter] at hh
+    obtain ⟨hhded, hph, hqh⟩ := hh
+    -- `h` is a normalized factor of some `f ∈ F`.
+    obtain ⟨f, hfF, hfac⟩ := mem_allFactors.mp (dedupFactors_subset_allFactors hhded)
+    -- `h ∣ f`, so `evalPlaneZeroSet h ⊆ evalPlaneZeroSet f`; hence `p, q ∈ evalPlaneZeroSet f`.
+    have hdvd : h ∣ f := UniqueFactorizationMonoid.dvd_of_mem_normalizedFactors hfac
+    have hsub := evalPlaneZeroSet_subset_of_dvd hdvd
+    have hpf : p ∈ evalPlaneZeroSet f := hsub hph
+    have hqf : q ∈ evalPlaneZeroSet f := hsub hqh
+    -- So `f ∈ Fpq`, and `h` is a normalized factor of `f`, hence `h ∈ cover`.
+    have hfFpq : f ∈ Fpq := by
+      rw [hFpq, Finset.mem_filter]; exact ⟨hfF, hpf, hqf⟩
+    rw [hcover, Finset.mem_biUnion]
+    exact ⟨f, hfFpq, Multiset.mem_toFinset.mpr hfac⟩
+  -- Step 2: bound the card via `card_le_card` then `card_biUnion_le` and the per-curve `≤ d` bound.
+  calc ((dedupFactors F).filter
+          (fun h => p ∈ evalPlaneZeroSet h ∧ q ∈ evalPlaneZeroSet h)).card
+      ≤ cover.card := Finset.card_le_card hsubset
+    _ ≤ ∑ f ∈ Fpq, ((UniqueFactorizationMonoid.normalizedFactors f).toFinset).card :=
+        Finset.card_biUnion_le
+    _ ≤ ∑ _f ∈ Fpq, d := by
+        apply Finset.sum_le_sum
+        intro f hf
+        -- `f ∈ Fpq ⊆ F`, so `f ≠ 0` and `f.totalDegree ≤ d`.
+        have hfF : f ∈ F := by rw [hFpq, Finset.mem_filter] at hf; exact hf.1
+        calc ((UniqueFactorizationMonoid.normalizedFactors f).toFinset).card
+            ≤ (UniqueFactorizationMonoid.normalizedFactors f).card :=
+              Multiset.toFinset_card_le _
+          _ ≤ f.totalDegree := card_normalizedFactors_le_totalDegree (hF0 f hfF)
+          _ ≤ d := hFd f hfF
+    _ = Fpq.card * d := by rw [Finset.sum_const, smul_eq_mul]
+    _ ≤ M * d := by
+        apply Nat.mul_le_mul_right
+        rw [hFpq]; exact hpp_orig p hp q hq hpq
 
 /-! ### Step 4 — the finite-locus incidence translation (stated obligation, R-2)
 
