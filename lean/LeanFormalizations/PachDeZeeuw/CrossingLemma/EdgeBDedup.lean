@@ -5,16 +5,24 @@ Authors: Adam McKenna
 -/
 
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.LocalArc
+import LeanFormalizations.PachDeZeeuw.Bezout
+import LeanFormalizations.PachDeZeeuw.ChartBridge
 
 /-!
-# Edge-B deduplication lemma (Lemma A)
+# Edge-B deduplication lemma (Lemma A) and curve–curve clause (deduped_cc)
 
-Distinct real zero sets imply non-associated polynomials.
+This file contains two lemmas:
 
-This is the algebraic engine for deduplicating irreducible curve carriers by
-their real zero set in `ℝ × ℝ`. The argument is pure ring-hom algebra:
-evaluation at a fixed point is a ring homomorphism, ring homs send units to
-units, and units in the field ℝ are nonzero.
+**Lemma A** (`not_associated_of_ne_evalPlaneZeroSet`): Distinct real zero sets
+in `ℝ × ℝ` imply non-associated polynomials. The argument is pure ring-hom
+algebra: evaluation at a fixed point is a ring homomorphism, ring homs send
+units to units, and units in the field ℝ are nonzero.
+
+**deduped_cc** (`planeCurveZeroSet_inter_encard_le`): Two distinct irreducible
+plane curves of degree ≤ d meet in at most `(2d+1)^4` points (as `encard`).
+The proof composes Lemma A, the chart bridge, and
+`irreducible_pair_intersection_bound` (Bézout), then converts from `ncard` to
+`encard` via `Set.encard_le_coe_iff_finite_ncard_le`.
 -/
 
 namespace PachDeZeeuw.Algebraic
@@ -56,5 +64,46 @@ lemma not_associated_of_ne_evalPlaneZeroSet
     rcases mul_eq_zero.mp hprod with h0 | hu0
     · exact h0
     · exact absurd hu0 hunit_val
+
+/-! ### Curve–curve intersection bound (deduped_cc) -/
+
+/-- **Curve–curve clause.** Two distinct irreducible plane polynomials of degree ≤ d
+have at most `(2·d+1)^4` intersection points in `EuclideanSpace ℝ (Fin 2)`, as an
+`encard` bound.
+
+Proof:
+1. Bridge from `PlaneCurveZeroSet` inequality to `evalPlaneZeroSet` inequality using
+   `chartEquiv_image_planeCurveZeroSet` (since `chartEquiv` is injective, image is
+   injective on sets, so equal images ↔ equal source sets).
+2. Apply `not_associated_of_ne_evalPlaneZeroSet` to get `¬ Associated K₁ K₂`.
+3. Apply `irreducible_pair_intersection_bound` (Bézout) at `d₁ = d₂ = d` to obtain
+   `s.Finite` and `s.ncard ≤ (d + d + 1)^4`.
+4. Note `d + d + 1 = 2·d + 1` by `omega`.
+5. Convert via `Set.encard_le_coe_iff_finite_ncard_le`. -/
+lemma planeCurveZeroSet_inter_encard_le {d : ℕ} (K₁ K₂ : PlanePoly)
+    (hirr₁ : Irreducible K₁) (hirr₂ : Irreducible K₂)
+    (hd₁ : K₁.totalDegree ≤ d) (hd₂ : K₂.totalDegree ≤ d)
+    (hne : PlaneCurveZeroSet K₁ ≠ PlaneCurveZeroSet K₂) :
+    (PlaneCurveZeroSet K₁ ∩ PlaneCurveZeroSet K₂).encard ≤ ((2 * d + 1) ^ 4 : ℕ∞) := by
+  -- Step 1: Derive evalPlaneZeroSet K₁ ≠ evalPlaneZeroSet K₂ from the PlaneCurveZeroSet
+  -- inequality, using that chartEquiv '' is injective on sets.
+  have hne_eval : evalPlaneZeroSet K₁ ≠ evalPlaneZeroSet K₂ := by
+    intro heq
+    apply hne
+    have h1 := chartEquiv_image_planeCurveZeroSet K₁
+    have h2 := chartEquiv_image_planeCurveZeroSet K₂
+    exact Set.image_injective.mpr chartEquiv.injective (h1.trans (heq.trans h2.symm))
+  -- Step 2: Apply Lemma A to get ¬ Associated K₁ K₂.
+  have hnot : ¬ Associated K₁ K₂ := not_associated_of_ne_evalPlaneZeroSet K₁ K₂ hne_eval
+  -- Step 3: Apply Bézout bound at d₁ = d₂ = d.
+  have hbez := irreducible_pair_intersection_bound K₁ K₂ hirr₁ hirr₂ hd₁ hd₂ hnot
+  obtain ⟨hfin, hncard⟩ := hbez
+  -- Step 4: Note d + d + 1 = 2 * d + 1.
+  have hexp : d + d + 1 = 2 * d + 1 := by omega
+  rw [hexp] at hncard
+  -- Step 5: Convert ncard to encard.
+  -- hfin.cast_ncard_eq : ↑s.ncard = s.encard (as ℕ∞), so s.encard = ↑s.ncard.
+  rw [← hfin.cast_ncard_eq]
+  exact_mod_cast hncard
 
 end PachDeZeeuw.Algebraic
