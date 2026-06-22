@@ -244,6 +244,27 @@ Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL
   predecessor corners collapse" reading of B1 is provably false (the corners land
   on opposite split sides); the true B1 is the extractor's `hsplit` on the
   entered-sector corners. Design + inventory: `docs/crossing-lemma-A1-edmonds-sameregion.md`.
+- Node A1 — geometric residual decomposed (2026-06-22): two prover design passes
+  (validated against source) reduced the `hgeo` obligation and corrected its shape.
+  `hgeo` does **not** need the deeper `:5785` extractor `hsplit` — it reroutes
+  through the sorry-free `_of_old_endpoint_incident` lemma
+  (`ResidualMapProperties.lean:4326`), needing only `hregion` + `hWne/hWold` at
+  level `m` (`docs/crossing-lemma-A1-B1-hsplit-design.md` §4). The remaining content
+  is **TWO open geometric nodes** (not one):
+  (N1a′) an **arc-free sector point** at each dart's angular position — the
+  `angleAt`-interval wedge `{z ∈ ball p ε | (angleAt p z − α d) mod 2π ∈ (0, gap)} \
+  arcUnion`. The originally-drafted `convexSector a p b` target is **REFUTED** (it is
+  the `<π` cone: ∅ for a collinear apex = degree-2 collinear ST vertex, and the wrong
+  wedge when the successor gap `>π`). N1a′ is PROVEN-on-paper, mathlib-v4.30-constructible
+  (no Jordan), but the `angleAt`/`Complex.arg`-interval API is thin and must be built.
+  (N5/`hreal`) maintaining the geometric-realization invariant `dr k = regionAt ∘
+  dartSectorPoint` across the harness step — the **cross-level Edmonds correspondence**
+  (`stepPoolRegion ∘ splitClass = regionAt ∘ dartSectorPoint`): non-`∅` base,
+  cross-level non-cut-face region invariance, local→global `Wleft/Wright`
+  identification. It shares only `dartSectorPoint` with N1a′ and is the larger node.
+  Foundation `exists_twoSidedPartition_prefixStep`/`_of_straightArc`
+  (`PLCollarSeparation.lean:879`/`:480`) re-certified axiom-clean `[propext,
+  Classical.choice, Quot.sound]`. Detail: `docs/crossing-lemma-A1-N1-dartsectorpoint.md`.
 
 ---
 
