@@ -202,9 +202,31 @@ substrate is sorry-free and axiom-clean.
 
 ## Pach–Sharir incidences — `PachDeZeeuw/PachSharir/*`, `IncidenceAssembly/*`
 
-Kernel status: **WIP, live `sorry`s** (Bridge 9, Theorem23 4,
-SzemerediTrotter 2). Top-level Theorem 1.1 / 1.2 are sorry-backed /
-conditional. Audit deferred until proofs land.
+Kernel status: **WIP.** Actual on-path tactic-`sorry`s (earlier "Bridge 9 /
+Theorem23 4 / SzemerediTrotter 2" counted prose mentions of the word, not tactic
+uses): **Bridge 1** — Gap B, `IncidenceAssembly/Bridge.lean:69`
+`positiveAuxiliaryIncidenceCardBound_of_theorem23`; **SzemerediTrotter 1** —
+`:4644`, the straight-line ARR planarity residual; **ComponentSplit 3** —
+`PachDeZeeuw/ComponentSplit.lean:72/:96/:117`, the auxCurve component-counting
+lemmas feeding Gap B. `Theorem23` is statement-only (0 tactic-`sorry`). Top-level
+Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL`.
+
+- `IncidenceAssembly/GapBSupport.lean` (2026-06-22): `incidence_pigeonhole` —
+  Proposition 1 point–point pigeonhole `|I(P,Γ)| ≤ M·|P|²+|Γ|`, dimension-free,
+  sorry-free, axiom-clean (`propext, Classical.choice, Quot.sound`). First closed
+  brick of the §3 assembly (supplies the asymmetric branch of the final conversion).
+- Gap B decomposition: `docs/gap-b-assembly-skeleton.md` (named sub-lemma DAG).
+  Two NEEDS-DESIGN bottlenecks, both needing infrastructure absent from pinned
+  mathlib v4.30: **GB-PROJ-curve** (nonzero plane eliminant of the generic ℝ⁴→ℝ²
+  projection of `auxCurve` — the cost of the `_of_theorem23` re-target) and
+  **GB-PART-b** (the partition's complex-dimension core, paper Lemma 3.2/§4).
+- Crossing-lemma route fork: `docs/crossing-lemma-route-fork.md`. The M-form
+  `WeakAveragedBound` has **no producer**; the wired ARR straight-line route
+  reaches only M=1 / Szemerédi–Trotter (single open node `SzemerediTrotter.lean:4644`,
+  Edmonds same-region⇒same-cycle); the M-form erdos-98 needs requires an additional
+  unbuilt Tier-B span (curved genus-0 map B1, ARR for algebraic arcs B2, M-form
+  averaging lift B3). `exists_twoSidedPartition_of_arc` (`:385`) and `PLArc.lean:3148`
+  are OFF the wired path. Audit deferred until proofs land.
 
 ---
 
