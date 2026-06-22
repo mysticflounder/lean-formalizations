@@ -57,6 +57,8 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBArcsJoin
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBMultiplicity
 -- Edge-B E1 discharge (iii): incidenceCount ≤ numEdges + c(d)·|Γ| (good-x coverage + bad-x fibre bound):
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBE1
+-- Edge-B top-level output: edgeB_crossingInput — composes the 6 discharges + M-form endgame → C(d,M) incidence bound:
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBCrossingInput
 -- Combinatorial-map / Euler machinery:
 import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion

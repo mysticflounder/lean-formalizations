@@ -51,8 +51,13 @@ and **all six discharges are now LANDED, axiom-clean**: (i) `card_V`, (ii) `numE
 `docs/corollary24-edgeB-e1-build.md`); (iv) `multiplicity_le_M` (`EdgeBMultiplicity.lean`);
 (v) `arcsJoinEndpoints` (`EdgeBArcsJoin.lean`); (vi) `wellDrawn` (`EdgeBWellDrawn.lean`). The
 P-aware bracket-coverage fix (`1aabcf2`, `docs/corollary24-edgeB-bracket-coverage-fix.md`) that
-E1 consumes via `goodIntervalsBundle_covers` also landed. Only `edgeB_crossingInput` (the §5.2
-composition of all six + the M-form endgame) remains to do for the top-level Edge-B output.
+E1 consumes via `goodIntervalsBundle_covers` also landed. **And `edgeB_crossingInput` itself is
+now LANDED, axiom-clean** (`EdgeBCrossingInput.lean`, `docs/corollary24-edgeB-crossinginput-build.md`):
+the §5.2 composition of all six discharges + the M-form endgame, yielding the incidence bound with
+`edgeBCrossingConst d M = 64·M·cConst d`. The full Edge-B top-level output is complete (conditional
+on the parked `CrossingLemmaMultigraphStatement`); only the four named downstream bridge nodes of
+§5.3 (`edgeB-chart-bridge`, `edgeB-shear-apply`, `edgeB-component-reduce`, `edgeB-corollary-lift`)
+separate it from `Corollary24Statement`.
 
 Two scratch computations were run (EMPIRICALLY VERIFIED, scopes stated inline): the
 multiplicity-≤-M class-pairing skeleton, and the M-tolerant endgame arithmetic / break point of the
@@ -640,9 +645,14 @@ nodes** (do NOT fold into Edge B):
    `ℝ^D → ℝ²` and the curve-image bookkeeping (`corollary24-A2/A4` docs). Out of Edge B entirely;
    this is the Edge-A surface.
 
-> **CLAIM 5. Status: CONJECTURED-constructible** for `edgeB_crossingInput` itself (composition §5.4
-> over landed leaves + the §2/§3/§4 FLAGs). The four downstream nodes are **named, not folded**; nodes
-> 1–2 route through landed `chartEquiv` / `exists_good_shear`, nodes 3–4 are separate workstreams.
+> **CLAIM 5. Status: LANDED, axiom-clean** for `edgeB_crossingInput` itself (`EdgeBCrossingInput.lean`,
+> `docs/corollary24-edgeB-crossinginput-build.md`): the §5.4 composition over the six landed discharges
+> + the landed M-form endgame, with `edgeBCrossingConst d M = 64·M·cConst d`. It takes `hpp`/`hcc` in
+> the `PlanePoly` rep directly (NOT `TwoDegreesOfFreedom`) — see the build doc's scoping note: `hcc`
+> over distinct `EdgeBCurve`s is not derivable from a `.image`-deduped `TwoDegreesOfFreedom` clause when
+> `Γ` holds associate-but-distinct carriers, so that conversion (with zero-set injectivity) is deferred
+> to nodes 1/3. The four downstream nodes are **named, not folded**; nodes 1–2 route through landed
+> `chartEquiv` / `exists_good_shear`, nodes 3–4 are separate workstreams.
 
 ### 5.4 The composition chain (every node labelled)
 
