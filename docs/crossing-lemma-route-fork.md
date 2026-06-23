@@ -2,7 +2,7 @@
 
 **Question.** For an *unconditional* `CrossingLemma.CrossingLemmaMultigraphStatement`
 (the M-form `e³ ≤ 64·M·v²·cr`, `CrossingLemma/CrossingLemma.lean:154`, consumed by
-the erdos-98 bridge), which route — faces or ARR — should carry obligation B
+the downstream M-form bridge), which route — faces or ARR — should carry obligation B
 (genus-0 combinatorial map → planar/Euler edge bound → `WeakAveragedBound` →
 `CrossingLemmaMultigraphStatement`), and what is the complete remaining obligation
 list on that route?
@@ -60,7 +60,7 @@ statement, off the wired path, and its closure is flagged NO-GO solo.
 
 **But the recommendation comes with a hard caveat (§4):** even the ARR route, fully
 closed for straight lines, produces only the **M = 1** target. To reach the M-form
-that erdos-98 needs, an **additional unbuilt span** is required: lift the
+that the downstream M-form consumer needs, an **additional unbuilt span** is required: lift the
 residualMap/genus-0/edge-bound/averaging chain from `stMultigraph` (M = 1) to a
 *curved, multiplicity-M* `DrawnMultigraph`, then run the M-form averaging
 `WeakAveragedBound`. That span is genuinely unbuilt and is listed in §6.
@@ -343,7 +343,7 @@ A2. **(closes automatically once A1 lands)** Tier-A chain `ST:4486 → :4770 →
 
 ### Tier B — lift from M = 1 straight-line to curved multiplicity-M (delivers the M-form)
 
-These are required *in addition* to Tier A to reach the M-form that erdos-98 needs.
+These are required *in addition* to Tier A to reach the M-form that the downstream consumer needs.
 None of them exists in the repo today.
 
 B1. **Genus-0 combinatorial map for a curved DrawnMultigraph
@@ -409,7 +409,7 @@ For each of {the 3 `ComponentSplit.lean` sorries, `vertexSubsetAveraging_bound`}
 - **`exists_genuine_component_rich` (`ComponentSplit.lean:117`) — NO.** Same:
   pigeonhole richness for the incidence decomposition.
 
-  (All three are on the *separate* erdos-98 obligation — the
+  (All three are on the *separate* downstream M-form obligation — the
   `PositiveAuxiliaryIncidenceCardBound`/Gap-B incidence assembly — which `Bridge.lean`
   reaches *given* `CrossingLemmaMultigraphStatement`. They are downstream consumers of
   the crossing lemma's output region, not inputs to producing it.)
@@ -476,7 +476,7 @@ For each of {the 3 `ComponentSplit.lean` sorries, `vertexSubsetAveraging_bound`}
 
 **Net.** The recommended route is ARR (residualMap genus-0), built on the existing
 `sorry`-free PL-collar straight-arc layer. Its straight-line closure (A1) is one
-OPEN-DIFFICULT node away and delivers Szemerédi–Trotter. The M-form that erdos-98
+OPEN-DIFFICULT node away and delivers Szemerédi–Trotter. The M-form that the downstream consumer
 needs requires the additional Tier-B span (B1–B4), which is genuinely unbuilt; B1/B2
 are OPEN-DIFFICULT, B3 is NEEDS-DESIGN, B4 is PROVEN-TRACTABLE. The faces arbitrary-arc
 residual is not a competing route — it is, at most, the curved plane-separation input

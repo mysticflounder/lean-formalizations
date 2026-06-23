@@ -2,7 +2,8 @@
 
 ## 0. What was investigated
 
-The single `sorry` on the erdos-98 spine, `Bridge.lean:69`:
+The single `sorry` on the distinct-distances reduction spine, `Bridge.lean:69`
+(since closed; `Bridge.lean` removed):
 
 ```lean
 theorem positiveAuxiliaryIncidenceCardBound_of_theorem23

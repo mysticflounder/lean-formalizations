@@ -5,8 +5,8 @@ modules — and advertising them.
 
 ## In progress
 
-- [x] **Strip project entanglement from BSG cluster** — namespace
-  `Erdos98Proof.External` → `Finset`, dead-project doc references scrubbed,
+- [x] **Strip project entanglement from BSG cluster** — the source-project
+  namespace was rehomed to `Finset`, dead-project doc references scrubbed,
   false `{{NEEDS_PROOF}}` markers removed.
 - [x] **De-jargon namespaces and identifiers** — `.PDZ` dropped
   (`PachDeZeeuw` / `CrossingLemma`); `.ST` → `PachSharir.SzemerediTrotter`;
@@ -19,8 +19,8 @@ modules — and advertising them.
   docstring tags replaced with standard combinatorial-topology language;
   cross-references now name the actual Lean lemmas.
 - [x] **Remaining source-project terminology sweep** — done. Audited all 35
-  `.lean` files: the verified core was already clean (0 Erdős/problem-number
-  references in source; `External` is not a live namespace). Scrubbed residual
+  `.lean` files: the verified core was already clean (0 source-project /
+  problem-number references in source; `External` is not a live namespace). Scrubbed residual
   development-structure jargon from the WIP PachDeZeeuw docstrings ("lane",
   "packet", "Branch 2"), removed a dead doc-filename citation, and corrected
   stale "`External` namespace retained" comments to describe the current state
@@ -32,11 +32,11 @@ modules — and advertising them.
 ## Geometry port
 
 - [x] **Port `unported/Geometry/Euclidean/` to standalone** — done. Deleted
-  `Foundation.lean` (only defined Erdős-98 predicates `InGeneralPosition`,
+  `Foundation.lean` (only defined source-project predicates `InGeneralPosition`,
   `distinctDistances`, `hIndexed`, `Config`, unused by the classification);
   in `IsometryClassification.lean` replaced the fork's `ℝ²` with
   `EuclideanSpace ℝ (Fin 2)`, supplied the standard orientation + `Fact (finrank
-  = 2)` instance, renamed namespace `Erdos98Proof` → `EuclideanGeometry`, and
+  = 2)` instance, rehomed the source-project namespace to `EuclideanGeometry`, and
   wired it into the build. Verified axiom-clean.
 
 ## Bézout (Pach–de Zeeuw Theorem 2.1)
@@ -57,16 +57,16 @@ modules — and advertising them.
   cases (`coeffline_…`, `zeroCurry_nonvertical_pair_intersection_bound`), so a
   sharper general assembly may be reachable. Not attempted yet.
 
-## Erdős-96 convex-geometry extraction
+## Convex-geometry extraction
 
-- [x] **Extract the general convex-geometry + counting content from the #96
+- [x] **Extract the general convex-geometry + counting content from the source
   research formalization** —
   extracted, de-jargoned (dropped `Problem96.Track1`), ported v4.28 → v4.30, and
   verified axiom-clean: `Geometry/Convex/LineSlice.lean` (line-slices of convex
   sets + strict-convex-no-3-collinear), `Geometry/Convex/SimpleConvexPolygon.lean`
   (concrete polygon model + collinear-vertices-cyclic-interval), and
   `Combinatorics/UnitDistance/Counting.lean` (elimination-order counting). The
-  #96 counterexample-path encoding (`ConvexPolygonUnitDistanceCounterexample*`,
+  source project's counterexample-path encoding (`ConvexPolygonUnitDistanceCounterexample*`,
   `FullCycle*`) was abandoned attack scaffolding and was **not** carried over.
 
 ## Correctness audit

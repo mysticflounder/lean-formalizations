@@ -325,6 +325,14 @@ incidence bound applied **in ℝ⁴** to the auxiliary curves — not through th
 this release path**. The multigraph crossing lemma and the ℝ⁴→ℝ² planar route are
 deferred.
 
+**Scope.** The closed statement assumes the curve is **irreducible**
+([`IsIrreducibleCurve`](lean/LeanFormalizations/PachDeZeeuw/Theorem11.lean#L26)). The
+paper's Theorem 1.1 (`thm:onecurve`) covers any degree-`d` curve with no line or
+circle component, including reducible ones; extending to that general case is the
+general→irreducible component reduction (`ComponentSplit.lean`, three `sorry`'d
+lemmas, currently unwired/deferred). This release is deliberately scoped to the
+irreducible-curve case.
+
 - **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
   combinatorial-map / Euler-bound / edge-insertion substrate has already been
   promoted to the standalone, sorry-free `Combinatorics/CombinatorialMap/` and

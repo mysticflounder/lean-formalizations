@@ -44,8 +44,8 @@ ESGK apex theorems added to the gate (now **61 theorems**, full build green
 **8549 jobs**); all axiom-clean. The citation/math-correctness audit of the ESGK
 proofs is tracked separately, outside this repo.
 
-**2026-06-18 (later still):** the vendored Erdős problem statements (96/97/98) and
-their `FormalConjectures/Util.lean` compat shim were removed — `formal-conjectures`
+**2026-06-18 (later still):** the vendored `formal-conjectures` problem statements
+and their `FormalConjectures/Util.lean` compat shim were removed — `formal-conjectures`
 now tracks mathlib v4.30 directly, so hosting frozen copies is no longer needed. The
 live planar general-position primitives the ESGK layer consumes (`ℝ²`,
 `Set.Triplewise`, `NonTrilinear`, `distinctDistances`, `InGeneralPosition`) were
@@ -202,9 +202,14 @@ substrate is sorry-free and axiom-clean.
 
 ## Pach–Sharir incidences — `PachDeZeeuw/PachSharir/*`, `IncidenceAssembly/*`
 
-Kernel status: **Theorem 1.1 closed on the §3 incidence path** (modulo three named
-inputs); crossing-lemma / Szemerédi–Trotter sub-program **deferred** ("98 later")
-and off the release path. The distinct-distances reduction now runs through the §3
+Kernel status: **Theorem 1.1 (irreducible-curve case) closed on the §3 incidence
+path** (modulo three named inputs); crossing-lemma / Szemerédi–Trotter sub-program
+**deferred** and off the release path. **Scope:** the closed statement assumes the
+curve is irreducible (`Theorem11.lean:29`, `IsIrreducibleCurve`); the paper's
+Theorem 1.1 (`thm:onecurve`) also covers reducible curves with no line/circle
+component, via the general→irreducible component reduction (`ComponentSplit.lean`,
+three `sorry`'d, currently-unwired lemmas — deferred). This release is scoped to
+the irreducible case. The distinct-distances reduction now runs through the §3
 incidence assembly, not the planar `Theorem23Statement` / crossing-lemma route:
 `IncidenceAssembly/SectionThreeAssembly.lean:435`
 `irreducibleCurve_distinctDistances_of_sectionThreeInputs` is `sorry`-free and
@@ -257,9 +262,9 @@ Not proved here.
 - Crossing-lemma route fork: `docs/crossing-lemma-route-fork.md`. The M-form
   `WeakAveragedBound` has **no producer**; the wired ARR straight-line route
   reaches only M=1 / Szemerédi–Trotter (single open node `SzemerediTrotter.lean:4644`,
-  Edmonds same-region⇒same-cycle); the M-form erdos-98 needs requires an additional
-  unbuilt Tier-B span (curved genus-0 map B1, ARR for algebraic arcs B2, M-form
-  averaging lift B3). `exists_twoSidedPartition_of_arc` (`:385`) and `PLArc.lean:3148`
+  Edmonds same-region⇒same-cycle); the general M-form (multiplicity-weighted) bound
+  requires an additional unbuilt Tier-B span (curved genus-0 map B1, ARR for
+  algebraic arcs B2, M-form averaging lift B3). `exists_twoSidedPartition_of_arc` (`:385`) and `PLArc.lean:3148`
   are OFF the wired path. Audit deferred until proofs land.
 - Node A1 (2026-06-22): the former monolithic A1 `sorry`
   (`SzemerediTrotter.lean:4644`, straight-line ARR residual-map planarity) is now
