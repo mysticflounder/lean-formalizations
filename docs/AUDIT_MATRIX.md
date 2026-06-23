@@ -54,15 +54,19 @@ relocated verbatim to `Geometry/Euclidean/PlanarGeneralPosition.lean`; the dead
 `answer()`/`category`/`AMS` shims were dropped. Gate unchanged at **61 theorems**
 (no gated theorem lived in the removed subtree); build green **8545 jobs**.
 
-**2026-06-23 (re-verification):** the isosceles circumscribed-counting bound
-(Dumitrescu; `IsoscelesCounting.iCount_le_of_convexIndep_circumscribed`,
+**2026-06-23 (re-verification):** two gate additions bring it to **65 theorems**.
+(1) the isosceles circumscribed-counting bound (Dumitrescu;
+`IsoscelesCounting.iCount_le_of_convexIndep_circumscribed`,
 `IsoscelesCounting.CGN8_circumscribed_iCount_upper_bound`) — added to the gate
-2026-06-18 but not previously recorded here — brings it to **63 theorems**. The
-Pach–de Zeeuw §3 Theorem 1.1 closure is conditional (`SectionThreeAssembly.lean`,
-threaded through the three named §3 inputs) and is **not** on the unconditional
-axiom gate. Full library re-verified via `scripts/check-axioms.sh`: all **63**
-gated theorems axiom-clean (`[propext, Classical.choice, Quot.sound]`); build
-green **8621 jobs**.
+2026-06-18 but not previously recorded here (61 → 63). (2) the two NearEnemy
+bisector-energy headlines (`NearEnemy.two_mul_pairCount_le_bisectorEnergy`,
+`NearEnemy.bisectorEnergy_eq_of_bisectorInjective`) — already comparator-audited
+(`comparator/axiom-audit.lean`) but not previously in `scripts/axiom-check.lean` —
+added to mirror the comparator surface (63 → 65). The Pach–de Zeeuw §3 Theorem 1.1
+closure is conditional (`SectionThreeAssembly.lean`, threaded through the three
+named §3 inputs) and is **not** on the unconditional axiom gate. Full library
+re-verified via `scripts/check-axioms.sh`: all **65** gated theorems axiom-clean
+(`[propext, Classical.choice, Quot.sound]`); build green **8621 jobs**.
 
 ---
 

@@ -25,6 +25,8 @@ Keep this list in sync with the README's ✅ VERIFIED claims.
 #print axioms IsoscelesCounting.CGN8_circumscribed_iCount_upper_bound
 
 -- Near Enemy Theorem
+#print axioms NearEnemy.two_mul_pairCount_le_bisectorEnergy
+#print axioms NearEnemy.bisectorEnergy_eq_of_bisectorInjective
 #print axioms NearEnemy.nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
 #print axioms NearEnemy.nearEnemy_sphereSlice_exists_bisectorEnergy_minimal_image_generalPosition_distanceTransport
 

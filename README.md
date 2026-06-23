@@ -10,7 +10,7 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 ## Verification status (2026-06-23)
 
 - **Build:** green — `lake build` completes all **8621 jobs**.
-- **Verified core:** the **63** theorems advertised as `✅ VERIFIED` below are
+- **Verified core:** the **65** theorems advertised as `✅ VERIFIED` below are
   mechanically re-verified axiom-clean — each depends only on a subset of the
   Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
   with `./scripts/check-axioms.sh` (list in `scripts/axiom-check.lean`).
@@ -261,7 +261,7 @@ lake exe cache get
 
 `scripts/check-axioms.sh` runs `#print axioms` on the full advertised list
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
-depends on `sorryAx` or a custom axiom. Last run (2026-06-23): all 63 listed
+depends on `sorryAx` or a custom axiom. Last run (2026-06-23): all 65 listed
 theorems clean (each depends only on a subset of
 `[propext, Classical.choice, Quot.sound]`), full build green (8621 jobs). The
 verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
