@@ -17,10 +17,13 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 - **No trust shortcuts:** the source defines **no custom `axiom`** and uses **no
   `native_decide`, `unsafe`, `@[extern]`, or `@[implemented_by]`** anywhere — so
   every `✅` theorem is closed under the Lean kernel alone.
-- **Honest `sorry`s:** every live `sorry` is confined to the `🟡` work-in-progress
-  Pach–de Zeeuw program (`PachDeZeeuw/CrossingLemma/*`, `PachSharir/*`,
-  `ComponentSplit`, `IncidenceAssembly/Bridge`). **No `✅ VERIFIED` module contains
-  a `sorry`.**
+- **Honest `sorry`s:** every live `sorry` is confined to the `🟡` deferred
+  crossing-lemma / Pach–Sharir sub-program (`PachDeZeeuw/CrossingLemma/*`,
+  `PachSharir/SzemerediTrotter`, `ComponentSplit`) — these are **off the
+  distinct-distances release path**. **No `✅ VERIFIED` module contains a `sorry`**,
+  and the Pach–de Zeeuw **Theorem 1.1 reduction**
+  (`IncidenceAssembly/SectionThreeAssembly`) is itself `sorry`-free and axiom-clean,
+  conditional on three named §3 inputs (see below).
 
 ## Provenance
 
@@ -306,6 +309,22 @@ or consume unproven statement-surfaces, and the reduction theorems are honestly
 stated as *conditional* results (`theorem … (h : SomeStatement) : …`). Live
 `sorry`s currently live only in the modules listed here.
 
+**Pach–de Zeeuw Theorem 1.1 (distinct distances on an irreducible algebraic
+curve) is closed on the §3 incidence path**, conditional on three named §3
+inputs. The headline reduction
+[`irreducibleCurve_distinctDistances_of_sectionThreeInputs`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeAssembly.lean#L435)
+is **`sorry`-free and axiom-clean** (`#print axioms` =
+`[propext, Classical.choice, Quot.sound]`), taking the three §3 statement-surfaces
+([`Lemma34PartitionStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L90)
+/ [`Lemma35AuxIncidenceStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L162)
+/ [`Lemma36MinorIncidenceStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L213),
+⚪ below) to the distinct-distances conclusion via the sorry-free
+`Theorem11`/`Theorem12`/`IncidenceBound` chain. This routes through the paper's §3
+incidence bound applied **in ℝ⁴** to the auxiliary curves — not through the planar
+`Theorem23Statement` / crossing-lemma path, which stays unfinished and is **off
+this release path**. The multigraph crossing lemma and the ℝ⁴→ℝ² planar route are
+deferred.
+
 - **`CrossingLemma/`** — the multigraph crossing lemma. Its complete
   combinatorial-map / Euler-bound / edge-insertion substrate has already been
   promoted to the standalone, sorry-free `Combinatorics/CombinatorialMap/` and
@@ -340,8 +359,16 @@ stated as *conditional* results (`theorem … (h : SomeStatement) : …`). Live
   [`exists_genuine_component_rich`](lean/LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L106)
   (pigeonhole feeding PdZ) are precise statement-surfaces for the
   algebraic-geometry steps, **stated with `sorry`**.
-- **`IncidenceAssembly/Bridge.lean`** — the reduction chain to Theorem 1.1,
-  conditional on the statement-surfaces (`sorry`). The accompanying reduction-chain
+- **`IncidenceAssembly/SectionThreeAssembly.lean`** — the §3 incidence assembly
+  closing **Theorem 1.1**, conditional on the three named §3 inputs. Both
+  [`positiveAuxiliaryIncidenceCardBound_of_sectionThreeInputs`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeAssembly.lean#L147)
+  (the proved card-bound step: cell decomposition → per-class incidence bound → sum
+  → balanced-regime cube) and the headline
+  [`irreducibleCurve_distinctDistances_of_sectionThreeInputs`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeAssembly.lean#L435)
+  are **`sorry`-free and axiom-clean**. The earlier `Bridge.lean` (which routed
+  through the planar `Theorem23Statement` and so understated the dependency on a
+  mathlib-absent ℝ⁴→ℝ² projection) was removed in favour of accepting the ℝ⁴
+  incidence bound directly as a named input. The accompanying reduction-chain
   modules (`Theorem11`, `Theorem12`, `IncidenceBound`, `AuxiliaryCurves`,
   `IncidenceAssembly`, `Basic`, `CurveInterface`) are themselves sorry-free; they
   package conditional results over the unproven surfaces.
@@ -378,6 +405,17 @@ These define a `Prop` but do **not** prove it — accepted classical inputs:
   Thom connected-components bound).
 - **`CurveSymmetries.lean`** — [`Lemma25Statement`](lean/LeanFormalizations/PachDeZeeuw/CurveSymmetries.lean#L67) / [`Lemma26Statement`](lean/LeanFormalizations/PachDeZeeuw/CurveSymmetries.lean#L269)
   (symmetries of plane algebraic curves).
+- **`IncidenceAssembly/SectionThreeInputs.lean`** — the three Pach–de Zeeuw §3
+  incidence inputs, accepted as named surfaces (faithful ℝ⁴ encodings of the
+  published lemmas, in the same style as `MilnorThom22Statement`):
+  [`Lemma34PartitionStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L90)
+  (Lemma 3.4 — the 2-DOF partition),
+  [`Lemma35AuxIncidenceStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L162)
+  (Corollary 2.4 / Lemma 3.5 — the ℝ⁴ incidence bound for the dimension-1 auxiliary
+  curve family), and
+  [`Lemma36MinorIncidenceStatement`](lean/LeanFormalizations/PachDeZeeuw/IncidenceAssembly/SectionThreeInputs.lean#L213)
+  (Lemma 3.6 — the minor incidences). These are the only added Pach–de Zeeuw
+  axioms-by-hypothesis on the Theorem 1.1 release path.
 
 ## Idiomaticity status (pre-PR)
 
@@ -413,8 +451,10 @@ lean/LeanFormalizations/
     AlgebraicPrelim.lean                    -- resultant/intersection core ✅
     Bezout.lean                             -- Bézout finite-intersection bound ✅
     MilnorThom.lean CurveSymmetries.lean    -- statement-surfaces ⚪
-    CrossingLemma/ PachSharir/SzemerediTrotter.lean  -- live sorrys 🟡
-    ComponentSplit.lean IncidenceAssembly/Bridge.lean -- live sorrys 🟡
+    CrossingLemma/ PachSharir/SzemerediTrotter.lean  -- live sorrys 🟡 (deferred, off Thm 1.1 path)
+    ComponentSplit.lean                               -- live sorrys 🟡 (deferred)
+    IncidenceAssembly/SectionThreeInputs.lean        -- 3 named §3 inputs ⚪
+    IncidenceAssembly/SectionThreeAssembly.lean      -- Thm 1.1 reduction, sorry-free + axiom-clean (conditional)
     Theorem11 Theorem12 IncidenceBound IncidenceAssembly ...  -- conditional, sorry-free
 ```
 

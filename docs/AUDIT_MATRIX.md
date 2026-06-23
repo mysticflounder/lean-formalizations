@@ -202,25 +202,58 @@ substrate is sorry-free and axiom-clean.
 
 ## Pach–Sharir incidences — `PachDeZeeuw/PachSharir/*`, `IncidenceAssembly/*`
 
-Kernel status: **WIP.** Actual on-path tactic-`sorry`s (earlier "Bridge 9 /
-Theorem23 4 / SzemerediTrotter 2" counted prose mentions of the word, not tactic
-uses): **Bridge 1** — Gap B, `IncidenceAssembly/Bridge.lean:69`
-`positiveAuxiliaryIncidenceCardBound_of_theorem23`; **SzemerediTrotter 1** —
-`:4649`, the per-step producer `hgeo` (former `:4644` A1 monolith reduced — see
-the A1 bullet below); **ComponentSplit 3** —
-`PachDeZeeuw/ComponentSplit.lean:72/:96/:117`, the auxCurve component-counting
-lemmas feeding Gap B. `Theorem23` is statement-only (0 tactic-`sorry`). Top-level
-Theorem 1.1 / 1.2 are conditional on Gap B and on a produced crossing lemma `hCL`.
+Kernel status: **Theorem 1.1 closed on the §3 incidence path** (modulo three named
+inputs); crossing-lemma / Szemerédi–Trotter sub-program **deferred** ("98 later")
+and off the release path. The distinct-distances reduction now runs through the §3
+incidence assembly, not the planar `Theorem23Statement` / crossing-lemma route:
+`IncidenceAssembly/SectionThreeAssembly.lean:435`
+`irreducibleCurve_distinctDistances_of_sectionThreeInputs` is `sorry`-free and
+axiom-clean (`[propext, Classical.choice, Quot.sound]`, re-verified 2026-06-23 on
+HEAD `9e539f2`), conditional on the three named §3 statement-surfaces
+(`Lemma34PartitionStatement` / `Lemma35AuxIncidenceStatement` /
+`Lemma36MinorIncidenceStatement`, `SectionThreeInputs.lean`); the intermediate
+`SectionThreeAssembly.lean:147`
+`positiveAuxiliaryIncidenceCardBound_of_sectionThreeInputs` is the proved card-bound
+step. `Bridge.lean` (the former Gap-B sorry
+`positiveAuxiliaryIncidenceCardBound_of_theorem23`) was **removed** — the paper
+applies Corollary 2.4 in ℝ⁴ to the auxiliary curves and never projects to the
+plane, so the ℝ⁴ bound is accepted directly rather than routed through a
+mathlib-absent ℝ⁴→ℝ² projection. Remaining off-path tactic-`sorry`s, all DEFERRED:
+**SzemerediTrotter 1** — `:4649`, per-step producer `hgeo` (see the A1 bullet
+below); **ComponentSplit 3** — `PachDeZeeuw/ComponentSplit.lean:72/:96/:117`.
+`Theorem23` / `Corollary24` remain statement-only (0 tactic-`sorry`); they no
+longer gate Theorem 1.1.
+
+### §3 named inputs (accepted statement-surfaces) — `IncidenceAssembly/SectionThreeInputs.lean`
+
+Accepted as named `def : Prop` surfaces (the project's faithful style for
+published-but-mathlib-absent results, mirroring `MilnorThom22Statement`). Statement
+faithfulness audited against the paper §3 (2026-06-22); non-vacuousness checked.
+Not proved here.
+
+| Surface | Paper | Citation | Statement | Note |
+|---------|-------|----------|-----------|------|
+| `Lemma34PartitionStatement` | Lemma 3.4 (tex 632) | ✅ | ✅ | 2-DOF colour partition: \|Γ₀\|≤4dm, \|P₀\|≤4dn exceptional sets + same-class curve-curve ≤16d⁴ and point-point (over the **whole** curve family, tex 682–683) ≤16d⁴. Non-vacuous: the card bounds block the all-exceptional colouring. |
+| `Lemma35AuxIncidenceStatement` | Cor 2.4 / Lemma 3.5 (tex 279/694) | ✅ | ✅ | ℝ⁴ incidence bound for the dimension-1 `auxCurve` family, index-keyed (the faithful Option-B form; sidesteps the open dim≥2 case of the literal `Corollary24Statement`). |
+| `Lemma36MinorIncidenceStatement` | Lemma 3.6 (tex 704) | 🔧 | ✅ | minor incidences, **linear** `K·m·n` — the design-doc draft `K·m·n²` was a transcription error; the paper's bound is `8d²mn`. |
 
 - `IncidenceAssembly/GapBSupport.lean` (2026-06-22): `incidence_pigeonhole` —
   Proposition 1 point–point pigeonhole `|I(P,Γ)| ≤ M·|P|²+|Γ|`, dimension-free,
   sorry-free, axiom-clean (`propext, Classical.choice, Quot.sound`). First closed
   brick of the §3 assembly (supplies the asymmetric branch of the final conversion).
-- Gap B decomposition: `docs/gap-b-assembly-skeleton.md` (named sub-lemma DAG).
-  Two NEEDS-DESIGN bottlenecks, both needing infrastructure absent from pinned
-  mathlib v4.30: **GB-PROJ-curve** (nonzero plane eliminant of the generic ℝ⁴→ℝ²
-  projection of `auxCurve` — the cost of the `_of_theorem23` re-target) and
+- Gap B: **CLOSED** via Option B (2026-06-23), not the `_of_theorem23` route. The
+  faithful named-input surface and the design rationale are in
+  `docs/gap-b-named-inputs-design.md`; the assembly report (dependency chain,
+  `#print axioms`) is in `docs/gap-b-release-assembly.md`. The earlier
+  `_of_theorem23` decomposition (`docs/gap-b-assembly-skeleton.md`) carried two
+  NEEDS-DESIGN bottlenecks absent from pinned mathlib v4.30 — **GB-PROJ-curve**
+  (nonzero plane eliminant of the generic ℝ⁴→ℝ² projection of `auxCurve`) and
   **GB-PART-b** (the partition's complex-dimension core, paper Lemma 3.2/§4).
+  GB-PROJ-curve is exactly why the planar route was abandoned: the paper applies
+  Corollary 2.4 in ℝ⁴, so accepting the ℝ⁴ bound (`Lemma35AuxIncidenceStatement`)
+  as a named input bypasses the projection entirely; GB-PART-b is subsumed by
+  `Lemma34PartitionStatement`. Both are now accepted §3 inputs (table above), not
+  open obligations.
 - Crossing-lemma route fork: `docs/crossing-lemma-route-fork.md`. The M-form
   `WeakAveragedBound` has **no producer**; the wired ARR straight-line route
   reaches only M=1 / Szemerédi–Trotter (single open node `SzemerediTrotter.lean:4644`,
