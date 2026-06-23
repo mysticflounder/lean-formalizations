@@ -9,7 +9,7 @@ import LeanFormalizations.PachDeZeeuw.PachSharir.Theorem23
 # Gap B support — dimension-free combinatorial incidence bounds
 
 Foundational, dimension-free sub-lemmas feeding the §3 incidence assembly
-(`IncidenceAssembly/Bridge.lean`, Gap B). Nothing here touches the open
+(`IncidenceAssembly/SectionThreeAssembly.lean`, Gap B). Nothing here touches the open
 algebraic-geometry core (the partition into two-degrees-of-freedom pieces,
 `docs/corollary24-gapB-incidence-assembly-scope.md`); these are the purely
 combinatorial bricks that hold for an *abstract* two-degrees-of-freedom system,

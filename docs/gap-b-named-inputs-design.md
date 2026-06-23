@@ -493,11 +493,17 @@ def Lemma36MinorIncidenceStatement : Prop :=
       (Γ₀ : Finset (X.P₁ × X.P₁)),
       Γ₀.card ≤ 4 * d * X.P₁.card →
         ((auxIncidences X).filter (fun t => t.2 ∈ Γ₀)).card
-          ≤ K * X.P₁.card * X.P₂.card ^ 2
+          ≤ K * X.P₁.card * X.P₂.card
 ```
 
 (and its dual), faithful to Lemma 3.6 with a relaxed constant `K` in place of the
-sharp `8d²`. CONJECTURED that in-repo `bezout` discharges this without the named
+sharp `8d²`. **Correction (2026-06-23, validated against tex 706-717 and the
+shipped `SectionThreeInputs.lean`):** the paper's bound is `|I(P,Γ₀)| ≤ 8d²mn`,
+*linear* in `m·n = |P₁|·|P₂|`. An earlier draft of this `def` wrote
+`K * X.P₁.card * X.P₂.card ^ 2` (`K·m·n²`); that is **not** the paper's bound and
+does not cube-absorb into `C·(mn)⁴` (it would need `n² ≤ const·m`, false under the
+balanced regime). The faithful form is the linear `K * X.P₁.card * X.P₂.card`
+above, as shipped. CONJECTURED that in-repo `bezout` discharges this without the named
 input; the discharge is GB-MINOR's open question (§4). I do not assert GB-IN-4 is
 *needed* — it is the fallback if GB-MINOR cannot be proven from `bezout`.
 
