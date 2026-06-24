@@ -546,19 +546,20 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   originating paper.)
 - Lund, B., Sheffer, A., and de Zeeuw, F. "Bisector energy and few distinct
   distances." *Discrete Comput. Geom.* **56** (2016), no. 2, 337–356.
-  arXiv:1411.6868; SoCG 2015, DOI: 10.4230/LIPIcs.SOCG.2015.537. (Journal DOI not
-  directly confirmed.) (Source of the bisector-energy notion the Near Enemy
-  Theorem *minimizes*; they use it for upper bounds, the minimization direction
-  is ours.)
+  DOI: 10.1007/s00454-016-9783-5. arXiv:1411.6868; SoCG 2015,
+  DOI: 10.4230/LIPIcs.SOCG.2015.537. (Source of the bisector-energy notion the
+  Near Enemy Theorem *minimizes*; they use it for upper bounds, the minimization
+  direction is ours.)
 - Erdős, P., Füredi, Z., Pach, J., and Ruzsa, I.Z. "The grid revisited."
   *Discrete Math.* **111** (1993), no. 1–3, 189–196. (Source of the "near enemy"
   set — the lattice-sphere slice and its generic planar projection — and of the
   general-position distinct-distance bound `n·2^{O(√log n)}` that the Near Enemy
   sphere-slice corollary reduces to. DOI not independently confirmed.)
 - Solymosi, J. and Tao, T. "An incidence theorem in higher dimensions."
-  *Discrete Comput. Geom.* **48** (2012), no. 3, 255–280. arXiv:1103.2926. (§5.1
-  — the canonical "generic projection keeps points in general position" trick the
-  Near Enemy construction relies on. DOI not independently confirmed.) The
+  *Discrete Comput. Geom.* **48** (2012), no. 2, 255–280.
+  DOI: 10.1007/s00454-012-9420-x. arXiv:1103.2926. (§5.1 — the canonical "generic
+  projection keeps points in general position" trick the Near Enemy construction
+  relies on.) The
   rotation-energy channel decomposition (translation / half-turn / proper
   rotation) is the Elekes–Sharir (2011) / Guth–Katz (2015) framework cited under
   *Distinct distances & incidences* above.
@@ -572,8 +573,8 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   claimed.)
 - Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. "The number of distinct
   distances from a vertex of a convex polygon." *J. Comput. Geom.* **4** (2013),
-  no. 1, 1–12. arXiv:1207.1266. (Credits Dumitrescu's `(11n²−18n)/12` isosceles
-  bound and sharpens it; DOI not independently confirmed.)
+  no. 1, 1–12. DOI: 10.20382/jocg.v4i1a1. arXiv:1207.1266. (Credits Dumitrescu's
+  `(11n²−18n)/12` isosceles bound and sharpens it.)
 
 ### Real algebraic geometry — `PachDeZeeuw/MilnorThom.lean`, `AlgebraicPrelim.lean`, `Bezout.lean`
 

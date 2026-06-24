@@ -31,7 +31,7 @@ books or pre-arXiv paywalled journals with no free/legal source.
 | 20 | Mazur–Ulam 1932, *C. R. Acad. Sci. Paris* 194 | — | pre-internet note, no free source | 🔲 |
 | 21 | Lund–Sheffer–de Zeeuw 2016, *DCG* 56(2) | `lund-sheffer-de-zeeuw-2016-bisector-energy.pdf` → `lund-sheffer-de-zeeuw-2016.md` | arXiv 1411.6868 | ✅ |
 | 22 | Erdős–Füredi–Pach–Ruzsa 1993, *Discrete Math.* 111 | — | paywalled journal, no arXiv | 🔲 |
-| 23 | Solymosi–Tao 2012, *DCG* 48(3) | `solymosi-tao-2012-incidence-higher-dimensions.pdf` → `solymosi-tao-2012.md` | arXiv 1103.2926 | ✅ |
+| 23 | Solymosi–Tao 2012, *DCG* 48(2) | `solymosi-tao-2012-incidence-higher-dimensions.pdf` → `solymosi-tao-2012.md` | arXiv 1103.2926 | ✅ |
 | 24 | Dumitrescu 2006, *DCG* 36(4) | `dumitrescu-2006-distinct-distances-convex-polygon.pdf` → `dumitrescu-2006.md` | local (erdos/97) | ✅ |
 | 25 | Nivasch–Pach–Pinchasi–Zerbib 2013, *J. Comput. Geom.* 4(1) | `nivasch-pach-pinchasi-zerbib-2013-…polygon.pdf` → `nivasch-pach-pinchasi-zerbib-2013.md` | local (erdos/97) + corpus | ✅ |
 | 26 | Milnor 1964, *Proc. AMS* 15(2) | `milnor-1964-betti-numbers-real-varieties.pdf` → `milnor-1964.md` | AMS open-access | ✅ |

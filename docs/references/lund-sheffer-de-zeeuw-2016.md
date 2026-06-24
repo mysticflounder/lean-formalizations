@@ -5,8 +5,8 @@
 ## Citation (as in paper)
 Lund, B., Sheffer, A., and de Zeeuw, F. "Bisector energy and few distinct
 distances." *Discrete Comput. Geom.* **56** (2016), no. 2, 337–356.
-arXiv:1411.6868; SoCG 2015, DOI: 10.4230/LIPIcs.SOCG.2015.537. (Journal DOI not
-directly confirmed.)
+DOI: 10.1007/s00454-016-9783-5. arXiv:1411.6868; SoCG 2015,
+DOI: 10.4230/LIPIcs.SOCG.2015.537.
 
 ## Fetched from
 arXiv:1411.6868v1 (downloaded 2026-06-24) →
@@ -15,9 +15,9 @@ arXiv:1411.6868v1 (downloaded 2026-06-24) →
 ## Verification
 - Authors: ✅ "Ben Lund, Adam Sheffer, Frank de Zeeuw" (title page).
 - Title: ✅ "Bisector energy and few distinct distances."
-- Venue: ⚠️ arXiv preprint confirms the paper; the **journal DOI remains
-  unconfirmed** (a README-flagged gap) — the arXiv ID and SoCG 2015 DOI are
-  present. This download resolves the *content/existence* gap, not the journal DOI.
+- Venue: ✅ *Discrete Comput. Geom.* **56** (2016), no. 2, 337–356, DOI
+  10.1007/s00454-016-9783-5 — confirmed against dblp (DCG vol 56) and the Springer
+  article page (2026-06-24). arXiv ID and SoCG 2015 DOI also present.
 - Content claims: ✅ Source of the bisector-energy notion, used by the authors as
   an **upper-bound** tool. Abstract: "We introduce the bisector energy of an
   n-point set P in R² … We use our **upper bound** on E(P) to obtain two rather
@@ -27,5 +27,4 @@ arXiv:1411.6868v1 (downloaded 2026-06-24) →
   the floor `2n(n−1)` are the project's own contribution (REFINEMENT, disclosed).
 
 ## Issues found
-None on attribution/content. Residual: journal DOI still unconfirmed (needs a
-publisher lookup, not resolvable from the preprint).
+None. Journal DOI now confirmed (10.1007/s00454-016-9783-5); no residual gap.

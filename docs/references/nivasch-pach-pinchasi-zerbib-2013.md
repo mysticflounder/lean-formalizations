@@ -5,8 +5,8 @@
 ## Citation (as in paper)
 Nivasch, G., Pach, J., Pinchasi, R., and Zerbib, S. "The number of distinct
 distances from a vertex of a convex polygon." *J. Comput. Geom.* **4** (2013),
-no. 1, 1–12. arXiv:1207.1266. (Credits Dumitrescu's `(11n²−18n)/12` bound and
-sharpens it; DOI not independently confirmed.)
+no. 1, 1–12. DOI: 10.20382/jocg.v4i1a1. arXiv:1207.1266. (Credits Dumitrescu's
+`(11n²−18n)/12` bound and sharpens it.)
 
 ## Fetched from
 Local copy (found in `erdos/97/docs/references/`), copied to
@@ -17,8 +17,8 @@ Also the ingested corpus `fox-pach-2012-arxiv-1207-1266` (arXiv:1207.1266). Read
 ## Verification
 - Authors: ✅ "Gabriel Nivasch, János Pach, Rom Pinchasi, Shira Zerbib" (title page).
 - Title: ✅ "The number of distinct distances from a vertex of a convex polygon."
-- Venue: ⚠️ arXiv:1207.1266 confirmed; J. Comput. Geom. 4(1) DOI/page range a
-  README-flagged gap (no journal DOI on the preprint). arXiv ID ✅.
+- Venue: ✅ *J. Comput. Geom.* **4** (2013), no. 1, 1–12, DOI 10.20382/jocg.v4i1a1
+  — confirmed against the JoCG article page and dblp (2026-06-24). arXiv ID ✅.
 - Content claims: ✅ "Credits Dumitrescu's bound and sharpens it." Confirmed: the
   paper states "Dumitrescu [Du06] established the bound … n²(1 − 1/12) for Z(P)"
   (= the (11/12)n² leading term of Dumitrescu's isosceles bound) "in the case where
@@ -28,8 +28,8 @@ Also the ingested corpus `fox-pach-2012-arxiv-1207-1266` (arXiv:1207.1266). Read
 
 ## Issues found
 None on attribution/content. Independent secondary source for the Dumitrescu
-constant (used as corroboration, not a formalized result). Residual: journal DOI
-unconfirmed.
+constant (used as corroboration, not a formalized result). Journal DOI now
+confirmed (10.20382/jocg.v4i1a1); no residual gap.
 
 ## Note on the ingested-corpus name
 The corpus `fox-pach-2012-arxiv-1207-1266` is keyed by arXiv:1207.1266, which **is**

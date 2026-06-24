@@ -82,11 +82,11 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 | # | Reference | Bib-ID | Used by → backs | Use | Verdict | Basis |
 |---|---|---|---|---|---|---|
 | 20 | Mazur–Ulam 1932, *C. R. Acad. Sci. Paris* 194, 946–948 | BOOK | Linear reduction for two-point isometry classification; the "≤2 isometries fix two points in ℝ²" count is an elementary corollary | Direct✅ | REFINEMENT | README L542–546: count is folklore, not attributed to the MU paper |
-| 21 | Lund–Sheffer–de Zeeuw 2016, *DCG* 56(2), 337–356, arXiv:1411.6868, SoCG DOI 10.4230/LIPIcs.SOCG.2015.537 | **DOI?** | Bisector-energy notion the Near Enemy Theorem **minimizes** | Direct✅ | REFINEMENT | README L547–552: they use it for upper bounds; minimization + floor `2n(n−1)` are ours. Journal DOI flagged |
+| 21 | Lund–Sheffer–de Zeeuw 2016, *DCG* 56(2), 337–356, DOI 10.1007/s00454-016-9783-5, arXiv:1411.6868, SoCG DOI 10.4230/LIPIcs.SOCG.2015.537 | OK | Bisector-energy notion the Near Enemy Theorem **minimizes** | Direct✅ | REFINEMENT | README L547–552: they use it for upper bounds; minimization + floor `2n(n−1)` are ours |
 | 22 | Erdős–Füredi–Pach–Ruzsa 1993, *Discrete Math.* 111(1–3), 189–196 | **DOI?** | "Near enemy" lattice-sphere slice + generic projection (formalized); the external `n·2^{O(√log n)}` GP bound the corollary reduces to (**not** formalized) | Direct✅ / Background | FAITHFUL + NOT-CLAIMED | README L553–557, L117: external arithmetic "not formalized and not claimed" |
-| 23 | Solymosi–Tao 2012, *DCG* 48(3), 255–280, arXiv:1103.2926 | **DOI?** | §5.1 generic-projection-keeps-general-position trick (Near Enemy construction) | Direct✅ | FAITHFUL | README L558–561 |
+| 23 | Solymosi–Tao 2012, *DCG* 48(2), 255–280, DOI 10.1007/s00454-012-9420-x, arXiv:1103.2926 | OK | §5.1 generic-projection-keeps-general-position trick (Near Enemy construction) | Direct✅ | FAITHFUL | README L558–561 (issue corrected 48(3)→48(2)) |
 | 24 | **Dumitrescu 2006**, *DCG* 36(4), 503–509, DOI 10.1007/s00454-006-1262-y | OK | eq. (5) isosceles count `(11n²−18n)/12` — headline of `IsoscelesCounting/` | Direct✅ | REFINEMENT | faithfulness doc §1 (scout-firsthand): circumscribed branch is a disclosed conditional restriction; naming hazards resolved |
-| 25 | Nivasch–Pach–Pinchasi–Zerbib 2013, *J. Comput. Geom.* 4(1), 1–12, arXiv:1207.1266 | **DOI?** | Independent secondary confirmation of Dumitrescu's constant (credits + sharpens) | Background | CONTEXTUAL | faithfulness doc §1.2; README L573–576 |
+| 25 | Nivasch–Pach–Pinchasi–Zerbib 2013, *J. Comput. Geom.* 4(1), 1–12, DOI 10.20382/jocg.v4i1a1, arXiv:1207.1266 | OK | Independent secondary confirmation of Dumitrescu's constant (credits + sharpens) | Background | CONTEXTUAL | faithfulness doc §1.2; README L573–576 |
 
 ## Real algebraic geometry — `PachDeZeeuw/MilnorThom.lean`, `AlgebraicPrelim.lean`, `Bezout.lean`
 
@@ -108,20 +108,23 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 
 ## Open bibliographic gaps (the `DOI?` / `LOC?` residue)
 
-Not closed in this pass (consolidate-only). These are the only entries where the
-README itself records an unverified identifier; resolving them needs a live
-publisher/arXiv lookup. None affects a faithfulness verdict — every flagged entry
-has venue + (where applicable) arXiv recorded, and the unverified item is a
-secondary identifier.
+These are the entries where the README records an unverified identifier; resolving
+them needs a live publisher/arXiv lookup. None affects a faithfulness verdict —
+every flagged entry has venue + (where applicable) arXiv recorded, and the
+unverified item is a secondary identifier.
 
 | # | Reference | Gap |
 |---|---|---|
 | 12 | Pach–Sharir 1998 | journal DOI (CPC 7, 121–127) not directly confirmed; no arXiv |
 | 17 | Lando–Zvonkin 2004 | book DOI confirmed; §1.3.3 / Prop 1.3.16 *location* not re-verified |
-| 21 | Lund–Sheffer–de Zeeuw 2016 | journal DOI not confirmed (arXiv:1411.6868 + SoCG DOI present) |
 | 22 | Erdős–Füredi–Pach–Ruzsa 1993 | DOI not confirmed (venue *Discrete Math.* 111 present) |
-| 23 | Solymosi–Tao 2012 | DOI not confirmed (arXiv:1103.2926 present) |
-| 25 | Nivasch–Pach–Pinchasi–Zerbib 2013 | DOI not confirmed (arXiv:1207.1266 present) |
+
+**Resolved 2026-06-24** (journal DOIs confirmed via dblp + publisher pages):
+| # | Reference | Resolution |
+|---|---|---|
+| 21 | Lund–Sheffer–de Zeeuw 2016 | DOI 10.1007/s00454-016-9783-5 (DCG 56(2), 337–356) confirmed |
+| 23 | Solymosi–Tao 2012 | DOI 10.1007/s00454-012-9420-x confirmed; **issue corrected 48(3)→48(2)** |
+| 25 | Nivasch–Pach–Pinchasi–Zerbib 2013 | DOI 10.20382/jocg.v4i1a1 (JoCG 4(1), 1–12) confirmed |
 
 ## Provenance — what this consolidates
 
@@ -138,7 +141,8 @@ secondary identifier.
 ## Coverage
 
 31 reference rows over 7 areas; every README §References entry represented.
-Bib-ID: 25 `OK`/`BOOK`, 6 flagged (`DOI?`×5, `LOC?`×1). Claim-support verdicts:
+Bib-ID: 28 `OK`/`BOOK`, 3 flagged (`DOI?`×2, `LOC?`×1) after the 2026-06-24
+journal-DOI pass (rows 21/23/25 resolved). Claim-support verdicts:
 no OVERCLAIM, no WRONG-CONSTANT; 5 REFINEMENT (each disclosed in source), 2
 NOT-CLAIMED (Guth–Katz headline; EFPR external bound — both explicitly excluded),
 rest FAITHFUL/CONTEXTUAL.
