@@ -337,13 +337,13 @@ theorem inner_nonpos_of_cap_region_thales
     · -- signedArea2 v1 v2 v3 < 0: derive signedArea2 O ≤ 0, signedArea2 v ≥ 0.
       have h_O : signedArea2 O v2 v3 ≤ 0 := by
         by_contra hpos'
-        push_neg at hpos'
+        push Not at hpos'
         have : signedArea2 O v2 v3 * signedArea2 v1 v2 v3 < 0 :=
           mul_neg_of_pos_of_neg hpos' hneg
         linarith
       have h_v : signedArea2 v v2 v3 ≥ 0 := by
         by_contra hneg'
-        push_neg at hneg'
+        push Not at hneg'
         have : signedArea2 v v2 v3 * signedArea2 v1 v2 v3 > 0 :=
           mul_pos_of_neg_of_neg hneg' hneg
         linarith
@@ -352,13 +352,13 @@ theorem inner_nonpos_of_cap_region_thales
     · -- signedArea2 v1 v2 v3 > 0: derive signedArea2 O ≥ 0, signedArea2 v ≤ 0.
       have h_O : signedArea2 O v2 v3 ≥ 0 := by
         by_contra hneg'
-        push_neg at hneg'
+        push Not at hneg'
         have : signedArea2 O v2 v3 * signedArea2 v1 v2 v3 < 0 :=
           mul_neg_of_neg_of_pos hneg' hpos
         linarith
       have h_v : signedArea2 v v2 v3 ≤ 0 := by
         by_contra hpos'
-        push_neg at hpos'
+        push Not at hpos'
         have : signedArea2 v v2 v3 * signedArea2 v1 v2 v3 > 0 := mul_pos hpos' hpos
         linarith
       exact mul_nonpos_of_nonneg_of_nonpos h_O h_v

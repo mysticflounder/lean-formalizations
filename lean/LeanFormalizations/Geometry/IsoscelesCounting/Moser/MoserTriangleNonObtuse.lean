@@ -403,7 +403,7 @@ private lemma inner_chord_nonneg_of_baryComb
     positivity
   have h4 : 0 ≤ ⟪midpoint ℝ a b - O, midpoint ℝ a b - c⟫_ℝ := by
     by_contra hneg
-    push_neg at hneg
+    push Not at hneg
     have : ⟪midpoint ℝ a b - O, midpoint ℝ a b - c⟫_ℝ * ‖a - b‖ ^ 2 < 0 :=
       mul_neg_of_neg_of_pos hneg hab_sq_pos
     linarith
@@ -622,7 +622,7 @@ theorem exists_nonobtuse_circumscribed_triple
       Finset.card_pair hpq
     have hex_c : ∃ c ∈ B, c ∉ ({p, q} : Finset ℝ²) := by
       by_contra hno
-      push_neg at hno
+      push Not at hno
       have hB_sub : B ⊆ ({p, q} : Finset ℝ²) := by
         intro c hc
         by_contra hcno

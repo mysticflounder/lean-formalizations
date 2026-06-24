@@ -687,7 +687,7 @@ theorem abs_sin_half_lt_iff (θ₁ θ₂ : Real.Angle) :
       |θ₁.toReal| < |θ₂.toReal| := by
   refine ⟨fun h => ?_, fun h => abs_sin_half_strict_mono _ _ h⟩
   by_contra hge
-  push_neg at hge
+  push Not at hge
   rcases lt_or_eq_of_le hge with hlt | heq
   · have h' := abs_sin_half_strict_mono _ _ hlt
     linarith
@@ -778,7 +778,7 @@ theorem arcAngle_chord_length_lt_iff
   refine ⟨fun h => ?_,
           fun h => arcAngle_chord_length_strict_mono _ _ hr _ _ _ hp hq₁ hq₂ h⟩
   by_contra hge
-  push_neg at hge
+  push Not at hge
   rcases lt_or_eq_of_le hge with hlt | heq
   · have h' := arcAngle_chord_length_strict_mono center r hr p q₂ q₁ hp hq₂ hq₁ hlt
     linarith

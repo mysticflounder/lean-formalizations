@@ -2724,10 +2724,7 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
                     (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp) x) :
                       ↥(incidentEnds (G.prefixEdges m hm) p) ⊕ Unit) :=
               Equiv.swap_apply_of_ne_of_ne hneR₁ hneR₂
-            simpa [hswapL, hswapR] using
-              (incident_ends_prefix_step_endpoint_equiv_apply_inl_val
-                (G := G) m hm hm' false hpnew hpother
-                ((vertexRotation (G.prefixEdges m hm) hARR hp) x)).symm
+            simp [hswapL, hswapR]
         exact hleft.trans (hpoint_val.trans hnew.symm)
       · let r : ℝ × ℝ := dartAnchor (G.prefixEdges m hm) a
         have hr : r ∈ G.V := by
@@ -2819,12 +2816,9 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
                   (Sum.inl (((vertexRotation (G.prefixEdges m hm) hARR hr) x).1) :
                     Fin m × Bool ⊕ Fin 2) :=
             Equiv.swap_apply_of_ne_of_ne hneU₁ hneU₂
-          simpa [x, insertedLeafEdgeMap_vertexPerm, insertedLeafVertexPerm,
+          simp [x, insertedLeafEdgeMap_vertexPerm, insertedLeafVertexPerm,
             Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
-            incident_ends_prefix_step_unchanged_equiv, leafDartA, hva, hswapU] using
-            (incident_ends_prefix_step_unchanged_equiv_apply_val
-              (G := G) m hm hm' hp1 hp2
-              ((vertexRotation (G.prefixEdges m hm) hARR hr) x)).symm
+            incident_ends_prefix_step_unchanged_equiv, leafDartA, hva, hswapU]
         exact hleft.trans (hpoint_val.trans hnew.symm)
   | inr j =>
       fin_cases j
@@ -9453,7 +9447,7 @@ theorem DrawnMultigraph.prefixStepInsertion_of_treePrefix_of_current_splitPool_e
     (hmTree : lvertex.length - 1 ≤ (G.permuteEdges π).numEdges)
     (hARR : ∀ m : ℕ, ∀ hm : m ≤ (G.permuteEdges π).numEdges,
       ArcsRotationRegular ((G.permuteEdges π).prefixEdges m hm))
-    (hsplit :
+    (_hsplit :
       ∀ (m : ℕ)
         (hm : m ≤ (G.permuteEdges π).numEdges)
         (hm' : m + 1 ≤ (G.permuteEdges π).numEdges)
@@ -10010,12 +10004,12 @@ theorem DrawnMultigraph.exists_faceGraphOnEdgeSet_spanningTree_of_treeEdgeOfLeaf
     have hmem_map : eV.symm (parent k hk hk0) ∈ (l.take k).map eV.symm := by
       exact List.mem_map.mpr ⟨parent k hk hk0, hmem_list, rfl⟩
     have htake : (l.take k).map eV.symm = l'.take k := by
-      simpa [l'] using (List.map_take (f := eV.symm) (l := l) (i := k))
+      simp [l']
     have hmem' : parent' k hk hk' ∈ (l'.take k).toFinset := by
       rw [← htake, List.mem_toFinset]
       simpa [parent'] using hmem_map
     have hget : l'[k]'hk' = eV.symm (l[k]'hk0) := by
-      simpa [l'] using (List.getElem_map (f := eV.symm) (l := l) (i := k) (h := hk'))
+      simp [l']
     refine ⟨hmem', ?_⟩
     change T.Adj (eV (l'[k]'hk')) (eV (parent' k hk hk'))
     simpa [parent', hget] using hadj0
@@ -10093,8 +10087,8 @@ theorem DrawnMultigraph.exists_faceGraphOnEdgeSet_spanningTree_of_treeEdgeOfLeaf
             _ = (eV (l'[(i.1 + 1)]'hi'_lt) : ℝ × ℝ) := by
                 have hget :
                     l'[(i.1 + 1)]'hi'_lt = eV.symm (l[i0.1 + 1]'hi0_lt) := by
-                  simpa [l', i0]
-                simpa [hget]
+                  simp [l', i0]
+                simp [hget]
         · apply eV.injective
           apply Subtype.ext
           calc
@@ -10128,17 +10122,15 @@ theorem DrawnMultigraph.exists_faceGraphOnEdgeSet_spanningTree_of_treeEdgeOfLeaf
             _ = (eV (l'[(i.1 + 1)]'hi'_lt) : ℝ × ℝ) := by
                 have hget :
                     l'[(i.1 + 1)]'hi'_lt = eV.symm (l[i0.1 + 1]'hi0_lt) := by
-                  simpa [l', i0]
-                simpa [hget]
+                  simp [l', i0]
+                simp [hget]
     have hends_sel :
         Edge.ends (M := M)
           (CombinatorialMap.vertexGraphEdge (M := M)
             (hT'sub (hparent' (i.1 + 1) hi_pos hi'_lt).2)) =
           s(l'[(i.1 + 1)]'hi'_lt,
             parent' (i.1 + 1) hi_pos hi'_lt) := by
-      simpa using
-        CombinatorialMap.vertexGraphEdge_spec (M := M)
-          (hT'sub (hparent' (i.1 + 1) hi_pos hi'_lt).2)
+      simp
     exact hsimple.2 (hends_tree.trans hends_sel.symm)
   obtain ⟨Tface, hTface_sub, hTface_tree⟩ :=
     CombinatorialMap.exists_faceGraphOnEdgeSet_spanningTree_of_not_mem_range_vertexLeafOrder
@@ -10152,7 +10144,7 @@ theorem DrawnMultigraph.exists_faceGraphOnEdgeSet_spanningTree_of_treeEdgeOfLeaf
   intro hmem
   apply he_old
   rcases hmem with ⟨i0, hi0⟩
-  let i : Fin (l'.length - 1) := ⟨i0.1, by simpa [l'] using i0.isLt⟩
+  let i : Fin (l'.length - 1) := ⟨i0.1, by simp [l']⟩
   refine ⟨i, ?_⟩
   apply (residualMapEdgeEquiv G hARR).injective
   calc

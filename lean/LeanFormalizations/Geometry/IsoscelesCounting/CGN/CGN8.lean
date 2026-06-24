@@ -205,7 +205,7 @@ theorem iCount_le_of_convexIndep_circumscribed
       | empty =>
           simp
       | @cons a s ha ih =>
-          simp [Finset.sigma, ha, ih, Finset.card_disjUnion]
+          simp [Finset.sigma, ha]
     let T : Finset (Fin m × Fin m × Fin m) :=
       (Finset.univ.sigma (fun j : Fin m => IsoscelesCounting.CGN.WitnessedPairsAt L j)).image
         (fun z => (z.1, z.2.1, z.2.2))
@@ -307,10 +307,10 @@ theorem iCount_le_of_convexIndep_circumscribed
           rcases lt_or_gt_of_ne hijne with hijlt | hjilt
           · refine Finset.mem_image.mpr
               ⟨(i, j), IsoscelesCounting.CGN.mem_CapIndexPairs.mpr hijlt, ?_⟩
-            simpa [IsoscelesCounting.CGN.edgeAt, hj] using rfl
+            simp [IsoscelesCounting.CGN.edgeAt, hj]
           · refine Finset.mem_image.mpr
               ⟨(j, i), IsoscelesCounting.CGN.mem_CapIndexPairs.mpr hjilt, ?_⟩
-            simpa [IsoscelesCounting.CGN.edgeAt, hj, Finset.pair_comm] using rfl
+            simp [IsoscelesCounting.CGN.edgeAt, hj, Finset.pair_comm]
       have hinj :
           Set.InjOn (fun p : Fin m × Fin m => IsoscelesCounting.CGN.edgeAt L p.1 p.2)
             (IsoscelesCounting.CGN.CapIndexPairs m) := by
@@ -515,7 +515,7 @@ theorem iCount_le_of_convexIndep_circumscribed
               exact Finset.sum_le_sum (fun xy hxy => hpair_bound xy (by
                 exact (Finset.mem_sdiff.mp hxy).1))
         _ = 2 * ((A.powersetCard 2) \ S).card := by
-          simp [Finset.sum_const, nsmul_eq_mul, Nat.mul_comm]
+          simp [Finset.sum_const, Nat.mul_comm]
     have hmain :
         Finset.sum S (fun xy => (IsoscelesCounting.Dumitrescu.capPairApexes A xy).card) +
           Finset.sum ((A.powersetCard 2) \ S)

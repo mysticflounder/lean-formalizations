@@ -221,12 +221,12 @@ private lemma not_card_boundary_eq_one
     have hq_not_bdry : q ∉ boundary A hA := by
       intro h; rw [hp₀_def, Finset.mem_singleton] at h; exact hne h
     have hq_le : dist q M.center ≤ M.radius := M.enclosing q hq
-    rw [mem_boundary_iff] at hq_not_bdry; push_neg at hq_not_bdry
+    rw [mem_boundary_iff] at hq_not_bdry; push Not at hq_not_bdry
     exact lt_of_le_of_ne hq_le (hq_not_bdry hq)
   -- A is not the singleton {p₀} (else collinear).
   have hex_other : ∃ q ∈ A, q ≠ p₀ := by
     by_contra hno
-    push_neg at hno
+    push Not at hno
     apply not_singleton_of_noncollinear hncol p₀
     apply Finset.eq_singleton_iff_unique_mem.mpr
     exact ⟨hp₀_mem, hno⟩
@@ -380,7 +380,7 @@ private lemma diameter_case_of_card_boundary_eq_two
   have hinterior : ∀ x ∈ A, x ≠ p → x ≠ q → dist x M.center < M.radius := by
     intro x hxA hxp hxq
     by_contra h
-    push_neg at h
+    push Not at h
     have hx_le : dist x M.center ≤ M.radius := M.enclosing x hxA
     have hx_eq : dist x M.center = M.radius := le_antisymm hx_le h
     have hx_bdry : x ∈ boundary A hA := (mem_boundary_iff hA).2 ⟨hxA, hx_eq⟩
@@ -577,7 +577,7 @@ theorem sylvester_dichotomy
   · right; rw [← hB_unfold]; exact h_card_ge_three
   -- B.card ≤ 2.  card ≥ 1 (always), card ≠ 1 (variational).
   left
-  push_neg at h_card_ge_three
+  push Not at h_card_ge_three
   have h_card_lt_three : B.card < 3 := h_card_ge_three
   have h_card_pos : 1 ≤ B.card := boundary_card_pos A hA
   have h_card_ne_one : B.card ≠ 1 := not_card_boundary_eq_one hA hncol

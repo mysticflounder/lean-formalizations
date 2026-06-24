@@ -136,7 +136,7 @@ theorem exists_point_in_complement (m : ℕ) (hm : m ≤ G.numEdges) :
       have hsum_pos : 0 ≤ R' + 1 := by linarith
       calc
         dist p (0 : ℝ × ℝ) = max (|(R' + 1) - (0 : ℝ)|) (|(0 : ℝ) - (0 : ℝ)|) := by
-          simp [p, Prod.dist_eq]
+          simp [p]
         _ = max (|R' + 1|) 0 := by simp
         _ = |R' + 1| := by simp
         _ = R' + 1 := abs_of_nonneg hsum_pos

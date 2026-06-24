@@ -76,9 +76,9 @@ cap-local counting wrapper consumed by CGN8. -/
 theorem noCapWitness_pairs_card_lower_bound
     {m : ℕ} {L : OrderedCap m} {A : Finset ℝ²}
     (Model : MinorCapChainModel L)
-    (Hord : StrictCapOrder A L)
-    (hconv : ConvexIndep A)
-    (hmem : ∀ t : Fin m, L.points t ∈ A) :
+    (_Hord : StrictCapOrder A L)
+    (_hconv : ConvexIndep A)
+    (_hmem : ∀ t : Fin m, L.points t ∈ A) :
     Nat.choose m 2 - (m - 1)^2 / 4 ≤
       (by
         classical
@@ -119,7 +119,7 @@ theorem noCapWitness_pairs_card_lower_bound
     | empty =>
         simp
     | @cons a s ha ih =>
-        simp [Finset.sigma, ha, ih, Finset.card_disjUnion]
+        simp [Finset.sigma, ha]
   let T : Finset (Fin m × Fin m × Fin m) :=
     (Finset.univ.sigma (fun j : Fin m => WitnessedPairsAt L j)).image
       (fun z => (z.1, z.2.1, z.2.2))
@@ -209,9 +209,9 @@ theorem noCapWitness_pairs_card_lower_bound
           simpa [hij] using hj
         rcases lt_or_gt_of_ne hijne with hijlt | hjilt
         · refine Finset.mem_image.mpr ⟨(i, j), mem_CapIndexPairs.mpr hijlt, ?_⟩
-          simpa [edgeAt, hj] using rfl
+          simp [edgeAt, hj]
         · refine Finset.mem_image.mpr ⟨(j, i), mem_CapIndexPairs.mpr hjilt, ?_⟩
-          simpa [edgeAt, hj, Finset.pair_comm] using rfl
+          simp [edgeAt, hj, Finset.pair_comm]
     have hinj :
         Set.InjOn (fun p : Fin m × Fin m => edgeAt L p.1 p.2) (CapIndexPairs m) := by
       intro p hp q hq heq

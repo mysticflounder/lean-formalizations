@@ -334,7 +334,7 @@ theorem edgeAt_injective_on_CapIndexPairs {m : ℕ} {L : OrderedCap m}
   rcases hp1idx with hp1idx | hp1idx
   · rcases hp2idx with hp2idx | hp2idx
     · exfalso
-      have hlt : q.1 < q.1 := by simpa [hp1idx, hp2idx] using hp_lt
+      have hlt : q.1 < q.1 := by simp [hp1idx, hp2idx] at hp_lt
       exact (lt_irrefl _ hlt)
     · exact Prod.ext hp1idx hp2idx
   · rcases hp2idx with hp2idx | hp2idx
@@ -342,7 +342,7 @@ theorem edgeAt_injective_on_CapIndexPairs {m : ℕ} {L : OrderedCap m}
       have hlt : q.2 < q.1 := by simpa [hp1idx, hp2idx] using hp_lt
       exact (lt_irrefl _ (lt_trans hlt hq_lt))
     · exfalso
-      have hlt : q.2 < q.2 := by simpa [hp1idx, hp2idx] using hp_lt
+      have hlt : q.2 < q.2 := by simp [hp1idx, hp2idx] at hp_lt
       exact (lt_irrefl _ hlt)
 
 /-- A witness is simply an indexed cap-side witness. -/

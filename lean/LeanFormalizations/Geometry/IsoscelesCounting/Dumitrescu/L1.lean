@@ -133,7 +133,7 @@ theorem perpBisector_apex_bound
     (A.filter (fun p => dist p a = dist p b)).card ≤ 2 := by
   -- Assume, for contradiction, three distinct equidistant points.
   by_contra h
-  push_neg at h
+  push Not at h
   rw [Finset.two_lt_card] at h
   obtain ⟨p, hp, q, hq, r, hr, hpq, hpr, hqr⟩ := h
   rcases Finset.mem_filter.mp hp with ⟨hpA, hpeq⟩

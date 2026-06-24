@@ -53,7 +53,7 @@ Used in the final arithmetic assembly of the isosceles upper bound
 (Dumitrescu 2006 eq. (5)) to extract the `(n+3)² / 12` term from the
 three-cap good-edge count. -/
 theorem power_mean_three_caps
-    {m₁ m₂ m₃ : ℝ} (h₁ : 0 ≤ m₁) (h₂ : 0 ≤ m₂) (h₃ : 0 ≤ m₃)
+    {m₁ m₂ m₃ : ℝ} (_h₁ : 0 ≤ m₁) (_h₂ : 0 ≤ m₂) (_h₃ : 0 ≤ m₃)
     {N : ℝ} (hsum : m₁ + m₂ + m₃ = N) :
     N^2 / 3 ≤ m₁^2 + m₂^2 + m₃^2 := by
   subst hsum

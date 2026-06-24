@@ -514,7 +514,7 @@ theorem angle_lt_pi_div_two_of_dist_ge
   -- If `angle = π/2`, then `cos = 0`, contradicting `cos > 0`.
   -- If `angle > π/2`, then `cos angle < cos(π/2) = 0`, contradicting `cos > 0`.
   by_contra hge
-  push_neg at hge
+  push Not at hge
   have hangle_le_pi : EuclideanGeometry.angle y c b ≤ Real.pi :=
     EuclideanGeometry.angle_le_pi y c b
   rcases lt_or_eq_of_le hge with hlt | heq

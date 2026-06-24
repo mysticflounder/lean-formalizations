@@ -3795,10 +3795,10 @@ theorem disjoint_stripSupport_sectorPlus_nonincident (β : PolyArc) {α δ₀ δ
           Fin.ext (by simpa using heq2)
         refine hadj_src ⟨(j : ℕ) + 1, hj1⟩ (by rw [hjval]; omega) z ?_ hzj1 ?_
         · have : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1, by rw [hjval]; omega⟩
-              : Fin β.numSegs) = i := Fin.ext (by simp only [hjval]; omega)
+              : Fin β.numSegs) = i := Fin.ext (by simp; omega)
           rw [this]; exact hbandmid
         · have : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1, by rw [hjval]; omega⟩
-              : Fin β.numSegs) = i := Fin.ext (by simp only [hjval]; omega)
+              : Fin β.numSegs) = i := Fin.ext (by simp; omega)
           rw [this]; exact hzi
       · -- j+1 < i < (j+1)+1 impossible
         omega
@@ -3844,10 +3844,10 @@ theorem disjoint_stripSupport_sectorMinus_nonincident (β : PolyArc) {α δ₀ �
           (lt_of_lt_of_le hzj1 hδ₀sep) (lt_of_lt_of_le hzi hδ₀sep)
       · refine hadj_src ⟨(j : ℕ) + 1, hj1⟩ (by rw [hjval]; omega) z ?_ hzj1 ?_
         · have : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1, by rw [hjval]; omega⟩
-              : Fin β.numSegs) = i := Fin.ext (by simp only [hjval]; omega)
+              : Fin β.numSegs) = i := Fin.ext (by simp; omega)
           rw [this]; exact hbandmid
         · have : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1, by rw [hjval]; omega⟩
-              : Fin β.numSegs) = i := Fin.ext (by simp only [hjval]; omega)
+              : Fin β.numSegs) = i := Fin.ext (by simp; omega)
           rw [this]; exact hzi
       · omega
 
@@ -4579,7 +4579,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
               r ⟨(j : ℕ) + 1, hj1⟩ := by
             have hidxeq : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1,
                 by rw [hjval]; omega⟩ : Fin β.numSegs) = ⟨(k : ℕ) + 1, hk1⟩ :=
-              Fin.ext (by simp only [hjval]; omega)
+              Fin.ext (by simp; omega)
             refine hconf ⟨(j : ℕ) + 1, hj1⟩ (by rw [hjval]; omega) hA2.1 ?_
             rw [hidxeq]; exact hB2.1
           have hne : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segSrc ⟨(j : ℕ) + 1, hj1⟩ :=
@@ -4605,7 +4605,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
               r ⟨(j : ℕ) + 1, hj1⟩ := by
             have hidxeq : (⟨((⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) : ℕ) + 1,
                 by rw [hjval]; omega⟩ : Fin β.numSegs) = k :=
-              Fin.ext (by simp only [hjval]; omega)
+              Fin.ext (by simp; omega)
             refine hconf ⟨(j : ℕ) + 1, hj1⟩ (by rw [hjval]; omega) hA2.1 ?_
             rw [hidxeq]; exact hB1.1
           have hne : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segSrc ⟨(j : ℕ) + 1, hj1⟩ :=
@@ -4725,10 +4725,10 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
           -- On edge j = k+2, segSrc j = verts(succ ⟨k+1⟩) ⇒ foot < α ⇒ ⊥ vs A1.
           set e2 : Fin β.numSegs := ⟨((⟨(k : ℕ) + 1, hk1⟩ : Fin β.numSegs) : ℕ) + 1,
             by rw [hkval]; omega⟩ with he2
-          have he2j : e2 = j := Fin.ext (by rw [he2]; simp only [hkval]; omega)
+          have he2j : e2 = j := Fin.ext (by rw [he2]; simp; omega)
           have hsve2 : β.segSrc e2 = β.verts (Fin.succ ⟨(k : ℕ) + 1, hk1⟩) := by
             have hidx : (Fin.castSucc e2 : Fin (β.numSegs + 1)) = Fin.succ ⟨(k : ℕ) + 1, hk1⟩ :=
-              Fin.ext (by rw [he2]; simp only [Fin.val_castSucc, Fin.val_succ, hkval])
+              Fin.ext (by rw [he2]; simp only [Fin.val_castSucc, Fin.val_succ])
             rw [PolyArc.segSrc, hidx]
           have hne2 : β.segTgt e2 ≠ β.segSrc e2 := β.segTgt_ne_segSrc e2
           have hconf' : dist z (β.verts (Fin.succ ⟨(k : ℕ) + 1, hk1⟩)) <
@@ -4767,7 +4767,7 @@ GREEN leaf via `Disjoint.mono`; `j = 0`'s incoming arm (edge `0`, foot `> α`) i
 from the cap disk by the disk-smallness budget `hball`, the outgoing arm (edge `1`) by the
 edge-`1` `hbudsrc` budget. -/
 theorem disjoint_endCapSrcPlus_sectorMinusClipped_all (β : PolyArc)
-    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (hα : 0 < α)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hball : (|(β.segTgt β.firstSeg).1 - (β.segSrc β.firstSeg).1|
@@ -4805,7 +4805,7 @@ from the GREEN leaf; `j+1 = numSegs−1 = lastSeg`'s outgoing arm (edge `lastSeg
 `< 1−α`) is separated from the cap disk by the disk-smallness budget, the incoming arm by
 the edge-`j` `hbudtgt` budget. -/
 theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolyArc)
-    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (hα : 0 < α)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
         ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -4848,7 +4848,7 @@ theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolyArc)
 /-- **Clipped sector⁺ ↔ source `−` cap, all sector indices.**  Mirror of
 `disjoint_endCapSrcPlus_sectorMinusClipped_all` with the sides flipped. -/
 theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolyArc)
-    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (hα : 0 < α)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hball : (|(β.segTgt β.firstSeg).1 - (β.segSrc β.firstSeg).1|
@@ -4879,7 +4879,7 @@ theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolyArc)
 /-- **Clipped sector⁺ ↔ target `−` cap, all sector indices.**  Mirror of
 `disjoint_endCapTgtPlus_sectorMinusClipped_all` with the sides flipped. -/
 theorem disjoint_sectorPlusClipped_endCapTgtMinus_all (β : PolyArc)
-    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (hα : 0 < α)
+    (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
         ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -5860,12 +5860,12 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
         ring
       have hPb : sideForm v b P = - sideForm v b a := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
         ring
       have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
@@ -5932,13 +5932,11 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]
         ring
       have hPb : sideForm v b P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]
         ring
       have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
@@ -5971,7 +5969,7 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz
-        simpa using hz
+        simp at hz
     have hstrip_i1 :
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z
@@ -5982,7 +5980,7 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
           Metric.infDist_nonneg
         nlinarith
       · intro hz
-        simpa using hz
+        simp at hz
     rw [hstrip_i, hstrip_i1, Set.union_empty, Set.inter_empty]
     exact isPreconnected_empty
 
@@ -6060,13 +6058,11 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]
         ring
       have hPb : sideForm v b P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]
         ring
       have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa,
@@ -6126,12 +6122,12 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
         ring
       have hPb : sideForm v b P = - sideForm v b a := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
         ring
       have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
@@ -6171,7 +6167,7 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz
-        simpa using hz
+        simp at hz
     have hstrip_i1 :
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z
@@ -6182,7 +6178,7 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
           Metric.infDist_nonneg
         nlinarith
       · intro hz
-        simpa using hz
+        simp at hz
     rw [hstrip_i, hstrip_i1, Set.union_empty, Set.inter_empty]
     exact isPreconnected_empty
 
@@ -6289,11 +6285,11 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         nlinarith [hεfj]
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
       have hPb : sideForm v b P = - sideForm v b a := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
       have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
@@ -6379,12 +6375,10 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         nlinarith [hεfj]
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]; ring
       have hPb : sideForm v b P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]; ring
       have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
         ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
@@ -6413,7 +6407,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [Set.mem_setOf_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
-      · intro hz; simpa using hz
+      · intro hz; simp at hz
     have hstrip_j :
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
@@ -6421,7 +6415,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [Set.mem_setOf_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
         nlinarith
-      · intro hz; simpa using hz
+      · intro hz; simp at hz
     rw [hstrip_i, hstrip_j, Set.empty_inter, Set.empty_inter, Set.union_empty, Set.inter_empty]
     exact isPreconnected_empty
 
@@ -6519,12 +6513,10 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         nlinarith [hεfj]
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]; ring
       have hPb : sideForm v b P = sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
-          Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add]; ring
       have hptA : 0 < cornerTurn a v b * sideForm a v pt := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
         ring_nf; nlinarith [hεpos, mul_self_pos.mpr hτ]
@@ -6599,11 +6591,11 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         nlinarith [hεfj]
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
       have hPb : sideForm v b P = - sideForm v b a := by
         rw [hP]
-        simp only [sideForm, Prod.fst_sub, Prod.snd_sub, Prod.fst_add, Prod.snd_add,
+        simp only [sideForm, Prod.fst_sub, Prod.snd_sub,
           Prod.smul_fst, Prod.smul_snd, smul_eq_mul]; ring
       have hptA : cornerTurn a v b * sideForm a v pt < 0 := by
         rw [hpt, sideForm_affineComb a v v P (by ring), sideForm_right_endpoint, hPa, cornerTurn]
@@ -6641,7 +6633,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [Set.mem_setOf_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
-      · intro hz; simpa using hz
+      · intro hz; simp at hz
     have hstrip_j :
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
@@ -6649,7 +6641,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [Set.mem_setOf_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
         nlinarith
-      · intro hz; simpa using hz
+      · intro hz; simp at hz
     rw [hstrip_i, hstrip_j, Set.empty_inter, Set.empty_inter, Set.union_empty, Set.inter_empty]
     exact isPreconnected_empty
 
@@ -10326,7 +10318,7 @@ the upper end is the interior shared vertex `verts (i+1)` (NEVER an arc endpoint
 no vertex-ball budget is needed — the clip keeps every foot-point off the tube-vanishing
 arc endpoints. -/
 theorem sectorPlusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (_hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
     (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
@@ -10406,7 +10398,7 @@ theorem sectorPlusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (�
 proof reads only the strip-union component `hz.2` (the vertex wedge is irrelevant to tube
 containment).  See `sectorPlusClipped_subset_taperedTube`. -/
 theorem sectorMinusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
-    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
+    (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (_hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
     (hsmall_out : (|(β.segTgt ⟨(i : ℕ) + 1, hi1⟩).1 - (β.segSrc ⟨(i : ℕ) + 1, hi1⟩).1|
@@ -10691,7 +10683,7 @@ or the outgoing arm (δ₀-thin to edge `i+1`, foot `< 1−α`).  For `z` also o
   outgoing via `footParam_gt_of_confined_tgt`), contradicting the clip's margin.  Mirrors agent D's
   `disjoint_sectorPlusClipped_sectorMinusClipped_all` adjacent-corner geometry. -/
 theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
-    (hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (_hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
       Metric.infDist w (β.segCarrier a) < δsep →
       Metric.infDist w (β.segCarrier b) < δsep → False)
@@ -10776,7 +10768,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
           have he1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1 < β.numSegs := by
             rw [hival]; have := k.isLt; omega
           have hk' : (⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩ : Fin β.numSegs) = k :=
-            Fin.ext (by simp only [Fin.val_mk]; omega)
+            Fin.ext (by simp; omega)
           have hcareq : β.segCarrier ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩
               = β.segCarrier k := congrArg β.segCarrier hk'
           have hzkstrip : Metric.infDist z (β.segCarrier
@@ -10804,7 +10796,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
 /-- **Clipped sector containment off the carrier (negative side).**  See
 `sectorPlusClipped_subset_compl_carrier`; the only difference is the `vertexMinus` τ-branch. -/
 theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
-    (hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
+    (_hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
       Metric.infDist w (β.segCarrier a) < δsep →
       Metric.infDist w (β.segCarrier b) < δsep → False)
@@ -10888,7 +10880,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep :
           have he1 : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1 < β.numSegs := by
             rw [hival]; have := k.isLt; omega
           have hk' : (⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩ : Fin β.numSegs) = k :=
-            Fin.ext (by simp only [Fin.val_mk]; omega)
+            Fin.ext (by simp; omega)
           have hcareq : β.segCarrier ⟨((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) + 1, he1⟩
               = β.segCarrier k := congrArg β.segCarrier hk'
           have hzkstrip : Metric.infDist z (β.segCarrier

@@ -504,7 +504,7 @@ theorem boundaryCap_chordProjection_strict
   have hsum_center : Packet.center - M = xc • u + yc • nvec := by
     simpa [β, xc, yc, nvec] using (β.sum_repr (Packet.center - M)).symm
   have hnorm_nvec : ‖nvec‖ = ‖u‖ := by
-    simpa [nvec] using IsoscelesCounting.stdOrientation.rightAngleRotation.norm_map u
+    simp [nvec]
   have hβu : β.repr u = Finsupp.single 0 (1 : ℝ) := by
     simpa [β, nvec] using (β.repr_self 0)
   have hβu0 : β.repr u 0 = 1 := by
@@ -512,8 +512,7 @@ theorem boundaryCap_chordProjection_strict
   have hβu1 : β.repr u 1 = 0 := by
     simp [hβu]
   have horth : inner ℝ u nvec = 0 := by
-    simpa [nvec] using
-      IsoscelesCounting.stdOrientation.inner_rightAngleRotation_self u
+    simp [nvec]
   have horth_rev : inner ℝ nvec u = 0 := by
     simpa [real_inner_comm] using horth
   have harea_u_left : ∀ r : ℝ, IsoscelesCounting.stdOrientation.areaForm u (r • u) = 0 := by
@@ -529,20 +528,20 @@ theorem boundaryCap_chordProjection_strict
     have h :=
       IsoscelesCounting.stdOrientation.areaForm_rightAngleRotation_right (x := u) (y := u)
     rw [IsoscelesCounting.stdOrientation.areaForm_swap] at h
-    simpa [nvec] using h
+    simp [nvec]
   have hsqpos : 0 < ‖u‖ ^ 2 := by
     exact sq_pos_of_ne_zero (norm_ne_zero_iff.mpr hu)
   have hq1mid : q1 - M = (-(1 / 2 : ℝ)) • u := by
     calc
       q1 - M = (1 / 2 : ℝ) • (q1 - qm) := by
-        simpa [M] using (left_sub_midpoint ℝ q1 qm)
+        simp [M]
       _ = (-(1 / 2 : ℝ)) • u := by
         rw [show q1 - qm = -u by
           dsimp [u]
           abel_nf]
         simp [smul_neg]
   have hqm_mid : qm - M = (1 / 2 : ℝ) • u := by
-    simpa [M, u] using (right_sub_midpoint ℝ q1 qm)
+    simp [M, u]
   have hX_first : X (IsoscelesCounting.CGN.firstIndex Block.hm) = -(1 / 2 : ℝ) := by
     have h := congrArg (fun v : ℝ² => β.repr v 0) hq1mid
     change X (IsoscelesCounting.CGN.firstIndex Block.hm) =
@@ -671,7 +670,7 @@ theorem boundaryCap_chordProjection_strict
       _ = ((-(1 / 2 : ℝ)) • u) - (yc • nvec) := by
         rw [hq1mid, hcenter_decomp]
       _ = (-(1 / 2 : ℝ)) • u + (-yc) • nvec := by
-        simpa [sub_eq_add_neg, neg_smul]
+        simp [sub_eq_add_neg, neg_smul]
   have hdiff_coords : ∀ r s : Fin m,
       L.points s - L.points r = (X s - X r) • u + (Y s - Y r) • nvec := by
     intro r s
@@ -1198,8 +1197,8 @@ theorem CGN4g_capData_of_supportCap_oriented
     (hacute : 0 ≤ ⟪M.v2 - M.v1, M.v3 - M.v1⟫_ℝ) :
     ∃ m, ∃ L : OrderedCap m,
       ∃ Packet : MecCapPacket A L,
-      ∃ Hside : MinorCapSideHypotheses Packet,
-      ∃ Hord : StrictCapOrder A L,
+      ∃ _Hside : MinorCapSideHypotheses Packet,
+      ∃ _Hord : StrictCapOrder A L,
         Finset.univ.image L.points = C ∧
           ((L.points (firstIndex Packet.hm) = M.v2 ∧
               L.points (lastIndex Packet.hm) = M.v3) ∨
@@ -1258,7 +1257,7 @@ theorem CGN4g_capData_of_supportCap_oriented
           refine Finset.mem_image.mpr ?_
           refine ⟨q - i1, Finset.mem_univ _, ?_⟩
           rw [show (q - i1) + i1 = q by
-            simpa [finCycle] using (Equiv.apply_symm_apply (finCycle i1) q)]
+            simp]
       _ = A := hphi_image
   have hneg_shift :
       ∀ {i j k : Fin n}, i < j → j < k →
@@ -1269,7 +1268,7 @@ theorem CGN4g_capData_of_supportCap_oriented
         IsoscelesCounting.signedArea2 (phi (i + i1)) (phi (j + i1)) (phi (k + i1)) < 0)
   have hpsi0 : psi 0 = M.v1 := by
     change phi (0 + i1) = M.v1
-    simpa [psi, hi1] using hi1
+    simp [hi1]
   have hi2_ne_i1 : i2 ≠ i1 := by
     intro h
     exact M.v12_ne (by simpa [hi1, hi2] using (congrArg phi h).symm)
@@ -1300,7 +1299,7 @@ theorem CGN4g_capData_of_supportCap_oriented
           (A := A) (C := C) (phi := psi)
           hpsi_inj hpsi_image hneg_shift hC_subset hC_arc hv_mem hw_mem
           (u_idx := 0) (v_idx := i2 - i1) (w_idx := i3 - i1)
-          hpsi0 (by simpa [psi, hi2] using hi2) (by simpa [psi, hi3] using hi3)
+          hpsi0 (by simp [psi, hi2]) (by simp [psi, hi3])
           hi2_pos h23
     have hcap_side :
         ∀ x, x ∈ C →
@@ -1346,7 +1345,7 @@ theorem CGN4g_capData_of_supportCap_oriented
         ring
       rw [hcyc] at hcenter_prod
       by_contra hpos
-      push_neg at hpos
+      push Not at hpos
       have : IsoscelesCounting.signedArea2 (psi (i2 - i1)) (psi (i3 - i1)) P.center *
           IsoscelesCounting.signedArea2 (psi 0) (psi (i2 - i1)) (psi (i3 - i1)) < 0 :=
         mul_neg_of_pos_of_neg hpos hbase_neg
@@ -1395,7 +1394,7 @@ theorem CGN4g_capData_of_supportCap_oriented
                 exact Block.points_eq (firstIndex Packet.hm)
         _ = psi Block.lo := by rw [Block.idx_first]
         _ = psi (i2 - i1) := by rw [hlo]
-        _ = M.v2 := by simpa [psi, hi2] using hi2
+        _ = M.v2 := by simp [psi, hi2]
     have hlast_v3 : L.points (lastIndex Packet.hm) = M.v3 := by
       calc
         L.points (lastIndex Packet.hm)
@@ -1403,7 +1402,7 @@ theorem CGN4g_capData_of_supportCap_oriented
                 exact Block.points_eq (lastIndex Packet.hm)
         _ = psi Block.hi := by rw [Block.idx_last]
         _ = psi (i3 - i1) := by rw [hhi]
-        _ = M.v3 := by simpa [psi, hi3] using hi3
+        _ = M.v3 := by simp [psi, hi3]
     exact ⟨m, L, Packet, Hside, Hord, Block.cap_image, Or.inl ⟨hfirst_v2, hlast_v3⟩⟩
   · have h32 : i3 - i1 < i2 - i1 := lt_of_le_of_ne (le_of_not_gt h23) (by
         intro hEq
@@ -1432,7 +1431,7 @@ theorem CGN4g_capData_of_supportCap_oriented
           (A := A) (C := C) (phi := psi)
           hpsi_inj hpsi_image hneg_shift hC_subset hswap_arc hw_mem hv_mem
           (u_idx := 0) (v_idx := i3 - i1) (w_idx := i2 - i1)
-          hpsi0 (by simpa [psi, hi3] using hi3) (by simpa [psi, hi2] using hi2)
+          hpsi0 (by simp [psi, hi3]) (by simp [psi, hi2])
           hi3_pos h32
     have hcap_side :
         ∀ x, x ∈ C →
@@ -1478,7 +1477,7 @@ theorem CGN4g_capData_of_supportCap_oriented
         ring
       rw [hcyc] at hcenter_prod
       by_contra hpos
-      push_neg at hpos
+      push Not at hpos
       have : IsoscelesCounting.signedArea2 (psi (i3 - i1)) (psi (i2 - i1)) P.center *
           IsoscelesCounting.signedArea2 (psi 0) (psi (i3 - i1)) (psi (i2 - i1)) < 0 :=
         mul_neg_of_pos_of_neg hpos hbase_neg
@@ -1527,7 +1526,7 @@ theorem CGN4g_capData_of_supportCap_oriented
                 exact Block.points_eq (firstIndex Packet.hm)
         _ = psi Block.lo := by rw [Block.idx_first]
         _ = psi (i3 - i1) := by rw [hlo]
-        _ = M.v3 := by simpa [psi, hi3] using hi3
+        _ = M.v3 := by simp [psi, hi3]
     have hlast_v2 : L.points (lastIndex Packet.hm) = M.v2 := by
       calc
         L.points (lastIndex Packet.hm)
@@ -1535,7 +1534,7 @@ theorem CGN4g_capData_of_supportCap_oriented
                 exact Block.points_eq (lastIndex Packet.hm)
         _ = psi Block.hi := by rw [Block.idx_last]
         _ = psi (i2 - i1) := by rw [hhi]
-        _ = M.v2 := by simpa [psi, hi2] using hi2
+        _ = M.v2 := by simp [psi, hi2]
     exact ⟨m, L, Packet, Hside, Hord, Block.cap_image, Or.inr ⟨hfirst_v3, hlast_v2⟩⟩
 
 /-- Drop the endpoint-orientation packet when only the bare cap data is
@@ -1552,8 +1551,8 @@ theorem CGN4g_capData_of_supportCap
     (hacute : 0 ≤ ⟪M.v2 - M.v1, M.v3 - M.v1⟫_ℝ) :
     ∃ m, ∃ L : OrderedCap m,
       ∃ Packet : MecCapPacket A L,
-      ∃ Hside : MinorCapSideHypotheses Packet,
-      ∃ Hord : StrictCapOrder A L,
+      ∃ _Hside : MinorCapSideHypotheses Packet,
+      ∃ _Hord : StrictCapOrder A L,
         Finset.univ.image L.points = C := by
   rcases CGN4g_capData_of_supportCap_oriented
       (A := A) (C := C) (M := M) hA hnoncoll hC_subset hC_arc hv_mem hw_mem P hacute with

@@ -205,7 +205,7 @@ private theorem orthonormal_pair_normsq {e n x : ℝ²}
 /-- The `e`-coordinate of a vector in an orthonormal pair is recovered by
 pairing with `e`. -/
 private theorem orthonormal_pair_inner_left {e n u : ℝ²}
-    (he : ‖e‖ = 1) (hn : ‖n‖ = 1) (hen : inner ℝ e n = 0) :
+    (he : ‖e‖ = 1) (_hn : ‖n‖ = 1) (hen : inner ℝ e n = 0) :
     ⟪⟪e, u⟫_ℝ • e + ⟪n, u⟫_ℝ • n, e⟫_ℝ = ⟪e, u⟫_ℝ := by
   rw [inner_add_left, inner_smul_left, inner_smul_left, real_inner_self_eq_norm_sq]
   have he2 : ‖e‖ ^ 2 = 1 := by nlinarith [he]
@@ -216,7 +216,7 @@ private theorem orthonormal_pair_inner_left {e n u : ℝ²}
 /-- The `n`-coordinate of a vector in an orthonormal pair is recovered by
 pairing with `n`. -/
 private theorem orthonormal_pair_inner_right {e n u : ℝ²}
-    (he : ‖e‖ = 1) (hn : ‖n‖ = 1) (hen : inner ℝ e n = 0) :
+    (_he : ‖e‖ = 1) (hn : ‖n‖ = 1) (hen : inner ℝ e n = 0) :
     ⟪⟪e, u⟫_ℝ • e + ⟪n, u⟫_ℝ • n, n⟫_ℝ = ⟪n, u⟫_ℝ := by
   rw [inner_add_left, inner_smul_left, inner_smul_left, real_inner_self_eq_norm_sq]
   have hn2 : ‖n‖ ^ 2 = 1 := by nlinarith [hn]
@@ -229,18 +229,18 @@ private theorem rightAngleRotation_sq_neg (x : ℝ²) :
     EuclideanGeometry.o.rightAngleRotation (EuclideanGeometry.o.rightAngleRotation x) = -x := by
   have h := congrArg (fun f : ℝ² ≃ₗᵢ[ℝ] ℝ² => f (EuclideanGeometry.o.rightAngleRotation x))
     EuclideanGeometry.o.rightAngleRotation_symm
-  simpa using h
+  simp
 
 /-- The `chordFrame` map is linear when the midpoint is `0`. -/
 private noncomputable def chordLinear (e n : ℝ²) (scale : ℝ) : ℝ² →ₗ[ℝ] ℝ² where
   toFun := fun v => chordFrame (0 : ℝ²) e n scale v
   map_add' := by
     intro x y
-    ext i <;> fin_cases i <;> simp [chordFrame, inner_add_left, inner_add_right]
+    ext i <;> fin_cases i <;> simp [chordFrame, inner_add_left]
     all_goals ring
   map_smul' := by
     intro m x
-    ext i <;> fin_cases i <;> simp [chordFrame, inner_smul_left, inner_smul_right]
+    ext i <;> fin_cases i <;> simp [chordFrame, inner_smul_left]
     all_goals ring
 
 /-- Area-form identity for the standard orientation and the right-angle
@@ -252,12 +252,11 @@ private theorem orthonormal_areaForm (e : ℝ²) (he : ‖e‖ = 1) :
         ⟪u, IsoscelesCounting.stdOrientation.rightAngleRotation e⟫_ℝ * ⟪v, e⟫_ℝ := by
   let n : ℝ² := IsoscelesCounting.stdOrientation.rightAngleRotation e
   have hn : ‖n‖ = 1 := by
-    simpa [n, he] using IsoscelesCounting.stdOrientation.rightAngleRotation.norm_map e
+    simp [n, he]
   have hen : inner ℝ e n = 0 := by
-    simpa [n, real_inner_comm] using IsoscelesCounting.stdOrientation.inner_rightAngleRotation_self e
+    simp [n]
   have hEn : IsoscelesCounting.stdOrientation.areaForm e n = 1 := by
-    simpa [n, he] using
-      (IsoscelesCounting.stdOrientation.areaForm_rightAngleRotation_right (x := e) (y := e))
+    simp [n, he]
   have harea_e : ∀ v : ℝ², IsoscelesCounting.stdOrientation.areaForm e v = ⟪v, n⟫_ℝ := by
     intro v
     have h' : IsoscelesCounting.stdOrientation.areaForm e v =
@@ -272,7 +271,7 @@ private theorem orthonormal_areaForm (e : ℝ²) (he : ‖e‖ = 1) :
         (IsoscelesCounting.stdOrientation.rightAngleRotation e) v = -⟪v, e⟫_ℝ := by
       have h := IsoscelesCounting.stdOrientation.inner_rightAngleRotation_left
         (x := IsoscelesCounting.stdOrientation.rightAngleRotation e) (y := v)
-      simpa [real_inner_comm] using h
+      simp [real_inner_comm]
     simpa [n] using h'
   intro u v
   have hu := orthonormal_pair_decomp (e := e) (n := n) he hn hen (x := u)
@@ -285,11 +284,11 @@ private theorem orthonormal_areaForm (e : ℝ²) (he : ‖e‖ = 1) :
   have h1 : IsoscelesCounting.stdOrientation.areaForm (⟪e, u⟫_ℝ • e) v =
       ⟪e, u⟫_ℝ * ⟪v, n⟫_ℝ := by
     have := congrArg (fun z : ℝ² →ₗ[ℝ] ℝ => z v) htmp1
-    simpa [harea_e v] using this
+    simp [harea_e v]
   have h2 : IsoscelesCounting.stdOrientation.areaForm (⟪n, u⟫_ℝ • n) v =
       -⟪n, u⟫_ℝ * ⟪v, e⟫_ℝ := by
     have := congrArg (fun z : ℝ² →ₗ[ℝ] ℝ => z v) htmp2
-    simpa [harea_n v] using this
+    simp [harea_n v]
   have hsum :
       IsoscelesCounting.stdOrientation.areaForm
           (⟪e, u⟫_ℝ • e + ⟪n, u⟫_ℝ • n) v =
@@ -339,12 +338,12 @@ private theorem vec2_areaForm (a b c d : ℝ) :
 private theorem vec2_dist_sq (x1 y1 x2 y2 : ℝ) :
     dist (vec2 x1 y1) (vec2 x2 y2) ^ 2 = (x1 - x2) ^ 2 + (y1 - y2) ^ 2 := by
   rw [dist_eq_norm, EuclideanSpace.norm_sq_eq]
-  simp [vec2, EuclideanSpace.single_apply, sub_eq_add_neg, pow_two]
+  simp [vec2, sub_eq_add_neg, pow_two]
 
 private theorem point_eq_vec2 {m : ℕ} (X Y : Fin m → ℝ) (t : Fin m) :
     point X Y t = vec2 (X t) (Y t) := by
   ext i <;> fin_cases i <;>
-    simp [point, vec2, EuclideanSpace.single_apply]
+    simp [point, vec2]
 
 private theorem point_signedArea2_eq {m : ℕ} (X Y : Fin m → ℝ) (t0 t1 t2 : Fin m) :
     signedArea2 (point X Y t0) (point X Y t1) (point X Y t2) =
@@ -376,7 +375,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
     (Packet : MecCapPacket A L)
     (Hside : MinorCapSideHypotheses Packet)
     (Hord : StrictCapOrder A L) :
-    ∃ T, ∃ hT : Function.Injective T, ∃ tau : SimilarityTransportData T,
+    ∃ T, ∃ hT : Function.Injective T, ∃ _tau : SimilarityTransportData T,
       Nonempty (MinorCapChainModel (L.map T hT)) := by
   classical
   let q1 : ℝ² := L.points (firstIndex (m := m) Packet.hm)
@@ -410,9 +409,9 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
         rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hnonneg]
       _ = 1 := by field_simp [hu_norm.ne']
   have hn : ‖n‖ = 1 := by
-    simpa [n, he] using IsoscelesCounting.stdOrientation.rightAngleRotation.norm_map e
+    simp [n, he]
   have hen : inner ℝ e n = 0 := by
-    simpa [n, real_inner_comm] using IsoscelesCounting.stdOrientation.inner_rightAngleRotation_self e
+    simp [n]
   let scale : ℝ := 2 / ‖u‖
   have hscale_pos : 0 < scale := by
     dsimp [scale]
@@ -421,7 +420,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
   have hF_inj : Function.Injective F := by
     intro v w hfw
     have h0 : F (v - w) = 0 := by
-      simpa [map_sub, hfw] using congrArg (fun z => z - F w) hfw
+      simp [map_sub, hfw]
     have hcoord0 : scale * ⟪v - w, e⟫_ℝ = 0 := by
       have := congrArg (fun z : ℝ² => z 0) h0
       simpa [F, chordLinear, chordFrame] using this
@@ -465,10 +464,10 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
     intro u v
     have hFu : F u = vec2 (scale * ⟪u, e⟫_ℝ) (scale * ⟪u, n⟫_ℝ) := by
       ext i <;> fin_cases i <;>
-        simp [F, chordLinear, chordFrame, vec2, EuclideanSpace.single_apply]
+        simp [F, chordLinear, chordFrame, vec2]
     have hFv : F v = vec2 (scale * ⟪v, e⟫_ℝ) (scale * ⟪v, n⟫_ℝ) := by
       ext i <;> fin_cases i <;>
-        simp [F, chordLinear, chordFrame, vec2, EuclideanSpace.single_apply]
+        simp [F, chordLinear, chordFrame, vec2]
     have hvec_area :
         stdOrientation.areaForm
             (vec2 (scale * ⟪u, e⟫_ℝ) (scale * ⟪u, n⟫_ℝ))
@@ -491,7 +490,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
       dist (T a) (T b) = ‖F (a - M) - F (b - M)‖ := by
         simp [T, dist_eq_norm]
       _ = ‖F ((a - M) - (b - M))‖ := by
-        simpa using (congrArg (fun z : ℝ² => ‖z‖) (map_sub F (a - M) (b - M)).symm)
+        simp
       _ = ‖F (a - b)‖ := by
         simp [sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
       _ = scale * dist a b := by
@@ -513,7 +512,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
     intro S a
     let Taff : ℝ² →ᵃ[ℝ] ℝ² := AffineMap.mk' T F M (by
       intro p'
-      simp [T, sub_eq_add_neg, map_add, map_sub, add_comm, add_left_comm, add_assoc])
+      simp [T, sub_eq_add_neg, map_add, add_comm])
     have hmap : T '' (convexHull ℝ S) = convexHull ℝ (T '' S) := by
       simpa using (AffineMap.image_convexHull Taff S)
     constructor
@@ -556,12 +555,12 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
   have hq1mid : q1 - M = -(1 / 2 : ℝ) • u := by
     calc
       q1 - M = (1 / 2 : ℝ) • (q1 - qm) := by
-        simpa [M] using (left_sub_midpoint ℝ q1 qm)
+        simp [M]
       _ = -(1 / 2 : ℝ) • u := by
-        rw [show q1 - qm = -u by simpa [u] using (neg_sub qm q1).symm]
+        rw [show q1 - qm = -u by simp [u]]
         simp [smul_neg]
   have hqm_mid : qm - M = (1 / 2 : ℝ) • u := by
-    simpa [M, u] using (right_sub_midpoint ℝ q1 qm)
+    simp [M, u]
   have hue : ⟪u, e⟫_ℝ = ‖u‖ := by
     dsimp [e]
     rw [real_inner_smul_right, real_inner_self_eq_norm_sq]
@@ -596,14 +595,14 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
         simpa [u, M] using hperp'
       have hmul : ‖u‖ * ⟪Packet.center - M, e⟫_ℝ = 0 := by
         rw [show e = ‖u‖⁻¹ • u by rfl, inner_smul_right]
-        simpa [hperp'']
+        simp [hperp'']
       exact (mul_eq_zero.mp hmul).resolve_left hs
     nlinarith [heq, hscale_pos]
   have hTcoord : ∀ z : ℝ²,
       T z = vec2 (scale * ⟪z - M, e⟫_ℝ) (scale * ⟪z - M, n⟫_ℝ) := by
     intro z
     ext i <;> fin_cases i <;>
-      simp [T, F, chordLinear, chordFrame, vec2, EuclideanSpace.single_apply, EuclideanSpace.ofLp_single]
+      simp [T, F, chordLinear, chordFrame, vec2]
   have hChordArea : ∀ z : ℝ²,
       signedArea2 (T q1) (T qm) (T z) = 2 * (scale * ⟪z - M, n⟫_ℝ) := by
     intro z
@@ -657,7 +656,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
       have hu' : ⟪L.points j - L.points i, u⟫_ℝ > 0 := by
         simpa [u, q1, qm] using hproj
       have hmul : ‖u‖ * ⟪L.points j - L.points i, e⟫_ℝ = ⟪L.points j - L.points i, u⟫_ℝ := by
-        simp [e, u, real_inner_smul_right, real_inner_self_eq_norm_sq, hu_norm.ne']
+        simp [e, u, real_inner_smul_right, hu_norm.ne']
       nlinarith [hu', hmul, hu_norm]
     have hdiff : hX j - hX i = scale * ⟪L.points j - L.points i, e⟫_ℝ := by
       have hinner : ⟪L.points j + -M, e⟫_ℝ + -⟪L.points i + -M, e⟫_ℝ =
@@ -1381,7 +1380,7 @@ theorem CGN6b_nonacute_of_minorCapChainCoords {m : ℕ} (L : MinorCapChainCoords
       have hrefl :
           slopeAt L.X L.Y 0 j.val (by omega) hj_nat ≤
             slopeAt L.X L.Y 0 j.val (by omega) hj_nat := le_rfl
-      simpa [hi0', h0simp] using hrefl
+      simp [hi0', h0simp]
     · have hi_pos : 0 < i.val := Nat.pos_of_ne_zero hi0
       have h0 :
           slopeAt L.X L.Y i.val j.val hi_nat hj_nat ≤
@@ -1408,7 +1407,7 @@ theorem CGN6b_nonacute_of_minorCapChainCoords {m : ℕ} (L : MinorCapChainCoords
         have hrefl :
             slopeAt L.X L.Y j.val (m - 1) (by omega) (by omega) ≤
               slopeAt L.X L.Y j.val (m - 1) (by omega) (by omega) := le_rfl
-        simpa [σR, hklast', hlsimp] using hrefl
+        simp [σR, hklast', hlsimp]
       have h0'' : -σR ≤ L.Y j / (1 - L.X j) := by
         have h0le : -L.Y j / (1 - L.X j) ≤ σR := by
           simpa [ge_iff_le] using h0'
@@ -1523,7 +1522,7 @@ theorem CGN6c_oneSidedDistanceInjective {m : ℕ} {L : OrderedCap m}
     have hmid_r :
         midpoint ℝ (L.points r) (L.points s) - L.points r =
           (1 / 2 : ℝ) • (L.points s - L.points r) := by
-      simpa using (right_sub_midpoint ℝ (L.points r) (L.points s))
+      simp
     have hinner_mid :
         inner ℝ (midpoint ℝ (L.points r) (L.points s) - L.points r)
           (L.points s - L.points r) = dist (L.points r) (L.points s) ^ 2 / 2 := by
@@ -1580,12 +1579,12 @@ theorem CGN6c_oneSidedDistanceInjective {m : ℕ} {L : OrderedCap m}
     have hmid_r :
         midpoint ℝ (L.points r) (L.points s) - L.points s =
           (1 / 2 : ℝ) • (L.points r - L.points s) := by
-      simpa using (left_sub_midpoint ℝ (L.points r) (L.points s))
+      simp
     have hinner_mid :
         inner ℝ (midpoint ℝ (L.points r) (L.points s) - L.points s)
           (L.points r - L.points s) = dist (L.points r) (L.points s) ^ 2 / 2 := by
       have hdist_rs : ‖L.points r - L.points s‖ = dist (L.points r) (L.points s) := by
-        simpa [dist_eq_norm] using (dist_comm (L.points r) (L.points s))
+        simp [dist_eq_norm]
       calc
         inner ℝ (midpoint ℝ (L.points r) (L.points s) - L.points s)
             (L.points r - L.points s)
@@ -1770,7 +1769,7 @@ theorem CGN6d0_positiveSideBisector_to_wbtw
     subst ha_mid
     linarith
   haveI : Fact (Module.finrank ℝ ℝ² = 1 + 1) := ⟨by
-    simpa using (finrank_euclideanSpace_fin (𝕜 := ℝ) (n := 2))⟩
+    simp⟩
   have hdir_finrank : Module.finrank ℝ (AffineSubspace.perpBisector x y).direction = 1 := by
     rw [AffineSubspace.direction_perpBisector]
     have hxyvec : y -ᵥ x ≠ 0 := by

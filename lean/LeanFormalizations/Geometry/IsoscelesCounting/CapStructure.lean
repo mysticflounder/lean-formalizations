@@ -271,7 +271,7 @@ theorem CapTriple.exists_surplus_cap_of_card_gt_nine
         | _      => CP.C3).card := by
   classical
   by_contra hall
-  push_neg at hall
+  push Not at hall
   -- Each `hall ⟨i, _⟩` reduces to `Ci.card ≤ 4` after the `match` unfolds.
   have h1 : CP.C1.card ≤ 4 := hall ⟨0, by decide⟩
   have h2 : CP.C2.card ≤ 4 := hall ⟨1, by decide⟩

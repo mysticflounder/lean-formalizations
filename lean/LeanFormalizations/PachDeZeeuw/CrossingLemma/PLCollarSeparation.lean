@@ -888,11 +888,11 @@ theorem exists_twoSidedPartition_prefixStep
   have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
   have hLpos : 0 < dist p₁ p₂ := dist_pos.mpr hne
   -- Segment data for the unique edge (mirrors `exists_twoSidedPartition_unitSegment`).
-  have hverts0 : β.verts 0 = p₁ := by rw [hβ]; simp [straightPolyArc, PolyArc.verts]
+  have hverts0 : β.verts 0 = p₁ := by rw [hβ]; simp [straightPolyArc]
   have hvertsLast : β.verts (Fin.last β.numSegs) = p₂ := by
     show (straightPolyArc p₁ p₂ hne).verts
         (Fin.last (straightPolyArc p₁ p₂ hne).numSegs) = _
-    simp [straightPolyArc, PolyArc.verts, Fin.last]
+    simp [straightPolyArc, Fin.last]
   have hsrc : β.segSrc β.firstSeg = p₁ := by
     rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
   have htgt : β.segTgt β.firstSeg = p₂ := by
@@ -1135,11 +1135,11 @@ theorem exists_twoSidedPartition_unitSegment :
   have hβ : β = straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne := rfl
   have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
   have hv0 : β.verts 0 = ((0,0) : ℝ × ℝ) := by
-    rw [hβ]; simp [straightPolyArc, PolyArc.verts]
+    rw [hβ]; simp [straightPolyArc]
   have hvL : β.verts (Fin.last β.numSegs) = ((1,0) : ℝ × ℝ) := by
     show (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).verts
         (Fin.last (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).numSegs) = _
-    simp [straightPolyArc, PolyArc.verts, Fin.last]
+    simp [straightPolyArc, Fin.last]
   have hsrc : β.segSrc β.firstSeg = ((0,0) : ℝ × ℝ) := by
     rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
   have htgt : β.segTgt β.firstSeg = ((1,0) : ℝ × ℝ) := by
@@ -1286,7 +1286,7 @@ theorem exists_twoSidedPartition_unitSegment :
       -- dist (c,0) (0,0) = |c| = c ; dist (0,0) (1,0) = 1 ; c = c * 1.
       have hd1 : dist ((c,0):ℝ×ℝ) ((0,0):ℝ×ℝ) = c := by
         rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]
-        simp only [Prod.fst, Prod.snd, sub_zero, abs_zero]
+        simp only [sub_zero, abs_zero]
         rw [max_eq_left (abs_nonneg c), abs_of_pos hc.1]
       have hd2 : dist ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) = 1 := by
         rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]; norm_num
@@ -1339,7 +1339,7 @@ theorem exists_twoSidedPartition_unitSegment :
       -- dist (d,0) (1,0) = |d-1| = 1-d ; dist (1,0) (0,0) = 1.
       have hd1 : dist ((d,0):ℝ×ℝ) ((1,0):ℝ×ℝ) = 1 - d := by
         rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]
-        simp only [Prod.fst, Prod.snd, sub_zero, sub_self, abs_zero]
+        simp only [sub_self, abs_zero]
         rw [max_eq_left (abs_nonneg _), abs_of_nonpos (by linarith [hd.2])]; ring
       have hd2 : dist ((1,0):ℝ×ℝ) ((0,0):ℝ×ℝ) = 1 := by
         rw [Prod.dist_eq, Real.dist_eq, Real.dist_eq]; norm_num

@@ -85,7 +85,7 @@ theorem three_le_card_of_convexIndep_noncoll
     (hnoncoll : ¬ Collinear ℝ (A : Set ℝ²)) :
     3 ≤ A.card := by
   by_contra h
-  push_neg at h
+  push Not at h
   apply hnoncoll
   interval_cases hcard : A.card
   · rw [Finset.card_eq_zero] at hcard
@@ -113,7 +113,7 @@ theorem affineSpan_eq_top_of_not_collinear
   rw [AffineSubspace.affineSpan_eq_top_iff_vectorSpan_eq_top_of_nonempty ℝ ℝ² ℝ² hne]
   have h2 : 2 ≤ Module.finrank ℝ (vectorSpan ℝ A) := by
     by_contra hlt
-    push_neg at hlt
+    push Not at hlt
     exact hnoncoll (collinear_iff_finrank_le_one.mpr (by omega))
   have htop : Module.finrank ℝ ℝ² = 2 := finrank_euclideanSpace_fin
   refine Submodule.eq_top_of_finrank_eq ?_
@@ -150,7 +150,7 @@ theorem notMem_extremePoints_of_mem_interior
     {s : Set ℝ²} {a : ℝ²} (ha : a ∈ interior s) :
     a ∉ Set.extremePoints ℝ s := by
   rw [mem_extremePoints]
-  push_neg
+  push Not
   intro _
   obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.mp isOpen_interior a ha
   set v : ℝ² := (ε / 2) • (EuclideanSpace.basisFun (Fin 2) ℝ) 0 with hv
@@ -624,7 +624,7 @@ theorem directions_not_in_halfplane_of_center_interior
     {u : ℝ²} (hu : u ≠ 0) :
     ∃ a ∈ A, ⟪a - c, u⟫ < 0 := by
   by_contra h
-  push_neg at h
+  push Not at h
   -- The closed half-space `{x | ⟪c,u⟫ ≤ ⟪x,u⟫}` is convex and contains `A`, hence the hull.
   set H : Set ℝ² := {x | (inner ℝ c u : ℝ) ≤ inner ℝ x u} with hH
   have hHconv : Convex ℝ H :=
@@ -1298,7 +1298,7 @@ theorem shortGap_ray_endpointChord_hit
     have h :=
       IsoscelesCounting.stdOrientation.areaForm_rightAngleRotation_right (x := u) (y := u)
     rw [IsoscelesCounting.stdOrientation.areaForm_swap] at h
-    simpa [n] using h
+    simp [n]
   have hwarea : IsoscelesCounting.signedArea2 c (phi i) (phi k) = tw * ‖u‖ ^ 2 := by
     calc
       IsoscelesCounting.signedArea2 c (phi i) (phi k) =

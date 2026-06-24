@@ -454,22 +454,20 @@ theorem IsTree.exists_leaf_insertion_order {V : Type*} (G : SimpleGraph V) [Fint
     have hget :
         (l0.reverse)[k]'(by simpa [List.length_reverse] using hk') =
           l0[i]'hi' := by
-      simpa [i] using
-        (List.get_reverse' (l := l0) (n := ⟨k, by simpa [List.length_reverse] using hk'⟩)
-          (by dsimp [i]; omega))
+      simp [i]
     have hfull : ∀ x : V, x ∈ l0 := by
       intro x
       have hcardto : l0.toFinset.card = Fintype.card V := by
         rw [List.toFinset_card_of_nodup hl0_nodup, hl0_len]
       have hsub : l0.toFinset ⊆ (Finset.univ : Finset V) := by
         intro y hy
-        simpa using hy
+        simp
       have hcardle : (Finset.univ : Finset V).card ≤ l0.toFinset.card := by
         rw [Finset.card_univ, hcardto]
       have hfin : l0.toFinset = (Finset.univ : Finset V) := by
         exact Finset.eq_of_subset_of_card_le hsub hcardle
       have hx : x ∈ l0.toFinset := by
-        simpa [hfin]
+        simp [hfin]
       simpa [List.mem_toFinset] using hx
     have hstep := hl0_leaf i (by dsimp [i]; omega)
     rcases hstep with ⟨w, hw, huniq⟩
@@ -485,7 +483,7 @@ theorem IsTree.exists_leaf_insertion_order {V : Type*} (G : SimpleGraph V) [Fint
         rw [List.mem_append] at happend
         exact Or.resolve_left happend hw_not_take
       have hdrop_eq : l0.drop i = l0.get ⟨i, hi'⟩ :: l0.drop (i + 1) := by
-        simpa using (List.cons_get_drop_succ (l := l0) (n := ⟨i, hi'⟩)).symm
+        simp
       have hw_drop_cons : w ∈ l0.get ⟨i, hi'⟩ :: l0.drop (i + 1) := by
         rw [hdrop_eq] at hw_drop_i
         exact hw_drop_i
@@ -803,7 +801,7 @@ theorem IsTree.parentEdgeMap_injective {V : Type*} (G : SimpleGraph V)
     · have ha : a.1 + 1 < l.length := by omega
       have hb : b.1 + 1 < l.length := by omega
       have hmeml : l[b.1 + 1] ∈ l := by
-        simpa using (List.mem_of_getElem (l := l) (i := b.1 + 1) (h := hb) rfl)
+        simp
       have hnot : l[b.1 + 1] ∉ (l.take (a.1 + 1)).toFinset := by
         intro hmemtake
         rw [List.mem_toFinset] at hmemtake
