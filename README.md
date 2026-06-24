@@ -10,8 +10,9 @@ Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`)
 ## Verification status (2026-06-23)
 
 - **Build:** green — `lake build` completes all **8621 jobs**.
-- **Verified core:** the **65** theorems advertised as `✅ VERIFIED` below are
-  mechanically re-verified axiom-clean — each depends only on a subset of the
+- **Verified core:** the **65** theorems on the axiom gate (a superset of the
+  `✅ VERIFIED` rows below) are mechanically re-verified axiom-clean — each
+  depends only on a subset of the
   Lean/mathlib core axioms `[propext, Classical.choice, Quot.sound]`. Reproduce
   with `./scripts/check-axioms.sh` (list in `scripts/axiom-check.lean`).
 - **No trust shortcuts:** the source defines **no custom `axiom`** and uses **no
