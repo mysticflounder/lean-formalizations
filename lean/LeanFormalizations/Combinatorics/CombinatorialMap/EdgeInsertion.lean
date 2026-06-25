@@ -304,7 +304,7 @@ The clean, cycle-combinatorics-free route to `|orbitCount (swap p q * f) −
 orbitCount f| ≤ 1`. Let `J := SameCycle.setoid f ⊔ ⟨pair p q⟩`, the partition of
 `f` with the classes of `p` and `q` identified.
 
-* **Monotonicity** (`orbitCount_mono_of_le`, PROVEN below): a finer setoid has at
+* **Monotonicity** (`card_quotient_mono_of_le`, PROVEN below): a finer setoid has at
   least as many classes — `Quot.factor` gives a surjection of quotients.
 * `SameCycle (swap p q * f) ≤ J`: each `g`-step `g x = (p q)(f x)` is an `f`-step
   (hence `≤ J`) possibly composed with the `p~q` link (in `J`); induct on the

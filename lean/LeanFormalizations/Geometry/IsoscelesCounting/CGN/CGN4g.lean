@@ -18,9 +18,9 @@ This file adds the closure-plan data carrier for the ordered-cap block cut out
 of a global convex-boundary enumeration, together with the theorem wrappers
 that are pure packaging.
 
-The geometric producers for the block (`CGN4g1`, `CGN4g3`, `CGN4g4`) remain
-separate. The declarations here are the sanctioned interfaces consumed by the
-existing CGN6 / CGN7 layers.
+The geometric producers for the block (`CGN4g1`, `CGN4g3`, `CGN4g4`) are
+defined in this file. The declarations here are the sanctioned interfaces
+consumed by the existing CGN6 / CGN7 layers.
 -/
 
 open scoped EuclideanGeometry
@@ -74,7 +74,7 @@ structure BoundaryCapBlock (A C : Finset ℝ²) {n m : ℕ}
 /-- Local CGN4g helper: once the omitted support vertex is the cut point of
 the global boundary order, the opposite support cap is exactly the closed
 interval between the two support endpoints. This is not a new public CGN
-interface; it packages the `CapTriple.arc_membership` predicate as a finite
+interface; it packages the `OnArcOpposite` predicate as a finite
 interval statement so it can feed `CGN4g1_capBlock_of_supportCap`. -/
 private theorem supportCap_interval_of_oppositeFirst
     {A C : Finset ℝ²} {n : ℕ} {phi : Fin n → ℝ²}

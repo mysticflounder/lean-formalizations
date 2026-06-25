@@ -225,7 +225,8 @@ where `π : p([n]) → [n]` is the index-recovery map for injective `p`.
 We define `phiQuadruple` (the image map) and prove it lands in
 `quadruplePos p` (Claim A: well-defined). Injectivity on direct
 isometries (Claim B) and surjectivity (Claim C, the existence half)
-are the two remaining pieces, deferred to follow-up work.
+are proved in the next section; together they assemble the full
+bridge identity `distanceEnergy_eq_sum_richness_falling`.
 -/
 
 /--

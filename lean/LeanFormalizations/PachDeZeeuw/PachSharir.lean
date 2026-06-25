@@ -10,12 +10,13 @@ import LeanFormalizations.PachDeZeeuw.PachSharir.GenericProjection
 /-!
 # The Pach–Sharir incidence bound
 
-Literature-facing Pach–Sharir incidence statements together with the axiom-free
+Literature-facing Pach–Sharir incidence statements together with the
 internal Szemerédi–Trotter reduction used downstream.
 
 `Theorem23.lean` exports only the exact statement surfaces from the paper
-(Theorem 2.3 and Corollary 2.4). `SzemerediTrotter.lean` contains the proved,
-axiom-free internal reduction from the multigraph crossing lemma to the
-point-line incidence bound and the grid rich-line corollary.
+(Theorem 2.3 and Corollary 2.4). `SzemerediTrotter.lean` contains the internal
+reduction from the simple crossing lemma (`CrossingLemma.SimpleCrossingLemmaStatement`,
+entering as hypothesis `hCL`) to the point-line incidence bound and the grid
+rich-line corollary.
 
 -/

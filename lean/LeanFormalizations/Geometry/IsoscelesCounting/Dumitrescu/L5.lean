@@ -156,7 +156,7 @@ the part this file does not attempt and which is missing from current
 Mathlib. -/
 
 /-- An **angle-monotonicity ranking** of the witness pairs in cap `C`:
-an injective `Finset`-valued map from `capWitnessPairs A C` into a
+an injective `ℝ²`-valued map from `capWitnessPairs A C` into a
 target Finset `T ⊆ C` with `T.card ≤ C.card - 1` (typically `T = C`
 with one vertex omitted). The intended source is the angle
 monotonicity along the cap's MEC arc: each witness pair gets a unique

@@ -45,7 +45,7 @@ this file builds the proof from first principles:
 
 ## Main theorems
 
-* `IsoscelesCounting.MinEnclosingCircle.exists` — existence of a MEC for any
+* `IsoscelesCounting.MinEnclosingCircle.exists_mec` — existence of a MEC for any
   nonempty `Finset ℝ²`.
 
 * `IsoscelesCounting.MinEnclosingCircle.unique_pair` — uniqueness on the level of

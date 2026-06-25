@@ -165,7 +165,7 @@ lemma noCommonCurveComponent_of_no_common_infinite_factor
     exact PlaneCurveZeroSet_subset_of_dvd hq
   exact hno ⟨h.totalDegree, PlaneCurveZeroSet h, hcurve, hinf, hsubset₁, hsubset₂⟩
 
-/-- Curry a bivariate real polynomial into a univariate polynomial over the coefficient ring. -/
+/-- The coefficient ring used in the Bézout proof: univariate real polynomials. -/
 abbrev XCoeff := MvPolynomial (Fin 1) ℝ
 
 /-- Fraction field of the coefficient ring used in the Bézout proof. -/
@@ -510,7 +510,7 @@ theorem isRelPrime_fraction_map_of_isPrimitive
       hrel hprim_dvd_P hprim_dvd_Q
     exact Polynomial.isUnit_or_eq_zero_of_isUnit_integerNormalization_primPart hD hunit_prim
 
-/-- Primitive `IsRelPrime` curries have nonzero resultant after mapping to the fraction field. -/
+/-- Primitive `IsRelPrime` curries remain coprime after mapping to the fraction field. -/
 theorem isCoprime_fraction_map_of_isPrimitive
     (P Q : Polynomial XCoeff)
     (hPprim : P.IsPrimitive)

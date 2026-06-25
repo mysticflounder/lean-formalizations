@@ -319,8 +319,11 @@ private lemma diameter_inner_side_nonneg (p q c : ℝ²) :
     rw [norm_neg]; ring
   linarith [hkey]
 
-/-- Bound from Cauchy–Schwarz on the on-sphere chord inner product: with
-`‖p - O‖ = ‖c - O‖ = r`, `|⟪p - c, q - c⟫_ℝ| ≤ ‖p - c‖ · ‖q - c‖`. -/
+/-- Diameter inner-product triple.  Under the diameter configuration
+`O = midpoint p q` with `p, q, c` on the sphere of radius `r`, three
+exact equalities hold:
+`⟪p - c, q - c⟫_ℝ = 0` (Thales: right angle at `c`),
+`⟪q - p, c - p⟫_ℝ = ‖c - p‖²`, and `⟪p - q, c - q⟫_ℝ = ‖c - q‖²`. -/
 private lemma diameter_inner_pq_le_normSq
     {O p q c : ℝ²} {r : ℝ}
     (hpO : ‖p - O‖ = r) (hqO : ‖q - O‖ = r) (hcO : ‖c - O‖ = r)

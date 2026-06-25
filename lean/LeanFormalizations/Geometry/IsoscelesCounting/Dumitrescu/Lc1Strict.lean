@@ -71,7 +71,7 @@ Strict variant: `dist y a < dist y c ↔ ⟪y - m, c - a⟫_ℝ < 0`.
 The "easy direction" packaged as a stand-alone implication: the
 algebraic chord-side condition implies the distance comparison.
 
-### `same_side_perpBisector_dist_le`
+### `dist_le_of_same_side_witness`
 
 Cap-witness flavored re-statement: if `x` witnesses edge `(a, c)`
 (`dist x a = dist x c`) and `y` lies on `a`'s closed half-plane of the
@@ -83,24 +83,21 @@ perpendicular bisector of `ac` (`⟪y - x, c - a⟫_ℝ ≤ 0`), then
 Nivasch–Pach–Pinchasi–Zerbib Lemma 6's actual proof requires three more ingredients that
 are **all open** in the current infrastructure:
 
-### Gap 1 — `convex_order_implies_perpBisector_side`  (NOT proven)
+### Gap 1 — `convex_order_implies_perpBisector_side`  (proven)
 
-For four points `a, y, x, c` in `ℝ²` in **convex position**, with
-convex polygon order `a, y, x, ..., c, ...` (i.e. `y` strictly between
-`a` and `x` in the polygon ordering, and `x` strictly between `a` and
-`c`), and `x` on the perpendicular bisector of `ac`, then `y` lies on
-`a`'s side of that perpendicular bisector:
+For any points `a, x, c` in `ℝ²` with `x` on the perpendicular
+bisector of `ac` (`dist x a = dist x c`) and `y` weakly between `a`
+and `x` (`Wbtw ℝ a y x`), then `y` lies on `a`'s closed half-plane
+of the perpendicular bisector of `ac`:
 
 ```text
 ⟪y - midpoint a c, c - a⟫_ℝ ≤ 0.
 ```
 
-This is the "second bullet" of the Lemma 6 chain. **It requires a
-convex-position angular monotonicity argument** that is not in current
-infrastructure: as `y` moves along the convex polygon from `a` towards
-`x`, the chord-side projection on the perp bisector of `ac` is
-monotone. The argument uses general-position convexity, not just the
-chord-side / disk-containment data we currently package.
+This is the "second bullet" of the Lemma 6 chain. It is proved below
+(`convex_order_implies_perpBisector_side`) via a convex-combination
+argument: the closed half-plane is a linear half-space, it contains
+both `a` and `x`, so it contains every point weakly between them.
 
 ### Gap 2 — wedge containment (`∠acb ≤ ∠ycb`)  (NOT proven)
 

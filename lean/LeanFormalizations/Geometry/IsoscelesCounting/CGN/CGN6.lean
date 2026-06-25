@@ -15,14 +15,17 @@ import Mathlib
 /-!
 # CGN6: normalized minor-cap chain model
 
-This file starts the CGN6 layer named in the updated counterexample-card-ge-nine
-prose. It records the normalized minor-cap chain data the prose uses for the
-CGN6b slope-product argument: ordered coordinates, endpoint normalization, the
-unit-disk bound, and the adjacent-slope bookkeeping.
+This file develops the full CGN6 layer named in the counterexample-card-ge-nine
+prose. It defines the normalized minor-cap chain data structures and proves the
+main geometric lemmas:
 
-The actual geometric construction of this model from a concrete MEC cap packet
-is still separate. This file only provides the data interface the subsequent
-CGN6b / CGN6c proofs will consume.
+* `MinorCapChainCoords` / `MinorCapChainModel`: the normalized coordinate data interface
+  (ordered coordinates, endpoint normalization, unit-disk bound, adjacent-slope bookkeeping).
+* `CGN6norm`: normalization of a MEC cap packet to a minor-cap chain model.
+* `CGN6b0` / `CGN6b`: endpoint secant bounds and the non-acute inner-product lemma.
+* `CGN6c`: one-sided distance injectivity and strict endpoint monotonicity.
+* `CGN6d0`: midpoint betweenness for positive-side apices.
+* `CGN6e0`-`CGN6e7`: apex-side dichotomy and indexed-witness existence and uniqueness.
 -/
 
 open scoped EuclideanGeometry

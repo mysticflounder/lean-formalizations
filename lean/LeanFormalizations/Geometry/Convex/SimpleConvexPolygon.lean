@@ -17,14 +17,17 @@ generate.
 The geometric headline is `SimpleConvexPolygon.collinear_vertices_cyclicInterval`:
 three distinct collinear boundary vertices (under an explicit "maximal flat side"
 uniqueness hypothesis — no other listed vertex lies on their supporting line)
-must occur consecutively in the cyclic vertex order. Its proof factors into:
+must occur consecutively in the cyclic vertex order. Its proof goes through:
 
-* `chord_in_frontier_of_collinear_boundary_triple` — in a 2-dimensional closed
-  convex set, three collinear frontier points (middle one strictly between)
-  force the whole chord into the frontier (a dimension-2 transverse argument);
 * `collinear_vertices_on_flat_chord_consecutive` — the cyclic-edge-cover
   bookkeeping that turns the flat chord into a cyclic interval, centered at the
-  middle vertex `b`.
+  middle vertex `b`, via the private `cyclic_walk_witness_of_flat_chord`.
+
+`chord_in_frontier_of_collinear_boundary_triple` is also proved here: in a
+2-dimensional closed convex set, three collinear frontier points (middle one
+strictly between) force the whole chord into the frontier (a dimension-2
+transverse argument). It is not used in the main proof chain but is retained
+as a standalone planar convex-geometry result.
 
 `hull_point_separation` and `exposed_subset_halfspace_slice` wire in the
 support-hyperplane / exposed-face API from mathlib. The line-slice machinery

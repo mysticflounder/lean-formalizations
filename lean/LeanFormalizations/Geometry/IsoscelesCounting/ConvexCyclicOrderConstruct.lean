@@ -60,8 +60,16 @@ It also lands the cut-open enumeration:
   bookkeeping over `Finset.orderEmbOfFin` of the key-image, using §3.2 for
   injectivity of the key on `A`.
 
-The remaining sub-lemma — the geometric heart (cyclic angular order ⇒
-CCW) and the final assembly — are **not** in this file yet.
+The geometric heart and final assembly are included in this file:
+
+* `signedArea2_neg_of_cut_sorted` (spec CGN4g-r6g) — splits the endpoint gap into
+  short, degenerate, and long cases to show `signedArea2 (phi i) (phi j) (phi k) < 0`
+  for every `i < j < k`.
+* `isCcwConvexPolygon_of_cut_sorted_arcAngle` — derives `IsCcwConvexPolygon phi` from
+  the signed-area sign via the `signedArea2_sign_eq_oangle_sign` bridge.
+* `exists_isCcwConvexPolygon_of_convexIndep` — the top-level Step 2 assembly: every
+  convex-independent non-collinear finite set in `ℝ²` admits a CCW convex-boundary
+  enumeration.
 -/
 
 open scoped EuclideanGeometry Real

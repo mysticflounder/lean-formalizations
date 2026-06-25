@@ -35,9 +35,7 @@ Together with the hypothesis `⟪a - c, b - c⟫_ℝ ≥ 0`, this gives the resu
 
 The companion `signedArea_prod_eq_inner_mul_dist_sq` is the abstract identity
 without the inner-product hypothesis on `c`; it depends only on the
-perpendicular-bisector condition on `O`. We also expose a `‖·‖²` form
-(`signedArea_prod_eq_inner_mul_dist_sq`) that is more convenient for direct
-algebraic chaining than re-deriving it from scratch.
+perpendicular-bisector condition on `O` (in squared-norm form: `‖a - O‖² = ‖b - O‖²`).
 -/
 
 open scoped EuclideanGeometry InnerProductSpace

@@ -88,7 +88,7 @@ structure EdgeBEdge (P : Finset (ℝ × ℝ)) where
 -- which is in scope here via the `DecompositionD1 → ChartBridge` import, so `E` is a
 -- reserved notation token and cannot be used as a binder name.
 
-/-- Both endpoints of an `EdgeBEdge` lie in `P` (from `edgesOnSheet_mem`). -/
+/-- The first endpoint of an `EdgeBEdge` lies in `P` (from `edgesOnSheet_mem`). -/
 theorem EdgeBEdge.fst_mem {P : Finset (ℝ × ℝ)} (Ed : EdgeBEdge P) : Ed.e.1 ∈ P :=
   (edgesOnSheet_mem P Ed.h Ed.α Ed.β Ed.j Ed.e Ed.hmem).1.1
 

@@ -1894,14 +1894,14 @@ private lemma graph_dependentRandomChoice_payoff_pointwise_count {G : Type*} [De
 /--
 **DRC payoff: pointwise path-3 count.** Given the pair-DRC witness `U ⊆ A`
 (from `graph_pair_dependentRandomChoice`), define the "non-bad" set
-`A' := { a ∈ U : few a' ∈ U with codegree < (δ³/32) n }` and the "popular"
+`A' := { a ∈ U : few a' ∈ U with codegree < (δ³/2⁷) n }` and the "popular"
 set `B' := { b ∈ B : (δ/4) |U| ≤ |N_U(b)| }`. For `a ∈ A'`, `b ∈ B'`, the
-length-3 path count `P(a, b) ≥ (δ⁵ / 2¹⁰) n² ≥ (δ⁵ / 2¹²) n²`.
+length-3 path count `P(a, b) ≥ (δ⁵ / 2¹²) n²`.
 
 Proof: of the `(δ/4)|U|` vertices in `U ∩ N(b)`, at most `(δ/8)|U|` are bad
 partners of `a`, leaving `≥ (δ/8)|U|` non-bad partners `a₁`. Each non-bad
-partner has `|N(a) ∩ N(a₁)| ≥ (δ³/32) n` choices of `b₁`. Total:
-`P(a, b) ≥ (δ/8)|U| · (δ³/32) n ≥ (δ/8)(δ/4)n · (δ³/32) n = (δ⁵/2¹⁰) n²`.
+partner has `|N(a) ∩ N(a₁)| ≥ (δ³/2⁷) n` choices of `b₁`. Total:
+`P(a, b) ≥ (δ/8)|U| · (δ³/2⁷) n ≥ (δ/8)(δ/4)n · (δ³/128) n = (δ⁵/2¹²) n²`.
 -/
 lemma graph_dependentRandomChoice_payoff_pointwise {G : Type*} [DecidableEq G]
     (δ : ℝ) (hδ_pos : 0 < δ) (hδ_le : δ ≤ 1)

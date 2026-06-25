@@ -22,7 +22,7 @@ units to units, and units in the field ℝ are nonzero.
 plane curves of degree ≤ d meet in at most `(2d+1)^4` points (as `encard`).
 The proof composes Lemma A, the chart bridge, and
 `irreducible_pair_intersection_bound` (Bézout), then converts from `ncard` to
-`encard` via `Set.encard_le_coe_iff_finite_ncard_le`.
+`encard` via `Set.Finite.cast_ncard_eq` and `exact_mod_cast`.
 -/
 
 namespace PachDeZeeuw.Algebraic
@@ -79,7 +79,7 @@ Proof:
 3. Apply `irreducible_pair_intersection_bound` (Bézout) at `d₁ = d₂ = d` to obtain
    `s.Finite` and `s.ncard ≤ (d + d + 1)^4`.
 4. Note `d + d + 1 = 2·d + 1` by `omega`.
-5. Convert via `Set.encard_le_coe_iff_finite_ncard_le`. -/
+5. Convert via `Set.Finite.cast_ncard_eq` and `exact_mod_cast`. -/
 lemma planeCurveZeroSet_inter_encard_le {d : ℕ} (K₁ K₂ : PlanePoly)
     (hirr₁ : Irreducible K₁) (hirr₂ : Irreducible K₂)
     (hd₁ : K₁.totalDegree ≤ d) (hd₂ : K₂.totalDegree ≤ d)

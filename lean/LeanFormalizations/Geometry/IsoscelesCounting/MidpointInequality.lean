@@ -71,8 +71,8 @@ theorem dist_midpoint_ge_half_of_inner_nn
   exact le_of_sq_le_sq hsq hd_nn
 
 /-- **Thales disk-angle equivalence.** A point lies in the closed disk
-with diameter `xy` exactly when it sees the chord `xy` at a non-obtuse
-angle.
+with diameter `xy` exactly when it sees the chord `xy` at a non-acute
+angle (i.e., right or obtuse, ≥ 90°).
 
 This is the converse form of `dist_midpoint_ge_half_of_inner_nn` and is
 the CGN6a midpoint wrapper used in the cap-witness proof stack. -/

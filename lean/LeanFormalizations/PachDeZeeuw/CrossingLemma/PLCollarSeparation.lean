@@ -96,7 +96,8 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides
 
 /-- **Polygonal collar separation, single-segment (`numSegs = 1`) — `sorry`-free.**
 
-Identical conclusion to `exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`,
+Weaker conclusion than `exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`
+(bare `∃ U V, IsTwoSidedPartition ...`, without the `collarPlus ⊆ U`/`collarMinus ⊆ V` witnesses),
 but it routes the `P2` union identity through the `sorry`-free single-segment lemma
 `union_collarPlus_collarMinus_of_numSegs_one` instead of the general
 `union_collarPlus_collarMinus` (whose interior-vertex disk branch is sorried).  Every
@@ -476,7 +477,7 @@ that the caller must supply.
 
 The result is the bare two-sided partition (`P5`-discharged) obtained by handing
 the internally chosen parameters to
-`exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`. -/
+`exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one`. -/
 theorem exists_twoSidedPartition_of_straightArc
     (β : PolyArc) (h1 : β.numSegs = 1) {R S : Set Plane} {α : ℝ}
     (hα : 0 < α) (hα3 : α < 1 / 3)

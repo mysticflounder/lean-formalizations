@@ -33,7 +33,7 @@ Enumerate `S` in increasing order, `e = S.orderEmbOfFin : Fin n ↪o ℝ` with `
 `Fin (n + 1)`; gap `j` is `(E j, E (j+1))` where the endpoint sequence `E : ℕ → EReal` is
 `E 0 = ⊥`, `E i = e (i-1)` for `1 ≤ i ≤ n`, and `E i = ⊤` for `i ≥ n+1`. `E` is monotone, so
 consecutive gaps are disjoint; the union is `Sᶜ` because a real `x` lies in exactly the gap
-indexed by its rank `r = #{s ∈ S | s < x}` (the `endpt_rank` characterization below).
+indexed by its rank `r = #{s ∈ S | s < x}` (the `orderEmb_lt_iff_lt_rank` characterization below).
 -/
 
 set_option linter.style.longLine false
@@ -142,7 +142,7 @@ theorem endpt_monotone (n : ℕ) (e : Fin n ↪o ℝ) : Monotone (endpt n e) := 
 
 /-- **Complement of a finite set in `ℝ` is a finite disjoint union of open intervals.**
 For finite `S ⊆ ℝ`, there is a finite index family `I : ι → Set ℝ` of pairwise-disjoint open
-intervals (extended-real endpoints) whose union is `Sᶜ`, with `≤ |S| + 1` components. -/
+intervals (extended-real endpoints) whose union is `Sᶜ`, with exactly `|S| + 1` components. -/
 theorem finite_compl_eq_iUnion_Ioo {S : Set ℝ} (hS : S.Finite) :
     ∃ (ι : Type) (_ : Fintype ι) (I : ι → Set ℝ),
       (∀ j, ∃ a b : EReal, I j = {x : ℝ | a < (x : EReal) ∧ (x : EReal) < b}) ∧
@@ -247,8 +247,8 @@ theorem finite_compl_eq_iUnion_Ioo {S : Set ℝ} (hS : S.Finite) :
 
 /-- **(D1c) The good locus is a finite disjoint union of open intervals.** Specializing
 `finite_compl_eq_iUnion_Ioo` to `S = Bad h` (with `GoodLocus h = (Bad h)ᶜ` definitionally):
-the components are open intervals with extended-real endpoints, pairwise disjoint, finitely
-many (`≤ |Bad h| + 1`), and their union is the good locus. The finiteness of `Bad h` is taken
+the components are open intervals with extended-real endpoints, pairwise disjoint, exactly
+`|Bad h| + 1` in number, and their union is the good locus. The finiteness of `Bad h` is taken
 as a hypothesis — supplied downstream by D1 (`decomp_D1_bad_finite`). -/
 theorem decomp_D1_goodLocus_components (h : PlanePoly) (hbad : (Bad h).Finite) :
     ∃ (ι : Type) (_ : Fintype ι) (I : ι → Set ℝ),

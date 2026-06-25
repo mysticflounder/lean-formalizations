@@ -30,13 +30,13 @@ and its intertwiner `eval_eq_evalPlane_chart`.
 
 ## Proof outline
 
-1. `incidenceCount_image_eq` — when `e : α → β` is injective, the incidence count of
+1. `incidenceCount_equiv_eq` — when `e : α ≃ β` is an equivalence, the incidence count of
    `P` against `Γ.image (fun H => e ⁻¹' f H)` equals that of `P.image e` against
    `Γ.image f`. Proved via the sum characterization `incidenceCount_eq_sum` and
    `Finset.card_image_of_injective` for the inner fibre.
 2. Rewrite the Euclidean zero set as `chartEquiv ⁻¹' evalPlaneZeroSet H.1` via
    `eval_eq_evalPlane_chart`.
-3. Apply `incidenceCount_image_eq` to match the LHS of `edgeB_crossingInput`.
+3. Apply `incidenceCount_equiv_eq` to match the LHS of `edgeB_crossingInput`.
 4. Transport `hpp`/`hcc` across `chartEquiv`.
 5. Apply `edgeB_crossingInput` at `P' := P.image chartEquiv`.
 6. Use `Finset.card_image_of_injective` to identify `P'.card = P.card`.
@@ -110,7 +110,7 @@ as `edgeB_crossingInput`, but with the point set in `EuclideanSpace ℝ (Fin 2)`
 expressed as Euclidean zero sets `{x | MvPolynomial.eval (fun i => x i) H.1 = 0}`.
 
 The proof transports across `chartEquiv : EuclideanSpace ℝ (Fin 2) ≃ₜ ℝ × ℝ` using
-`eval_eq_evalPlane_chart` and `chartEquiv_preimage_evalPlaneZeroSet`, then applies
+`eval_eq_evalPlane_chart` and `chartEquiv_image_planeCurveZeroSet`, then applies
 `edgeB_crossingInput`. -/
 theorem edgeB_crossingInput_euclidean
     (hCL : CrossingLemmaMultigraphStatement)

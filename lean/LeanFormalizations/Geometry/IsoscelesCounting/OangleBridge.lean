@@ -35,7 +35,7 @@ Scope of this pass (no proofs in U1/U2/U3 are modified by this file):
 * `IsoscelesCounting.two_zsmul_oangle_eq_of_mecSphere` — wraps mathlib's
   `Sphere.two_zsmul_oangle_eq` for points on the MEC sphere
   (inscribed-angle theorem in Mathlib's `2 • oangle = 2 • oangle` form).
-* `IsoscelesCounting.cospherical_of_two_zsmul_oangle_eq_of_not_collinear_named` —
+* `IsoscelesCounting.cospherical_of_two_zsmul_oangle_eq` —
   re-export of mathlib's Apollonius converse, named in our namespace so
   downstream callers don't have to chase the open-namespace boilerplate.
 
@@ -331,7 +331,7 @@ theorem equilateral_inscribed_side_eq_radius_mul_sqrt_three
 /-- **Equilateral inscribed apex sees opposite chord at angle `π/3`
 (unoriented form).** Three distinct points `p₁, p₂, p₃` on a 2D
 Euclidean sphere, with all pairwise distances equal, have unoriented
-angle `∠ p₁ p₂ p₃ = π/3` at every vertex.
+angle `∠ p₁ p₂ p₃ = π/3` at the apex `p₂`.
 
 This is the unoriented half of "the inscribed apex of an equilateral
 triangle sees the opposite chord at 60°"; the signed form is

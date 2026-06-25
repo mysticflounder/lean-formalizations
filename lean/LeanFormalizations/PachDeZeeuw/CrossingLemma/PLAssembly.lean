@@ -127,16 +127,20 @@ theorem connectedComponentIn_meets_neighborhood_of_cut
     simpa [hKRdef] using hwKR
   exact ⟨w, hwK, hwTC⟩
 
-/-- **The abstract collar ⇒ two-sided partition reduction.**
+/-- **The abstract collar ⇒ two-sided partition reduction (with collar-side containment).**
 
 Given a simply connected open region `R ⊆ ℝ²`, a closed cut `C`, and a *collar*
 `Tp ⊔ Tm` carved out of a preconnected tube `T` around the part of `C` inside `R`,
-the region-minus-cut `R ∖ C` admits a two-sided open partition.
+the region-minus-cut `R ∖ C` admits a two-sided open partition `U, V` with `Tp ⊆ U`
+and `Tm ⊆ V`.
 
 The two collar sides must each be preconnected (`hTp_pre`, `hTm_pre` — the
 geometric obligation **P5**). All other inputs are the collar's already-proved
 structural facts; the former `G4` reachability condition is derived internally
-from connectedness of `R` and the neighborhood cover `R ∩ C ⊆ T`. -/
+from connectedness of `R` and the neighborhood cover `R ∩ C ⊆ T`.
+
+This is the strengthened form; use `exists_twoSidedPartition_of_collar` if the
+collar-side containment witnesses are not needed. -/
 theorem exists_twoSidedPartition_of_collar_with_collar_sides
     {R C T Tp Tm : Set Plane}
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)

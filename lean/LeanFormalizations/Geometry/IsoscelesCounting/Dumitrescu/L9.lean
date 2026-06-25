@@ -47,7 +47,7 @@ namespace Dumitrescu
 
 /-- **Dumitrescu L9 (real form).**  Power-mean / Cauchy–Schwarz on three
 nonnegative reals with a fixed sum: for `m₁ + m₂ + m₃ = N`,
-`N² / 3 ≤ m₁² + m₂² + m₃²`, with equality iff `m₁ = m₂ = m₃ = N/3`.
+`N² / 3 ≤ m₁² + m₂² + m₃²`.
 
 Used in the final arithmetic assembly of the isosceles upper bound
 (Dumitrescu 2006 eq. (5)) to extract the `(n+3)² / 12` term from the

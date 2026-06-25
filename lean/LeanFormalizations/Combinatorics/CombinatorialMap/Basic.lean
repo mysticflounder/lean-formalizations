@@ -40,7 +40,7 @@ Note: this definition excludes disjoint isolated vertices.
 structure CombinatorialMap (D : Type*) where
   /--
   Permutation whose orbits correspond to vertices, it gives the next dart counter-clockwise around
-  an edge.
+  a vertex.
   -/
   vertexPerm : Equiv.Perm D
   /-- Permutation whose orbits correspond to edges, it gives the opposite dart of an edge. -/

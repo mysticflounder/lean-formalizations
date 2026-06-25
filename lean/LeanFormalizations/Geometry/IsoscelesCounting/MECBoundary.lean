@@ -169,7 +169,7 @@ For `card = 2` with boundary `{p, q}`, take `q* := midpoint p q = m`; then
 on the perpendicular bisector, `⟨p - c, m - c⟩ = ‖m - c‖²`.
 -/
 
-/-- The core shrink identity at `t = 1` and along the segment to `q*`:
+/-- The core shrink identity for arbitrary `t` along the segment to `q*`:
 if `⟨p - c, q* - c⟩ = ‖q* - c‖²`, then moving `t` of the way from `c` to `q*`
 reduces `‖p - · ‖²` by `(2t - t²) ‖q* - c‖²`. -/
 private lemma sq_dist_shrink_along_line
@@ -354,8 +354,7 @@ private lemma inner_p_sub_c_m_sub_c
   rw [h_pc_qc]
   ring
 
-/-- For `B = {p, q}` (card-2 case), the diameter case holds: `M.center = midpoint p q`
-and `M.radius = dist p q / 2`. -/
+/-- For `B = {p, q}` (card-2 case), the MEC centre is the midpoint: `M.center = midpoint p q`. -/
 private lemma diameter_case_of_card_boundary_eq_two
     {A : Finset ℝ²} (hA : A.Nonempty)
     (hncol : ¬ Collinear ℝ (A : Set ℝ²))

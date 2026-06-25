@@ -371,13 +371,14 @@ theorem exists_vertexEdgePermutation_of_leafOrder
   intro i
   simp [π, e, hσ]
 
-/-- If every edge other than `d` incident to the vertex of `d` identifies the
-same face label on its two sides, then `d` does as well.
+/-- Any dart `x` in the vertex cycle of `d` has the same face label as `d`,
+provided every edge other than `d` incident to that vertex preserves the face
+label across its two sides.
 
-This is the local vertex-cycle step behind the spanning-tree/spanning-cotree
-complement theorem.  Around a leaf of the remaining primal tree, every other
-incident edge is already known to preserve the current face label, so the last
-remaining tree edge preserves it too. -/
+This is the vertex-cycle transport step behind the spanning-tree/spanning-cotree
+complement theorem.  The hypothesis `hx` places `x` in the `vertexPerm` cycle
+of `d`; the conclusion is `label (Face_mk x) = label (Face_mk d)`, not that
+`d` itself preserves the label across its edge. -/
 theorem face_label_eq_of_mem_vertexPerm_toList_of_forall_same_vertex_other_edge
     (M : CombinatorialMap D) [Fintype D] [DecidableEq D]
     {β : Type*} (label : M.Face → β) {d x : D}

@@ -50,7 +50,8 @@ case structure.
 
 ## Main declarations
 
-* Algebraic identities for `signedArea2` (`signedArea2_self_*`).
+* Algebraic identities for `signedArea2` (`signedArea2_eq_endpoint_left`,
+  `signedArea2_eq_endpoint_right`).
 * Lemmas `onArcOpposite_of_chord_endpoint_{left,right}` — Moser
   vertex endpoints lie on their adjacent caps.
 * `IsoscelesCounting.signedArea2_eq_zero_of_onArcOpposite_self` — apex lies

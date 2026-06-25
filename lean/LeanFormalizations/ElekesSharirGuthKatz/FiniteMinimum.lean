@@ -40,7 +40,7 @@ theorem hIndexed_le_of_config {n : ℕ} (p : Config n)
   exact ⟨p, hp, hgp, rfl⟩
 
 
-/-- Bulk transfer of per-configuration lower bound to `hIndexed n` via `Nat.le_sInf`,
+/-- Bulk transfer of per-configuration lower bound to `hIndexed n` via `le_csInf`,
 discharging the nonemptiness side-condition with `gp_config_nonempty`. -/
 theorem all_configs_lower_bound_to_hIndexed_lower_bound {n : ℕ} {B : ℕ}
     (hB : ∀ p : Config n, Function.Injective p →

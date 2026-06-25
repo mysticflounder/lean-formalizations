@@ -2950,8 +2950,9 @@ variable {ι : Type*} [Fintype ι]
 finite set with no three collinear points in any Euclidean space admits a
 planar projection that is injective on it and realizes the absolute minimum
 bisector energy `2n(n−1)` — every unordered point-pair has a distinct
-perpendicular bisector.  This is the strongest form proved here; the
-sphere-slice form is the corollary below. -/
+perpendicular bisector.  The sphere-slice form is the corollary below;
+stronger forms with image general position, zero rotational energy, and
+distance-transport appear later in this section. -/
 theorem nearEnemy_noThreeCollinear_exists_bisectorEnergy_minimal
     {G : Finset (EuclideanSpace ℝ ι)}
     (hG : ∀ p₁ ∈ G, ∀ p₂ ∈ G, ∀ p₃ ∈ G, p₁ ≠ p₂ → p₁ ≠ p₃ → p₂ ≠ p₃ →

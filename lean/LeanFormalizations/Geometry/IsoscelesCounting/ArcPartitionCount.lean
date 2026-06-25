@@ -203,7 +203,7 @@ private lemma inner_sub_eq_of_sphere
   ring
 
 /-- **Disk inequality** at boundary point `vk`: if `‖v - O‖ ≤ ‖vk - O‖`,
-then `⟨v - vk, vk - O⟩ ≤ -‖v - vk‖² / 2 ≤ 0`. -/
+then `⟨v - vk, vk - O⟩ ≤ -‖v - vk‖² / 2`. -/
 private lemma inner_disk_at_boundary
     (v vk O : ℝ²) (h_disk : ‖v - O‖ ≤ ‖vk - O‖) :
     inner ℝ (v - vk) (vk - O) ≤ - ‖v - vk‖^2 / 2 := by

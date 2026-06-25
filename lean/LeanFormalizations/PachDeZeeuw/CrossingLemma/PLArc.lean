@@ -176,12 +176,8 @@ into two open sectors:
 
 The two sectors are open and disjoint; together with the corner rays they exhaust
 the plane.  This is the elementary algebraic model L3 localises to a thin tube and
-glues across vertices.
-
-**Remaining L2 piece (for L3, not yet formalised):** the explicit identification
-`(convexSector ∪ reflexSector)ᶜ = ray(v→a) ∪ ray(v→b)` (the corner locus).  It is
-mechanical (line/ray parametrisation) and is most naturally done together with the
-tube localisation in L3; see `docs/ROUTE_C_PLAN.md`. -/
+glues across vertices.  The identification `(convexSector ∪ reflexSector)ᶜ = cornerLocus`
+(the algebraic corner locus) is proved as `compl_sectors_eq_cornerLocus` below. -/
 
 /-- The signed turn at the corner `a → v → b` (twice the signed area of the
 triangle `a, v, b`).  Nonzero ⇔ `a, v, b` not collinear. -/
@@ -517,8 +513,9 @@ A `PolyArc` is a finite list of `n+1` vertices spanning `n ≥ 1` segments.  The
 simplicity conditions are recorded so the carrier is a genuine simple arc:
 `distinct` (vertices pairwise distinct) and `nonadjacent_disjoint` (non-consecutive
 closed segments disjoint).  The coercion `PolyArc → SimpleArc Plane`
-(piecewise-linear parametrisation) and the collar construction are built on top in
-later work (node L3 of `docs/ROUTE_C_PLAN.md`). -/
+(piecewise-linear parametrisation) is built in this file as `PolyArc.toSimpleArc`
+(§L3 sub-node 1(b)); the collar construction (`collarPlus`/`collarMinus`) is
+assembled in §L3 sub-node 2 below. -/
 
 /-- A **polygonal (PL) simple arc** in the plane: `n + 1` vertices `verts 0, …,
 verts n` (`n ≥ 1`) joined by the `n` consecutive segments `[verts i, verts (i+1)]`.

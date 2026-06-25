@@ -70,8 +70,8 @@ lemma bipartiteDistances_card_le_distinctDistances_of_subset_disjoint
   intro hEq
   exact Disjoint.forall_ne_finset hdisj hp₁ hp₂ hEq
 
-/-- A disjoint split into three-ish comparable pieces, sized using the
-`(n + 2) / 3` division round-up. -/
+/-- A disjoint split into two comparable pieces, each of size at least
+`(n + 2) / 3` (roughly one-third of the total). -/
 lemma split_finset_into_two_comparable_parts
     (P : Finset Point2) (hP : 2 ≤ P.card) :
     ∃ P₁ P₂ : Finset Point2,

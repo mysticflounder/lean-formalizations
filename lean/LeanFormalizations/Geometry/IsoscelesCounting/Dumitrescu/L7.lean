@@ -64,10 +64,10 @@ witness-counting argument applies to it.
 
 Complementary lemmas establish:
 
-* a "Moser-vs-non-Moser" sufficient condition for cross-cap-ness
-  (`mosersymvNonMoser_isCrossCapEdge`),
-* a "two non-Moser distinct caps" sufficient condition
-  (`nonMoserDistinctCaps_isCrossCapEdge`),
+* a "distinct caps" sufficient condition for cross-cap-ness
+  (`isCrossCapEdge_of_distinct_caps`),
+* a "no shared cap" sufficient condition
+  (`isCrossCapEdge_of_no_shared_cap`),
 * equivalence of `IsCrossCapEdge` with the disjoint membership form
   needed by L8 (`mem_crossCapEdges_iff`).
 
@@ -267,8 +267,7 @@ the `Cⱼ` apex), and similarly `v ∈ Cⱼ` and `v ∉ Cᵢ`, and additionally
 no single third cap contains both, then `{u, v}` is a cross-cap edge.
 
 This is the explicit form needed for L8's disjoint-union argument.
-The full Moser-vs-Moser case is handled by the
-`twoNonMoserDistinct_*` variant below. -/
+The "no shared cap" pointwise form is `isCrossCapEdge_of_no_shared_cap`. -/
 theorem isCrossCapEdge_of_distinct_caps
     {A : Finset ℝ²} {M : IsoscelesCounting.MoserTriangle A}
     (CP : IsoscelesCounting.CapTriple A M)

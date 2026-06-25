@@ -407,7 +407,9 @@ private theorem IsTree.exists_leaf_removal_order_with_leaves_aux {V : Type*} (n 
               have hEq : z' = w := huniq z' ⟨hz_tail, hz_adj'⟩
               exact congrArg Subtype.val hEq
 
-/-- A finite tree admits a vertex order whose successive prefix removals leave
+/-- A finite tree admits a vertex order in which every non-final vertex has a
+unique neighbor (is a leaf) among the vertices not yet removed at its step;
+the companion `exists_leaf_removal_order` records that these removals leave
 trees. -/
 theorem IsTree.exists_leaf_removal_order_with_leaves {V : Type*} (G : SimpleGraph V)
     [Fintype V] [DecidableEq V] [DecidableRel G.Adj] [Nonempty V] (h : G.IsTree) :

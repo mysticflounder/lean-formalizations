@@ -383,8 +383,8 @@ unconditional, and each step is this transport. -/
 /-- **Region-separation transports across a same-face prefix insertion.**
 
 Hypotheses (all combinatorial except the two abstract per-step inputs):
-* `hc`, `hsame`, `hvertex`: the predecessor same-face insertion data at corners
-  `c₁ ≠ c₂` (exactly `ResidualMapPrefixStepInsertion.sameFace`'s payload);
+* `hc`, `hsame`: the predecessor same-face insertion data at corners
+  `c₁ ≠ c₂` (i.e. `c₁ ≠ c₂` and `facePerm.SameCycle c₁ c₂`);
 * `splitPool`, `hpool`: a class function on successor darts such that successor
   *face* equality is equivalent to `splitPool` equality — supplied for the
   concrete split-pool equiv by

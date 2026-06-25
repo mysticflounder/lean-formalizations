@@ -205,7 +205,7 @@ lemma degreeOf_resultant_le
     rw [hsum]; exact hmn
   exact le_trans hsign hprod'
 
-/-- The coefficient-root set of the resultant is bounded by `2*d₁*d₂`. -/
+/-- The coefficient-root set of the resultant is bounded by `(d₁ + d₂) ^ 2`. -/
 lemma coeff_root_ncard_resultant_le
     (p q : MvPolynomial (Fin 2) ℝ)
     (hR : ResultantCoeff p q ≠ 0)

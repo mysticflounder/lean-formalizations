@@ -60,9 +60,10 @@ The hypotheses are minimal and exactly pin `L'`:
 * `succAbove_add_one`, `succAbove_add_one_fire` — the two `Fin (n+1)` index identities relating the
   `Fin (n+1)`-successor `(·+1)` to the `Fin n`-successor through `Fin.succAbove`,
   off and at the wrap/insertion point. (Verified for `n ≤ 8` before formalizing.)
-* `finRotate_finCongr`, `permOfEquiv_finCongr` — `finRotate` is natural under the
-  size-cast `finCongr`, so `rotationOfOrder L'` (indexed by `Fin (card (β⊕Unit))`)
-  may be computed through any `Fin (card β + 1)`-indexed increasing enumeration.
+* `permOfEquiv_finCongr` — `permOfEquiv` is invariant under precomposing the index
+  equivalence with a size-cast `finCongr`, so `rotationOfOrder L'` (indexed by
+  `Fin (card (β⊕Unit))`) may be computed through any `Fin (card β + 1)`-indexed
+  increasing enumeration.
 * `enumInl` — the enumeration bridge: removing `x`'s slot from the `L'`-increasing
   enumeration of `β ⊕ Unit` recovers the `L`-increasing enumeration of `β`
   (both are *the* increasing map into the finset `{x}ᶜ`, so they coincide by
