@@ -178,9 +178,9 @@ Formalized bridge pieces now available:
   corresponding full-residual-map dart.  The conclusion is still the actual
   `ResidualMapPrefixStepInsertion.sameFace` witness.
 - `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_of_collar_with_collar_sides`,
-  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`,
+  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides`,
   and
-  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides`
+  `CrossingLemma.PlaneArcSeparation.exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets_with_collar_sides`
   export the side data constructed by the PL collar proof: the positive collar
   is contained in one component of the region-minus-crosscut and the negative
   collar is contained in the other.

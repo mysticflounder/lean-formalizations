@@ -50,10 +50,10 @@ restricted to PL/straight-line drawings. {{UNVALIDATED}} Status of that check:
   and the **drawing→map bridge** must preserve PL-ness of the drawings they
   manipulate. Not yet traced. See §4 risk R1.
 
-**Action 0.** Introduce `structure PolyArc` (or `def IsPL (β : SimpleArc Plane)`):
+**Action 0.** Introduce `structure PolygonalArc` (or `def IsPL (β : SimpleArc Plane)`):
 a finite vertex list `p₀,…,pₙ` (`n ≥ 1`), consecutive segments, simple. Provide the
-coercion `PolyArc → SimpleArc` and a PL variant of `ArcInRegion`. The residual is
-then stated and proved for `PolyArc`. No external dependency (pure definition over
+coercion `PolygonalArc → SimpleArc` and a PL variant of `ArcInRegion`. The residual is
+then stated and proved for `PolygonalArc`. No external dependency (pure definition over
 `ℝ × ℝ`; segments via `affineSegment`/`segment`, both in mathlib).
 
 ---
@@ -116,7 +116,7 @@ and `Plane` is locally connected (`IsOpen.locPathConnectedSpace`, PRESENT). So t
   product lives on `WithLp 2 (ℝ×ℝ)` / `EuclideanSpace`, see ledger D7); the
   determinant form sidesteps that entirely. *From scratch, trivial.*
 
-- **L2 — corner local model. CORE PROVEN ✅ (2026-06-02, `PLArc.lean` §L2).** At a PL
+- **L2 — corner local model. CORE PROVEN ✅ (2026-06-02, `PolygonalArc.lean` §L2).** At a PL
   vertex `a → v → b` with genuine turn `τ := sideForm a v b ≠ 0` (`IsCorner`), the
   complement of the two rays splits *globally* into `convexSector` (inside the turn,
   `{0 < τ·sideForm a v z ∧ 0 < τ·sideForm v b z}`) and `reflexSector` (outside,
@@ -287,9 +287,9 @@ Estimate (sessions = ~150–200k context → one `/compact`):
 0. **R1 + R2 gate — DONE ✅ (2026-06-02).** Both resolved; route (c) is GO. R2's
    resolution removed E6 and reduced the residual to L3 + plumbing.
 1. **Action 0 + L1** (PL types, segment determinant functional) — DONE ✅
-   (`PLArc.lean` §L1 + §Action 0, 2026-06-02).
+   (`PolygonalArc.lean` §L1 + §Action 0, 2026-06-02).
 2. **L2 core** (corner model: two sectors open/disjoint/connected) — DONE ✅
-   (`PLArc.lean` §L2, 2026-06-02). Remaining: corner-locus complement identity,
+   (`PolygonalArc.lean` §L2, 2026-06-02). Remaining: corner-locus complement identity,
    folded into L3. **L3** (global collar) — ~2 sessions, **the genuine hardest
    node**; the only node needing PL.
 3. **G1** (two-chart side double cover ⇒ `IsCoveringMap`) — ~1 session.
@@ -342,12 +342,12 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
 
 ### L3 sub-nodes (build order; hardest = the collar + local separation)
 
-1. **`PolyArc → SimpleArc Plane` coercion** (PL parametrisation): continuous,
+1. **`PolygonalArc → SimpleArc Plane` coercion** (PL parametrisation): continuous,
    injective piecewise-affine `Icc 0 1 → Plane`; relate `carrier`/`arcInterior` to
-   `PolyArc.carrier` and the endpoint set. Plumbing, real. *(deps: none external)*
+   `PolygonalArc.carrier` and the endpoint set. Plumbing, real. *(deps: none external)*
    **DONE (a)+(b)+(c) 2026-06-02, sorry-free, axiom-clean
    `[propext, Classical.choice, Quot.sound]`:**
-   - (a) `PolyArc` carries the no-self-crossing fields `nonadjacent_disjoint`
+   - (a) `PolygonalArc` carries the no-self-crossing fields `nonadjacent_disjoint`
      (non-consecutive closed segments disjoint) **and now `consecutive_meet`**
      (adjacent segments meet only at the shared vertex). Metric backbone PROVEN:
      `segCarrier_isCompact`, `exists_pos_nonadjacent_sep` (uniform `d_sep > 0`).
@@ -358,7 +358,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
      `idx_mono`. Affine injectivity `affine_inj`/`affine_eq_left`/`affine_eq_right`.
      `injective_param` via the three-case argument (same segment / adjacent via
      `consecutive_meet` / non-adjacent via `nonadjacent_disjoint`). Coercion
-     `PolyArc.toSimpleArc : SimpleArc Plane`.
+     `PolygonalArc.toSimpleArc : SimpleArc Plane`.
    - (c) **Carrier relation PROVEN:** `range_toSimpleArc : Set.range β.toSimpleArc =
      β.carrier` (via `segCarrier_subset_range_param`).
    - (d) **Endpoint values PROVEN (2026-06-13, sorry-free, axiom-clean):**
@@ -408,7 +408,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    `disk \ β = (disk ∩ convexSector) ⊔ (disk ∩ reflexSector)` — the two sectors are
    exactly the two sides. Non-emptiness of `T⁺,T⁻`: the sector points (e.g.
    `a+b−v`, `3v−a−b`) lie in `T` for a thin enough disk. *(deps: §L1/§L2 of
-   `PLArc.lean`, all PROVEN.)*
+   `PolygonalArc.lean`, all PROVEN.)*
 
    **CORRECTED GLOBAL DESIGN (2026-06-02) — the slabs must dodge the vertices.**
    A coordinate check refutes the naive "slab side = `sign(εᵢ·sideForm_i)` over the
@@ -499,7 +499,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    barycentric coordinate `b = footParam` of the spine point — middle `[α,1−α]` ⇒ edge
    band, `b<α` ⇒ source-vertex disk, `b>1−α` ⇒ target-vertex disk; axiom-clean.  The
    budget inequalities are deliberately left as hypotheses so the assembly discharges
-   them by choosing `δ₀` small.  Helper `PolyArc.segTgt_ne_segSrc` (each edge
+   them by choosing `δ₀` small.  Helper `PolygonalArc.segTgt_ne_segSrc` (each edge
    non-degenerate).  **Budget step DONE:** `exists_delta_cover_budget` — given `α>0`
    and radii `ρⱼ` already exceeding `α·distᵢ` for each incident edge (`hρsrc`/`hρtgt`),
    there is a single `δ₀>0` satisfying all three budget families at once (`δ₀` = half
@@ -523,7 +523,7 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
    ‖a−v‖²·(1−footParam)`) — use a double cutoff `α′=α/2`; (c) choose `α` from a **global
    geometric minimum** (`α ≤ Rmin/(2(Lmax+1))`) to reconcile cover-wants-`ρ`-large vs
    disk-localisation-wants-`ρ`-small, and add hypotheses `IsCorner` at each interior
-   vertex (not derivable from `PolyArc`) and `ρ₀ ≤ infDist(verts 0)(segCarrier 1)`.
+   vertex (not derivable from `PolygonalArc`) and `ρ₀ ≤ infDist(verts 0)(segCarrier 1)`.
    **C1 DONE (the endpoint pinch — highest-risk):** `l1_linf_le_two_l2sq`
    (`(|x|+|y|)·max|x| |y| ≤ 2(x²+y²)`), `l1_mul_dist_le_two_dotp` (geometric form:
    `(|t.1−s.1|+|t.2−s.2|)·dist s t ≤ 2·‖t−s‖²`), and
@@ -713,13 +713,13 @@ that (i) takes both values and (ii) has each fibre `σ⁻¹{c}` **preconnected**
 4. **G1** two-chart cover ⇒ `IsCoveringMap` (D3/D3a). 5. **G3** lift `id`, build
    `σ`, both values (D4/D5/D5a). 6. **G4** fibre-preconnected via path-cut (D6/D8,
    E5). 7. **Z1** assemble `IsTwoSidedPartition`; close
-   `exists_twoSidedPartition_of_polyArc` (the PL form of the residual).
+   `exists_twoSidedPartition_of_polygonalArc` (the PL form of the residual).
 
 **Status (2026-06-02):** L1, L2 (incl. corner-locus complement
 `compl_sectors_eq_cornerLocus`), sub-node-3's "sectors avoid incident segments",
 **and the metric disk-localisation `ball_inter_cornerLocus`** are PROVEN sorry-free
-and axiom-clean in `PLArc.lean`. **Sub-node 3 (local separation) is now
-algebraically complete.** **Sub-node 1 — the `PolyArc → SimpleArc Plane` coercion —
+and axiom-clean in `PolygonalArc.lean`. **Sub-node 3 (local separation) is now
+algebraically complete.** **Sub-node 1 — the `PolygonalArc → SimpleArc Plane` coercion —
 is now PROVEN (parts (a)+(b)+(c)):** the `consecutive_meet` simplicity field, the
 ramp-sum parametrisation with continuity (`continuous_param`) and injectivity
 (`injective_param`), the coercion `toSimpleArc`, and the carrier relation
@@ -761,11 +761,11 @@ sector/slab `g` is, because both candidate nearest points give the same side).
   `< ½·` (min non-adjacent segment distance) and `< ½·` (min incident edge length),
   so each disk/slab sees only its own incident segment(s) — this is where the
   disk-localisation `ball_inter_cornerLocus` and the *no-self-crossing simplicity
-  field* of `PolyArc` (sub-node 1, still TODO) are spent. {{NEEDS_PROOF}} the
+  field* of `PolygonalArc` (sub-node 1, still TODO) are spent. {{NEEDS_PROOF}} the
   positivity of "min non-adjacent segment distance" needs that simplicity field
   (closed non-adjacent segments disjoint ⇒ positive distance by compactness).
 
-Next concrete step: sub-node 1 (the `PolyArc → SimpleArc` coercion + the
+Next concrete step: sub-node 1 (the `PolygonalArc → SimpleArc` coercion + the
 no-self-crossing simplicity field that makes `d_sep > 0`), then sub-node 2 (the
 tapered tube `T` with the four properties above).
 
@@ -773,7 +773,7 @@ tapered tube `T` with the four properties above).
 
 ## 7. G-node implementation — the abstract ℤ/2 separation lemma (in progress, 2026-06-03)
 
-**Collar (L3) is COMPLETE** (`PLArc.lean`, `main` ≥ `19caa19`): `collarPlus`,
+**Collar (L3) is COMPLETE** (`PolygonalArc.lean`, `main` ≥ `19caa19`): `collarPlus`,
 `collarMinus` open, disjoint, union `= taperedTube ∖ carrier`, each nonempty.
 The G-nodes are now under construction in a **new file
 `lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/PLCover.lean`**.
@@ -836,7 +836,7 @@ the `open_iff` crux; `triv0`/`triv1`; `isCoveringMap_p : IsCoveringMap p`;
 `existsUnique_continuousMap_lifts` ⇒ section `F`; `σ := q∘F` locally constant on
 `V₀` via open sheet-fibers; `q₁∘F` constant on connected `V₁`; the `g`-shift on the
 overlap forces `σ` to differ across `Pp`/`Pm`). Note the **`IsPreconnected V₁`
-hypothesis** (the collar `taperedTube` is connected — already proven in `PLArc`).
+hypothesis** (the collar `taperedTube` is connected — already proven in `PolygonalArc`).
 
 NEXT (instantiation + assembly, the remaining work): set `B = ↥R`, `V₀ =`
 restriction of `regionMinusArc`, `V₁ =` collar, `Pp = collarPlus`,
@@ -866,7 +866,7 @@ exists_twoSidedPartition_of_collar
   : ∃ U V, IsTwoSidedPartition (R \ C) U V
 ```
 
-It is **geometry-free** (no `PolyArc` dependency): it takes the collar sides `Tp`,
+It is **geometry-free** (no `PolygonalArc` dependency): it takes the collar sides `Tp`,
 `Tm`, the tube `T`, and their topological facts as hypotheses, builds the
 `PLCover.GlueData` over `B = ↥R` (`V₀ = R∖C`, `V₁ = T`, `Pp = Tp`, `Pm = Tm`),
 runs `exists_separating_fun` to get `σ`, and assembles the partition as the two
@@ -878,7 +878,7 @@ back along the continuous lift `↥(R∖C) → ↥V₀`.
 
 This **pins, with no slack, the only remaining geometric obligations**:
 
-* **P5 — DONE (2026-06-03, `PLArc.lean`, sorry-free, axiom-clean `[propext,
+* **P5 — DONE (2026-06-03, `PolygonalArc.lean`, sorry-free, axiom-clean `[propext,
   Classical.choice, Quot.sound]`).** `isPreconnected_collarPlus` /
   `isPreconnected_collarMinus`: each collar side is preconnected. Method (the "no-taper"
   regime): the geometric pieces are convex (bands = `edge±Mid ∩ Metric.thickening δ₀
@@ -920,10 +920,10 @@ This **pins, with no slack, the only remaining geometric obligations**:
     fails is their instantiation. **Fix (Option A, chosen 2026-06-03, Adam):** reprove P5
     for `collarPlus` as *defined* (keeping the `(taperedTube∖carrier) ∩` prefix — the
     clipped collar), dropping `hsub`. New content + progress:
-    * (1) **`sector ⊆ tube` — DONE** (`sectorPlus/Minus_subset_taperedTube`, PLArc.lean,
+    * (1) **`sector ⊆ tube` — DONE** (`sectorPlus/Minus_subset_taperedTube`, PolygonalArc.lean,
       sorry-free, axiom-clean). Witness = the interior vertex `verts(i+1) ∈ S`; needs
       `ρ(succ i) ≤ δ₀` and `ρ(succ i) ≤ ½·infDist(verts(i+1)) Rᶜ`.
-    * (2) **`band_i ⊆ tube` — DONE** (`bandStripPlus/Minus_subset_taperedTube`, PLArc.lean,
+    * (2) **`band_i ⊆ tube` — DONE** (`bandStripPlus/Minus_subset_taperedTube`, PolygonalArc.lean,
       commit `42fb8e0`, sorry-free, axiom-clean). **The hard analytic core — but the prior plan
       over-feared it.** No sup-argmin-interior sub-lemma is needed. Clean route: the strip
       certificate `infDist_sup(z,segCarrier i) < δ₀` gives, via `Metric.infDist_lt_iff`, *any*
@@ -1023,7 +1023,7 @@ This **pins, with no slack, the only remaining geometric obligations**:
   `exists_twoSidedPartition_of_collar` no longer takes an `hG4` hypothesis; G4 is not a
   remaining node.
 * **arcInterior characterization — DONE (2026-06-13, sub-node-1's last loose end;
-  `PLArc.lean`, sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`,
+  `PolygonalArc.lean`, sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`,
   commits `e8bd8b0` + `01bafe1`).** The spine is `S = arcInterior β.toSimpleArc`. Forward
   map `affineComb_eq_param` + strict-interior membership `affineComb_mem_arcInterior`;
   the spine-point consequences `firstMid_mem_arcInterior` (⇒ `hmS`),
@@ -1038,14 +1038,14 @@ This **pins, with no slack, the only remaining geometric obligations**:
 
 * **⚠ SUPERSEDED (2026-06-18) — see `docs/sector-redefinition-scope.md`.** The metric-disk
   sector this note is written against no longer exists: `sectorPlus`/`sectorMinus`
-  (`PLArc.lean:2842`/`:2849`) were redefined to the **δ₀-corner-tube UNION** form on 2026-06-14
+  (`PolygonalArc.lean:2842`/`:2849`) were redefined to the **δ₀-corner-tube UNION** form on 2026-06-14
   (union, *not* the intersection proposed in the fix path below — the intersection is a
   gentle-corner NO-GO, see `region-face-bridge-plan §9`). The old **P5** disk collision is gone
   (`sectorPlusClipped_subset_taperedTube`, `:10321`, carries no `ρ`). An *equivalent* collision
   migrated to **P2-vs-P3**: the P2 cover (`taperedTube_subset_midBands_union_disks`) still routes
   interior-vertex tube points through `ball(verts j, ρ j)` — forcing `ρ` large via `hsrc`/`htgt`
   — while P3 end-cap disjointness forces `ρ` small, the same `L₂² ≤ L₁·L∞` constraint, now on the
-  two endpoint radii. The true residual is the single `sorry` at `PLArc.lean:3140` (the P2
+  two endpoint radii. The true residual is the single `sorry` at `PolygonalArc.lean:3140` (the P2
   interior-vertex disk branch); closing it off the metric disk (corner-tube disjunct
   `dist(z,v) < δ₀`) dissolves the constraint and unblocks `numSegs ≥ 2`. The 2026-06-13 analysis
   below is retained as history.
@@ -1054,19 +1054,19 @@ This **pins, with no slack, the only remaining geometric obligations**:
   is PROVABLY UNSATISFIABLE for any arc with an interior vertex (`numSegs ≥ 2`); the sole
   P5 lemma re-imports the `L₂² ≤ L₁·L∞` constraint.  Machine-checked.**  Producing the
   `(δ₀, α, ρ, S)` bundle for
-  `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
+  `exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets`
   (`PLCollarSeparation.lean:260`) **requires proving `False`**:
   - `hρδ` (`ρ(succ i) ≤ δ₀`) is forced by P5's `sectorPlus_subset_taperedTube`
-    (`PLArc.lean:8064`): the sector is the *metric disk* `ball(verts(succ i), ρ(succ i))`
+    (`PolygonalArc.lean:8064`): the sector is the *metric disk* `ball(verts(succ i), ρ(succ i))`
     intersected with `vertexPlus`, and to lie in the tube (a union of balls of radius
     `≤ δ₀`) its radius must satisfy `ρ ≤ δ₀`.
   - `hsrc` (`δ₀ + 2α·L_i < ρ(castSucc i)`) is forced by P5's band↔sector overlap
-    `overlap_sectorPlus_bandStripPlus_src` (`PLArc.lean:6115`): the overlap witness sits at
+    `overlap_sectorPlus_bandStripPlus_src` (`PolygonalArc.lean:6115`): the overlap witness sits at
     distance `≈ 2α·L_i` from the vertex along the band and must be inside the sector disk.
   - For every interior vertex these collide on the **same** `ρ`-entry
     (`Fin.succ i₀ = Fin.castSucc i₁`), giving `δ₀ < δ₀ + 2α·L < ρ ≤ δ₀`.  *(Verified: a
     Lean proof of `False` from `hα`, `hsrc`, `hρδ`, `numSegs ≥ 2` compiles.)*
-  - The base `isPreconnected_collarPlus` (`PLArc.lean:5070`) carries the **same** conflict
+  - The base `isPreconnected_collarPlus` (`PolygonalArc.lean:5070`) carries the **same** conflict
     (`hsectorW` vs `hO1`/`hO2`); it is the only assembled P5 route.
   - The collision is **unconditional** (angle-independent): chaining with `hband`
     (`M_i·δ₀ < α·P_i`) gives `α·L_i < ρ ≤ δ₀ < α·P_i/M_i`, i.e.
@@ -1075,19 +1075,19 @@ This **pins, with no slack, the only remaining geometric obligations**:
   - **Root cause:** the §6 "constraint eliminated (2026-06-03)" resolution converted the
     **disjointness glue (P3)** to the angle-free `thin_of_infDist_*` form, but the **P5
     sector-in-tube containment** still uses the *metric disk* `ball(verts, ρ)` — the
-    `sectorPlus`/`collarPlus` definitions (`PLArc.lean:2752`/`2789`) were never converted to
+    `sectorPlus`/`collarPlus` definitions (`PolygonalArc.lean:2752`/`2789`) were never converted to
     the δ₀-controlled corner-tube-overlap form, so the constraint persists there.
   **Fix path (NOT attempted, out of this node's scope):** redefine `sectorPlus`/`sectorMinus`
   as a δ₀-corner-tube-overlap `{infDist z (edge i) < δ₀} ∩ {infDist z (edge i+1) < δ₀} ∩
   vertexPlus` (the free-`δ₀` vertex region of §6 line 576, controlled by `δ₀`, not by a disk
   radius `ρ` pinned both `≤ δ₀` and `> δ₀ + 2α·L`), then reprove P2/P3/P5 for the new sector.
   This is a redefinition of the collar's vertex piece, not a budget choice.
-  **KEYSTONE STILL VALID:** `exists_pos_infDist_compl_of_isCompact` (`PLArc.lean`,
+  **KEYSTONE STILL VALID:** `exists_pos_infDist_compl_of_isCompact` (`PolygonalArc.lean`,
   axiom-clean) — the region-clearance fact every `δ₀ ≤ ½·infDist · Rᶜ` budget reduces to;
   it remains the right tool once the sector redefinition lands.
 * **Residual closure (separate, NOT-attempted NO-GO)** — representing an arbitrary
-  `SimpleArc` satisfying `ArcInRegion` as a `PolyArc` is Schoenflies-strength. The
-  PL route discharges `exists_twoSidedPartition_of_polyArc`; wiring it to the
+  `SimpleArc` satisfying `ArcInRegion` as a `PolygonalArc` is Schoenflies-strength. The
+  PL route discharges `exists_twoSidedPartition_of_polygonalArc`; wiring it to the
   arbitrary-arc `exists_twoSidedPartition_of_arc` at line 377 needs either that
   bridge or a signature change restricting the consumer to PL arcs (an Adam-level
   decision; see §0).

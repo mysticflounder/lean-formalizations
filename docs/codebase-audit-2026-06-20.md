@@ -24,7 +24,7 @@ relayed secondhand.
 - **8 real `sorry` tactics** in the whole `lean/` tree — bare `sorry` lines only,
   no `:= sorry`/`by sorry`. All in the in-progress PachDeZeeuw program:
   `ComponentSplit.lean:72,96,117`, `CrossingLemma/CrossingLemmaAmplification.lean:1611`,
-  `CrossingLemma/PLArc.lean:3140`, `CrossingLemma/PlaneArcSeparation.lean:380`,
+  `CrossingLemma/PolygonalArc.lean:3140`, `CrossingLemma/PlaneArcSeparation.lean:380`,
   `IncidenceAssembly/Bridge.lean:53`, `PachSharir/SzemerediTrotter.lean:4644`.
   Each is labeled in surrounding text; none is reachable from a theorem the code
   claims PROVEN / axiom-clean (agents cross-checked call paths). The single
@@ -48,7 +48,7 @@ cheapest tier and the most clear-cut.
 
 | ID | File:Line | Issue | Fix | Sev |
 |----|-----------|-------|-----|-----|
-| B1 | `lean/.../CrossingLemma/PLArc.lean:1664` | "…shrank with the angle, the wall" — "the wall" as an obstruction name | Rename neutrally, e.g. "the angle-dependent radius obstruction"; or drop the parenthetical | HIGH |
+| B1 | `lean/.../CrossingLemma/PolygonalArc.lean:1664` | "…shrank with the angle, the wall" — "the wall" as an obstruction name | Rename neutrally, e.g. "the angle-dependent radius obstruction"; or drop the parenthetical | HIGH |
 | B2 | `lean/.../CrossingLemma/PlaneArcSeparation.lean:366` | "THIS IS THE GENUINELY HARD, NON-ELEMENTARY PART" — difficulty characterization + all-caps | Reword to state the obligation (the crosscut/Jordan-strength theorem for simply connected planar domains) without difficulty language | HIGH |
 | B3 | `docs/ROUTE_C_PLAN.md:589` | "**THE `tan θ` WALL IS AN ARTIFACT — DISSOLVED**" — all-caps drama + banned name | "The `tan θ` constraint is an artifact of the vertex-distance estimate and does not apply to the strip-width bound (2026-06-03)." | HIGH |
 | B4 | `docs/region-face-bridge-plan.md:415,440,455` | "provably hits a wall"; heading "§8's fix-lead is DEAD; the intersection-tube walls structurally…"; "§8's \"wall dissolves\" lead is dead" | Replace with formula-anchored / neutral wording ("the joint condition fails…", "refuted; structurally obstructed", "constraint elimination is ruled out") | MED |
@@ -69,8 +69,8 @@ Effort: < 1 session for B1–B5 + the sweep.
 
 | ID | File:Line | Issue | Fix | Sev |
 |----|-----------|-------|-----|-----|
-| N1 | `lean/.../CrossingLemma/PLArc.lean:39` vs `:3140` | File header says "Nothing here is `sorry`", but `union_collarPlus_collarMinus` at 3140 carries a real `sorry` (multi-segment interior-vertex disk branch). The sorry is labeled only at its branch and in the sibling single-segment docstring, not on its own docstring or the header. | Correct the header; add a status label to the `union_collarPlus_collarMinus` docstring | HIGH |
-| N2 | `lean/.../IsoscelesCounting/ConvexCyclicOrder.lean:66,72`; `CombinatorialMap/Basic.lean:23`; `PLArc.lean:5775`; `GeneralLinearGroup/Defs.lean:33` | `TODO` / inline plan-headers living inside proof files | Convert to neutral "OPEN:" / "Future:" comments or move to a plan doc | LOW |
+| N1 | `lean/.../CrossingLemma/PolygonalArc.lean:39` vs `:3140` | File header says "Nothing here is `sorry`", but `union_collarPlus_collarMinus` at 3140 carries a real `sorry` (multi-segment interior-vertex disk branch). The sorry is labeled only at its branch and in the sibling single-segment docstring, not on its own docstring or the header. | Correct the header; add a status label to the `union_collarPlus_collarMinus` docstring | HIGH |
+| N2 | `lean/.../IsoscelesCounting/ConvexCyclicOrder.lean:66,72`; `CombinatorialMap/Basic.lean:23`; `PolygonalArc.lean:5775`; `GeneralLinearGroup/Defs.lean:33` | `TODO` / inline plan-headers living inside proof files | Convert to neutral "OPEN:" / "Future:" comments or move to a plan doc | LOW |
 | N3 | `docs/sector-redefinition-scope.md:57,96,130,167`; `ROUTE_C_PLAN.md:42,973` | Non-canonical inline ambiguity markers (`{{UNVALIDATED — prose…}}`); possibly-resolved `{{UNVALIDATED}}` / `{{NEEDS_RESEARCH}}` left in place | Normalize to bare `{{MARKER}}` + prose; verify and retire resolved ones | LOW |
 
 Effort: < 1 session.
@@ -108,7 +108,7 @@ a stale build-tool entry. Most carry a roadmap decision.
 
 | ID | Target | Rationale | Prereq / seams |
 |----|--------|-----------|----------------|
-| L1 | Shard `CrossingLemma/PLArc.lean` (11,303 lines) | Impedes incremental compile and review; `lean-shard` tool available | Do A3 first (export the duplicated private lemma). Section seams (from `/-! ## §` headers): Foundations 1–1315; CollarGeometry 1317–2253; Cover 2254–3282 (contains the 3140 sorry); Disjointness 3283–5606; Connectivity 5607–11303 (split again at §P5⁻ ≈ 8342) |
+| L1 | Shard `CrossingLemma/PolygonalArc.lean` (11,303 lines) | Impedes incremental compile and review; `lean-shard` tool available | Do A3 first (export the duplicated private lemma). Section seams (from `/-! ## §` headers): Foundations 1–1315; CollarGeometry 1317–2253; Cover 2254–3282 (contains the 3140 sorry); Disjointness 3283–5606; Connectivity 5607–11303 (split again at §P5⁻ ≈ 8342) |
 | L2 | Shard `CrossingLemma/ResidualMapProperties.lean` (10,662 lines) | Same | Seams: Aux 1–396; inductive core 397–8106; Simplicity/Connectivity 8107–10662 |
 
 Effort: each of L1/L2 is its own session (re-shard, rebuild, confirm axiom
@@ -145,5 +145,5 @@ since sharding a file that is still being edited churns the seams.
 - **D1 — ComponentSplit / MilnorThom:** leave as-is. Both are already correctly triaged in README (ComponentSplit under 🟡 work-in-progress; MilnorThom under ⚪ statement-surfaces). They are in-progress PDZ scaffolding, not headlines. The earlier "archive or wire in" recommendation is withdrawn. Precision: PDZ's *verified* algebraic core (`PachDeZeeuw.Algebraic`, incl. `bezout`) IS a headline (#34); only the CrossingLemma / PachSharir / ComponentSplit / MilnorThom WIP is out of the headlines.
 - **D2 — four `Geometry/ElekesSharir/` files:** DROPPED (not dead code). All four back comparator headlines: OmegaRankCollapse → `finrank_ker_functional_ge` (#17), `finrank_ker_ge_two_of_finrank_eq_three` (#18); ConicNormalForm → `quadraticPart_eq`, `quadraticPart_vanishes_iff`; ChordCurve → `twoPinnedDet_affine` (#35), `twoPinnedDet_eq_const_add_linear` (#36); RulingSkewness → `intersect_or_parallel_of_dist2_eq/_of_isometryGraph`, `atMostOneLine_of_skewRuling_isometryGraph` (#39). The agent's "no consumer" was a subtree-scoped blind spot: the consumer is `comparator/Solution.lean`, which imports the whole library.
 - **D3 — MECArcAngle exports / `L9.power_mean_three_caps_nat`:** confirmed genuinely unconsumed even comparator-aware (the lone Lc3 hit is a comment, not a proof step). Reclassified: MECArcAngle exports (`arcAngle_chord_length_eq_iff/_lt_iff`, `abs_sin_half_eq_iff/_lt_iff`) are forward infrastructure for the still-open Lc1 strict-monotone-distance form → annotate with intended consumer, do not delete; `power_mean_three_caps_nat` is an unused twin of the live real-valued `power_mean_three_caps` → mark `private` or remove.
-- **"wall" policy:** Option B — purge entirely (done this pass in the two plan docs + `PLArc.lean`).
+- **"wall" policy:** Option B — purge entirely (done this pass in the two plan docs + `PolygonalArc.lean`).
 - **Execution status:** Tier 1 and Tier 2 executed 2026-06-20 (comments/prose only). Tiers 3–5 pending review.

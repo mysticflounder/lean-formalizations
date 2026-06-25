@@ -3,18 +3,18 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 7/7 — **ClippedCollar**: P5 (clipped collar) — containment of each
+PolygonalArc shard 7/7 — **ClippedCollar**: P5 (clipped collar) — containment of each
 collar piece in the tapered tube, and the final clipped-collar assembly. The
-last shard. Split out of `PLArc.lean`; see that
+last shard. Split out of `PolygonalArc.lean`; see that
 coordinator module's doc for the overview.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Disjointness
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Existence
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Preconnected
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.NegativeCollar
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Disjointness
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Existence
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Preconnected
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.NegativeCollar
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -41,7 +41,7 @@ the upper end is the interior shared vertex `verts (i+1)` (NEVER an arc endpoint
 (a carrier point has foot in `[0,1]`).  Unlike the false unclipped `sectorPlus_subset_taperedTube`,
 no vertex-ball budget is needed — the clip keeps every foot-point off the tube-vanishing
 arc endpoints. -/
-theorem sectorPlusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem sectorPlusClipped_subset_taperedTube (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (_hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -121,7 +121,7 @@ theorem sectorPlusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (�
 /-- **Clipped sector containment (negative side).**  Identical to the positive side: the
 proof reads only the strip-union component `hz.2` (the vertex wedge is irrelevant to tube
 containment).  See `sectorPlusClipped_subset_taperedTube`. -/
-theorem sectorMinusClipped_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem sectorMinusClipped_subset_taperedTube (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (_hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -203,7 +203,7 @@ keep `y`'s foot-parameter inside `(α/2, 1−α/2)`, so `y` is a *strictly inter
 `hS` then places `y` in the spine `S`, and `hR` (only needed on the safe window, where it is
 satisfiable even for the end edges) gives `δ₀ ≤ ½·infDist y Rᶜ`, so the tube ball at `y` has
 radius `δ₀` and swallows `z`.  No sup-metric arg-min geometry is required. -/
-theorem bandStripPlus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem bandStripPlus_subset_taperedTube (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hα : 0 < α)
     (hsmall : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -239,7 +239,7 @@ theorem bandStripPlus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀
 
 /-- **Band containment (negative side).**  Identical to the positive side: the proof uses only
 the foot-parameter window and the strip certificate, not the side-functional sign. -/
-theorem bandStripMinus_subset_taperedTube (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem bandStripMinus_subset_taperedTube (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hα : 0 < α)
     (hsmall : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -279,7 +279,7 @@ An open band-strip point cannot lie on the polygonal carrier: on its own edge th
 strict sign condition contradicts `sideForm = 0`, on an adjacent edge the corner
 confinement budgets `hadj_tgt` / `hadj_src` rule it out, and on a nonadjacent edge
 the global strip-separation budget `hsep` does. -/
-theorem bandStripPlus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem bandStripPlus_subset_compl_carrier (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hδ₀ : 0 < δ₀) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -296,7 +296,7 @@ theorem bandStripPlus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
     bandStripPlus β α δ₀ i ⊆ (β.carrier)ᶜ := by
   intro z hz
   have hδsep : 0 < δsep := lt_of_lt_of_le hδ₀ hδ₀sep
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨k, hzk⟩
   have hki : Metric.infDist z (β.segCarrier i) < δ₀ := hz.2
   have hkδ₀ : Metric.infDist z (β.segCarrier k) < δ₀ := by
@@ -321,7 +321,7 @@ theorem bandStripPlus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
       exact hadj_src k hk1 z (by simpa [hkeq] using hz.1.1) hkδ₀ (by simpa [hkeq] using hki)
     · exact hsep k i hfar z hkδ hiδ
   · have hkeq : k = i := Fin.ext heq
-    rw [hkeq, PolyArc.segCarrier] at hzk
+    rw [hkeq, PolygonalArc.segCarrier] at hzk
     have hzero : sideForm (β.segSrc i) (β.segTgt i) z = 0 :=
       sideForm_eq_zero_of_mem_segment _ _ hzk
     have hpos : 0 < sideForm (β.segSrc i) (β.segTgt i) z := hz.1.2
@@ -337,7 +337,7 @@ theorem bandStripPlus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
     · exact hsep i k hfar z hiδ hkδ
 
 /-- **Band containment off the carrier (negative side).** -/
-theorem bandStripMinus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem bandStripMinus_subset_compl_carrier (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hδ₀ : 0 < δ₀) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -354,7 +354,7 @@ theorem bandStripMinus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ
     bandStripMinus β α δ₀ i ⊆ (β.carrier)ᶜ := by
   intro z hz
   have hδsep : 0 < δsep := lt_of_lt_of_le hδ₀ hδ₀sep
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨k, hzk⟩
   have hki : Metric.infDist z (β.segCarrier i) < δ₀ := hz.2
   have hkδ₀ : Metric.infDist z (β.segCarrier k) < δ₀ := by
@@ -379,7 +379,7 @@ theorem bandStripMinus_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ
       exact hadj_src k hk1 z (by simpa [hkeq] using hz.1.1) hkδ₀ (by simpa [hkeq] using hki)
     · exact hsep k i hfar z hkδ hiδ
   · have hkeq : k = i := Fin.ext heq
-    rw [hkeq, PolyArc.segCarrier] at hzk
+    rw [hkeq, PolygonalArc.segCarrier] at hzk
     have hzero : sideForm (β.segSrc i) (β.segTgt i) z = 0 :=
       sideForm_eq_zero_of_mem_segment _ _ hzk
     have hneg : sideForm (β.segSrc i) (β.segTgt i) z < 0 := hz.1.2
@@ -406,7 +406,7 @@ or the outgoing arm (δ₀-thin to edge `i+1`, foot `< 1−α`).  For `z` also o
   toward the shared vertex (`< α` for incoming via `footParam_lt_of_confined_src`, `> 1−α` for
   outgoing via `footParam_gt_of_confined_tgt`), contradicting the clip's margin.  Mirrors agent D's
   `disjoint_sectorPlusClipped_sectorMinusClipped_all` adjacent-corner geometry. -/
-theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem sectorPlusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (_hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
       Metric.infDist w (β.segCarrier a) < δsep →
@@ -426,7 +426,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorPlusClipped β δ₀ α i hi1 ⊆ (β.carrier)ᶜ := by
   intro z hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨k, hzk⟩
   obtain ⟨hzV, harm⟩ := hz
   have hzU :
@@ -438,16 +438,16 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
     · exact Or.inr hzV
   by_cases hki : (k : ℕ) = (i : ℕ)
   · have hkeq : k = i := Fin.ext hki
-    rw [hkeq, PolyArc.segCarrier] at hzk
+    rw [hkeq, PolygonalArc.segCarrier] at hzk
     exact (segment_av_subset_compl_sectors
       (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
   · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
     · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
-      rw [hkeq, PolyArc.segCarrier] at hzk
+      rw [hkeq, PolygonalArc.segCarrier] at hzk
       have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
         Fin.ext (by simp [Fin.val_succ])
       have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
-        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+        rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
       rw [hcs] at hzk
       exact (segment_vb_subset_compl_sectors
         (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
@@ -469,7 +469,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
           have hsv : β.segSrc i = β.verts (Fin.succ k) := by
             have hidx : (Fin.castSucc i : Fin (β.numSegs + 1)) = Fin.succ k :=
               Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
-            rw [PolyArc.segSrc, hidx]
+            rw [PolygonalArc.segSrc, hidx]
           have hne : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
           have hbud : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
               / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * r k ≤ α := by
@@ -519,7 +519,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : 
 
 /-- **Clipped sector containment off the carrier (negative side).**  See
 `sectorPlusClipped_subset_compl_carrier`; the only difference is the `vertexMinus` τ-branch. -/
-theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem sectorMinusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (_hα : 0 < α) (hδ₀ : 0 < δ₀) (hδsep : 0 < δsep) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
       Metric.infDist w (β.segCarrier a) < δsep →
@@ -539,7 +539,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep :
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorMinusClipped β δ₀ α i hi1 ⊆ (β.carrier)ᶜ := by
   intro z hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨k, hzk⟩
   obtain ⟨hzV, harm⟩ := hz
   have hzU :
@@ -551,16 +551,16 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep :
     · exact Or.inl hzV
   by_cases hki : (k : ℕ) = (i : ℕ)
   · have hkeq : k = i := Fin.ext hki
-    rw [hkeq, PolyArc.segCarrier] at hzk
+    rw [hkeq, PolygonalArc.segCarrier] at hzk
     exact (segment_av_subset_compl_sectors
       (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
   · by_cases hki1 : (k : ℕ) = (i : ℕ) + 1
     · have hkeq : k = ⟨(i : ℕ) + 1, hi1⟩ := Fin.ext hki1
-      rw [hkeq, PolyArc.segCarrier] at hzk
+      rw [hkeq, PolygonalArc.segCarrier] at hzk
       have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
         Fin.ext (by simp [Fin.val_succ])
       have hcs : β.segSrc ⟨(i : ℕ) + 1, hi1⟩ = β.segTgt i := by
-        rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+        rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
       rw [hcs] at hzk
       exact (segment_vb_subset_compl_sectors
         (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) hzk) hzU
@@ -581,7 +581,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep :
           have hsv : β.segSrc i = β.verts (Fin.succ k) := by
             have hidx : (Fin.castSucc i : Fin (β.numSegs + 1)) = Fin.succ k :=
               Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
-            rw [PolyArc.segSrc, hidx]
+            rw [PolygonalArc.segSrc, hidx]
           have hne : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
           have hbud : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
               / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * r k ≤ α := by
@@ -630,7 +630,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolyArc) {α δ₀ δsep :
           · exact hsep ⟨(i : ℕ) + 1, hi1⟩ k (by rw [hkval1]; omega) z hi1close hkclose
 
 /-- **Band containment in the clipped collar ground set (positive side).** -/
-theorem bandStripPlus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+theorem bandStripPlus_subset_taperedTube_diff_carrier (β : PolygonalArc) (R S : Set Plane)
     {α δ₀ δsep : ℝ} (i : Fin β.numSegs)
     (hδ₀ : 0 < δ₀) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
@@ -658,7 +658,7 @@ theorem bandStripPlus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set 
     bandStripPlus_subset_compl_carrier β hδ₀ hδ₀sep hsep hadj_tgt hadj_src i hz⟩
 
 /-- **Band containment in the clipped collar ground set (negative side).** -/
-theorem bandStripMinus_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+theorem bandStripMinus_subset_taperedTube_diff_carrier (β : PolygonalArc) (R S : Set Plane)
     {α δ₀ δsep : ℝ} (i : Fin β.numSegs)
     (hδ₀ : 0 < δ₀) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
@@ -690,7 +690,7 @@ clipped tube-containment (`sectorPlusClipped_subset_taperedTube`, window-style `
 the clipped off-carrier lemma (`sectorPlusClipped_subset_compl_carrier`, confinement budget).  The
 union of the two lemmas' hypotheses; the collar-facing replacement for the unclipped
 `sectorPlus_subset_taperedTube_diff_carrier`. -/
-theorem sectorPlusClipped_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+theorem sectorPlusClipped_subset_taperedTube_diff_carrier (β : PolygonalArc) (R S : Set Plane)
     (δ₀ α : ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -733,7 +733,7 @@ theorem sectorPlusClipped_subset_taperedTube_diff_carrier (β : PolyArc) (R S : 
 
 /-- **Clipped sector containment in the collar ground set (negative side).**  See
 `sectorPlusClipped_subset_taperedTube_diff_carrier`. -/
-theorem sectorMinusClipped_subset_taperedTube_diff_carrier (β : PolyArc) (R S : Set Plane)
+theorem sectorMinusClipped_subset_taperedTube_diff_carrier (β : PolygonalArc) (R S : Set Plane)
     (δ₀ α : ℝ) (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hsmall_in : (|(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2|)
         / dotp (β.segTgt i - β.segSrc i) (β.segTgt i - β.segSrc i) * δ₀ ≤ α / 2)
@@ -781,7 +781,7 @@ This is the local sector-to-collar direction used by the crosscut side
 classification: once the sliver budgets put the sector in
 `taperedTube R S δ₀ \ β.carrier`, its defining positive-sector membership places
 it in `collarPlus`. -/
-theorem sectorPlus_subset_collarPlus_of_subset_ground (β : PolyArc) (R S : Set Plane)
+theorem sectorPlus_subset_collarPlus_of_subset_ground (β : PolygonalArc) (R S : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hground : sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
@@ -793,7 +793,7 @@ theorem sectorPlus_subset_collarPlus_of_subset_ground (β : PolyArc) (R S : Set 
 
 /-- A negative vertex sector that lies in the clipped collar ground is contained
 in the negative collar side. -/
-theorem sectorMinus_subset_collarMinus_of_subset_ground (β : PolyArc) (R S : Set Plane)
+theorem sectorMinus_subset_collarMinus_of_subset_ground (β : PolygonalArc) (R S : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hground : sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ \ β.carrier) :
@@ -805,7 +805,7 @@ theorem sectorMinus_subset_collarMinus_of_subset_ground (β : PolyArc) (R S : Se
 
 /-- If the positive collar is assigned to a side `U`, then any positive vertex
 sector already placed in the clipped collar ground is assigned to `U`. -/
-theorem sectorPlus_subset_of_collarPlus_subset (β : PolyArc) (R S U : Set Plane)
+theorem sectorPlus_subset_of_collarPlus_subset (β : PolygonalArc) (R S U : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hPlusU : collarPlus β R S δ₀ α ρ ⊆ U)
@@ -816,7 +816,7 @@ theorem sectorPlus_subset_of_collarPlus_subset (β : PolyArc) (R S U : Set Plane
 
 /-- If the negative collar is assigned to a side `V`, then any negative vertex
 sector already placed in the clipped collar ground is assigned to `V`. -/
-theorem sectorMinus_subset_of_collarMinus_subset (β : PolyArc) (R S V : Set Plane)
+theorem sectorMinus_subset_of_collarMinus_subset (β : PolygonalArc) (R S V : Set Plane)
     (δ₀ α : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hMinusV : collarMinus β R S δ₀ α ρ ⊆ V)
@@ -832,7 +832,7 @@ are put into the ground set using the clipped-containment lemmas above, while th
 negative end caps are supplied by the source/target sliver-budget preconnectedness
 theorems. -/
 theorem isPreconnected_collarMinus_of_sliver_budgets
-    (β : PolyArc) (R S : Set Plane) {δ₀ α δsep cSrc cTgt : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) {δ₀ α δsep cSrc cTgt : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -915,11 +915,11 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
     exact overlap_sectorMinusClipped_bandStripMinus_tgt β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcMinus_bandStripMinus β ρ hδ₀ hα hα3
-      (by simpa [PolyArc.firstSeg] using hsrc β.firstSeg)
+      (by simpa [PolygonalArc.firstSeg] using hsrc β.firstSeg)
   · have hlast : Fin.succ β.lastSeg = Fin.last β.numSegs := by
       apply Fin.ext
       have h := β.numSegs_pos
-      simp [PolyArc.lastSeg, Fin.val_last]
+      simp [PolygonalArc.lastSeg, Fin.val_last]
       omega
     exact overlap_endCapTgtMinus_bandStripMinus β ρ hδ₀ hα hα3
       (by simpa [hlast] using htgt β.lastSeg)
@@ -931,7 +931,7 @@ This is the `P5⁺` companion to
 in the clipped ground set by the containment lemmas, and the two positive end caps
 are supplied by the source/target sliver-budget preconnectedness theorems. -/
 theorem isPreconnected_collarPlus_of_sliver_budgets
-    (β : PolyArc) (R S : Set Plane) {δ₀ α δsep cSrc cTgt : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) {δ₀ α δsep cSrc cTgt : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1014,11 +1014,11 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
     exact overlap_sectorPlusClipped_bandStripPlus_tgt β ρ hδ₀ hα hα3 i hi1
       (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcPlus_bandStripPlus β ρ hδ₀ hα hα3
-      (by simpa [PolyArc.firstSeg] using hsrc β.firstSeg)
+      (by simpa [PolygonalArc.firstSeg] using hsrc β.firstSeg)
   · have hlast : Fin.succ β.lastSeg = Fin.last β.numSegs := by
       apply Fin.ext
       have h := β.numSegs_pos
-      simp [PolyArc.lastSeg, Fin.val_last]
+      simp [PolygonalArc.lastSeg, Fin.val_last]
       omega
     exact overlap_endCapTgtPlus_bandStripPlus β ρ hδ₀ hα hα3
       (by simpa [hlast] using htgt β.lastSeg)

@@ -49,7 +49,7 @@ from* the per-step crosscut partition. The base prefix (spanning tree) has one
 face, so `dr start` is unconstrained. For each cotree step `m → m+1`:
 
 1. The new graph edge is a straight segment; realize it as a one-segment
-   `PolyArc` β. **Keep** your `straightPolyArc` / `arcToPolyArc` — they are
+   `PolygonalArc` β. **Keep** your `straightPolygonalArc` / `arcToPolygonalArc` — they are
    correct and reusable.
 2. Let `R := residualFaceRegion (level m) (Face_mk c₁)` be the single predecessor
    face the new edge crosscuts (`c₁ c₂` are its two splice corners). Get the two
@@ -85,7 +85,7 @@ face, so `dr start` is unconstrained. For each cotree step `m → m+1`:
 - **Delete the entire §2 of `DartSectorPoint.lean`** (lines 118–217:
   `exists_dartSectorPoint`, `dartSectorPoint`, `dartSectorPoint_mem_drawingComplementIn`,
   `dartSectorRegion`, `dartSectorRegion_hcomp`) — wrong decomposition. **Keep §1**
-  (`straightPolyArc`, `straightPolyArc_src/_tgt/_carrier`, `arcToPolyArc`). Update
+  (`straightPolygonalArc`, `straightPolygonalArc_src/_tgt/_carrier`, `arcToPolygonalArc`). Update
   the file's module docstring so it no longer advertises the deleted region map or
   a `{{NEEDS_PROOF}}` sorry the code no longer contains.
 - **Do NOT** close `h_geometric_region` with `rfl` and call it done. It is hollow;
@@ -159,7 +159,7 @@ theorem exists_twoSidedPartition_prefixStep
       IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
       IsTwoSidedPartition
         (CrossingLemma.PlaneArcSeparation.regionMinusArc R
-          (straightPolyArc p₁ p₂ hne).toSimpleArc) U V := by
+          (straightPolygonalArc p₁ p₂ hne).toSimpleArc) U V := by
   sorry  -- build tube R; discharge collar hyps; apply exists_twoSidedPartition_of_straightArc
 ```
 
@@ -206,11 +206,11 @@ inapplicable lemma.
 
 **Root cause (genuine gap, not a typo):** the source end-cap radius `ρ 0` is forced
 `> 2α·L₁` by `hsrc`, but the "near-spine ⇒ first-edge slice" decomposition
-(`taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine`, PLArc.lean:7802,
+(`taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine`, PolygonalArc.lean:7802,
 applied at 7820–7851) requires every spine point within `ρ 0 + δ₀` of the endpoint
 to have foot-parameter `≤ cSrc ≤ 2α`. The spine (forced ⊇ whole open edge by
 `hSband`) has points in the annulus `(cSrc·L₁, ρ 0 + δ₀)` that violate this. The
-honest discharge helper `arcInterior_near_src` (PLArc.lean:7278) only reaches radius
+honest discharge helper `arcInterior_near_src` (PolygonalArc.lean:7278) only reaches radius
 `cSrc·L₁ < ρ 0`. The end-cap radius `ρ 0` is conflated with the collar reach budget.
 
 **Blast radius:** contained. Nothing completed/axiom-clean depends on the infected

@@ -3,16 +3,16 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 3/7 — **Disjointness**: the P3 pairwise-disjointness lemmas for the
+PolygonalArc shard 3/7 — **Disjointness**: the P3 pairwise-disjointness lemmas for the
 collar cells (clean sign/same-locus cases, adjacent corner cases, band↔sector
 glue, sector↔sector, end caps, the per-cell aggregators, and the master
 assembly). Also defines `stripSupport` and `exists_pos_disk_radius`, used by the
-later collar shards. Split out of `PLArc.lean`; see that coordinator module's
+later collar shards. Split out of `PolygonalArc.lean`; see that coordinator module's
 doc for the overview.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -28,7 +28,7 @@ opposite-sign pieces on the *same* edge or *same* vertex contradict directly. -/
 
 /-- A band-strip's positive and negative halves on the **same edge** are disjoint
 (opposite `sideForm` signs). -/
-theorem disjoint_bandStripPlus_bandStripMinus (β : PolyArc) (α δ₀ : ℝ)
+theorem disjoint_bandStripPlus_bandStripMinus (β : PolygonalArc) (α δ₀ : ℝ)
     (i : Fin β.numSegs) :
     Disjoint (bandStripPlus β α δ₀ i) (bandStripMinus β α δ₀ i) := by
   rw [Set.disjoint_left]
@@ -39,7 +39,7 @@ theorem disjoint_bandStripPlus_bandStripMinus (β : PolyArc) (α δ₀ : ℝ)
 
 /-- A vertex sector's positive and negative halves at the **same vertex** are disjoint
 (`disjoint_vertexPlus_vertexMinus`). -/
-theorem disjoint_sectorPlus_sectorMinus (β : PolyArc) (δ₀ : ℝ)
+theorem disjoint_sectorPlus_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     Disjoint (sectorPlus β δ₀ i hi1) (sectorMinus β δ₀ i hi1) := by
   rw [Set.disjoint_left]
@@ -50,14 +50,14 @@ theorem disjoint_sectorPlus_sectorMinus (β : PolyArc) (δ₀ : ℝ)
 
 /-- The **strip support** of edge `i` at width `δ`: points within `δ` of the closed
 segment.  Both `bandStrip±` sit inside the support at their own width `δ₀`. -/
-def stripSupport (β : PolyArc) (δ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+def stripSupport (β : PolygonalArc) (δ : ℝ) (i : Fin β.numSegs) : Set Plane :=
   {z | Metric.infDist z (β.segCarrier i) < δ}
 
-theorem bandStripPlus_subset_stripSupport (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem bandStripPlus_subset_stripSupport (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     bandStripPlus β α δ₀ i ⊆ stripSupport β δ₀ i :=
   fun _ hz => hz.2
 
-theorem bandStripMinus_subset_stripSupport (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem bandStripMinus_subset_stripSupport (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     bandStripMinus β α δ₀ i ⊆ stripSupport β δ₀ i :=
   fun _ hz => hz.2
 
@@ -68,26 +68,26 @@ both — so the single-strip containments `⊆ stripSupport i` / `⊆ stripSuppo
 old intersection form are **false**; only this union containment holds.  Disjointness of a
 sector from a *far* edge's strip now needs separation from *both* arms (4-way), and adjacent
 disjointness uses the σ-sign lemmas, not strip separation. -/
-theorem sectorPlus_subset_stripSupport_union (β : PolyArc) (δ₀ : ℝ) (i : Fin β.numSegs)
+theorem sectorPlus_subset_stripSupport_union (β : PolygonalArc) (δ₀ : ℝ) (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorPlus β δ₀ i hi1 ⊆ stripSupport β δ₀ i ∪ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ :=
   fun _ hz => hz.2
 
 /-- **Union form (2026-06-14).**  A `−` sector sits in the union of the strip supports of its
 two incident edges.  See `sectorPlus_subset_stripSupport_union`. -/
-theorem sectorMinus_subset_stripSupport_union (β : PolyArc) (δ₀ : ℝ) (i : Fin β.numSegs)
+theorem sectorMinus_subset_stripSupport_union (β : PolygonalArc) (δ₀ : ℝ) (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorMinus β δ₀ i hi1 ⊆ stripSupport β δ₀ i ∪ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ :=
   fun _ hz => hz.2
 
-theorem stripSupport_mono (β : PolyArc) {δ δ' : ℝ} (h : δ ≤ δ') (i : Fin β.numSegs) :
+theorem stripSupport_mono (β : PolygonalArc) {δ δ' : ℝ} (h : δ ≤ δ') (i : Fin β.numSegs) :
     stripSupport β δ i ⊆ stripSupport β δ' i :=
   fun _ hz => lt_of_lt_of_le hz h
 
 /-- **Non-adjacent strip supports are disjoint**, once `δ` is below the non-adjacent
 separation `exists_delta_nonadjacent_tube_sep`.  This kills every band↔band cross-overlap
 between non-consecutive edges (regardless of sign). -/
-theorem disjoint_stripSupport_nonadjacent (β : PolyArc) {δ : ℝ}
+theorem disjoint_stripSupport_nonadjacent (β : PolygonalArc) {δ : ℝ}
     (hsep : ∀ i j : Fin β.numSegs, (i : ℕ) + 1 < (j : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier i) < δ → Metric.infDist z (β.segCarrier j) < δ → False)
     (i j : Fin β.numSegs) (hij : (i : ℕ) + 1 < (j : ℕ)) :
@@ -110,7 +110,7 @@ point lies in edge `i`'s mid-band while also being within `δ₀` of edge `i+1`.
 is also within `δ₀` of both edge `i` and edge `i+1` is impossible, provided the corner
 confinement at radius `r` holds at width `δ₀` and the Lipschitz budget `L_i · r ≤ α` is
 met (`L_i = ‖edge_i‖₁ / ‖edge_i‖₂²` the foot-parameter Lipschitz constant). -/
-theorem not_mem_adjacent_band_strip (β : PolyArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
+theorem not_mem_adjacent_band_strip (β : PolygonalArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hconf : ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ₀ →
       Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ →
@@ -146,7 +146,7 @@ theorem not_mem_adjacent_band_strip (β : PolyArc) {α δ₀ r : ℝ} (i : Fin �
 `not_mem_adjacent_band_strip` for a point in edge `(i+1)`'s narrowed mid-band that is also
 within `δ₀` of both edges `i` and `i+1`.  Here the shared vertex is edge `(i+1)`'s *source*
 (`footParam = 0`), so the Lipschitz budget uses edge `(i+1)`'s constant. -/
-theorem not_mem_adjacent_band_strip_src (β : PolyArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
+theorem not_mem_adjacent_band_strip_src (β : PolygonalArc) {α δ₀ r : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hconf : ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ₀ →
       Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ →
@@ -163,7 +163,7 @@ theorem not_mem_adjacent_band_strip_src (β : PolyArc) {α δ₀ r : ℝ} (i : F
   have hne : β.segTgt k ≠ β.segSrc k := β.segTgt_ne_segSrc k
   have hidx : (Fin.castSucc k : Fin (β.numSegs + 1)) = Fin.succ i :=
     Fin.ext (by simp [Fin.val_succ, hk])
-  have hsv : β.segSrc k = β.verts (Fin.succ i) := by rw [PolyArc.segSrc, hidx]
+  have hsv : β.segSrc k = β.verts (Fin.succ i) := by rw [PolygonalArc.segSrc, hidx]
   have hfp_gt : α < footParam (β.segSrc k) (β.segTgt k) z := hmid.1
   have hconf' : dist z (β.verts (Fin.succ i)) < r := hconf z hzi hzi1
   have hfs : footParam (β.segSrc k) (β.segTgt k) (β.segSrc k) = 0 := footParam_src _ _
@@ -192,7 +192,7 @@ meet the `+` sector, never the `−` one. -/
 
 /-- On the incoming-arm band/disk overlap, a `sideForm > 0` point lands in the `+`
 sector. -/
-theorem bandStrip_incoming_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
+theorem bandStrip_incoming_mem_vertexPlus (β : PolygonalArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt i - β.segTgt ⟨(i : ℕ) + 1, hi1⟩) (β.segSrc i - β.segTgt i)|
@@ -210,7 +210,7 @@ theorem bandStrip_incoming_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (i : F
   have hfoot_inc : α ≤ footParam (β.segTgt i) (β.segSrc i) z := by
     rw [footParam_swap_eq hva z]; linarith
   have hsegeq : segment ℝ (β.segTgt i) (β.segSrc i) = β.segCarrier i := by
-    rw [PolyArc.segCarrier, segment_symm]
+    rw [PolygonalArc.segCarrier, segment_symm]
   have hstrip' : Metric.infDist z (segment ℝ (β.segTgt i) (β.segSrc i)) < δ₀ := by
     rw [hsegeq]; exact hstrip
   have hthin := thin_of_infDist_incoming (a := β.segSrc i) (v := β.segTgt i)
@@ -219,7 +219,7 @@ theorem bandStrip_incoming_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (i : F
 
 /-- On the incoming-arm band/disk overlap, a `sideForm < 0` point lands in the `−`
 sector. -/
-theorem bandStrip_incoming_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
+theorem bandStrip_incoming_mem_vertexMinus (β : PolygonalArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt i - β.segTgt ⟨(i : ℕ) + 1, hi1⟩) (β.segSrc i - β.segTgt i)|
@@ -237,7 +237,7 @@ theorem bandStrip_incoming_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (i : 
   have hfoot_inc : α ≤ footParam (β.segTgt i) (β.segSrc i) z := by
     rw [footParam_swap_eq hva z]; linarith
   have hsegeq : segment ℝ (β.segTgt i) (β.segSrc i) = β.segCarrier i := by
-    rw [PolyArc.segCarrier, segment_symm]
+    rw [PolygonalArc.segCarrier, segment_symm]
   have hstrip' : Metric.infDist z (segment ℝ (β.segTgt i) (β.segSrc i)) < δ₀ := by
     rw [hsegeq]; exact hstrip
   have hthin := thin_of_infDist_incoming (a := β.segSrc i) (v := β.segTgt i)
@@ -246,7 +246,7 @@ theorem bandStrip_incoming_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (i : 
 
 /-- **Incident band⁺ ↔ sector⁻ disjointness (incoming arm).**  Edge `i` is the incoming
 arm of the corner at `verts (i+1)`; its `+` band and the corner's `−` sector cannot meet. -/
-theorem disjoint_bandStripPlus_sectorMinus_incoming (β : PolyArc)
+theorem disjoint_bandStripPlus_sectorMinus_incoming (β : PolygonalArc)
     {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) ≠ 0)
@@ -262,7 +262,7 @@ theorem disjoint_bandStripPlus_sectorMinus_incoming (β : PolyArc)
   exact (Set.disjoint_left.mp (disjoint_vertexPlus_vertexMinus _ _ _)) hmem hzs.1
 
 /-- **Incident band⁻ ↔ sector⁺ disjointness (incoming arm).** -/
-theorem disjoint_bandStripMinus_sectorPlus_incoming (β : PolyArc)
+theorem disjoint_bandStripMinus_sectorPlus_incoming (β : PolygonalArc)
     {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) ≠ 0)
@@ -286,7 +286,7 @@ quantities into the corner's `v→b` arm, and `thin_of_infDist_outgoing` feeds
 
 /-- On the outgoing-arm band/disk overlap, a `sideForm > 0` point lands in the `+`
 sector. -/
-theorem bandStrip_outgoing_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
+theorem bandStrip_outgoing_mem_vertexPlus (β : PolygonalArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt j - β.segSrc j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩ - β.segTgt j)|
@@ -303,7 +303,7 @@ theorem bandStrip_outgoing_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (j : F
   have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
     Fin.ext (by simp [Fin.val_succ])
   have hsv : β.segSrc ⟨(j : ℕ) + 1, hj1⟩ = β.segTgt j := by
-    rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+    rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
   rw [hsv] at hmid hsf
   have hbv : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segTgt j := by
     rw [← hsv]; exact β.segTgt_ne_segSrc ⟨(j : ℕ) + 1, hj1⟩
@@ -315,7 +315,7 @@ theorem bandStrip_outgoing_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (j : F
       (segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩)) < δ₀ := by
     have hseg : β.segCarrier ⟨(j : ℕ) + 1, hj1⟩
         = segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) := by
-      rw [PolyArc.segCarrier, hsv]
+      rw [PolygonalArc.segCarrier, hsv]
     rw [← hseg]; exact hstrip
   have hthin := thin_of_infDist_outgoing (a := β.segSrc j) (v := β.segTgt j)
     (b := β.segTgt ⟨(j : ℕ) + 1, hj1⟩) (z := z) hbv (le_of_lt hmid) hstrip' hδ
@@ -323,7 +323,7 @@ theorem bandStrip_outgoing_mem_vertexPlus (β : PolyArc) {α δ₀ : ℝ} (j : F
 
 /-- On the outgoing-arm band/disk overlap, a `sideForm < 0` point lands in the `−`
 sector. -/
-theorem bandStrip_outgoing_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
+theorem bandStrip_outgoing_mem_vertexMinus (β : PolygonalArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt j - β.segSrc j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩ - β.segTgt j)|
@@ -340,7 +340,7 @@ theorem bandStrip_outgoing_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (j : 
   have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
     Fin.ext (by simp [Fin.val_succ])
   have hsv : β.segSrc ⟨(j : ℕ) + 1, hj1⟩ = β.segTgt j := by
-    rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+    rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
   rw [hsv] at hmid hsf
   have hbv : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segTgt j := by
     rw [← hsv]; exact β.segTgt_ne_segSrc ⟨(j : ℕ) + 1, hj1⟩
@@ -352,7 +352,7 @@ theorem bandStrip_outgoing_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (j : 
       (segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩)) < δ₀ := by
     have hseg : β.segCarrier ⟨(j : ℕ) + 1, hj1⟩
         = segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) := by
-      rw [PolyArc.segCarrier, hsv]
+      rw [PolygonalArc.segCarrier, hsv]
     rw [← hseg]; exact hstrip
   have hthin := thin_of_infDist_outgoing (a := β.segSrc j) (v := β.segTgt j)
     (b := β.segTgt ⟨(j : ℕ) + 1, hj1⟩) (z := z) hbv (le_of_lt hmid) hstrip' hδ
@@ -360,7 +360,7 @@ theorem bandStrip_outgoing_mem_vertexMinus (β : PolyArc) {α δ₀ : ℝ} (j : 
 
 /-- **Incident band⁺ ↔ sector⁻ disjointness (outgoing arm).**  Edge `j+1` is the outgoing
 arm of the corner at `verts (j+1)`; its `+` band and the corner's `−` sector cannot meet. -/
-theorem disjoint_bandStripPlus_sectorMinus_outgoing (β : PolyArc)
+theorem disjoint_bandStripPlus_sectorMinus_outgoing (β : PolygonalArc)
     {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
@@ -377,7 +377,7 @@ theorem disjoint_bandStripPlus_sectorMinus_outgoing (β : PolyArc)
   exact (Set.disjoint_left.mp (disjoint_vertexPlus_vertexMinus _ _ _)) hmem hzs.1
 
 /-- **Incident band⁻ ↔ sector⁺ disjointness (outgoing arm).** -/
-theorem disjoint_bandStripMinus_sectorPlus_outgoing (β : PolyArc)
+theorem disjoint_bandStripMinus_sectorPlus_outgoing (β : PolygonalArc)
     {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
@@ -403,7 +403,7 @@ is non-adjacent to at least one of them. -/
 
 /-- A point in the vertex ball at `verts (j+1)` is within that radius of **both** incident
 edges `j` and `j+1` (the vertex is their shared endpoint). -/
-theorem infDist_lt_of_mem_vertexBall (β : PolyArc) (j : Fin β.numSegs)
+theorem infDist_lt_of_mem_vertexBall (β : PolygonalArc) (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) {ρ' : ℝ} {z : Plane}
     (hz : z ∈ Metric.ball (β.verts (Fin.succ j)) ρ') :
     Metric.infDist z (β.segCarrier j) < ρ' ∧
@@ -412,7 +412,7 @@ theorem infDist_lt_of_mem_vertexBall (β : PolyArc) (j : Fin β.numSegs)
   have h1 : β.verts (Fin.succ j) = β.segTgt j := rfl
   have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
     Fin.ext (by simp [Fin.val_succ])
-  have h2 : β.verts (Fin.succ j) = β.segSrc ⟨(j : ℕ) + 1, hj1⟩ := by rw [PolyArc.segSrc, hidx]
+  have h2 : β.verts (Fin.succ j) = β.segSrc ⟨(j : ℕ) + 1, hj1⟩ := by rw [PolygonalArc.segSrc, hidx]
   refine ⟨?_, ?_⟩
   · calc Metric.infDist z (β.segCarrier j)
         ≤ dist z (β.segTgt j) := Metric.infDist_le_dist_of_mem (right_mem_segment ℝ _ _)
@@ -426,7 +426,7 @@ theorem infDist_lt_of_mem_vertexBall (β : PolyArc) (j : Fin β.numSegs)
 
 /-- **Sector ↔ sector disjointness (different vertices).**  Reduces to disjointness of
 the two vertex balls (a `ρ` budget). -/
-theorem disjoint_sectorPlus_sectorMinus_diff (β : PolyArc) (δ₀ : ℝ)
+theorem disjoint_sectorPlus_sectorMinus_diff (β : PolygonalArc) (δ₀ : ℝ)
     (j k : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs) (hk1 : (k : ℕ) + 1 < β.numSegs)
     (hjj : Disjoint (stripSupport β δ₀ j) (stripSupport β δ₀ k))
     (hjk : Disjoint (stripSupport β δ₀ j) (stripSupport β δ₀ ⟨(k : ℕ) + 1, hk1⟩))
@@ -450,7 +450,7 @@ theorem disjoint_sectorPlus_sectorMinus_diff (β : PolyArc) (δ₀ : ℝ)
 sector's vertex `verts (j+1)` (`(i:ℕ) ∉ {j, j+1}`).  Reduces (via the strip support and
 the vertex ball) to the non-adjacent edge separation at width `δ`, with `δ₀ ≤ δ` and
 `ρ (j+1) ≤ δ`. -/
-theorem disjoint_stripSupport_vertexBall_nonincident (β : PolyArc)
+theorem disjoint_stripSupport_vertexBall_nonincident (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ δ : ℝ} (i j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ w : Plane,
@@ -477,7 +477,7 @@ raw strip support), and given the adjacent-corner band/strip impossibilities `ha
 `hadj_src`.  The sector meets BOTH arm strips `{j, j+1}`; for the arm non-adjacent to `i`,
 `hsep` separates; for an arm adjacent to `i` (`i = j−1` shares corner `j−1`, or `i = j+2`
 shares corner `j+1`), the band's interior foot kills the overlap via the corner glue. -/
-theorem disjoint_stripSupport_sectorPlus_nonincident (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem disjoint_stripSupport_sectorPlus_nonincident (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep → Metric.infDist z (β.segCarrier b) < δsep → False)
@@ -534,7 +534,7 @@ theorem disjoint_stripSupport_sectorPlus_nonincident (β : PolyArc) {α δ₀ δ
 
 /-- **Non-incident edge band ↔ `−` sector (δ₀-tube UNION model).**  Sign-mirror of
 `disjoint_stripSupport_sectorPlus_nonincident`; restated for the `+` band strip on edge `i`. -/
-theorem disjoint_stripSupport_sectorMinus_nonincident (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem disjoint_stripSupport_sectorMinus_nonincident (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep → Metric.infDist z (β.segCarrier b) < δsep → False)
@@ -588,7 +588,7 @@ cap against the opposite-sign band on its own edge, contradict directly; the two
 caps are separated by their balls. -/
 
 /-- Opposite-sign caps at the source endpoint are disjoint. -/
-theorem disjoint_endCapSrcPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem disjoint_endCapSrcPlus_endCapSrcMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Disjoint (endCapSrcPlus β ρ) (endCapSrcMinus β ρ) := by
   rw [Set.disjoint_left]
   intro z hzp hzm
@@ -597,7 +597,7 @@ theorem disjoint_endCapSrcPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSe
   linarith
 
 /-- Opposite-sign caps at the target endpoint are disjoint. -/
-theorem disjoint_endCapTgtPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem disjoint_endCapTgtPlus_endCapTgtMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Disjoint (endCapTgtPlus β ρ) (endCapTgtMinus β ρ) := by
   rw [Set.disjoint_left]
   intro z hzp hzm
@@ -607,7 +607,7 @@ theorem disjoint_endCapTgtPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSe
 
 /-- The source `+` cap and the `−` band on its own edge (`firstSeg`) are disjoint
 (opposite `sideForm` sign on the same edge). -/
-theorem disjoint_endCapSrcPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcPlus_bandStripMinus_self (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (α δ₀ : ℝ) : Disjoint (endCapSrcPlus β ρ) (bandStripMinus β α δ₀ β.firstSeg) := by
   rw [Set.disjoint_left]
   intro z hzc hzb
@@ -616,7 +616,7 @@ theorem disjoint_endCapSrcPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.
   linarith
 
 /-- The source `−` cap and the `+` band on its own edge are disjoint. -/
-theorem disjoint_endCapSrcMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcMinus_bandStripPlus_self (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (α δ₀ : ℝ) : Disjoint (endCapSrcMinus β ρ) (bandStripPlus β α δ₀ β.firstSeg) := by
   rw [Set.disjoint_left]
   intro z hzc hzb
@@ -625,7 +625,7 @@ theorem disjoint_endCapSrcMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.
   linarith
 
 /-- The target `+` cap and the `−` band on its own edge (`lastSeg`) are disjoint. -/
-theorem disjoint_endCapTgtPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapTgtPlus_bandStripMinus_self (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (α δ₀ : ℝ) : Disjoint (endCapTgtPlus β ρ) (bandStripMinus β α δ₀ β.lastSeg) := by
   rw [Set.disjoint_left]
   intro z hzc hzb
@@ -634,7 +634,7 @@ theorem disjoint_endCapTgtPlus_bandStripMinus_self (β : PolyArc) (ρ : Fin (β.
   linarith
 
 /-- The target `−` cap and the `+` band on its own edge are disjoint. -/
-theorem disjoint_endCapTgtMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapTgtMinus_bandStripPlus_self (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (α δ₀ : ℝ) : Disjoint (endCapTgtMinus β ρ) (bandStripPlus β α δ₀ β.lastSeg) := by
   rw [Set.disjoint_left]
   intro z hzc hzb
@@ -643,7 +643,7 @@ theorem disjoint_endCapTgtMinus_bandStripPlus_self (β : PolyArc) (ρ : Fin (β.
   linarith
 
 /-- The two endpoint caps are disjoint once their balls are (a `ρ` budget). -/
-theorem disjoint_endCapSrc_endCapTgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrc_endCapTgt (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hball : Disjoint (Metric.ball (β.verts 0) (ρ 0))
                       (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))) :
     Disjoint (endCapSrcPlus β ρ) (endCapTgtMinus β ρ) := by
@@ -652,7 +652,7 @@ theorem disjoint_endCapSrc_endCapTgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) �
   exact (Set.disjoint_left.mp hball) hzs.1.1 hzt.1.1
 
 /-- The other endpoint-cap cross pairing. -/
-theorem disjoint_endCapSrcMinus_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcMinus_endCapTgtPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hball : Disjoint (Metric.ball (β.verts 0) (ρ 0))
                       (Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)))) :
     Disjoint (endCapSrcMinus β ρ) (endCapTgtPlus β ρ) := by
@@ -672,7 +672,7 @@ budget `ρ + δ₀ ≤ infDist v (segCarrier i)`.  End cap ↔ sector is pure ba
 `ρ' + δ₀` from edge `i` (in `infDist`), the `ρ'`-ball about `v` misses edge `i`'s `δ₀`-strip
 support.  `infDist` is `1`-Lipschitz, so a point within `ρ'` of `v` and within `δ₀` of the
 edge would put `v` within `ρ' + δ₀` of the edge. -/
-theorem disjoint_vertexBall_stripSupport_of_budget (β : PolyArc) {v : Plane} {ρ' δ₀ : ℝ}
+theorem disjoint_vertexBall_stripSupport_of_budget (β : PolygonalArc) {v : Plane} {ρ' δ₀ : ℝ}
     (i : Fin β.numSegs)
     (hbudget : ρ' + δ₀ ≤ Metric.infDist v (β.segCarrier i)) :
     Disjoint (Metric.ball v ρ') (stripSupport β δ₀ i) := by
@@ -686,7 +686,7 @@ theorem disjoint_vertexBall_stripSupport_of_budget (β : PolyArc) {v : Plane} {�
   linarith
 
 /-- Source `+` cap ↔ `−` band on a non-incident edge (`i ≠ firstSeg`). -/
-theorem disjoint_endCapSrcPlus_bandStripMinus_nonincident (β : PolyArc)
+theorem disjoint_endCapSrcPlus_bandStripMinus_nonincident (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
     Disjoint (endCapSrcPlus β ρ) (bandStripMinus β α δ₀ i) :=
@@ -694,7 +694,7 @@ theorem disjoint_endCapSrcPlus_bandStripMinus_nonincident (β : PolyArc)
     (fun _ hz => hz.1.1) (bandStripMinus_subset_stripSupport β α δ₀ i)
 
 /-- Source `−` cap ↔ `+` band on a non-incident edge (`i ≠ firstSeg`). -/
-theorem disjoint_endCapSrcMinus_bandStripPlus_nonincident (β : PolyArc)
+theorem disjoint_endCapSrcMinus_bandStripPlus_nonincident (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
     Disjoint (endCapSrcMinus β ρ) (bandStripPlus β α δ₀ i) :=
@@ -702,7 +702,7 @@ theorem disjoint_endCapSrcMinus_bandStripPlus_nonincident (β : PolyArc)
     (fun _ hz => hz.1.1) (bandStripPlus_subset_stripSupport β α δ₀ i)
 
 /-- Target `+` cap ↔ `−` band on a non-incident edge (`i ≠ lastSeg`). -/
-theorem disjoint_endCapTgtPlus_bandStripMinus_nonincident (β : PolyArc)
+theorem disjoint_endCapTgtPlus_bandStripMinus_nonincident (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
       ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
@@ -711,7 +711,7 @@ theorem disjoint_endCapTgtPlus_bandStripMinus_nonincident (β : PolyArc)
     (fun _ hz => hz.1.1) (bandStripMinus_subset_stripSupport β α δ₀ i)
 
 /-- Target `−` cap ↔ `+` band on a non-incident edge (`i ≠ lastSeg`). -/
-theorem disjoint_endCapTgtMinus_bandStripPlus_nonincident (β : PolyArc)
+theorem disjoint_endCapTgtMinus_bandStripPlus_nonincident (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
       ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
@@ -721,7 +721,7 @@ theorem disjoint_endCapTgtMinus_bandStripPlus_nonincident (β : PolyArc)
 
 /-- Source `+` cap ↔ a sector (different vertices: `verts 0 ≠ verts (succ j)`), a ball
 budget. -/
-theorem disjoint_endCapSrcPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcPlus_sectorMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j))
     (hbudget1 : ρ 0 + δ₀
@@ -739,7 +739,7 @@ theorem disjoint_endCapSrcPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs 
     (sectorMinus_subset_stripSupport_union β δ₀ j hj1)
 
 /-- Target `+` cap ↔ a sector, an `infDist` budget. -/
-theorem disjoint_endCapTgtPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapTgtPlus_sectorMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
       ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j))
@@ -757,7 +757,7 @@ theorem disjoint_endCapTgtPlus_sectorMinus (β : PolyArc) (ρ : Fin (β.numSegs 
     (sectorMinus_subset_stripSupport_union β δ₀ j hj1)
 
 /-- A sector ↔ source `−` cap, an `infDist` budget. -/
-theorem disjoint_sectorPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_sectorPlus_endCapSrcMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier j))
     (hbudget1 : ρ 0 + δ₀
@@ -774,7 +774,7 @@ theorem disjoint_sectorPlus_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs 
     (sectorPlus_subset_stripSupport_union β δ₀ j hj1)).symm
 
 /-- A sector ↔ target `−` cap, an `infDist` budget. -/
-theorem disjoint_sectorPlus_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_sectorPlus_endCapTgtMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ : ℝ} (j : Fin β.numSegs) (hj1 : (j : ℕ) + 1 < β.numSegs)
     (hbudget : ρ (Fin.last β.numSegs) + δ₀
       ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier j))
@@ -804,7 +804,7 @@ those their corner confinement + Lipschitz budgets). -/
 /-- **band⁺ ↔ band⁻, all index pairs.**  Same edge → sign clash; adjacent → the corner
 impossibility (target arm if the `+` band is the lower edge, source arm if upper);
 non-adjacent → the strip separation. -/
-theorem disjoint_bandStripPlus_bandStripMinus_all (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem disjoint_bandStripPlus_bandStripMinus_all (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -844,7 +844,7 @@ theorem disjoint_bandStripPlus_bandStripMinus_all (β : PolyArc) {α δ₀ δsep
 
 /-- **band⁺ ↔ sector⁻, all index pairs.**  Incident (`i = j` incoming, `i = j+1` outgoing)
 → the corner glue; non-incident → strip/ball separation. -/
-theorem disjoint_bandStripPlus_sectorMinus_all (β : PolyArc)
+theorem disjoint_bandStripPlus_sectorMinus_all (β : PolygonalArc)
     {α δ₀ δsep : ℝ} (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -885,7 +885,7 @@ theorem disjoint_bandStripPlus_sectorMinus_all (β : PolyArc)
         i j hj1 hij hij1
 
 /-- **sector⁺ ↔ band⁻, all index pairs.**  The sign-swapped mirror of the previous. -/
-theorem disjoint_sectorPlus_bandStripMinus_all (β : PolyArc)
+theorem disjoint_sectorPlus_bandStripMinus_all (β : PolygonalArc)
     {α δ₀ δsep : ℝ} (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -928,7 +928,7 @@ theorem disjoint_sectorPlus_bandStripMinus_all (β : PolyArc)
 
 /-- **Source `+` cap ↔ band⁻, all band indices.**  Own edge → sign clash; else the
 endpoint-edge budget. -/
-theorem disjoint_endCapSrcPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcPlus_bandStripMinus_all (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {α δ₀ : ℝ}
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
@@ -939,7 +939,7 @@ theorem disjoint_endCapSrcPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.n
   · exact disjoint_endCapSrcPlus_bandStripMinus_nonincident β ρ i (hbudsrc i hi)
 
 /-- **Source `−` cap ↔ band⁺, all band indices.** -/
-theorem disjoint_endCapSrcMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapSrcMinus_bandStripPlus_all (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {α δ₀ : ℝ}
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
@@ -950,7 +950,7 @@ theorem disjoint_endCapSrcMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.n
   · exact disjoint_endCapSrcMinus_bandStripPlus_nonincident β ρ i (hbudsrc i hi)
 
 /-- **Target `+` cap ↔ band⁻, all band indices.** -/
-theorem disjoint_endCapTgtPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapTgtPlus_bandStripMinus_all (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {α δ₀ : ℝ}
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
@@ -962,7 +962,7 @@ theorem disjoint_endCapTgtPlus_bandStripMinus_all (β : PolyArc) (ρ : Fin (β.n
   · exact disjoint_endCapTgtPlus_bandStripMinus_nonincident β ρ i (hbudtgt i hi)
 
 /-- **Target `−` cap ↔ band⁺, all band indices.** -/
-theorem disjoint_endCapTgtMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem disjoint_endCapTgtMinus_bandStripPlus_all (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {α δ₀ : ℝ}
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
@@ -974,7 +974,7 @@ theorem disjoint_endCapTgtMinus_bandStripPlus_all (β : PolyArc) (ρ : Fin (β.n
   · exact disjoint_endCapTgtMinus_bandStripPlus_nonincident β ρ i (hbudtgt i hi)
 
 /-- `Fin.succ j ≠ Fin.last` when `j+1 < numSegs` (the sector vertex is interior). -/
-private theorem succ_ne_last_of_lt (β : PolyArc) {j : Fin β.numSegs}
+private theorem succ_ne_last_of_lt (β : PolygonalArc) {j : Fin β.numSegs}
     (hj1 : (j : ℕ) + 1 < β.numSegs) : (Fin.succ j : Fin (β.numSegs + 1)) ≠ Fin.last β.numSegs := by
   intro h
   have := congrArg Fin.val h
@@ -1057,7 +1057,7 @@ theorem footParam_gt_of_confined_tgt {s t w z : Plane} (hts : t ≠ s) {α r : �
 corner's OUTGOING edge `j+1` with foot `≥ α` there lies strictly LEFT of that edge:
 `0 < sideForm (segTgt j) (segTgt (j+1)) z`.  Mirrors `bandStrip_outgoing_mem_vertexPlus`'s
 thinness chain but stops at the σ-sign (`vertexPlus_sideForm_outgoing_pos`). -/
-theorem sideForm_pos_of_vertexPlus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
+theorem sideForm_pos_of_vertexPlus_outgoing (β : PolygonalArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt j - β.segSrc j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩ - β.segTgt j)|
@@ -1074,7 +1074,7 @@ theorem sideForm_pos_of_vertexPlus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j :
   have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
     Fin.ext (by simp [Fin.val_succ])
   have hsv : β.segSrc ⟨(j : ℕ) + 1, hj1⟩ = β.segTgt j := by
-    rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+    rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
   rw [hsv] at hfoot
   have hbv : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segTgt j := by
     rw [← hsv]; exact β.segTgt_ne_segSrc ⟨(j : ℕ) + 1, hj1⟩
@@ -1086,7 +1086,7 @@ theorem sideForm_pos_of_vertexPlus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j :
       (segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩)) < δ₀ := by
     have hseg : β.segCarrier ⟨(j : ℕ) + 1, hj1⟩
         = segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) := by
-      rw [PolyArc.segCarrier, hsv]
+      rw [PolygonalArc.segCarrier, hsv]
     rw [← hseg]; exact hstrip
   have hthin := thin_of_infDist_outgoing (a := β.segSrc j) (v := β.segTgt j)
     (b := β.segTgt ⟨(j : ℕ) + 1, hj1⟩) (z := z) hbv hfoot hstrip' hδ
@@ -1096,7 +1096,7 @@ theorem sideForm_pos_of_vertexPlus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j :
 corner's INCOMING edge `k` with foot `< 1 − α` there lies strictly RIGHT of that edge:
 `sideForm (segSrc k) (segTgt k) z < 0`.  Mirrors `bandStrip_incoming_mem_vertexMinus`'s
 thinness chain but stops at the σ-sign (`vertexMinus_sideForm_incoming_neg`). -/
-theorem sideForm_neg_of_vertexMinus_incoming (β : PolyArc) {α δ₀ : ℝ} (k : Fin β.numSegs)
+theorem sideForm_neg_of_vertexMinus_incoming (β : PolygonalArc) {α δ₀ : ℝ} (k : Fin β.numSegs)
     (hk1 : (k : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc k) (β.segTgt k) (β.segTgt ⟨(k : ℕ) + 1, hk1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt k - β.segTgt ⟨(k : ℕ) + 1, hk1⟩) (β.segSrc k - β.segTgt k)|
@@ -1115,7 +1115,7 @@ theorem sideForm_neg_of_vertexMinus_incoming (β : PolyArc) {α δ₀ : ℝ} (k 
   have hfoot_inc : α ≤ footParam (β.segTgt k) (β.segSrc k) z := by
     rw [footParam_swap_eq hva z]; linarith
   have hsegeq : segment ℝ (β.segTgt k) (β.segSrc k) = β.segCarrier k := by
-    rw [PolyArc.segCarrier, segment_symm]
+    rw [PolygonalArc.segCarrier, segment_symm]
   have hstrip' : Metric.infDist z (segment ℝ (β.segTgt k) (β.segSrc k)) < δ₀ := by
     rw [hsegeq]; exact hstrip
   have hthin := thin_of_infDist_incoming (a := β.segSrc k) (v := β.segTgt k)
@@ -1126,7 +1126,7 @@ theorem sideForm_neg_of_vertexMinus_incoming (β : PolyArc) {α δ₀ : ℝ} (k 
 corner's INCOMING edge `j` with foot `< 1 − α` there lies strictly LEFT of that edge:
 `0 < sideForm (segSrc j) (segTgt j) z`.  Mirrors `bandStrip_incoming_mem_vertexPlus`'s
 thinness chain but stops at the σ-sign (`vertexPlus_sideForm_incoming_pos`). -/
-theorem sideForm_pos_of_vertexPlus_incoming (β : PolyArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
+theorem sideForm_pos_of_vertexPlus_incoming (β : PolygonalArc) {α δ₀ : ℝ} (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt i - β.segTgt ⟨(i : ℕ) + 1, hi1⟩) (β.segSrc i - β.segTgt i)|
@@ -1144,7 +1144,7 @@ theorem sideForm_pos_of_vertexPlus_incoming (β : PolyArc) {α δ₀ : ℝ} (i :
   have hfoot_inc : α ≤ footParam (β.segTgt i) (β.segSrc i) z := by
     rw [footParam_swap_eq hva z]; linarith
   have hsegeq : segment ℝ (β.segTgt i) (β.segSrc i) = β.segCarrier i := by
-    rw [PolyArc.segCarrier, segment_symm]
+    rw [PolygonalArc.segCarrier, segment_symm]
   have hstrip' : Metric.infDist z (segment ℝ (β.segTgt i) (β.segSrc i)) < δ₀ := by
     rw [hsegeq]; exact hstrip
   have hthin := thin_of_infDist_incoming (a := β.segSrc i) (v := β.segTgt i)
@@ -1155,7 +1155,7 @@ theorem sideForm_pos_of_vertexPlus_incoming (β : PolyArc) {α δ₀ : ℝ} (i :
 corner's OUTGOING edge `j+1` with foot `≥ α` there lies strictly RIGHT of that edge:
 `sideForm (segTgt j) (segTgt (j+1)) z < 0`.  Mirrors `bandStrip_outgoing_mem_vertexMinus`'s
 thinness chain but stops at the σ-sign (`vertexMinus_sideForm_outgoing_neg`). -/
-theorem sideForm_neg_of_vertexMinus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
+theorem sideForm_neg_of_vertexMinus_outgoing (β : PolygonalArc) {α δ₀ : ℝ} (j : Fin β.numSegs)
     (hj1 : (j : ℕ) + 1 < β.numSegs) (hα : 0 < α)
     (hτ : cornerTurn (β.segSrc j) (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) ≠ 0)
     (hδ : |dotp (β.segTgt j - β.segSrc j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩ - β.segTgt j)|
@@ -1172,7 +1172,7 @@ theorem sideForm_neg_of_vertexMinus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j 
   have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
     Fin.ext (by simp [Fin.val_succ])
   have hsv : β.segSrc ⟨(j : ℕ) + 1, hj1⟩ = β.segTgt j := by
-    rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+    rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
   rw [hsv] at hfoot
   have hbv : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segTgt j := by
     rw [← hsv]; exact β.segTgt_ne_segSrc ⟨(j : ℕ) + 1, hj1⟩
@@ -1184,7 +1184,7 @@ theorem sideForm_neg_of_vertexMinus_outgoing (β : PolyArc) {α δ₀ : ℝ} (j 
       (segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩)) < δ₀ := by
     have hseg : β.segCarrier ⟨(j : ℕ) + 1, hj1⟩
         = segment ℝ (β.segTgt j) (β.segTgt ⟨(j : ℕ) + 1, hj1⟩) := by
-      rw [PolyArc.segCarrier, hsv]
+      rw [PolygonalArc.segCarrier, hsv]
     rw [← hseg]; exact hstrip
   have hthin := thin_of_infDist_outgoing (a := β.segSrc j) (v := β.segTgt j)
     (b := β.segTgt ⟨(j : ℕ) + 1, hj1⟩) (z := z) hbv hfoot hstrip' hδ
@@ -1202,7 +1202,7 @@ plus the clip-enabled shared-edge data):
   per-edge Lipschitz budgets `Lₑ · r ≤ α` (`not_mem_adjacent_band_strip*` shape);
 * `hδout`/`hδin` — per-corner outgoing/incoming σ-thinness budgets
   (`bandStrip_outgoing_mem_vertexPlus` / `bandStrip_incoming_mem_vertexMinus` shape). -/
-theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ₀ δsep : ℝ}
+theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolygonalArc) {α δ₀ δsep : ℝ}
     (hα : 0 < α) (hδ₀sep : δ₀ ≤ δsep)
     (hsep : ∀ a b : Fin β.numSegs, (a : ℕ) + 1 < (b : ℕ) → ∀ z : Plane,
       Metric.infDist z (β.segCarrier a) < δsep →
@@ -1269,7 +1269,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
           have hidx : (Fin.castSucc ⟨(j : ℕ) + 1, hj1⟩ : Fin (β.numSegs + 1)) = Fin.succ j :=
             Fin.ext (by simp [Fin.val_succ])
           have hsv : β.segSrc ⟨(j : ℕ) + 1, hj1⟩ = β.verts (Fin.succ j) := by
-            rw [PolyArc.segSrc, hidx]
+            rw [PolygonalArc.segSrc, hidx]
           have hne : β.segTgt ⟨(j : ℕ) + 1, hj1⟩ ≠ β.segSrc ⟨(j : ℕ) + 1, hj1⟩ :=
             β.segTgt_ne_segSrc ⟨(j : ℕ) + 1, hj1⟩
           have hconf' : dist z (β.verts (Fin.succ j)) < r j :=
@@ -1299,7 +1299,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
           have hskeq : β.segSrc k = β.segTgt j := by
             have hidx : (Fin.castSucc k : Fin (β.numSegs + 1)) = Fin.succ j :=
               Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
-            rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+            rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
           have htkeq : β.segTgt k = β.segTgt ⟨(j : ℕ) + 1, hj1⟩ := by rw [hkj]
           rw [hskeq, htkeq] at hneg
           linarith
@@ -1379,7 +1379,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
         have hidxk : (Fin.castSucc ⟨(k : ℕ) + 1, hk1⟩ : Fin (β.numSegs + 1)) = Fin.succ k :=
           Fin.ext (by simp [Fin.val_succ])
         have hsvk : β.segSrc ⟨(k : ℕ) + 1, hk1⟩ = β.verts (Fin.succ k) := by
-          rw [PolyArc.segSrc, hidxk]
+          rw [PolygonalArc.segSrc, hidxk]
         have hnek : β.segTgt ⟨(k : ℕ) + 1, hk1⟩ ≠ β.segSrc ⟨(k : ℕ) + 1, hk1⟩ :=
           β.segTgt_ne_segSrc ⟨(k : ℕ) + 1, hk1⟩
         rcases hzp.2 with hA1 | hA2 <;> rcases hzm.2 with hB1 | hB2
@@ -1420,7 +1420,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
           have hsjeq : β.segSrc j = β.segTgt k := by
             have hidx : (Fin.castSucc j : Fin (β.numSegs + 1)) = Fin.succ k :=
               Fin.ext (by simp only [Fin.val_castSucc, Fin.val_succ]; omega)
-            rw [PolyArc.segSrc, PolyArc.segTgt, hidx]
+            rw [PolygonalArc.segSrc, PolygonalArc.segTgt, hidx]
           have htjeq : β.segTgt j = β.segTgt ⟨(k : ℕ) + 1, hk1⟩ := by rw [hjk]
           rw [hsjeq, htjeq] at hpos
           linarith
@@ -1458,7 +1458,7 @@ theorem disjoint_sectorPlusClipped_sectorMinusClipped_all (β : PolyArc) {α δ�
           have hsve2 : β.segSrc e2 = β.verts (Fin.succ ⟨(k : ℕ) + 1, hk1⟩) := by
             have hidx : (Fin.castSucc e2 : Fin (β.numSegs + 1)) = Fin.succ ⟨(k : ℕ) + 1, hk1⟩ :=
               Fin.ext (by rw [he2]; simp only [Fin.val_castSucc, Fin.val_succ])
-            rw [PolyArc.segSrc, hidx]
+            rw [PolygonalArc.segSrc, hidx]
           have hne2 : β.segTgt e2 ≠ β.segSrc e2 := β.segTgt_ne_segSrc e2
           have hconf' : dist z (β.verts (Fin.succ ⟨(k : ℕ) + 1, hk1⟩)) <
               r ⟨(k : ℕ) + 1, hk1⟩ := by
@@ -1495,7 +1495,7 @@ confinement uses) turns that into a contradiction with the cap disk's radius. -/
 GREEN leaf via `Disjoint.mono`; `j = 0`'s incoming arm (edge `0`, foot `> α`) is separated
 from the cap disk by the disk-smallness budget `hball`, the outgoing arm (edge `1`) by the
 edge-`1` `hbudsrc` budget. -/
-theorem disjoint_endCapSrcPlus_sectorMinusClipped_all (β : PolyArc)
+theorem disjoint_endCapSrcPlus_sectorMinusClipped_all (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
@@ -1508,7 +1508,7 @@ theorem disjoint_endCapSrcPlus_sectorMinusClipped_all (β : PolyArc)
   by_cases hj0 : (j : ℕ) = 0
   · -- j = 0 = firstSeg: incoming arm IS edge 0 (carries verts 0); clip + disk-smallness.
     have hjfs : j = β.firstSeg := Fin.ext (by rw [hj0]; rfl)
-    have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+    have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolygonalArc.segSrc, PolygonalArc.firstSeg]; rfl
     have hne : β.segTgt β.firstSeg ≠ β.segSrc β.firstSeg := β.segTgt_ne_segSrc β.firstSeg
     rw [Set.disjoint_left]
     intro z hzc hzs
@@ -1533,7 +1533,7 @@ theorem disjoint_endCapSrcPlus_sectorMinusClipped_all (β : PolyArc)
 from the GREEN leaf; `j+1 = numSegs−1 = lastSeg`'s outgoing arm (edge `lastSeg`, foot
 `< 1−α`) is separated from the cap disk by the disk-smallness budget, the incoming arm by
 the edge-`j` `hbudtgt` budget. -/
-theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolyArc)
+theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
@@ -1547,10 +1547,10 @@ theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolyArc)
   by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
   · -- j+1 = numSegs-1 = lastSeg: outgoing arm IS edge lastSeg (carries verts last).
     have hj1fs : (⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) = β.lastSeg :=
-      Fin.ext (by rw [PolyArc.lastSeg]; exact hjlast)
+      Fin.ext (by rw [PolygonalArc.lastSeg]; exact hjlast)
     have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
-      rw [PolyArc.segTgt]; congr 1
-      apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+      rw [PolygonalArc.segTgt]; congr 1
+      apply Fin.ext; simp only [Fin.val_succ, PolygonalArc.lastSeg, Fin.val_last]; omega
     have hne : β.segTgt β.lastSeg ≠ β.segSrc β.lastSeg := β.segTgt_ne_segSrc β.lastSeg
     rw [Set.disjoint_left]
     intro z hzc hzs
@@ -1576,7 +1576,7 @@ theorem disjoint_endCapTgtPlus_sectorMinusClipped_all (β : PolyArc)
 
 /-- **Clipped sector⁺ ↔ source `−` cap, all sector indices.**  Mirror of
 `disjoint_endCapSrcPlus_sectorMinusClipped_all` with the sides flipped. -/
-theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolyArc)
+theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudsrc : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 + δ₀ ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
@@ -1588,7 +1588,7 @@ theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolyArc)
     Disjoint (sectorPlusClipped β δ₀ α j hj1) (endCapSrcMinus β ρ) := by
   by_cases hj0 : (j : ℕ) = 0
   · have hjfs : j = β.firstSeg := Fin.ext (by rw [hj0]; rfl)
-    have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+    have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolygonalArc.segSrc, PolygonalArc.firstSeg]; rfl
     have hne : β.segTgt β.firstSeg ≠ β.segSrc β.firstSeg := β.segTgt_ne_segSrc β.firstSeg
     rw [Set.disjoint_left]
     intro z hzs hzc
@@ -1607,7 +1607,7 @@ theorem disjoint_sectorPlusClipped_endCapSrcMinus_all (β : PolyArc)
 
 /-- **Clipped sector⁺ ↔ target `−` cap, all sector indices.**  Mirror of
 `disjoint_endCapTgtPlus_sectorMinusClipped_all` with the sides flipped. -/
-theorem disjoint_sectorPlusClipped_endCapTgtMinus_all (β : PolyArc)
+theorem disjoint_sectorPlusClipped_endCapTgtMinus_all (β : PolygonalArc)
     (ρ : Fin (β.numSegs + 1) → ℝ) {α δ₀ : ℝ} (_hα : 0 < α)
     (hbudtgt : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) + δ₀
@@ -1620,10 +1620,10 @@ theorem disjoint_sectorPlusClipped_endCapTgtMinus_all (β : PolyArc)
     Disjoint (sectorPlusClipped β δ₀ α j hj1) (endCapTgtMinus β ρ) := by
   by_cases hjlast : (j : ℕ) + 1 = β.numSegs - 1
   · have hj1fs : (⟨(j : ℕ) + 1, hj1⟩ : Fin β.numSegs) = β.lastSeg :=
-      Fin.ext (by rw [PolyArc.lastSeg]; exact hjlast)
+      Fin.ext (by rw [PolygonalArc.lastSeg]; exact hjlast)
     have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
-      rw [PolyArc.segTgt]; congr 1
-      apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+      rw [PolygonalArc.segTgt]; congr 1
+      apply Fin.ext; simp only [Fin.val_succ, PolygonalArc.lastSeg, Fin.val_last]; omega
     have hne : β.segTgt β.lastSeg ≠ β.segSrc β.lastSeg := β.segTgt_ne_segSrc β.lastSeg
     rw [Set.disjoint_left]
     intro z hzs hzc
@@ -1656,7 +1656,7 @@ edge separation at width `δsep` dominating both `δ₀` and every disk radius),
 `hτ`/`hδin`/`hδout` (per-corner turn nonzero and the angle-free thinness thresholds),
 `hballs` (pairwise-disjoint vertex/endpoint disks), and `hbudsrc`/`hbudtgt` (endpoint disks
 separated from non-incident edges). -/
-theorem disjoint_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α δsep : ℝ}
+theorem disjoint_collarPlus_collarMinus (β : PolygonalArc) (R S : Set Plane) {δ₀ α δsep : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
     (r : Fin β.numSegs → ℝ)
     (hconf : ∀ (e : Fin β.numSegs) (he1 : (e : ℕ) + 1 < β.numSegs) {z : Plane},
@@ -1779,7 +1779,7 @@ to its non-incident edges.  The master's `hballs`, `hbudsrc`, `hbudtgt` sit belo
 
 /-- A single positive disk radius `ρ₀` making the `numSegs+1` vertex disks pairwise
 disjoint (one third of the minimal inter-vertex distance). -/
-theorem exists_pos_disk_radius (β : PolyArc) :
+theorem exists_pos_disk_radius (β : PolygonalArc) :
     ∃ ρ₀ : ℝ, 0 < ρ₀ ∧ ∀ p q : Fin (β.numSegs + 1), p ≠ q →
       Disjoint (Metric.ball (β.verts p) ρ₀) (Metric.ball (β.verts q) ρ₀) := by
   classical
@@ -1804,7 +1804,7 @@ theorem exists_pos_disk_radius (β : PolyArc) :
   linarith
 
 /-- A positive gap `d` from the source endpoint `verts 0` to every non-incident edge. -/
-theorem exists_pos_src_edge_sep (β : PolyArc) :
+theorem exists_pos_src_edge_sep (β : PolygonalArc) :
     ∃ d : ℝ, 0 < d ∧ ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       d ≤ Metric.infDist (β.verts 0) (β.segCarrier i) := by
   classical
@@ -1827,7 +1827,7 @@ theorem exists_pos_src_edge_sep (β : PolyArc) :
   rwa [hfi] at hle
 
 /-- A positive gap `d` from the target endpoint `verts (last)` to every non-incident edge. -/
-theorem exists_pos_tgt_edge_sep (β : PolyArc) :
+theorem exists_pos_tgt_edge_sep (β : PolygonalArc) :
     ∃ d : ℝ, 0 < d ∧ ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       d ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) := by
   classical

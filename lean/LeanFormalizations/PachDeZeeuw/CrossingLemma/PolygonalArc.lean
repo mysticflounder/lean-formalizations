@@ -36,34 +36,34 @@ This is the bottom of the route-(c) node DAG:
   reflexSector)`.  The one piece of genuine 2-D linear algebra is
   `exists_param_of_sideForm_eq_zero` (a point on a line is an affine combination of
   its endpoints).                                                     [PROVEN]
-* **Action 0** — the `PolyArc` carrier (finite vertex list + simplicity).
-  The coercion `PolyArc → SimpleArc` and the collar (L3) are built on top in
+* **Action 0** — the `PolygonalArc` carrier (finite vertex list + simplicity).
+  The coercion `PolygonalArc → SimpleArc` and the collar (L3) are built on top in
   later work.                                                         [definitions]
 
 The multi-segment P2 union proof (`union_collarPlus_collarMinus`) carries one
 labelled `sorry` in its interior-vertex disk branch (now in the
-`PLArc.CollarConstruction` shard); the single-segment variant is `sorry`-free.
+`PolygonalArc.CollarConstruction` shard); the single-segment variant is `sorry`-free.
 
 # Module layout (this file is a coordinator)
 
-The development was split into bounded shards under `PLArc/`, cut at the §-level
+The development was split into bounded shards under `PolygonalArc/`, cut at the §-level
 documentation seams.  Every reference is backward (a declaration only uses
 earlier ones, forced by Lean's elaboration order), so each shard imports the
 shards before it (a linear chain).  This module re-imports them all, so
-downstream consumers `import …CrossingLemma.PLArc` unchanged:
+downstream consumers `import …CrossingLemma.PolygonalArc` unchanged:
 
-* `PLArc.Foundations`        — §L1–§L3.2 + Action 0 + the PolyArc parametrisation
-* `PLArc.CollarConstruction` — collar tube, side-function `g`, cover, P2 union
-* `PLArc.Disjointness`       — P3 pairwise disjointness; `stripSupport`, `exists_pos_disk_radius`
-* `PLArc.Existence`          — P4 nonempty + P3 existence primitives
-* `PLArc.Preconnected`       — P5 preconnectedness + arcInterior membership
-* `PLArc.NegativeCollar`     — P5⁻ negative-collar mirror
-* `PLArc.ClippedCollar`      — P5 clipped-collar containment + final assembly
+* `PolygonalArc.Foundations`        — §L1–§L3.2 + Action 0 + the PolygonalArc parametrisation
+* `PolygonalArc.CollarConstruction` — collar tube, side-function `g`, cover, P2 union
+* `PolygonalArc.Disjointness`       — P3 pairwise disjointness; `stripSupport`, `exists_pos_disk_radius`
+* `PolygonalArc.Existence`          — P4 nonempty + P3 existence primitives
+* `PolygonalArc.Preconnected`       — P5 preconnectedness + arcInterior membership
+* `PolygonalArc.NegativeCollar`     — P5⁻ negative-collar mirror
+* `PolygonalArc.ClippedCollar`      — P5 clipped-collar containment + final assembly
 -/
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Disjointness
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Existence
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Preconnected
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.NegativeCollar
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.ClippedCollar
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Disjointness
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Existence
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Preconnected
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.NegativeCollar
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.ClippedCollar

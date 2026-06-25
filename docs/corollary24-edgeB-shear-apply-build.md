@@ -11,7 +11,7 @@ Status: **PROVEN, sorry-free, axiom-clean.**
 (no `sorryAx`, no `Lean.ofReduceBool`, no custom axioms). Same closure for the three
 supporting lemmas `incidenceCount_map_image_equiv`, `image_shearPoint_evalPlaneZeroSet`,
 `shearPoly_injective`. The theorem does not touch the parked `sorry`s in
-`SzemerediTrotter.lean:4533`, `PLArc.lean`, `PlaneArcSeparation.lean`,
+`SzemerediTrotter.lean:4533`, `PolygonalArc.lean`, `PlaneArcSeparation.lean`,
 `CrossingLemmaAmplification.lean` (all off this proof's import-closure spine).
 
 ## Scope (item 5 of the generic-rotation scope, `corollary24-generic-rotation-scope.md` §7)
@@ -133,7 +133,7 @@ needed here (already consumed by the leaves inside `edgeB_crossingInput`).
 - Build green: `./lake-build.sh LeanFormalizations.PachDeZeeuw.CrossingLemma.EdgeBShearApply`
   → `Build completed successfully (8532 jobs).` No warnings/errors from this file. (The only
   build warnings are pre-existing parked `sorry`s and `unusedSimpArgs` lints in
-  `PLCollarSeparation.lean`, `SzemerediTrotter.lean`, `PLArc.lean`, `PlaneArcSeparation.lean`,
+  `PLCollarSeparation.lean`, `SzemerediTrotter.lean`, `PolygonalArc.lean`, `PlaneArcSeparation.lean`,
   `CrossingLemmaAmplification.lean` — all off this file's closure.)
 - `#print axioms edgeB_crossingInput_unsheared` = `[propext, Classical.choice, Quot.sound]`
   (verified in a transient `/tmp`-style axcheck module; same closure for

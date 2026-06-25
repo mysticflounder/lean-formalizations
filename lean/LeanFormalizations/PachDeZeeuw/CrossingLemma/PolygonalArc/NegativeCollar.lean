@@ -3,17 +3,17 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 6/7 — **NegativeCollar**: the P5⁻ mirror of the positive side —
+PolygonalArc shard 6/7 — **NegativeCollar**: the P5⁻ mirror of the positive side —
 preconnectedness of the negative collar `collarMinus` and its band/sector
-pieces. Split out of `PLArc.lean`; see that coordinator module's doc for the
+pieces. Split out of `PolygonalArc.lean`; see that coordinator module's doc for the
 overview.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Disjointness
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Existence
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Preconnected
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Disjointness
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Existence
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Preconnected
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -31,7 +31,7 @@ This is the negative-side analogue of
 continuity of the centre and radius functions makes nearby slices overlap
 automatically. -/
 theorem local_overlap_endCapSrcMinus_of_slice_nonempty
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
     (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcMinus β ρ ∩ Metric.ball
@@ -69,7 +69,7 @@ This is the negative-side companion to
 sliver inequality, sliding slightly back along the first edge and lifting a tiny
 amount to the negative side produces a point in the slice. -/
 theorem nonempty_endCapSrcMinus_slice_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
     (hc : 0 < c)
     (hρ0 : 0 < ρ 0)
     (hrad :
@@ -174,7 +174,7 @@ This packages `nonempty_endCapSrcMinus_slice_of_sliver_budget` over an interval
 satisfies the source-endpoint sliver inequality, then every source-negative slice
 in the range is nonempty. -/
 theorem nonempty_endCapSrcMinus_slices_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
@@ -201,7 +201,7 @@ theorem nonempty_endCapSrcMinus_slices_of_sliver_budget
 This is the negative-side principal-foot overlap witness for
 `isPreconnected_cap_inter_ball_cover`: consecutive slices share a common point
 obtained by a tiny negative lift of the foot-`c` centre. -/
-theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
+theorem local_overlap_endCapSrcMinus (β : PolygonalArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -225,8 +225,8 @@ theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hv0 : β.verts 0 = s := by
     have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
-      apply Fin.ext; simp [PolyArc.firstSeg]
-    rw [hs, PolyArc.segSrc, hcast]
+      apply Fin.ext; simp [PolygonalArc.firstSeg]
+    rw [hs, PolygonalArc.segSrc, hcast]
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
   have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ 0 - c * dist s t) with hK
@@ -310,7 +310,7 @@ theorem local_overlap_endCapSrcMinus (β : PolyArc) (R : Set Plane)
 once every tube witness near the source endpoint comes from the first edge in the
 same foot window. -/
 theorem taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
@@ -370,7 +370,7 @@ theorem taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
 preconnected once its tube witnesses are controlled by first-edge slices over that
 same parameter window. -/
 theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -412,7 +412,7 @@ Compared to `isPreconnected_ground_inter_endCapSrcMinus_of_near_spine`, the
 overlap input is supplied by slice nonemptiness on the chosen foot range, with
 continuity handling the local-overlap step. -/
 theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_slice_nonempty
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -452,7 +452,7 @@ theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_slice_nonemp
 /-- A source-negative clipped-cap preconnectedness theorem driven directly by a
 pointwise sliver budget on the foot range. -/
 theorem isPreconnected_ground_inter_endCapSrcMinus_of_near_spine_of_sliver_budget
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -481,7 +481,7 @@ again `Ioc 0 c_max`. Once every slice
 `endCapTgtMinus ∩ ball (p c) (r c)` is nonempty on that range, continuity of the
 centre and radius functions gives local overlap automatically. -/
 theorem local_overlap_endCapTgtMinus_of_slice_nonempty
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
     (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtMinus β ρ ∩ Metric.ball
@@ -518,7 +518,7 @@ Viewed from the target endpoint, `endCapTgtMinus` is the source-positive cap on
 the reversed last edge. Under the same sliver inequality, one slides slightly
 back along that reversed edge and lifts a tiny amount to the positive side. -/
 theorem nonempty_endCapTgtMinus_slice_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
     (hc : 0 < c)
     (hρL : 0 < ρ (Fin.last β.numSegs))
     (hrad :
@@ -542,11 +542,11 @@ theorem nonempty_endCapTgtMinus_slice_of_sliver_budget
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hvL : β.verts (Fin.last β.numSegs) = s := by
-    rw [hs, PolyArc.segTgt]
+    rw [hs, PolygonalArc.segTgt]
     congr 1
     apply Fin.ext
     have h := β.numSegs_pos
-    simp [PolyArc.lastSeg, Fin.val_last]
+    simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   set rad : ℝ := min δ₀ (Metric.infDist (liftPlus s t c 0) Rᶜ / 2) with hraddef
   have hbetween :
@@ -631,7 +631,7 @@ theorem nonempty_endCapTgtMinus_slice_of_sliver_budget
 This is the interval package for
 `nonempty_endCapTgtMinus_slice_of_sliver_budget` on the reversed last edge. -/
 theorem nonempty_endCapTgtMinus_slices_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
@@ -657,7 +657,7 @@ theorem nonempty_endCapTgtMinus_slices_of_sliver_budget
 
 This is the target-endpoint principal-foot overlap witness, indexed by the
 reversed last edge so that the parameter range is again `Ioc 0 c_max`. -/
-theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
+theorem local_overlap_endCapTgtMinus (β : PolygonalArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
@@ -682,11 +682,11 @@ theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hvL : β.verts (Fin.last β.numSegs) = s := by
-    rw [hs, PolyArc.segTgt]
+    rw [hs, PolygonalArc.segTgt]
     congr 1
     apply Fin.ext
     have h := β.numSegs_pos
-    simp [PolyArc.lastSeg, Fin.val_last]
+    simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
   have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
@@ -771,7 +771,7 @@ theorem local_overlap_endCapTgtMinus (β : PolyArc) (R : Set Plane)
 once every tube witness near the target endpoint comes from the last edge in the
 same reversed foot window. -/
 theorem taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
@@ -806,7 +806,7 @@ theorem taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
     let c : ℝ := footParam s t p
     have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by
-      simpa [s, t, PolyArc.segCarrier, segment_symm] using hpseg
+      simpa [s, t, PolygonalArc.segCarrier, segment_symm] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
       simpa [c] using sub_eq_footParam_smul_of_sideForm_zero hts hpzero
@@ -835,7 +835,7 @@ theorem taperedTube_inter_endCapTgtMinus_eq_iUnion_slices_of_near_spine
 preconnected once its tube witnesses are controlled by reversed-last-edge slices
 over that same parameter window. -/
 theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -880,7 +880,7 @@ Compared to `isPreconnected_ground_inter_endCapTgtMinus_of_near_spine`, the
 overlap step is supplied by slice nonemptiness on the reversed-last-edge foot
 range, with continuity handling the local intersections. -/
 theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_slice_nonempty
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -922,7 +922,7 @@ theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_slice_nonemp
 /-- A target-negative clipped-cap preconnectedness theorem driven directly by a
 pointwise sliver budget on the reversed-last-edge foot range. -/
 theorem isPreconnected_ground_inter_endCapTgtMinus_of_near_spine_of_sliver_budget
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -952,7 +952,7 @@ The target-positive cap is the source-negative cap on the reversed last edge.
 Once every reversed-last-edge slice is nonempty, continuity again gives local
 overlap automatically. -/
 theorem local_overlap_endCapTgtPlus_of_slice_nonempty
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ}
     (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapTgtPlus β ρ ∩ Metric.ball
@@ -989,7 +989,7 @@ Viewed from the target endpoint, `endCapTgtPlus` is the source-negative cap on
 the reversed last edge: slide slightly back along that reversed edge, then lift a
 tiny amount to the negative side. -/
 theorem nonempty_endCapTgtPlus_slice_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
     (hc : 0 < c)
     (hρL : 0 < ρ (Fin.last β.numSegs))
     (hrad :
@@ -1013,11 +1013,11 @@ theorem nonempty_endCapTgtPlus_slice_of_sliver_budget
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hvL : β.verts (Fin.last β.numSegs) = s := by
-    rw [hs, PolyArc.segTgt]
+    rw [hs, PolygonalArc.segTgt]
     congr 1
     apply Fin.ext
     have h := β.numSegs_pos
-    simp [PolyArc.lastSeg, Fin.val_last]
+    simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   set rad : ℝ := min δ₀ (Metric.infDist (liftPlus s t c 0) Rᶜ / 2) with hraddef
   have hbetween :
@@ -1101,7 +1101,7 @@ theorem nonempty_endCapTgtPlus_slice_of_sliver_budget
 
 /-- **Target-positive cap slice nonemptiness on a full foot range.** -/
 theorem nonempty_endCapTgtPlus_slices_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρL : 0 < ρ (Fin.last β.numSegs))
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
@@ -1127,7 +1127,7 @@ theorem nonempty_endCapTgtPlus_slices_of_sliver_budget
 
 This is the target-endpoint principal-foot overlap witness on the reversed last
 edge, using a tiny negative lift of the foot-`c` centre. -/
-theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
+theorem local_overlap_endCapTgtPlus (β : PolygonalArc) (R : Set Plane)
     (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segTgt β.lastSeg) (β.segSrc β.lastSeg)
       < ρ (Fin.last β.numSegs))
@@ -1152,11 +1152,11 @@ theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
   have hP : 0 < dotp (t - s) (t - s) := dotp_self_pos hts
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hvL : β.verts (Fin.last β.numSegs) = s := by
-    rw [hs, PolyArc.segTgt]
+    rw [hs, PolygonalArc.segTgt]
     congr 1
     apply Fin.ext
     have h := β.numSegs_pos
-    simp [PolyArc.lastSeg, Fin.val_last]
+    simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
   have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
@@ -1245,7 +1245,7 @@ theorem local_overlap_endCapTgtPlus (β : PolyArc) (R : Set Plane)
 once every tube witness near the target endpoint comes from the last edge in the
 same reversed foot window. -/
 theorem taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts (Fin.last β.numSegs)) <
@@ -1280,7 +1280,7 @@ theorem taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
     let c : ℝ := footParam s t p
     have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
     have hpseg' : p ∈ segment ℝ s t := by
-      simpa [s, t, PolyArc.segCarrier, segment_symm] using hpseg
+      simpa [s, t, PolygonalArc.segCarrier, segment_symm] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
       simpa [c] using sub_eq_footParam_smul_of_sideForm_zero hts hpzero
@@ -1309,7 +1309,7 @@ theorem taperedTube_inter_endCapTgtPlus_eq_iUnion_slices_of_near_spine
 preconnected once its tube witnesses are controlled by reversed-last-edge slices
 over that same parameter window. -/
 theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -1350,7 +1350,7 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine
 
 /-- A range-flexible target-positive clipped-cap preconnectedness theorem. -/
 theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_slice_nonempty
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -1392,7 +1392,7 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_slice_nonempt
 /-- A target-positive clipped-cap preconnectedness theorem driven directly by a
 pointwise sliver budget on the reversed-last-edge foot range. -/
 theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_sliver_budget
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -1417,14 +1417,14 @@ theorem isPreconnected_ground_inter_endCapTgtPlus_of_near_spine_of_sliver_budget
   exact nonempty_endCapTgtPlus_slices_of_sliver_budget β R ρ hδ₀ hρL hRpos hsliver
 
 /-- The `i`-th chain link of the negative collar. -/
-noncomputable def collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+noncomputable def collarChainMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
   bandStripMinus β α δ₀ i
     ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
     ∪ (⋃ (_ : ¬ ((i : ℕ) + 1 < β.numSegs)), endCapTgtMinus β ρ)
     ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcMinus β ρ)
 
-theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
+theorem iUnion_collarChainMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
     (⋃ i, collarChainMinus β ρ δ₀ α i)
       = (⋃ i, bandStripMinus β α δ₀ i)
         ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorMinusClipped β δ₀ α i hi1)
@@ -1446,7 +1446,7 @@ theorem iUnion_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → �
       have hl : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
       omega
 
-theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+theorem isPreconnected_collarChainMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
     (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1507,7 +1507,7 @@ theorem isPreconnected_collarChainMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1
 /-- **P5⁻ clipped-collar assembly.**  The negative collar is preconnected once the band strips
 and vertex sectors lie in the ground set and the two clipped negative end caps are
 preconnected. -/
-theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+theorem isPreconnected_collarMinus (β : PolygonalArc) (R S : Set Plane) {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1647,7 +1647,7 @@ theorem isPreconnected_collarMinus (β : PolyArc) (R S : Set Plane) {δ₀ α : 
     exact ⟨hyW, Or.inl (Or.inl (Or.inl hy.2))⟩
 
 /-- **hO3⁻.** The negative source end cap meets band `firstSeg`. -/
-theorem overlap_endCapSrcMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_endCapSrcMinus_bandStripMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (hbud : δ₀ + 2 * α * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0) :
     (endCapSrcMinus β ρ ∩ bandStripMinus β α δ₀ β.firstSeg).Nonempty := by
@@ -1667,8 +1667,8 @@ theorem overlap_endCapSrcMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSe
     rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hP; nlinarith
   have hv0 : β.verts 0 = s := by
     have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
-      apply Fin.ext; simp [PolyArc.firstSeg]
-    rw [hs, PolyArc.segSrc, hcast]
+      apply Fin.ext; simp [PolygonalArc.firstSeg]
+    rw [hs, PolygonalArc.segSrc, hcast]
   have hball : z ∈ Metric.ball (β.verts 0) (ρ 0) := by
     rw [Metric.mem_ball, hv0]
     have hd : dist z s ≤ (2 * α + ε) * dist s t := by
@@ -1687,7 +1687,7 @@ theorem overlap_endCapSrcMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSe
   · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
 
 /-- **hO4⁻.** The negative target end cap meets band `lastSeg`. -/
-theorem overlap_endCapTgtMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_endCapTgtMinus_bandStripMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (hbud : δ₀ + 2 * α * dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)
       < ρ (Fin.last β.numSegs)) :
@@ -1708,8 +1708,8 @@ theorem overlap_endCapTgtMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSe
   have hside : sideForm s t z < 0 := by
     rw [hz, sideForm_liftPlus]; have := mul_pos hεpos hP; nlinarith
   have hvL : β.verts (Fin.last β.numSegs) = t := by
-    rw [ht, PolyArc.segTgt]; congr 1
-    apply Fin.ext; have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]
+    rw [ht, PolygonalArc.segTgt]; congr 1
+    apply Fin.ext; have h := β.numSegs_pos; simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   have hball : z ∈ Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)) := by
     rw [Metric.mem_ball, hvL]
@@ -1731,7 +1731,7 @@ theorem overlap_endCapTgtMinus_bandStripMinus (β : PolyArc) (ρ : Fin (β.numSe
   · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
 
 /-- **hO1⁻.** The vertex sector at `verts (i+1)` meets band `i` (incoming, minus side). -/
-theorem overlap_sectorMinus_bandStripMinus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorMinus_bandStripMinus_src (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1795,7 +1795,7 @@ theorem overlap_sectorMinus_bandStripMinus_src (β : PolyArc) (ρ : Fin (β.numS
       hside⟩, hinf⟩⟩
 
 /-- **hO2⁻.** The vertex sector at `verts (i+1)` meets band `i+1` (outgoing, minus side). -/
-theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1856,7 +1856,7 @@ theorem overlap_sectorMinus_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numS
 /-- **Clipped hO1⁻.** The *clipped* vertex sector at `verts (i+1)` meets band `i` (incoming, minus
 side).  Same witness as `overlap_sectorMinus_bandStripMinus_src`; foot-clip `α < footParam = 1 − 2α`
 holds via `α < 1/3`. -/
-theorem overlap_sectorMinusClipped_bandStripMinus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorMinusClipped_bandStripMinus_src (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1922,7 +1922,7 @@ theorem overlap_sectorMinusClipped_bandStripMinus_src (β : PolyArc) (ρ : Fin (
 /-- **Clipped hO2⁻.** The *clipped* vertex sector at `verts (i+1)` meets band `i+1` (outgoing, minus
 side).  Same witness as `overlap_sectorMinus_bandStripMinus_tgt`; foot-clip `footParam = 2α < 1 − α`
 holds via `α < 1/3`. -/
-theorem overlap_sectorMinusClipped_bandStripMinus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorMinusClipped_bandStripMinus_tgt (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))

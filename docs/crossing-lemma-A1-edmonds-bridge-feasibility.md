@@ -119,7 +119,7 @@ namespace unless noted.
 - `exists_twoSidedPartition_prefixStep p₁ p₂ hne` (`PLCollarSeparation.lean:879`,
   PROVEN sorry-free): returns `R, U, V` with `R = ball((p₁+p₂)/2, ‖p₁p₂‖/2)`,
   `IsOpen R`, `IsSimplyConnected R` (`convex_ball.contractibleSpace`), `p₁,p₂ ∈
-  Rᶜ`, and `IsTwoSidedPartition (regionMinusArc R (straightPolyArc p₁ p₂).toSimpleArc) U V`.
+  Rᶜ`, and `IsTwoSidedPartition (regionMinusArc R (straightPolygonalArc p₁ p₂).toSimpleArc) U V`.
   **The partition is of the TUBE `R \ β.carrier`, NOT of the global complement.**
 - `IsTwoSidedPartition W U V` (`PlaneArcSeparation.lean:104`): `U,V` ambient-open,
   disjoint, `U ∪ V = W`, both nonempty, both preconnected.
@@ -369,7 +369,7 @@ The distinctness `Wleft ≠ Wright` requires ruling out a global preconnected
 
 **The `sideForm` half-plane shortcut does NOT close it (PROVEN that it fails).**
 With `ℓ := {sideForm p₁ p₂ z = 0}`, `ℓ⁺/ℓ⁻` the open half-planes (convex,
-preconnected — repo `convex_mul_sideForm_gt`, `PLArc.lean:149`/`:134`), and
+preconnected — repo `convex_mul_sideForm_gt`, `PolygonalArc.lean:149`/`:134`), and
 `U ⊆ ℓ⁺`, `V ⊆ ℓ⁻` (repo `collarPlus/Minus_subset_pos/neg_sideForm_of_numSegs_one`,
 `PLCollarSeparation.lean:417/444`): the contradiction `P ⊆ ℓ⁺ ∪ ℓ⁻` would need
 `P ∩ ℓ = ∅`, i.e. `P` avoids the **whole line** `ℓ`. But `P ⊆ drawingComplementIn

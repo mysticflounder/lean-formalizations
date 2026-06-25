@@ -3,16 +3,16 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 5/7 — **Preconnected**: P5 preconnectedness of each (positive)
+PolygonalArc shard 5/7 — **Preconnected**: P5 preconnectedness of each (positive)
 collar piece, the linear-chain assembly, the off-carrier end caps, the overlap
 witnesses, and the deferred `arcInterior` membership for the collar spine
-points. Split out of `PLArc.lean`; see that coordinator module's doc.
+points. Split out of `PolygonalArc.lean`; see that coordinator module's doc.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Disjointness
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Existence
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Disjointness
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Existence
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -156,7 +156,7 @@ theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : 
 that follows it — the vertex sector at `i+1` (when `i` is not the last segment) or the
 target end cap (when it is) — and, at `i = 0`, the source end cap.  Grouping each band with
 its *successor* connector makes the links overlap consecutively. -/
-noncomputable def collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+noncomputable def collarChainPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (δ₀ α : ℝ) (i : Fin β.numSegs) : Set Plane :=
   bandStripPlus β α δ₀ i
     ∪ (⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
@@ -164,7 +164,7 @@ noncomputable def collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → 
     ∪ (⋃ (_ : (i : ℕ) = 0), endCapSrcPlus β ρ)
 
 /-- The union of the chain links is exactly the geometric part of the positive collar. -/
-theorem iUnion_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
+theorem iUnion_collarChainPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ) :
     (⋃ i, collarChainPlus β ρ δ₀ α i)
       = (⋃ i, bandStripPlus β α δ₀ i)
         ∪ (⋃ i : Fin β.numSegs, ⋃ (hi1 : (i : ℕ) + 1 < β.numSegs), sectorPlusClipped β δ₀ α i hi1)
@@ -203,7 +203,7 @@ theorem iUnion_prop_pos {α : Type*} {P : Prop} (hP : P) (s : P → Set α) :
 
 /-- Each positive chain link is preconnected: band `i` together with its (nonempty) connector
 and (nonempty) source cap, each of which meets band `i`. -/
-theorem isPreconnected_collarChainPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
+theorem isPreconnected_collarChainPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) (δ₀ α : ℝ)
     (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -266,7 +266,7 @@ ground set `taperedTube R S δ₀ \ β.carrier`, and the two clipped end caps ar
 then the positive collar is preconnected.  This is the actual collar shape used in
 `collarPlus`: the end caps stay clipped by the ground set instead of being forced into an
 unsatisfiable global subset hypothesis. -/
-theorem isPreconnected_collarPlus (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+theorem isPreconnected_collarPlus (β : PolygonalArc) (R S : Set Plane) {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α) (hα1 : α < 1)
     (hturn : ∀ (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs),
       IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -441,16 +441,16 @@ feed the spine-budget hypotheses `hmS`, `hSrcSpine`, `hTgtSpine` of the collar
 assembly with the spine choice `S = arcInterior β.toSimpleArc`. -/
 
 /-- The first-edge midpoint lies in `arcInterior β.toSimpleArc`. -/
-theorem firstMid_mem_arcInterior (β : PolyArc) :
+theorem firstMid_mem_arcInterior (β : PolygonalArc) :
     firstMid β ∈ β.toSimpleArc.arcInterior := by
   have hfm : firstMid β
       = (1 - (1 / 2 : ℝ)) • β.verts (Fin.castSucc β.firstSeg)
         + (1 / 2 : ℝ) • β.verts (Fin.succ β.firstSeg) := by
-    rw [firstMid, PolyArc.segSrc, PolyArc.segTgt]
+    rw [firstMid, PolygonalArc.segSrc, PolygonalArc.segTgt]
     have h2 : ((1 - (1 / 2 : ℝ)) : ℝ) = (1 / 2 : ℝ) := by norm_num
     rw [h2]; ext <;> simp [smul_eq_mul] <;> ring
   rw [hfm]
-  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolyArc.firstSeg]
+  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolygonalArc.firstSeg]
   refine β.affineComb_mem_arcInterior β.firstSeg (by norm_num) (by norm_num) ?_ ?_
   · rw [hi0]; norm_num
   · rw [hi0]
@@ -460,10 +460,10 @@ theorem firstMid_mem_arcInterior (β : PolyArc) :
 
 /-- A forward interior point `liftPlus s t c 0 = (1-c)•s + c•t` of the first edge,
 for `c ∈ (0,1)`, lies in `arcInterior β.toSimpleArc`. -/
-theorem liftPlus_firstSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
+theorem liftPlus_firstSeg_mem_arcInterior (β : PolygonalArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
     liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ β.toSimpleArc.arcInterior := by
-  rw [liftPlus_zero_eq_affineComb, PolyArc.segSrc, PolyArc.segTgt]
-  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolyArc.firstSeg]
+  rw [liftPlus_zero_eq_affineComb, PolygonalArc.segSrc, PolygonalArc.segTgt]
+  have hi0 : ((β.firstSeg : ℕ) : ℝ) = 0 := by simp [PolygonalArc.firstSeg]
   refine β.affineComb_mem_arcInterior β.firstSeg (le_of_lt hc0) (le_of_lt hc1) ?_ ?_
   · rw [hi0]; linarith
   · rw [hi0]
@@ -473,13 +473,13 @@ theorem liftPlus_firstSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c)
 
 /-- A forward interior point `liftPlus t s c 0 = (1-c)•t + c•s` of the last edge,
 written from its target vertex, for `c ∈ (0,1)`, lies in `arcInterior β.toSimpleArc`. -/
-theorem liftPlus_lastSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
+theorem liftPlus_lastSeg_mem_arcInterior (β : PolygonalArc) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
     liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0 ∈ β.toSimpleArc.arcInterior := by
   rw [liftPlus_zero_eq_affineComb]
   have hrw : (1 - c) • β.segTgt β.lastSeg + c • β.segSrc β.lastSeg
       = (1 - (1 - c)) • β.verts (Fin.castSucc β.lastSeg)
         + (1 - c) • β.verts (Fin.succ β.lastSeg) := by
-    rw [PolyArc.segSrc, PolyArc.segTgt]
+    rw [PolygonalArc.segSrc, PolygonalArc.segTgt]
     have h : (1 : ℝ) - (1 - c) = c := by ring
     rw [h]; rw [add_comm]
   rw [hrw]
@@ -488,7 +488,7 @@ theorem liftPlus_lastSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) 
   have hs1 : s ≤ 1 := by rw [hsdef]; linarith
   have hlast : ((β.lastSeg : ℕ) : ℝ) = (β.numSegs : ℝ) - 1 := by
     have hnpos := β.numSegs_pos
-    rw [PolyArc.lastSeg]
+    rw [PolygonalArc.lastSeg]
     rw [show ((⟨β.numSegs - 1, _⟩ : Fin β.numSegs) : ℕ) = β.numSegs - 1 from rfl]
     rw [Nat.cast_sub (by omega)]; push_cast; ring
   refine β.affineComb_mem_arcInterior β.lastSeg hs0 hs1 ?_ ?_
@@ -501,7 +501,7 @@ theorem liftPlus_lastSeg_mem_arcInterior (β : PolyArc) {c : ℝ} (hc0 : 0 < c) 
 /-- **`hSband` for `S = arcInterior`.**  A point of edge `i` with foot parameter
 strictly in `(0,1)` lies in `arcInterior β.toSimpleArc`.  (Reconstruct the segment
 point from its foot parameter, then apply `affineComb_mem_arcInterior`.) -/
-theorem segCarrier_foot_interior_mem_arcInterior (β : PolyArc) (i : Fin β.numSegs)
+theorem segCarrier_foot_interior_mem_arcInterior (β : PolygonalArc) (i : Fin β.numSegs)
     {y : Plane} (hy : y ∈ β.segCarrier i)
     (hfoot : footParam (β.segSrc i) (β.segTgt i) y ∈ Set.Ioo (0 : ℝ) 1) :
     y ∈ β.toSimpleArc.arcInterior := by
@@ -512,7 +512,7 @@ theorem segCarrier_foot_interior_mem_arcInterior (β : PolyArc) (i : Fin β.numS
   rw [hrw] at hfoot ⊢
   rw [footParam_affineComb hts b] at hfoot
   rw [Set.mem_Ioo] at hfoot
-  rw [PolyArc.segSrc, PolyArc.segTgt]
+  rw [PolygonalArc.segSrc, PolygonalArc.segTgt]
   refine β.affineComb_mem_arcInterior i hb (by linarith) ?_ ?_
   · have : (0 : ℝ) ≤ (i : ℝ) := by positivity
     linarith [hfoot.1]
@@ -526,7 +526,7 @@ theorem segCarrier_foot_interior_mem_arcInterior (β : PolyArc) (i : Fin β.numS
 source endpoint must lie on the first edge with a small forward foot parameter.  The
 separation budget `hSep` (the endpoint is `≥ D` from every non-incident edge) excludes
 all other edges; the foot bound comes from `dist p (verts 0) = foot · ‖edge‖`. -/
-theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
+theorem arcInterior_near_src (β : PolygonalArc) {D cSrc : ℝ} {p : Plane}
     (hp : p ∈ β.toSimpleArc.arcInterior)
     (hSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       D ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
@@ -535,11 +535,11 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
     p ∈ β.segCarrier β.firstSeg ∧
       footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) p ∈ Set.Ioo (0 : ℝ) cSrc := by
   have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
-  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  rw [PolygonalArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
   have hfirst : i = β.firstSeg := by
     by_contra hne
-    have hi0 : (i : ℕ) ≠ 0 := fun h => hne (Fin.ext (by simp [PolyArc.firstSeg, h]))
+    have hi0 : (i : ℕ) ≠ 0 := fun h => hne (Fin.ext (by simp [PolygonalArc.firstSeg, h]))
     have hge : D ≤ Metric.infDist (β.verts 0) (β.segCarrier i) := hSep i hi0
     have hle : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) p :=
       Metric.infDist_le_dist_of_mem hpi
@@ -547,9 +547,9 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
     linarith
   subst hfirst
   have hsv : β.segSrc β.firstSeg = β.verts 0 := by
-    rw [PolyArc.segSrc]
+    rw [PolygonalArc.segSrc]
     have : (Fin.castSucc β.firstSeg : Fin (β.numSegs + 1)) = 0 :=
-      Fin.ext (by simp [PolyArc.firstSeg])
+      Fin.ext (by simp [PolygonalArc.firstSeg])
     rw [this]
   have hts : β.segTgt β.firstSeg ≠ β.segSrc β.firstSeg := β.segTgt_ne_segSrc β.firstSeg
   have hdpos : 0 < dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) :=
@@ -578,7 +578,7 @@ theorem arcInterior_near_src (β : PolyArc) {D cSrc : ℝ} {p : Plane}
 
 /-- **`hTgtNear` for `S = arcInterior`.**  Symmetric to `arcInterior_near_src` at the
 target endpoint, with the last edge oriented from its target vertex. -/
-theorem arcInterior_near_tgt (β : PolyArc) {D cTgt : ℝ} {p : Plane}
+theorem arcInterior_near_tgt (β : PolygonalArc) {D cTgt : ℝ} {p : Plane}
     (hp : p ∈ β.toSimpleArc.arcInterior)
     (hSep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       D ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i))
@@ -587,15 +587,15 @@ theorem arcInterior_near_tgt (β : PolyArc) {D cTgt : ℝ} {p : Plane}
     p ∈ β.segCarrier β.lastSeg ∧
       footParam (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) p ∈ Set.Ioo (0 : ℝ) cTgt := by
   have hpc : p ∈ β.carrier := β.arcInterior_subset_carrier hp
-  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  rw [PolygonalArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
   have hlastv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
-    rw [PolyArc.segTgt]; congr 1; apply Fin.ext
-    have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]; omega
+    rw [PolygonalArc.segTgt]; congr 1; apply Fin.ext
+    have h := β.numSegs_pos; simp [PolygonalArc.lastSeg, Fin.val_last]; omega
   have hlast : i = β.lastSeg := by
     by_contra hne
     have hilast : (i : ℕ) ≠ β.numSegs - 1 :=
-      fun h => hne (Fin.ext (by simp [PolyArc.lastSeg, h]))
+      fun h => hne (Fin.ext (by simp [PolygonalArc.lastSeg, h]))
     have hge : D ≤ Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i) :=
       hSep i hilast
     have hle : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
@@ -798,7 +798,7 @@ This is the flexible version of the source-cap overlap input for
 `endCapSrcPlus ∩ ball (p c) (r c)` is nonempty on a chosen foot range, continuity of
 the centre and radius functions makes nearby slices overlap automatically. -/
 theorem local_overlap_endCapSrcPlus_of_slice_nonempty
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hslice : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       (endCapSrcPlus β ρ ∩ Metric.ball
         (liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0)
@@ -837,7 +837,7 @@ slides slightly back along the edge into the source ball, then lifts a tiny amou
 the positive side. This is the constructive source-cap witness for the sliver range
 identified in the route-(c) plan. -/
 theorem nonempty_endCapSrcPlus_slice_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c : ℝ}
     (hc : 0 < c)
     (hρ0 : 0 < ρ 0)
     (hrad :
@@ -940,7 +940,7 @@ This packages `nonempty_endCapSrcPlus_slice_of_sliver_budget` over an interval
 parameter satisfies the sliver inequality, then every source-positive slice in the
 range is nonempty. -/
 theorem nonempty_endCapSrcPlus_slices_of_sliver_budget
-    (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hδ₀ : 0 < δ₀) (hρ0 : 0 < ρ 0)
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       0 < Metric.infDist
@@ -973,7 +973,7 @@ is in the cap (`sideForm = ε·‖t−s‖₂² > 0`, `foot = c > 0`, `dist(w,v�
 (`Metric.infDist_le_infDist_add_dist`) to keep `r c'` from collapsing — in `ball(p c', r c')`.
 Inputs: `δ₀ > 0`, the cap-radius budget `c_max·dist(s,t) < ρ 0`, and radius positivity
 `0 < infDist(p c) Rᶜ` on the foot range. -/
-theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem local_overlap_endCapSrcPlus (β : PolygonalArc) (R : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ c_max : ℝ} (hδ₀ : 0 < δ₀)
     (hρ : c_max * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0)
     (hRpos : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -997,8 +997,8 @@ theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β
   have hD : 0 < dist s t := dist_pos.mpr fun h => hts h.symm
   have hv0 : β.verts 0 = s := by
     have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
-      apply Fin.ext; simp [PolyArc.firstSeg]
-    rw [hs, PolyArc.segSrc, hcast]
+      apply Fin.ext; simp [PolygonalArc.firstSeg]
+    rw [hs, PolygonalArc.segSrc, hcast]
   set I0 := Metric.infDist (liftPlus s t c 0) Rᶜ with hI0
   have hI0pos : 0 < I0 := hRpos c ⟨hc0, hclt⟩
   set K := min (min δ₀ (I0 / 4)) (ρ 0 - c * dist s t) with hK
@@ -1071,7 +1071,7 @@ theorem local_overlap_endCapSrcPlus (β : PolyArc) (R : Set Plane) (ρ : Fin (β
 /-- The source-positive end cap is exactly the union of its first-edge slice balls once every
 tube witness near the source endpoint comes from the first edge in the same foot window. -/
 theorem taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
       liftPlus (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) c 0 ∈ S)
     (hnear : ∀ p ∈ S, dist p (β.verts 0) < ρ 0 + δ₀ →
@@ -1130,7 +1130,7 @@ theorem taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
 /-- In the principal foot regime, the clipped source-positive end cap is preconnected once its
 tube witnesses are controlled by first-edge slices over that same parameter window. -/
 theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -1174,7 +1174,7 @@ Instead we assume only that every slice in the chosen range is nonempty, letting
 continuity-based overlap lemma handle the nerve connectivity.  This is the form
 needed for the remaining sliver-range work in the route-(c) plan. -/
 theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_slice_nonempty
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -1216,7 +1216,7 @@ sliver budget on the foot range. This is the concrete source-cap form needed for
 remaining route-(c) instantiation work: it replaces a family of slice nonemptiness
 hypotheses by the intervalwise budget that forces them. -/
 theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_sliver_budget
-    (β : PolyArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
+    (β : PolygonalArc) (R S : Set Plane) (ρ : Fin (β.numSegs + 1) → ℝ) {δ₀ c_max : ℝ}
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i))
     (hspine : ∀ c ∈ Set.Ioo (0 : ℝ) c_max,
@@ -1239,7 +1239,7 @@ theorem isPreconnected_ground_inter_endCapSrcPlus_of_near_spine_of_sliver_budget
   exact nonempty_endCapSrcPlus_slices_of_sliver_budget β R ρ hδ₀ hρ0 hRpos hsliver
 
 /-- **hO3.** The source end cap meets band `firstSeg`. -/
-theorem overlap_endCapSrcPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_endCapSrcPlus_bandStripPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (hbud : δ₀ + 2 * α * dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) < ρ 0) :
     (endCapSrcPlus β ρ ∩ bandStripPlus β α δ₀ β.firstSeg).Nonempty := by
@@ -1257,8 +1257,8 @@ theorem overlap_endCapSrcPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs
   have hside : 0 < sideForm s t z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hP
   have hv0 : β.verts 0 = s := by
     have hcast : (0 : Fin (β.numSegs + 1)) = Fin.castSucc β.firstSeg := by
-      apply Fin.ext; simp [PolyArc.firstSeg]
-    rw [hs, PolyArc.segSrc, hcast]
+      apply Fin.ext; simp [PolygonalArc.firstSeg]
+    rw [hs, PolygonalArc.segSrc, hcast]
   have hball : z ∈ Metric.ball (β.verts 0) (ρ 0) := by
     rw [Metric.mem_ball, hv0]
     have hd : dist z s ≤ (2 * α + ε) * dist s t := by
@@ -1277,7 +1277,7 @@ theorem overlap_endCapSrcPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs
   · show footParam s t z ∈ Set.Ioo α (1 - α); rw [hfoot]; constructor <;> linarith
 
 /-- **hO4.** The target end cap meets band `lastSeg`. -/
-theorem overlap_endCapTgtPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_endCapTgtPlus_bandStripPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (hbud : δ₀ + 2 * α * dist (β.segSrc β.lastSeg) (β.segTgt β.lastSeg)
       < ρ (Fin.last β.numSegs)) :
@@ -1296,8 +1296,8 @@ theorem overlap_endCapTgtPlus_bandStripPlus (β : PolyArc) (ρ : Fin (β.numSegs
     rw [hz]; exact footParam_liftPlus hts (1 - 2 * α) ε
   have hside : 0 < sideForm s t z := by rw [hz, sideForm_liftPlus]; exact mul_pos hεpos hP
   have hvL : β.verts (Fin.last β.numSegs) = t := by
-    rw [ht, PolyArc.segTgt]; congr 1
-    apply Fin.ext; have h := β.numSegs_pos; simp [PolyArc.lastSeg, Fin.val_last]
+    rw [ht, PolygonalArc.segTgt]; congr 1
+    apply Fin.ext; have h := β.numSegs_pos; simp [PolygonalArc.lastSeg, Fin.val_last]
     omega
   have hball : z ∈ Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs)) := by
     rw [Metric.mem_ball, hvL]
@@ -1327,7 +1327,7 @@ theorem dotp_liftPlus_sub_tgt (s t : Plane) (c ε : ℝ) :
   simp only [dotp, Prod.fst_sub, Prod.snd_sub, liftPlus_fst, liftPlus_snd]; ring
 
 /-- **hO1.** The vertex sector at `verts (i+1)` meets band `i` (the incoming edge). -/
-theorem overlap_sectorPlus_bandStripPlus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorPlus_bandStripPlus_src (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1389,7 +1389,7 @@ theorem overlap_sectorPlus_bandStripPlus_src (β : PolyArc) (ρ : Fin (β.numSeg
       hside⟩, hinf⟩⟩
 
 /-- **hO2.** The vertex sector at `verts (i+1)` meets band `i+1` (the outgoing edge). -/
-theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1448,7 +1448,7 @@ theorem overlap_sectorPlus_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSeg
 /-- **Clipped hO1.** The *clipped* vertex sector at `verts (i+1)` meets band `i` (incoming edge).
 Same witness as `overlap_sectorPlus_bandStripPlus_src`; the foot-clip `α < footParam` holds since
 the witness sits at `footParam = 1 − 2α > α` (from `α < 1/3`). -/
-theorem overlap_sectorPlusClipped_bandStripPlus_src (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorPlusClipped_bandStripPlus_src (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))
@@ -1512,7 +1512,7 @@ theorem overlap_sectorPlusClipped_bandStripPlus_src (β : PolyArc) (ρ : Fin (β
 /-- **Clipped hO2.** The *clipped* vertex sector at `verts (i+1)` meets band `i+1` (outgoing edge).
 Same witness as `overlap_sectorPlus_bandStripPlus_tgt`; the foot-clip `footParam < 1 − α` holds
 since the witness sits at `footParam = 2α < 1 − α` (from `α < 1/3`). -/
-theorem overlap_sectorPlusClipped_bandStripPlus_tgt (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem overlap_sectorPlusClipped_bandStripPlus_tgt (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     {δ₀ α : ℝ} (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα3 : α < 1 / 3)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hturn : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩))

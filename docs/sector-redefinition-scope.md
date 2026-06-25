@@ -1,7 +1,7 @@
 # Sector redefinition — scoping the multi-segment collar residual
 
 *Scoped 2026-06-18. Read-only investigation against `main` (PLCollarSeparation builds:
-8492 jobs, exit 0; one genuine `sorry`, `PLArc.lean:3140`).*
+8492 jobs, exit 0; one genuine `sorry`, `PolygonalArc.lean:3140`).*
 
 ## 0. Status correction (read first)
 
@@ -10,7 +10,7 @@ vertex sector as a **metric disk** `ball(verts(succ i), ρ(succ i)) ∩ vertexPl
 the δ₀-corner-tube redefinition as "NOT yet attempted." **Both framings are now stale.**
 Source-verified 2026-06-18:
 
-- `sectorPlus`/`sectorMinus` (`PLArc.lean:2842`/`:2849`) are **already** the δ₀-corner-tube
+- `sectorPlus`/`sectorMinus` (`PolygonalArc.lean:2842`/`:2849`) are **already** the δ₀-corner-tube
   form, in the **UNION** variant
   `vertexPlus a v b ∩ ({z | infDist z (segCarrier i) < δ₀} ∪ {z | infDist z (segCarrier (i+1)) < δ₀})`.
   The docstring (`:2820`–`:2841`, dated 2026-06-14) explains the union (not the intersection
@@ -20,29 +20,29 @@ Source-verified 2026-06-18:
 - A collar-facing **clipped** variant `sectorPlusClipped`/`sectorMinusClipped`
   (`:2863`/`:2873`) exists and is what `collarPlus`/`collarMinus` (`:2942`/`:2951`) actually use.
 - The whole collar (P1–P5) builds against the new sectors. The single remaining `sorry` is
-  `PLArc.lean:3140`.
+  `PolygonalArc.lean:3140`.
 
 This document scopes **the actual remaining gap**, not the already-completed redefinition.
 
 ## 1. The current definitions (source-verified)
 
 ```lean
--- PLArc.lean:2384 / :2388  (unchanged — the τ-selected angular wedge)
+-- PolygonalArc.lean:2384 / :2388  (unchanged — the τ-selected angular wedge)
 noncomputable def vertexPlus  (a v b : Plane) : Set Plane :=
   if 0 < cornerTurn a v b then convexSector a v b else reflexSector a v b
 noncomputable def vertexMinus (a v b : Plane) : Set Plane :=
   if 0 < cornerTurn a v b then reflexSector a v b else convexSector a v b
 
--- PLArc.lean:2842 / :2849  (δ₀-corner-tube UNION form — the redefinition §8 asked for)
-noncomputable def sectorPlus (β : PolyArc) (δ₀ : ℝ)
+-- PolygonalArc.lean:2842 / :2849  (δ₀-corner-tube UNION form — the redefinition §8 asked for)
+noncomputable def sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i:ℕ)+1 < β.numSegs) : Set Plane :=
   vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i:ℕ)+1, hi1⟩)
     ∩ ({z | Metric.infDist z (β.segCarrier i) < δ₀}
         ∪ {z | Metric.infDist z (β.segCarrier ⟨(i:ℕ)+1, hi1⟩) < δ₀})
 -- sectorMinus: same, vertexMinus.
 
--- PLArc.lean:2863 / :2873  (clipped, collar-facing — trims the FAR arm by a footParam α-margin)
-noncomputable def sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+-- PolygonalArc.lean:2863 / :2873  (clipped, collar-facing — trims the FAR arm by a footParam α-margin)
+noncomputable def sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i:ℕ)+1 < β.numSegs) : Set Plane :=
   vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i:ℕ)+1, hi1⟩)
     ∩ ( ({z | infDist z (segCarrier i) < δ₀} ∩ {z | α < footParam (segSrc i) (segTgt i) z})
@@ -153,7 +153,7 @@ used in the disjointness proof.
    rewrite of its interior-disk disjunct) so `hsrc`/`htgt` can be deleted from
    `union_collarPlus_collarMinus` and the instantiation.
 
-## 4. Relation to `PLArc.lean:3140`
+## 4. Relation to `PolygonalArc.lean:3140`
 
 **They are the same problem, not independent.** `:3140` *is* the interior-vertex disk branch of
 P2 `union_collarPlus_collarMinus`. The migrated P2-vs-P3 constraint (§2) exists *because* this
@@ -182,7 +182,7 @@ Those calls need re-plumbing to a budget-free overlap variant.
 3. **Drop `hsrc`/`htgt`** from `union_collarPlus_collarMinus`, the cover, and the
    `_of_sliver_budgets` overlap calls; re-derive the endpoint `ρ` window to satisfy
    `hballSrc`/`hballTgt`. Re-prove the instantiation
-   `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
+   `exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets`
    (`PLCollarSeparation.lean:317`) is now satisfiable for numSegs ≥ 2 (the actual unblocking).
 
 **Risks:**
@@ -202,7 +202,7 @@ non-vacuity for numSegs ≥ 2 (the multi-segment analogue of `exists_twoSidedPar
 
 ## Critical files
 
-- `LeanFormalizations/PachDeZeeuw/CrossingLemma/PLArc.lean` — sectors `:2842`/`:2863`, cover
+- `LeanFormalizations/PachDeZeeuw/CrossingLemma/PolygonalArc.lean` — sectors `:2842`/`:2863`, cover
   `:2574`, P2 sorry `:3140`, P3 `:4925`, P5 `:7040`, clipped containment `:10321`.
 - `LeanFormalizations/PachDeZeeuw/CrossingLemma/PLCollarSeparation.lean` — instantiation `:317`,
   straightArc `:480`.

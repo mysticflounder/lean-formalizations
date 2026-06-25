@@ -315,7 +315,7 @@ endpoints' splice corners lie in (the closure of) one region `R`, which the new
 arc splits into `U, V` via an `IsTwoSidedPartition`.  We state this against an
 **abstract** `IsTwoSidedPartition` plus the abstract hypothesis that both splice
 corners face that one region `R` — exactly the data the geometric track
-(`PLCollarSeparation` / `exists_twoSidedPartition_of_polyArc`) will supply.  The
+(`PLCollarSeparation` / `exists_twoSidedPartition_of_polygonalArc`) will supply.  The
 conclusion is co-faciality (`facePerm.SameCycle`, i.e. `Face_mk` equality),
 delivered by the forward Edmonds direction. -/
 

@@ -47,7 +47,7 @@ All in `CrossingLemma` namespace; `Plane := ℝ × ℝ`. Citations are to
   n)`-th via `finRotate`). Order key = `α = angleAt = Complex.arg`, so the successor is the
   next-larger-arg incident end, wrapping max→min **at the `±π` branch cut**.
 - `convexSector a v b := {z | 0 < τ·sideForm a v z ∧ 0 < τ·sideForm v b z}`, `τ =
-  cornerTurn a v b = sideForm a v b` (`PLArc.lean:198`, `:188`). `sideForm a b z =
+  cornerTurn a v b = sideForm a v b` (`PolygonalArc.lean:198`, `:188`). `sideForm a b z =
   (b.1−a.1)(z.2−a.2) − (b.2−a.2)(z.1−a.1)` (signed area / left-of test, `:65`).
   `convex_convexSector` (`:233`): it is `(convex_mul_sideForm_gt a v τ 0).inter
   (convex_mul_sideForm_gt v b τ 0)` — **the intersection of two open half-planes whose
@@ -112,7 +112,7 @@ EMPIRICALLY VERIFIED scope = those exact configs; the structural argument above 
 ### 1.2 Failure mode B — wrong wedge when the successor gap exceeds π (membership false even with `IsCorner`)
 
 **(PROVEN, by exact sign arithmetic + the convex-cone structure.)** `convexSector a p b` is
-the intersection of two open half-planes through `p` (`convex_convexSector`, `PLArc.lean:233`),
+the intersection of two open half-planes through `p` (`convex_convexSector`, `PolygonalArc.lean:233`),
 hence a **convex cone**, which subtends exactly the **convex (< π) angular sector** between
 the rays `p→a` and `p→b` — blind to which side the cyclic successor sits on. The CCW-open
 successor arc from `α(d)` to `α(succ)` is ray-free **by the specification of
@@ -429,7 +429,7 @@ base) — and the second is the larger.**
    identify `Wleft/Wright` with sector-point components. Only after this do `hregion` and
    the §4 assembly (`nonempty_prefixStepCrosscut_of_data`, `:380`) close `hgeo` /
    `SzemerediTrotter.lean:4649`.
-6. **`convexSector` stays valid for the PL collar layer** (`PLArc.lean`, `PLCollarSeparation`)
+6. **`convexSector` stays valid for the PL collar layer** (`PolygonalArc.lean`, `PLCollarSeparation`)
    where it is used with a genuine non-degenerate `IsCorner` polyarc vertex and the < π
    convex cone is the intended object. The unsoundness is specifically in repurposing
    `convexSector` as the *dart-face wedge keyed by the cyclic successor*; do not touch its

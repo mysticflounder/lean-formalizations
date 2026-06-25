@@ -32,7 +32,7 @@ Files: `ST` = `LeanFormalizations/PachDeZeeuw/PachSharir/SzemerediTrotter.lean`,
   content — not in Mathlib, not in the repo.** Budget the bulk of effort here.
   Everything else is a thin consumer once step 2 exists.
 - **Concurrent dependency:** the geometric instantiation (Track B) consumes
-  `exists_twoSidedPartition_of_polyArc` (built in `PLC`/`PLArc`). Track A (the
+  `exists_twoSidedPartition_of_polygonalArc` (built in `PLC`/`PolygonalArc`). Track A (the
   hard core + abstract-hypothesis consumers) proceeds without it.
 
 ---
@@ -106,9 +106,9 @@ Same-region-before = `R` connected, both endpoints in its closure
 
 Instantiation chain (the new, hard direction — easy half of §1's bijection,
 contrapositive): splice corners have anchors `dartAnchor` near `p₁,p₂` pointing
-into sectors `sectorPlus/Minus` (`PLArc.lean:2645/2651`) ⊆ collar sides
+into sectors `sectorPlus/Minus` (`PolygonalArc.lean:2645/2651`) ⊆ collar sides
 `collarPlus ⊆ U`, `collarMinus ⊆ V`
-(`exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides`,
+(`exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets_with_collar_sides`,
 `PLC:151`; sector→collar containments `sectorPlus_subset_collarPlus_of_sliver_budgets`,
 docs `planar-tree-cotree.md:180–195`). **Missing piece** (`planar-tree-cotree.md:322–328`):
 identify the vertex-rotation-chosen corner `c₁₀` (`exists_endpoint_splice_incidentAngle`,
@@ -149,8 +149,8 @@ between the geometry (`PAS`/`PLC`) and the consumer (`ST`).
    (`RM:1757`). **Budget the bulk of effort here; do not assume it is free.**
 3. **[Track B, new]** `cotreeEdge_crosscuts_residualFaceRegion`: cotree edge `j`'s
    segment arc is a crosscut of its face-region; instantiate
-   `exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets`
-   (`PLC:260`). **Needs the concurrent `exists_twoSidedPartition_of_polyArc`.**
+   `exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets`
+   (`PLC:260`). **Needs the concurrent `exists_twoSidedPartition_of_polygonalArc`.**
 4. **[Track A, new]** Lemma B `residualMap_prefixStep_cotree_sameFace_of_twoSidedPartition`:
    consumes an abstract `IsTwoSidedPartition` + sector-side containments + step 2,
    yields `Face_mk c₁ = Face_mk c₂`. State against abstract crosscut now.
@@ -168,7 +168,7 @@ between the geometry (`PAS`/`PLC`) and the consumer (`ST`).
   **step 2 is the long pole.**
 - Steps 3, 5, 6 → statements + wiring writable now against an abstract
   `∃ U V, IsTwoSidedPartition …`; full discharge needs the concurrent
-  `exists_twoSidedPartition_of_polyArc`.
+  `exists_twoSidedPartition_of_polygonalArc`.
 - Make **step 2** the single load-bearing bridge lemma; both residuals are then
   thin consumers sharing one `IsTwoSidedPartition` per cotree edge.
 
@@ -245,9 +245,9 @@ instantiate the five abstract hypotheses of `regionSeparates_prefix_of_crosscut`
   `v = dartAnchor d`, the first-crossing direction of `d`, and that of its
   `vertexRotation`-successor, give a `vertexPlus a v b ∩ ball v ε` wedge; the
   point lands in `drawingComplementIn` for ε small (a new membership lemma). **No
-  existing dart→sector-point function** (`sectorPlus` is per-`PolyArc`-segment, not
+  existing dart→sector-point function** (`sectorPlus` is per-`PolygonalArc`-segment, not
   per-incident-arc). Keep `dr` abstract in `EdmondsConstruction`; instantiate it in
-  a **downstream file importing `PLArc`**.
+  a **downstream file importing `PolygonalArc`**.
 - `hcard1` ← `RM:8990` on the spanning-tree prefix (direct, bridge-side).
 - `hcomp` — `rfl` modulo the `dartSectorPoint ∈ drawingComplementIn` membership lemma.
 - `hconst` — **NOT residual-side-only** (correction): needs a complement-connector
@@ -259,7 +259,7 @@ instantiate the five abstract hypotheses of `regionSeparates_prefix_of_crosscut`
   same-face connectivity, no Euler increment) but genuine geometry.
 - each `PrefixStepCrosscutData` ← the cotree edge's two-sided partition realised as
   an injective `poolRegion` — **needs Target 2's output**
-  (`exists_twoSidedPartition_of_polyArc`).
+  (`exists_twoSidedPartition_of_polygonalArc`).
 The iteration being closed, what was the "risk-bearing novel content" is now the
 `dartSectorPoint` + its membership/connector geometry (`dr`/`hcomp`/`hconst`) plus
 Target 2 (`PrefixStepCrosscutData`). **Buildable against abstract per-edge crosscut
@@ -267,7 +267,7 @@ data** — confirmed by the landed file; does NOT need Target 2 *proven*, only i
 per-edge statement. Note `dr`/`hcomp`/`hconst` are sector-geometry, not pure
 residual-side plumbing — they belong in the downstream PL-importing file.
 
-### 6.3 REMAINING TARGET 2 (Track B) — `exists_twoSidedPartition_of_polyArc`
+### 6.3 REMAINING TARGET 2 (Track B) — `exists_twoSidedPartition_of_polygonalArc`
 The PL crosscut for straight segments. The existing collar machinery is
 **vacuous** (`sectorPlus/Minus := ball(verts, ρ)` forces unsatisfiable budgets
 `ρ ≤ δ₀` ∧ `δ₀+2αL < ρ`). Fix = redefine sector as δ₀-corner-tube overlap
@@ -275,7 +275,7 @@ The PL crosscut for straight segments. The existing collar machinery is
 (δ₀-governed, ρ-untied). Validated on paper (Agent-X, WIP in `git stash@{0}`,
 recall nthdegree `mem2`). **Impact map (mapping agent, full report in session
 transcript)**: ~200 line-references, **15–20 proof rewrites**:
-- BREAKS (ball load-bearing): `sectorPlus_subset_taperedTube` (PLArc:8061),
+- BREAKS (ball load-bearing): `sectorPlus_subset_taperedTube` (PolygonalArc:8061),
   `overlap_sectorPlus_bandStripPlus_src/tgt` (6111/6171),
   `mem_sectorPlus_or_sectorMinus_of_ball` (2924),
   `disjoint_sectorPlus_sectorMinus_diff/_all` (3456/3795), `isOpen_sector*`
@@ -289,10 +289,10 @@ transcript)**: ~200 line-references, **15–20 proof rewrites**:
   into a large disk a corner-tube can't capture; fix = split foot∈(0,1)→band vs
   outer-cone-behind-vertex→corner-tube (both `infDist` to incident edges = `dist`
   to shared vertex `v`, captured iff `dist(z,v) < δ₀`).
-- Helper keystones still valid: `exists_delta_corner_confine` (PLArc:2635),
+- Helper keystones still valid: `exists_delta_corner_confine` (PolygonalArc:2635),
   `exists_pos_infDist_compl_of_isCompact` (3999).
 - Public `exists_twoSidedPartition_of_arc` (PAS:377) stays sorried (general
-  Schoenflies NO-GO); `_of_polyArc` is the new public PL entry to build.
+  Schoenflies NO-GO); `_of_polygonalArc` is the new public PL entry to build.
 
 ### 6.4 Sequencing
 Target 1 and Target 2 are **independent until final wiring** (Target 1 builds
@@ -315,18 +315,18 @@ fronts. All file:line verified against the current tree.
   must be **off the vertex**, in the angular sector between the dart's two
   consecutive incident arcs.
 - **No existing dart→sector-point function.** `sectorPlus`/`vertexPlus`
-  (PLArc:2752/2384) are per-`PolyArc`-*segment*, and there is **no bridge** from a
-  `DrawnMultigraph`'s `G.arc e` to the `PolyArc` collar machinery. The load-bearing
+  (PolygonalArc:2752/2384) are per-`PolygonalArc`-*segment*, and there is **no bridge** from a
+  `DrawnMultigraph`'s `G.arc e` to the `PolygonalArc` collar machinery. The load-bearing
   new object is `dartSectorPoint` (vertex + first-crossing dirs of `d` and of its
   `vertexRotation`-successor ⇒ `vertexPlus a v b ∩ ball v ε`) + membership lemma
   `dartSectorPoint ∈ drawingComplementIn` (ARR first-crossing + finitely many arcs
   ⇒ small wedge off `v` misses `arcUnion`). This is genuine PL/angular geometry.
 - Decision: keep `dr` abstract in `EdmondsConstruction.lean` (already so);
   instantiate it `regionAt … (dartSectorPoint …)` in a **downstream file importing
-  `PLArc`**, leaving the landed file untouched. `hcomp` then `rfl`-trivial modulo
+  `PolygonalArc`**, leaving the landed file untouched. `hcomp` then `rfl`-trivial modulo
   membership; `hconst` needs a same-face collar-strip connector (driving lemmas in
   §6.2). Anchor index: `dartAnchor` RM:47, `vertexRotation` CrossingLemma.lean:574,
-  `incidentEnds` CL:350, `convexSector_nonempty` PLArc:214.
+  `incidentEnds` CL:350, `convexSector_nonempty` PolygonalArc:214.
 
 ### 7.2 ST consumer wiring (both sorries live in `hstep`'s cotree branch)
 - **Entanglement:** main thm `straightLineCanonicalComponentResidualMapPlanarityOfARR`
@@ -363,9 +363,9 @@ fronts. All file:line verified against the current tree.
 - **Prereq step 0:** ST does **not** import the bridge yet (and uses none of its
   API); add `import …CrossingLemma.EdmondsConstruction` to ST.
 
-### 7.3 Target-2 gate verdict: **GO** (`exists_twoSidedPartition_of_polyArc`)
+### 7.3 Target-2 gate verdict: **GO** (`exists_twoSidedPartition_of_polygonalArc`)
 - **OLD ball sector: provably UNSAT.** The collision is in
-  `isPreconnected_collarPlus_of_sliver_budgets` (PLArc:8667), which for an interior
+  `isPreconnected_collarPlus_of_sliver_budgets` (PolygonalArc:8667), which for an interior
   vertex carries both `hρδ : ρ(succ i) ≤ δ₀` (8695) and
   `htgt : δ₀+2αL < ρ(succ i)` (8700) ⇒ `2αL < 0`. (Matches the machine-verified
   `False`-from-bundle finding.)
@@ -377,10 +377,10 @@ fronts. All file:line verified against the current tree.
   B reduces to `δ₀ > 0`. SAT holds; the redefinition is sound.
 - **Two residual PROOF obligations** (not satisfiability obstructions): {{NEEDS_PROOF}}
   (i) the δ₀-only (ε-free) witness reconstruction in `overlap_sectorPlus_bandStripPlus_src/tgt`
-  (PLArc:6111/6171) — genuine proof, not signature surgery; (ii) a new
+  (PolygonalArc:6111/6171) — genuine proof, not signature surgery; (ii) a new
   `infDist_segment_eq_dist_endpoint_of_footParam_le_zero` lemma for the P2-cover
   outer-cone branch.
-- **`stash@{0}` = first third done** (+102/−69, PLArc.lean only, up to ~3700): new
+- **`stash@{0}` = first third done** (+102/−69, PolygonalArc.lean only, up to ~3700): new
   `sectorPlus/Minus` defs, `isOpen_sector*`, `collar*` call sites,
   `disjoint_sectorPlus_sectorMinus` + `_diff`, the adjacent band↔sector glue, the 4
   endcap↔sector lemmas (ball→infDist-budget). **Missing:** reach lemmas (6111/6171),
@@ -410,7 +410,7 @@ for the δ₀-tube model. **Validated GREEN** (the entire 3777–4111 region com
 - **Master `disjoint_collarPlus_collarMinus`** dropped `hρsep` (now dead); `hballs`
   survives only for the two endpoint cap↔cap pairings. Caller updated.
 
-**Reach lemma = the genuine crux** (`overlap_sectorPlus_bandStripPlus_src`, PLArc:6222).
+**Reach lemma = the genuine crux** (`overlap_sectorPlus_bandStripPlus_src`, PolygonalArc:6222).
 The δ₀-tube sector additionally needs the witness within δ₀ of the **outgoing** edge i+1.
 The naive on-edge band witness (foot `1−2α` or `1−α`, near `v`) **provably fails
 for gentle corners**: the joint reach `αL·sinφ < δ₀` and band-thinness `hδin`
@@ -420,7 +420,7 @@ corner turn `φ ≈ 0` and edge `i` is diagonal (`‖Δ‖₂/‖Δ‖₁ → 1/
 verified and the failure is real for that witness family.
 
 **ROOT CAUSE + FIX LEAD (concrete, not a dead end):** the obstruction is *entirely* from the
-**`‖Δ‖₁` L1-norm** in `hδin`, which enters via `thin_of_infDist_incoming` (≈PLArc:3284,
+**`‖Δ‖₁` L1-norm** in `hδin`, which enters via `thin_of_infDist_incoming` (≈PolygonalArc:3284,
 used by `bandStrip_incoming_mem_vertexPlus` 3263). If `thin_of_infDist_incoming` can be
 reproven with **`‖Δ‖₂`** (L2) instead of `‖Δ‖₁`, the joint condition becomes
 `|cos φ| < 1` — true for **every** genuine corner (`φ ∈ (0,π)`, `φ≠0`) — and the constraint is eliminated. {{NEEDS_PROOF}}: verify `thin_of_infDist_incoming` admits the L2 bound
@@ -430,7 +430,7 @@ the reach goes through with the existing on-edge witness (re-pointed at the δ�
 `hbud` δ₀+2αL<ρ replaced by a δ₀-only `2αL·sinφ < δ₀`-type condition); if not,
 the bisector witness must be built and re-analysed against the L2 threshold.
 
-**WIP location:** `stash@{0}` (backup) AND the live working tree (PLArc.lean, +242/−131).
+**WIP location:** `stash@{0}` (backup) AND the live working tree (PolygonalArc.lean, +242/−131).
 The cascade is done; remaining errors are all downstream of the reach resolution or
 independent-but-mechanical (`isPreconnected_sector*` convexity 4801/4811,
 `sectorPlus_subset_taperedTube` 8172, the bundle 8634, P2-cover 2946). Do these *after*
@@ -469,7 +469,7 @@ For gentle corners `|tanψ|→0` drives δ₀→0 while reach keeps δ₀ ≳ α
 cancels** (linear on both sides) — no budget choice closes it. Empty δ₀-window whenever
 `|tanψ| ≲ ‖Δ‖₁/‖Δ‖₂ ∈ [1,√2]`, i.e. for **every turn gentler than ~45°**. The
 intersection-tube model (`sectorPlus = vertexPlus ∩ {δ₀ of i} ∩ {δ₀ of i+1}`) is a
-NO-GO. The doc comment at `sectorPlus` (PLArc:2758) claiming decoupling δ₀ from ρ
+NO-GO. The doc comment at `sectorPlus` (PolygonalArc:2758) claiming decoupling δ₀ from ρ
 "escapes the constraint `L₂² ≤ L₁·L∞`" is right for the disjointness cascade but **the reach
 lemma re-imports the constraint**.
 
@@ -484,7 +484,7 @@ union each sector is a *two-strip* set, so strip-separation no longer isolates s
 sharing edge i+1; disjointness must come from the **angular sign on the shared edge**,
 and `reflexSector` is an OR that does not obviously pin it. **Resolved** via the existing
 `overlap_mem_convexSector_iff` / `overlap_mem_reflexSector_iff` (+ `_incoming`,
-PLArc:1959–2033): on a thin overlap with positive foot, the reflex OR **collapses** to
+PolygonalArc:1959–2033): on a thin overlap with positive foot, the reflex OR **collapses** to
 the single thin-edge sign (`pos_turn_sideForm_of_overlap` kills the other disjunct). Then
 with σ := `sideForm(v_{i+1}, v_{i+2}, z)` on the shared edge:
 - `z ∈ sectorPlus_i` (thin to edge i+1 as *outgoing*, interior foot) ⟹ **σ > 0** in
@@ -517,10 +517,10 @@ incident corner's structure. No constraint, normal formalization.
 
 ## 10 · UNION-tube GREEN BASELINE landed (2026-06-14) — `sorry` worklist for the rework
 
-`PLArc.lean` now **compiles green** under the union sector
+`PolygonalArc.lean` now **compiles green** under the union sector
 (`sectorPlus = vertexPlus ∩ ({δ₀ of i} ∪ {δ₀ of i+1})`); `PLCollarSeparation` (its only
-consumer) builds unchanged — the rework is **fully contained in `PLArc`, no external API
-churn** (verified: no file outside `PLArc` references any changed/removed name). This is a
+consumer) builds unchanged — the rework is **fully contained in `PolygonalArc`, no external API
+churn** (verified: no file outside `PolygonalArc` references any changed/removed name). This is a
 *baseline*: the genuinely-union-reworked proofs are explicit `sorry`s with in-line specs, so
 the file gives a build signal and a per-hole worklist instead of a non-compiling 8700-line
 blob. Each `sorry` carries a `-- §9 UNION …` comment stating its goal and route.
@@ -579,7 +579,7 @@ collar-facing **clipped sector** def. Decision recorded in nthdegree
 runs the full incident edge down to the arc endpoints `verts 0` / `verts last`, which sit on
 `∂R` where the tapered tube radius `min δ₀ (½·infDist Rᶜ)` → 0. So the raw union sector pokes
 *outside* the tube at the two arc-endpoint corners (`i=0` incoming arm; `i=numSegs−2` outgoing
-arm), and `sectorPlus_subset_taperedTube` (PLArc:8619) cannot hold. The wedge provably reaches
+arm), and `sectorPlus_subset_taperedTube` (PolygonalArc:8619) cannot hold. The wedge provably reaches
 `verts0`: `τ·sideForm(verts1,verts2,verts0) = τ² > 0` (via `sideForm_cyclic`), so the wedge's
 second half-plane condition holds there. A parameter-free or fixed foot margin provably fails
 (the margin must scale with `α`); shrinking `δ₀` doesn't help (the taper is a ratio, always wins
@@ -689,9 +689,9 @@ plus the unclipped-`compl_carrier` line if not deleted).
 
 ## §14 — Phase 2 COMPLETE (2026-06-15) — collar flipped to clipped sectors, GREEN
 
-The big-bang flip landed: `PLArc.lean` builds GREEN (`LAKE_EXIT=0`) with **exactly one `sorry`**
+The big-bang flip landed: `PolygonalArc.lean` builds GREEN (`LAKE_EXIT=0`) with **exactly one `sorry`**
 (`union_collarPlus_collarMinus` interior-vertex disk-routing, ~3140 — the designated keep). Commit
-`58e0a98`, fast-forwarded onto `152619c`; diffstat **149 insertions / 425 deletions**, only `PLArc.lean`.
+`58e0a98`, fast-forwarded onto `152619c`; diffstat **149 insertions / 425 deletions**, only `PolygonalArc.lean`.
 
 **Axiom-clean (verified by `#print axioms`, not just claimed):** `disjoint_collarPlus_collarMinus`,
 `exists_collar_disjoint`, `isPreconnected_collarPlus` each report exactly
@@ -726,14 +726,14 @@ sidesteps it cleanly. The band keeps its original `hSband`/`hRband` (`Icc(a/2)(1
 4 `sector*_subset_collar*` bridge lemmas were flipped to clipped (still live).
 
 **Next:** post-flip Target-1 phase — see `ws:target1-map`. The remaining cover `sorry` (~3140) and the
-downstream `exists_twoSidedPartition_of_polyArc` packaging + `dartSectorPoint` + EC instantiation are the
+downstream `exists_twoSidedPartition_of_polygonalArc` packaging + `dartSectorPoint` + EC instantiation are the
 path to discharging the two ST cotree-theorem sorries.
 
 ## §15 Target-1 phase, session 2026-06-15 (regression fix · binder cleanup · the endpoint-cap constraint and its single-segment resolution)
 
-**Regression found + fixed (merged, main `4a38faa`).** The §14 clip-core flip changed PLArc's sliver-wrapper
+**Regression found + fixed (merged, main `4a38faa`).** The §14 clip-core flip changed PolygonalArc's sliver-wrapper
 signatures (`isPreconnected_collar{Plus,Minus}_of_sliver_budgets` gained `hα1`, `hsectorW`) but its "green"
-was only the *targeted* PLArc build (8476 jobs) — it never rebuilt `PLCollarSeparation`, which consumes those
+was only the *targeted* PolygonalArc build (8476 jobs) — it never rebuilt `PLCollarSeparation`, which consumes those
 wrappers via `CrossingLemma.lean`. So the **full `lake build` (default target `LeanFormalizations`) was RED**
 on the pushed `4c56c72`. Fix: forward `hα1` (derived locally from `hα2`) + `hsectorWPlus`/`hsectorWMinus` to
 the call-sites in PLC:151/265. Full lib build now GREEN. *Lesson: after a def-signature flip, build the default
@@ -746,26 +746,26 @@ directly contradicts the live `htgt` (`δ₀+2α·dist < ρ(succ i)`), which had
 unsatisfiable (provable but uninstantiable).
 
 **The endpoint-cap constraint (verified) and why it does NOT block the goal.** Attempting
-`exists_twoSidedPartition_of_polyArc` for a *general multi-segment* PolyArc hits a genuine inconsistency at the
+`exists_twoSidedPartition_of_polygonalArc` for a *general multi-segment* PolygonalArc hits a genuine inconsistency at the
 source/target endpoints: the cap radius `ρ 0` must reach `footParam = 2α` to connect to the band
-(`overlap_endCapSrcPlus_bandStripPlus`, PLArc:7866) yet stay `foot < α` for cap↔SECTOR disjointness
-(`disjoint_sectorPlusClipped_endCapSrcMinus_all`, PLArc:4740, hyp `(‖Δ‖₁/dotp)·ρ0 ≤ α`). On `ℝ×ℝ`,
+(`overlap_endCapSrcPlus_bandStripPlus`, PolygonalArc:7866) yet stay `foot < α` for cap↔SECTOR disjointness
+(`disjoint_sectorPlusClipped_endCapSrcMinus_all`, PolygonalArc:4740, hyp `(‖Δ‖₁/dotp)·ρ0 ≤ α`). On `ℝ×ℝ`,
 `dist=‖Δ‖∞`, `dotp(Δ,Δ)=‖Δ‖₂²`, `‖Δ‖₂² ≤ ‖Δ‖₁‖Δ‖∞`, so the two collapse to `2x < x` — impossible. (For
 convex corners side-separation would dissolve it; for reflex corners the foot bound is genuinely needed.)
 **But sectors require `numSegs ≥ 2`.** The region↔face crosscut is the inserted graph edge itself
-(RFB:309-314), straight ⇒ `arcToPolyArc`/`straightPolyArc` give `numSegs = 1`, where there are no sectors and
+(RFB:309-314), straight ⇒ `arcToPolygonalArc`/`straightPolygonalArc` give `numSegs = 1`, where there are no sectors and
 every `collar±` disjointness is Plus-vs-Minus **by side** (`sideForm>0` vs `<0` w.r.t. the one edge). Adam
 confirmed the crosscut is a single straight chord, so the constraint is **vacuous for the actual application**.
 
 **Resolution path (→ §16: DONE/MERGED).** Build `exists_twoSidedPartition_of_straightArc` (single-segment) feeding
-`exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides` (PLC:41) — which takes `hdisj`,
+`exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides` (PLC:41) — which takes `hdisj`,
 `hTp_pre`, `hTm_pre` *directly*, so the contradictory cap-foot budget (which lived only in the disjointness
 master `exists_collar_disjoint`) is never incurred. Choose δ₀ small, `ρ ∈ (δ₀+2αL, L]`; prove `hdisj` by
 side-separation (`collarPlus ⊆ {sideForm>0}`, `collarMinus ⊆ {sideForm<0}`). The over-general multi-segment
 collar is simply over-built for ST.
 
 **Step-3 `dartSectorPoint` (held, not merged).** `DartSectorPoint.lean` (branch `worktree-agent-a22f148e…`,
-commit `8e9b364`): the `arcToPolyArc`/`straightPolyArc` bridge is solid and sorry-free. But `dartSectorPoint`
+commit `8e9b364`): the `arcToPolygonalArc`/`straightPolygonalArc` bridge is solid and sorry-free. But `dartSectorPoint`
 was built from a too-weak `∃ p, p ∈ drawingComplementIn …`, so the candidate `dr := regionAt ∘ dartSectorPoint`
 **cannot satisfy `hconst`** (EC:203-204, `dr (facePerm d) = dr d`). Redesign needed (design pass pending): the
 point must sit in the wedge at the dart's anchor and be FACE-determined, with a `facePerm`-invariance lemma;
@@ -778,10 +778,10 @@ is wrong (abstract leaf ruled out). This paragraph is superseded.**
 **`exists_twoSidedPartition_of_straightArc` MERGED + independently verified (main `d8e5f5c`).** The §15
 "resolution path (in progress)" is done. Cherry-picked from the agent worktree (`e0cb5be`) onto main (the
 agent branched from `2b783d4`, before the `b42473d` doc commit, so no pure ff). Independently verified — not on
-the agent's say-so: scope = `PLCollarSeparation.lean` + `PLArc.lean` only (+507/−0); `CrossingLemma` build
+the agent's say-so: scope = `PLCollarSeparation.lean` + `PolygonalArc.lean` only (+507/−0); `CrossingLemma` build
 GREEN (8475 jobs); `#print axioms exists_twoSidedPartition_of_straightArc` = `[propext, Classical.choice,
 Quot.sound]` — **no `sorryAx`**. Deviation (sound): rather than route through PLC:41 (which transitively hits
-the pre-existing `union_collarPlus_collarMinus` sorry at PLArc~3140), it adds a `numSegs = 1` verbatim copy
+the pre-existing `union_collarPlus_collarMinus` sorry at PolygonalArc~3140), it adds a `numSegs = 1` verbatim copy
 `union_collarPlus_collarMinus_of_numSegs_one` (interior-vertex disk branch vacuous — `omega` kills `0 < j < 1`)
 plus a clean entry point `…_of_numSegs_one`, and proves `hdisj` by side-separation
 (`collarPlus ⊆ {sideForm>0}`, `collarMinus ⊆ {sideForm<0}`). *Minor wart:* the `straightArc` docstring says it

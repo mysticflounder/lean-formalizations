@@ -3,15 +3,15 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 4/7 — **Existence**: P4 (a scaled-normal witness off the first-edge
+PolygonalArc shard 4/7 — **Existence**: P4 (a scaled-normal witness off the first-edge
 midpoint shows the collar is nonempty) and the P3 existence primitives (the
 per-corner separation threshold and the global assembly). Split out of
-`PLArc.lean`; see that coordinator module's doc for the overview.
+`PolygonalArc.lean`; see that coordinator module's doc for the overview.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.CollarConstruction
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Disjointness
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.CollarConstruction
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Disjointness
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -28,19 +28,19 @@ below the tube cap, the region clearance, and the separation to every other edge
 lands the point in `taperedTube ∖ carrier` close to edge `0`. -/
 
 /-- Midpoint of the first edge (foot parameter `1/2`, on the first segment). -/
-noncomputable def firstMid (β : PolyArc) : Plane :=
+noncomputable def firstMid (β : PolygonalArc) : Plane :=
   (((β.segSrc β.firstSeg).1 + (β.segTgt β.firstSeg).1) / 2,
    ((β.segSrc β.firstSeg).2 + (β.segTgt β.firstSeg).2) / 2)
 
-theorem firstMid_mem_segCarrier (β : PolyArc) :
+theorem firstMid_mem_segCarrier (β : PolygonalArc) :
     firstMid β ∈ β.segCarrier β.firstSeg := by
-  rw [PolyArc.segCarrier]
+  rw [PolygonalArc.segCarrier]
   refine ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, ?_⟩
   refine Prod.ext ?_ ?_ <;>
     simp only [firstMid, Prod.smul_fst, Prod.smul_snd, smul_eq_mul, Prod.fst_add,
       Prod.snd_add] <;> ring
 
-theorem firstMid_footParam (β : PolyArc) :
+theorem firstMid_footParam (β : PolygonalArc) :
     footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) (firstMid β) = 1 / 2 := by
   have hP : dotp (β.segTgt β.firstSeg - β.segSrc β.firstSeg)
       (β.segTgt β.firstSeg - β.segSrc β.firstSeg) ≠ 0 :=
@@ -53,26 +53,26 @@ theorem firstMid_footParam (β : PolyArc) :
     simp only [dotp, firstMid, Prod.fst_sub, Prod.snd_sub]; ring
   rw [hnum]; field_simp
 
-theorem firstMid_notMem_segCarrier (β : PolyArc) {k : Fin β.numSegs} (hk : k ≠ β.firstSeg) :
+theorem firstMid_notMem_segCarrier (β : PolygonalArc) {k : Fin β.numSegs} (hk : k ≠ β.firstSeg) :
     firstMid β ∉ β.segCarrier k := by
   intro hmem
   have hf0 : firstMid β ∈ segment ℝ (β.verts (Fin.castSucc β.firstSeg))
       (β.verts (Fin.succ β.firstSeg)) := by
     have h := firstMid_mem_segCarrier β
-    rwa [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt] at h
+    rwa [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt] at h
   have hfk : firstMid β ∈ segment ℝ (β.verts (Fin.castSucc k)) (β.verts (Fin.succ k)) := by
-    rwa [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt] at hmem
+    rwa [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt] at hmem
   have hk0 : (k : ℕ) ≠ 0 := by
-    intro h; exact hk (Fin.ext (by simp [PolyArc.firstSeg, h]))
+    intro h; exact hk (Fin.ext (by simp [PolygonalArc.firstSeg, h]))
   rcases Nat.lt_or_ge 1 (k : ℕ) with hgt | hle
   · have hadj : (β.firstSeg : Fin β.numSegs).val + 1 < (k : ℕ) := by
-      simp only [PolyArc.firstSeg]; omega
+      simp only [PolygonalArc.firstSeg]; omega
     exact (Set.disjoint_left.mp (β.nonadjacent_disjoint β.firstSeg k hadj)) hf0 hfk
   · have hk1 : (k : ℕ) = 1 := by omega
     have hlt : (β.firstSeg : Fin β.numSegs).val + 1 < β.numSegs := by
-      simp only [PolyArc.firstSeg]; have := k.isLt; omega
+      simp only [PolygonalArc.firstSeg]; have := k.isLt; omega
     have hkeq : k = ⟨(β.firstSeg : Fin β.numSegs).val + 1, hlt⟩ :=
-      Fin.ext (by simp only [PolyArc.firstSeg, Fin.val_mk]; omega)
+      Fin.ext (by simp only [PolygonalArc.firstSeg, Fin.val_mk]; omega)
     have hcast : (Fin.castSucc ⟨(β.firstSeg : Fin β.numSegs).val + 1, hlt⟩ : Fin (β.numSegs + 1))
         = Fin.succ β.firstSeg := Fin.ext (by simp [Fin.val_succ])
     have hfk' : firstMid β ∈ segment ℝ (β.verts (Fin.succ β.firstSeg))
@@ -118,7 +118,7 @@ theorem exists_pos_infDist_compl_of_isCompact {R K : Set Plane}
 
 /-- A single positive radius `B` below which a witness within `B` of `firstMid β` is
 inside the tube cap, the region clearance, and the separation to every other edge. -/
-theorem exists_firstMid_radius (β : PolyArc) (R : Set Plane) {δ₀ : ℝ} (hδ₀ : 0 < δ₀)
+theorem exists_firstMid_radius (β : PolygonalArc) (R : Set Plane) {δ₀ : ℝ} (hδ₀ : 0 < δ₀)
     (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
     ∃ B : ℝ, 0 < B ∧ B ≤ δ₀ ∧ B ≤ Metric.infDist (firstMid β) Rᶜ / 2
       ∧ ∀ k : Fin β.numSegs, k ≠ β.firstSeg →
@@ -147,7 +147,7 @@ theorem exists_firstMid_radius (β : PolyArc) (R : Set Plane) {δ₀ : ℝ} (hδ
 /-- The coordinate-free core: a point close to `firstMid β` (within the tube cap, the
 region clearance, and every other edge's separation) and off the first edge's line is
 in the ground set `taperedTube ∖ carrier` and is `< δ₀` from the first segment. -/
-theorem firstMid_push_in_ground (β : PolyArc) (R S : Set Plane) {δ₀ : ℝ}
+theorem firstMid_push_in_ground (β : PolygonalArc) (R S : Set Plane) {δ₀ : ℝ}
     (hmS : firstMid β ∈ S) {w : Plane}
     (htube : dist w (firstMid β) < δ₀)
     (hR : dist w (firstMid β) < Metric.infDist (firstMid β) Rᶜ / 2)
@@ -159,11 +159,11 @@ theorem firstMid_push_in_ground (β : PolyArc) (R S : Set Plane) {δ₀ : ℝ}
   refine ⟨⟨?_, ?_⟩, ?_⟩
   · rw [taperedTube]
     exact Set.mem_iUnion₂.mpr ⟨firstMid β, hmS, Metric.mem_ball.mpr (lt_min htube hR)⟩
-  · rw [PolyArc.carrier, Set.mem_iUnion]
+  · rw [PolygonalArc.carrier, Set.mem_iUnion]
     rintro ⟨k, hk⟩
     by_cases hkf : k = β.firstSeg
     · subst hkf
-      rw [PolyArc.segCarrier] at hk
+      rw [PolygonalArc.segCarrier] at hk
       exact hsf0 (sideForm_eq_zero_of_mem_segment _ _ hk)
     · have htri : Metric.infDist (firstMid β) (β.segCarrier k)
           ≤ Metric.infDist w (β.segCarrier k) + dist (firstMid β) w :=
@@ -174,7 +174,7 @@ theorem firstMid_push_in_ground (β : PolyArc) (R S : Set Plane) {δ₀ : ℝ}
 
 /-- **P4⁺ (nonempty).**  Needs the first-edge midpoint inside the spine `S` and
 strictly interior to `R`, and `α < 1/2`. -/
-theorem collarPlus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+theorem collarPlus_nonempty (β : PolygonalArc) (R S : Set Plane) {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ) (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα2 : α < 1 / 2)
     (hmS : firstMid β ∈ S) (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
     (collarPlus β R S δ₀ α ρ).Nonempty := by
@@ -232,7 +232,7 @@ theorem collarPlus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
     exact hinf
 
 /-- **P4⁻ (nonempty).** -/
-theorem collarMinus_nonempty (β : PolyArc) (R S : Set Plane) {δ₀ α : ℝ}
+theorem collarMinus_nonempty (β : PolygonalArc) (R S : Set Plane) {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ) (hδ₀ : 0 < δ₀) (hα : 0 < α) (hα2 : α < 1 / 2)
     (hmS : firstMid β ∈ S) (hmR : 0 < Metric.infDist (firstMid β) Rᶜ) :
     (collarMinus β R S δ₀ α ρ).Nonempty := by
@@ -298,7 +298,7 @@ at any width `δ₀ ≤ δ`.  Combines `exists_delta_corner_confine` (at radius 
 L_{c+1})`, so both Lipschitz budgets `L·r ≤ α` are met) with the `M/(K+1)` thresholds for
 the `hδin`/`hδout` shapes (whose `sideForm` factor is `±cornerTurn ≠ 0`).  Stated totally
 over `c` (vacuous when `c` is not a corner) so the global step can skolemize and minimise. -/
-theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
+theorem exists_corner_delta (β : PolygonalArc) {α : ℝ} (hα : 0 < α)
     (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
       cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0)
     (c : Fin β.numSegs) :
@@ -334,7 +334,7 @@ theorem exists_corner_delta (β : PolyArc) {α : ℝ} (hα : 0 < α)
     have hcc1 : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segSrc ⟨(c : ℕ) + 1, hc1⟩ :=
       β.segTgt_ne_segSrc _
     have htt : β.segTgt ⟨(c : ℕ) + 1, hc1⟩ ≠ β.segTgt c := by
-      rw [PolyArc.segTgt, PolyArc.segTgt]; intro h
+      rw [PolygonalArc.segTgt, PolygonalArc.segTgt]; intro h
       have hval := congrArg Fin.val (β.distinct h)
       simp only [Fin.val_succ] at hval; omega
     set Lc := (|(β.segTgt c).1 - (β.segSrc c).1| + |(β.segTgt c).2 - (β.segSrc c).2|)
@@ -424,7 +424,7 @@ budget, so the two collar sides are disjoint. -/
 /-- **The two collar sides can be made disjoint** by a concrete choice of `δ₀` and a
 constant disk-radius `ρ`, for any narrowing width `α > 0`, provided the arc has no straight
 corners (`hturn`). -/
-theorem exists_collar_disjoint (β : PolyArc) (R S : Set Plane) {α : ℝ} (hα : 0 < α)
+theorem exists_collar_disjoint (β : PolygonalArc) (R S : Set Plane) {α : ℝ} (hα : 0 < α)
     (hturn : ∀ (c : Fin β.numSegs) (hc1 : (c : ℕ) + 1 < β.numSegs),
       cornerTurn (β.segSrc c) (β.segTgt c) (β.segTgt ⟨(c : ℕ) + 1, hc1⟩) ≠ 0) :
     ∃ (δ₀ : ℝ) (ρ : Fin (β.numSegs + 1) → ℝ), 0 < δ₀ ∧ (∀ p, 0 < ρ p) ∧
@@ -579,7 +579,7 @@ theorem convex_edgeMinusMid (s t : Plane) (α : ℝ) : Convex ℝ (edgeMinusMid 
 
 /-- The positive band strip is convex (positive band ∩ the open `δ₀`-neighbourhood of the
 segment, which is the thickening of a convex set). -/
-theorem convex_bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem convex_bandStripPlus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     Convex ℝ (bandStripPlus β α δ₀ i) := by
   rw [bandStripPlus]
   refine (convex_edgePlusMid _ _ _).inter ?_
@@ -591,7 +591,7 @@ theorem convex_bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs
   exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
 
 /-- The negative band strip is convex. -/
-theorem convex_bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem convex_bandStripMinus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     Convex ℝ (bandStripMinus β α δ₀ i) := by
   rw [bandStripMinus]
   refine (convex_edgeMinusMid _ _ _).inter ?_
@@ -685,7 +685,7 @@ sector is empty, trivially preconnected, so no positivity hypothesis is needed).
 star-connected to a basepoint near `v` in the cone; the old
 `isPreconnected_vertexPlus_inter_ball` handled a single ball — here it is a union of two
 strips, so reconstruct connectivity through the shared apex wedge. -/
-theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
+theorem isPreconnected_sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorPlus β δ₀ i hi1) := by
@@ -749,12 +749,12 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
       have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact right_mem_segment ℝ _ _
       have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
@@ -821,12 +821,12 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
       have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact right_mem_segment ℝ _ _
       have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
@@ -883,7 +883,7 @@ theorem isPreconnected_sectorPlus (β : PolyArc) (δ₀ : ℝ)
     exact isPreconnected_empty
 
 /-- The negative vertex sector is preconnected.  See `isPreconnected_sectorPlus`. -/
-theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
+theorem isPreconnected_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorMinus β δ₀ i hi1) := by
@@ -947,12 +947,12 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
       have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact right_mem_segment ℝ _ _
       have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = sideForm a v b := by
         rw [hP]
@@ -1011,12 +1011,12 @@ theorem isPreconnected_sectorMinus (β : PolyArc) (δ₀ : ℝ)
       have hptstrip_i : pt ∈ stripSupport β δ₀ i := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact right_mem_segment ℝ _ _
       have hptstrip_i1 : pt ∈ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩ := by
         rw [stripSupport]
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         exact left_mem_segment ℝ _ _
       have hPa : sideForm a v P = - sideForm a v b := by
         rw [hP]
@@ -1086,7 +1086,7 @@ the arm.  The apex hub `pt`, built near the shared vertex `v`, still lands in bo
 on edge `i` (vertex foot `1`) `footParam pt = 1 − ε·(1 − footParam P) > α`, and on edge `i+1`
 (vertex foot `0`) `footParam pt = ε·footParam P < 1 − α`, for the (suitably small) apex weight
 `ε`. -/
-theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α) (hα1 : α < 1)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorPlusClipped β δ₀ α i hi1) := by
@@ -1099,7 +1099,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
     have hvj : sj = v := by
       have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
         Fin.ext (by simp [Fin.val_succ])
-      rw [hsj, PolyArc.segSrc, hidx, hv, PolyArc.segTgt]
+      rw [hsj, PolygonalArc.segSrc, hidx, hv, PolygonalArc.segTgt]
     have hne_i : v ≠ a := β.segTgt_ne_segSrc i
     have hτne : cornerTurn a v b ≠ 0 := by
       simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
@@ -1169,10 +1169,10 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [hdistEq]; exact hεstrip
       have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
       have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
       -- the apex satisfies the two foot clips
       have hfoot_i : α < footParam a v pt := by
         rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
@@ -1260,10 +1260,10 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [hdistEq]; exact hεstrip
       have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
       have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
       have hfoot_i : α < footParam a v pt := by
         rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
         nlinarith [hεfi]
@@ -1318,7 +1318,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
     exact isPreconnected_empty
 
 /-- The clipped negative vertex sector is preconnected.  See `isPreconnected_sectorPlusClipped`. -/
-theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) (hα : 0 < α) (hα1 : α < 1)
     (hcorner : IsCorner (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)) :
     IsPreconnected (sectorMinusClipped β δ₀ α i hi1) := by
@@ -1330,7 +1330,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
     have hvj : sj = v := by
       have hidx : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
         Fin.ext (by simp [Fin.val_succ])
-      rw [hsj, PolyArc.segSrc, hidx, hv, PolyArc.segTgt]
+      rw [hsj, PolygonalArc.segSrc, hidx, hv, PolygonalArc.segTgt]
     have hne_i : v ≠ a := β.segTgt_ne_segSrc i
     have hτne : cornerTurn a v b ≠ 0 := by
       simpa [a, v, b, IsCorner, cornerTurn, ha, hv, hb] using hcorner
@@ -1398,10 +1398,10 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [hdistEq]; exact hεstrip
       have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
       have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
       have hfoot_i : α < footParam a v pt := by
         rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
         nlinarith [hεfi]
@@ -1476,10 +1476,10 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         rw [hdistEq]; exact hεstrip
       have hptstrip_i : Metric.infDist pt (β.segCarrier i) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hv]; exact right_mem_segment ℝ _ _
       have hptstrip_j : Metric.infDist pt (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀ := by
         refine lt_of_le_of_lt (Metric.infDist_le_dist_of_mem ?_) hdist
-        rw [PolyArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
+        rw [PolygonalArc.segCarrier, ← hb, ← hsj, hvj]; exact left_mem_segment ℝ _ _
       have hfoot_i : α < footParam a v pt := by
         rw [hpt, footParam_affineComb_pt a v v P (by ring : (1 - ε) + ε = 1), footParam_tgt hne_i]
         nlinarith [hεfi]
@@ -1544,7 +1544,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
     exact isPreconnected_empty
 
 /-- The positive source end cap is convex. -/
-theorem convex_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem convex_endCapSrcPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Convex ℝ (endCapSrcPlus β ρ) := by
   rw [endCapSrcPlus]
   refine ((convex_ball _ _).inter (convex_footParam_gt _ _ 0)).inter ?_
@@ -1554,7 +1554,7 @@ theorem convex_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) 
   rw [e]; exact convex_mul_sideForm_gt _ _ 1 0
 
 /-- The negative source end cap is convex. -/
-theorem convex_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem convex_endCapSrcMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Convex ℝ (endCapSrcMinus β ρ) := by
   rw [endCapSrcMinus]
   refine ((convex_ball _ _).inter (convex_footParam_gt _ _ 0)).inter ?_
@@ -1564,7 +1564,7 @@ theorem convex_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
   rw [e]; exact convex_mul_sideForm_lt _ _ 1 0
 
 /-- The positive target end cap is convex. -/
-theorem convex_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem convex_endCapTgtPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Convex ℝ (endCapTgtPlus β ρ) := by
   rw [endCapTgtPlus]
   refine ((convex_ball _ _).inter (convex_footParam_lt _ _ 1)).inter ?_
@@ -1574,7 +1574,7 @@ theorem convex_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) 
   rw [e]; exact convex_mul_sideForm_gt _ _ 1 0
 
 /-- The negative target end cap is convex. -/
-theorem convex_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem convex_endCapTgtMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     Convex ℝ (endCapTgtMinus β ρ) := by
   rw [endCapTgtMinus]
   refine ((convex_ball _ _).inter (convex_footParam_lt _ _ 1)).inter ?_
@@ -1593,19 +1593,19 @@ plain intersection `taperedTube ∩ endCap`, removing the carrier from the conne
 
 /-- The positive source end cap lies off the carrier, provided `ρ 0` is at most the distance
 from `verts 0` to every non-incident edge. -/
-theorem endCapSrcPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem endCapSrcPlus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
     endCapSrcPlus β ρ ⊆ (β.carrier)ᶜ := by
   intro z hz
   obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨i, hzi⟩
   by_cases hi0 : (i : ℕ) = 0
-  · have hif : i = β.firstSeg := Fin.ext (by simp [PolyArc.firstSeg, hi0])
+  · have hif : i = β.firstSeg := Fin.ext (by simp [PolygonalArc.firstSeg, hi0])
     have hz0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z = 0 := by
       have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
-      rw [PolyArc.segCarrier] at hzi'
+      rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
     simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
@@ -1615,19 +1615,19 @@ theorem endCapSrcPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs 
     rw [dist_comm] at hb; linarith
 
 /-- The negative source end cap lies off the carrier. -/
-theorem endCapSrcMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem endCapSrcMinus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ 0 →
       ρ 0 ≤ Metric.infDist (β.verts 0) (β.segCarrier i)) :
     endCapSrcMinus β ρ ⊆ (β.carrier)ᶜ := by
   intro z hz
   obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨i, hzi⟩
   by_cases hi0 : (i : ℕ) = 0
-  · have hif : i = β.firstSeg := Fin.ext (by simp [PolyArc.firstSeg, hi0])
+  · have hif : i = β.firstSeg := Fin.ext (by simp [PolygonalArc.firstSeg, hi0])
     have hz0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z = 0 := by
       have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
-      rw [PolyArc.segCarrier] at hzi'
+      rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
     simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
@@ -1638,20 +1638,20 @@ theorem endCapSrcMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs
 
 /-- The positive target end cap lies off the carrier, provided `ρ (last)` is at most the
 distance from `verts last` to every non-incident edge. -/
-theorem endCapTgtPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem endCapTgtPlus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
     endCapTgtPlus β ρ ⊆ (β.carrier)ᶜ := by
   intro z hz
   obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨i, hzi⟩
   by_cases hil : (i : ℕ) = β.numSegs - 1
-  · have hif : i = β.lastSeg := Fin.ext (by simp [PolyArc.lastSeg, hil])
+  · have hif : i = β.lastSeg := Fin.ext (by simp [PolygonalArc.lastSeg, hil])
     have hz0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z = 0 := by
       have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
-      rw [PolyArc.segCarrier] at hzi'
+      rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
     simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
@@ -1663,20 +1663,20 @@ theorem endCapTgtPlus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs 
     rw [dist_comm] at hb; linarith
 
 /-- The negative target end cap lies off the carrier. -/
-theorem endCapTgtMinus_subset_compl_carrier (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ)
+theorem endCapTgtMinus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ)
     (hsep : ∀ i : Fin β.numSegs, (i : ℕ) ≠ β.numSegs - 1 →
       ρ (Fin.last β.numSegs) ≤
         Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)) :
     endCapTgtMinus β ρ ⊆ (β.carrier)ᶜ := by
   intro z hz
   obtain ⟨⟨hzball, _hfoot⟩, hside⟩ := hz
-  rw [Set.mem_compl_iff, PolyArc.carrier, Set.mem_iUnion]
+  rw [Set.mem_compl_iff, PolygonalArc.carrier, Set.mem_iUnion]
   rintro ⟨i, hzi⟩
   by_cases hil : (i : ℕ) = β.numSegs - 1
-  · have hif : i = β.lastSeg := Fin.ext (by simp [PolyArc.lastSeg, hil])
+  · have hif : i = β.lastSeg := Fin.ext (by simp [PolygonalArc.lastSeg, hil])
     have hz0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z = 0 := by
       have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
-      rw [PolyArc.segCarrier] at hzi'
+      rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
     simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)

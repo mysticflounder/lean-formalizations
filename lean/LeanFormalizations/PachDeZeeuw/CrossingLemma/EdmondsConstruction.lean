@@ -25,7 +25,7 @@ The point of this file is the **iteration**: it reduces the global
 `EdmondsCompatible.region_separates` clause (a statement over *all* darts of the
 full residual map) to the strictly more granular *per-step* crosscut datum — one
 cotree edge crosscutting one region — which is exactly what the planar geometry
-(`PLCollarSeparation` / `exists_twoSidedPartition_of_polyArc`) supplies edge by
+(`PLCollarSeparation` / `exists_twoSidedPartition_of_polygonalArc`) supplies edge by
 edge.  The `Nat.le_induction` harness here mirrors the planarity induction
 `residualMap_isPlanar_prefix_of_insertions_from` (`RM:1779`) but carries
 region-separation rather than `IsPlanar`.

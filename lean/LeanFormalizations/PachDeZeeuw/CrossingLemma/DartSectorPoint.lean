@@ -6,14 +6,14 @@ Authors: Adam McKenna
 
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.RegionFaceBridge
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc
 
 /-!
-# The arc→`PolyArc` bridge
+# The arc→`PolygonalArc` bridge
 
-Provides `straightPolyArc` and `arcToPolyArc` — turning a straight graph arc
-into a one-segment `PolyArc`.  These are reused by the Target-1 instantiation for
-the bridge (`exists_twoSidedPartition_of_straightArc` expects a `PolyArc`).
+Provides `straightPolygonalArc` and `arcToPolygonalArc` — turning a straight graph arc
+into a one-segment `PolygonalArc`.  These are reused by the Target-1 instantiation for
+the bridge (`exists_twoSidedPartition_of_straightArc` expects a `PolygonalArc`).
 
 The dart→sector-point map (§2) was removed (2026-06-16): the `Classical.choose`
 region map cannot satisfy `PrefixStepCrosscutData.hinj`/`hfactor`; the region
@@ -21,7 +21,7 @@ family is forced to be `poolRegion`-derived, not freely chosen.
 
 ## What is proved here
 
-* `straightPolyArc` and `arcToPolyArc` — proved **sorry-free**: the two
+* `straightPolygonalArc` and `arcToPolygonalArc` — proved **sorry-free**: the two
   no-self-crossing fields are vacuous at `numSegs = 1`, and `distinct` reduces to
   the endpoints being distinct.
 
@@ -36,18 +36,18 @@ open CrossingLemma.PlaneArcSeparation
 
 variable (G : DrawnMultigraph)
 
-/-! ## §1  The arc→`PolyArc` bridge (deliverable 3)
+/-! ## §1  The arc→`PolygonalArc` bridge (deliverable 3)
 
-A straight graph arc is a single segment `[s, t]`.  As a `PolyArc` it has one
+A straight graph arc is a single segment `[s, t]`.  As a `PolygonalArc` it has one
 segment (`numSegs = 1`) and the two vertices `s, t`.  Its two no-self-crossing
 fields are **vacuous** at `numSegs = 1` (`nonadjacent_disjoint` needs `i+1 < j`
 with `i, j : Fin 1`, impossible; `consecutive_meet` needs `i+1 < 1` with
 `i : Fin 1`, impossible), so the only genuine constructor obligation is
 `distinct`, which for `![s, t]` is exactly `s ≠ t`. -/
 
-/-- **The one-segment `PolyArc` of a straight segment `[s, t]`** with distinct
+/-- **The one-segment `PolygonalArc` of a straight segment `[s, t]`** with distinct
 endpoints `hst : s ≠ t`.  `numSegs = 1`, `verts = ![s, t]`. -/
-noncomputable def straightPolyArc (s t : Plane) (hst : s ≠ t) : PolyArc where
+noncomputable def straightPolygonalArc (s t : Plane) (hst : s ≠ t) : PolygonalArc where
   numSegs := 1
   numSegs_pos := le_refl 1
   verts := ![s, t]
@@ -61,34 +61,34 @@ noncomputable def straightPolyArc (s t : Plane) (hst : s ≠ t) : PolyArc where
     intro i h
     exact absurd h (by omega)
 
-/-- The source vertex of `straightPolyArc s t hst` is `s`. -/
-theorem straightPolyArc_src (s t : Plane) (hst : s ≠ t) :
-    (straightPolyArc s t hst).src = s := by
-  simp [PolyArc.src, straightPolyArc]
+/-- The source vertex of `straightPolygonalArc s t hst` is `s`. -/
+theorem straightPolygonalArc_src (s t : Plane) (hst : s ≠ t) :
+    (straightPolygonalArc s t hst).src = s := by
+  simp [PolygonalArc.src, straightPolygonalArc]
 
-/-- The target vertex of `straightPolyArc s t hst` is `t`. -/
-theorem straightPolyArc_tgt (s t : Plane) (hst : s ≠ t) :
-    (straightPolyArc s t hst).tgt = t := by
-  simp [PolyArc.tgt, straightPolyArc]
+/-- The target vertex of `straightPolygonalArc s t hst` is `t`. -/
+theorem straightPolygonalArc_tgt (s t : Plane) (hst : s ≠ t) :
+    (straightPolygonalArc s t hst).tgt = t := by
+  simp [PolygonalArc.tgt, straightPolygonalArc]
 
 /-- The carrier of the one-segment arc is the closed segment `[s, t]`. -/
-theorem straightPolyArc_carrier (s t : Plane) (hst : s ≠ t) :
-    (straightPolyArc s t hst).carrier = segment ℝ s t := by
-  rw [PolyArc.carrier]
+theorem straightPolygonalArc_carrier (s t : Plane) (hst : s ≠ t) :
+    (straightPolygonalArc s t hst).carrier = segment ℝ s t := by
+  rw [PolygonalArc.carrier]
   apply Set.eq_of_subset_of_subset
   · apply Set.iUnion_subset
     intro i
     fin_cases i
-    simp [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, straightPolyArc]
-  · refine Set.subset_iUnion_of_subset ⟨0, (straightPolyArc s t hst).numSegs_pos⟩ ?_
-    simp [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, straightPolyArc]
+    simp [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt, straightPolygonalArc]
+  · refine Set.subset_iUnion_of_subset ⟨0, (straightPolygonalArc s t hst).numSegs_pos⟩ ?_
+    simp [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt, straightPolygonalArc]
 
-/-- **The `PolyArc` of edge `e`** of a drawing whose arcs join their declared
+/-- **The `PolygonalArc` of edge `e`** of a drawing whose arcs join their declared
 endpoints (so the two declared endpoints are distinct, `hjoin`): the one-segment
 arc on `G.endpoints e`. -/
-noncomputable def arcToPolyArc (hjoin : G.ArcsJoinEndpoints) (e : Fin G.numEdges) :
-    PolyArc :=
-  straightPolyArc (G.endpoints e).1 (G.endpoints e).2
+noncomputable def arcToPolygonalArc (hjoin : G.ArcsJoinEndpoints) (e : Fin G.numEdges) :
+    PolygonalArc :=
+  straightPolygonalArc (G.endpoints e).1 (G.endpoints e).2
     (G.endpoints_ne_of_arcsJoinEndpoints hjoin e)
 
 /-! ## §2  Complement nonempty: existence of a point off all arcs

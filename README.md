@@ -339,7 +339,7 @@ irreducible-curve case.
   promoted to the standalone, sorry-free `Combinatorics/CombinatorialMap/` and
   `Combinatorics/SimpleGraph/` libraries above. What remains here is the
   unfinished drawing→map bridge and its residual-map / plane-topology helpers
-  (`ResidualMapProperties.lean`, `PLArc.lean`, `PLCollarSeparation.lean`,
+  (`ResidualMapProperties.lean`, `PolygonalArc.lean`, `PLCollarSeparation.lean`,
   `PlaneArcSeparation.lean`, etc.). The full crossing lemma still bottoms out in
   a labelled conjectured geometric residual,
   [`exists_twoSidedPartition_of_arc`](lean/LeanFormalizations/PachDeZeeuw/CrossingLemma/PlaneArcSeparation.lean#L377)

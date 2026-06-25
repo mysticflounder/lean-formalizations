@@ -3,10 +3,10 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 1/7 — **Foundations**: §L1 segment side-functional, §L2 corner
-local model, §L3.1/§L3.2 metric localisation, §Action 0 the `PolyArc` carrier
-and its PL parametrisation. Root of the PLArc dependency DAG. Split out of
-`PLArc.lean`; see that coordinator module's doc for the full route-(c) overview.
+PolygonalArc shard 1/7 — **Foundations**: §L1 segment side-functional, §L2 corner
+local model, §L3.1/§L3.2 metric localisation, §Action 0 the `PolygonalArc` carrier
+and its PL parametrisation. Root of the PolygonalArc dependency DAG. Split out of
+`PolygonalArc.lean`; see that coordinator module's doc for the full route-(c) overview.
 -/
 import Mathlib
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
@@ -472,11 +472,11 @@ theorem exists_pos_forall_lt_dist {s t : Set Plane} (hs : IsCompact s)
 
 /-! ## §Action 0  The polygonal-arc carrier
 
-A `PolyArc` is a finite list of `n+1` vertices spanning `n ≥ 1` segments.  The
+A `PolygonalArc` is a finite list of `n+1` vertices spanning `n ≥ 1` segments.  The
 simplicity conditions are recorded so the carrier is a genuine simple arc:
 `distinct` (vertices pairwise distinct) and `nonadjacent_disjoint` (non-consecutive
-closed segments disjoint).  The coercion `PolyArc → SimpleArc Plane`
-(piecewise-linear parametrisation) is built in this file as `PolyArc.toSimpleArc`
+closed segments disjoint).  The coercion `PolygonalArc → SimpleArc Plane`
+(piecewise-linear parametrisation) is built in this file as `PolygonalArc.toSimpleArc`
 (§L3 sub-node 1(b)); the collar construction (`collarPlus`/`collarMinus`) is
 assembled in §L3 sub-node 2 below. -/
 
@@ -485,7 +485,7 @@ verts n` (`n ≥ 1`) joined by the `n` consecutive segments `[verts i, verts (i+
 The `distinct` field records that the vertices are pairwise distinct (a necessary
 part of simplicity); the full no-self-crossing condition is added where the collar
 needs it. -/
-structure PolyArc where
+structure PolygonalArc where
   /-- Number of segments (`= #vertices − 1`); at least one. -/
   numSegs : ℕ
   /-- `1 ≤ numSegs`. -/
@@ -514,9 +514,9 @@ structure PolyArc where
         ∩ segment ℝ (verts (Fin.succ i)) (verts (Fin.succ ⟨(i : ℕ) + 1, h⟩))
         ⊆ {verts (Fin.succ i)}
 
-namespace PolyArc
+namespace PolygonalArc
 
-variable (β : PolyArc)
+variable (β : PolygonalArc)
 
 /-- The `i`-th directed segment goes from `verts i` to `verts (i+1)`. -/
 def segSrc (i : Fin β.numSegs) : Plane :=
@@ -568,15 +568,15 @@ theorem src_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ 0) :
   have hcs0 : (Fin.castSucc ⟨0, β.numSegs_pos⟩ : Fin (β.numSegs + 1)) = 0 :=
     Fin.ext (by simp)
   have hv0 : β.verts 0 ∈ β.segCarrier ⟨0, β.numSegs_pos⟩ := by
-    rw [PolyArc.segCarrier, PolyArc.segSrc, hcs0]; exact left_mem_segment ℝ _ _
+    rw [PolygonalArc.segCarrier, PolygonalArc.segSrc, hcs0]; exact left_mem_segment ℝ _ _
   have hf' : β.verts 0 ∈ segment ℝ (β.verts (Fin.castSucc ⟨0, β.numSegs_pos⟩))
       (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩)) := by
-    rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hv0
+    rw [← PolygonalArc.segSrc, ← PolygonalArc.segTgt, ← PolygonalArc.segCarrier]; exact hv0
   rcases Nat.lt_or_ge 1 (i : ℕ) with hgt | hle
   · have hadj : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1 < (i : ℕ) := by simpa using hgt
     have hdisj := β.nonadjacent_disjoint ⟨0, β.numSegs_pos⟩ i hadj
     have hi' : β.verts 0 ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
-      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+      rw [← PolygonalArc.segSrc, ← PolygonalArc.segTgt, ← PolygonalArc.segCarrier]; exact hmem
     exact (Set.disjoint_left.mp hdisj) hf' hi'
   · have hi1 : (i : ℕ) = 1 := by omega
     have hlt : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1 < β.numSegs := by
@@ -594,7 +594,7 @@ theorem src_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ 0) :
       have hseg : β.segCarrier ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩
           = segment ℝ (β.verts (Fin.succ ⟨0, β.numSegs_pos⟩))
             (β.verts (Fin.succ ⟨(⟨0, β.numSegs_pos⟩ : Fin β.numSegs).val + 1, hlt⟩)) := by
-        rw [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+        rw [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt, hcast]
       rw [← hseg, ← hieq]; exact hmem
     have hmeet := β.consecutive_meet ⟨0, β.numSegs_pos⟩ hlt
     have hsingle : β.verts 0 ∈ ({β.verts (Fin.succ ⟨0, β.numSegs_pos⟩)} : Set Plane) :=
@@ -617,12 +617,12 @@ theorem tgt_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ β.numSeg
   intro hmem
   have hpos := β.numSegs_pos
   have hsl : (Fin.succ β.lastSeg : Fin (β.numSegs + 1)) = Fin.last β.numSegs := by
-    apply Fin.ext; simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+    apply Fin.ext; simp only [Fin.val_succ, PolygonalArc.lastSeg, Fin.val_last]; omega
   have hvL : β.verts (Fin.last β.numSegs) ∈ β.segCarrier β.lastSeg := by
-    rw [PolyArc.segCarrier, PolyArc.segTgt, hsl]; exact right_mem_segment ℝ _ _
+    rw [PolygonalArc.segCarrier, PolygonalArc.segTgt, hsl]; exact right_mem_segment ℝ _ _
   have hfL : β.verts (Fin.last β.numSegs) ∈ segment ℝ (β.verts (Fin.castSucc β.lastSeg))
       (β.verts (Fin.succ β.lastSeg)) := by
-    rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hvL
+    rw [← PolygonalArc.segSrc, ← PolygonalArc.segTgt, ← PolygonalArc.segCarrier]; exact hvL
   have hilt : (i : ℕ) < β.numSegs - 1 := by have := i.isLt; omega
   have hlast : (β.lastSeg : ℕ) = β.numSegs - 1 := rfl
   rcases Nat.lt_or_ge ((i : ℕ) + 1) (β.numSegs - 1) with hgt | hge
@@ -630,23 +630,23 @@ theorem tgt_notMem_segCarrier (i : Fin β.numSegs) (hi : (i : ℕ) ≠ β.numSeg
     have hdisj := β.nonadjacent_disjoint i β.lastSeg hadj
     have hi' : β.verts (Fin.last β.numSegs)
         ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
-      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+      rw [← PolygonalArc.segSrc, ← PolygonalArc.segTgt, ← PolygonalArc.segCarrier]; exact hmem
     exact (Set.disjoint_left.mp hdisj) hi' hfL
   · have hieq1 : (i : ℕ) + 1 = β.numSegs - 1 := by omega
     have hlt : (i : ℕ) + 1 < β.numSegs := by omega
     have hclast : (⟨(i : ℕ) + 1, hlt⟩ : Fin β.numSegs) = β.lastSeg :=
-      Fin.ext (by simp only [PolyArc.lastSeg, Fin.val_mk]; omega)
+      Fin.ext (by simp only [PolygonalArc.lastSeg, Fin.val_mk]; omega)
     have hmeet := β.consecutive_meet i hlt
     have hfirst : β.verts (Fin.last β.numSegs)
         ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
-      rw [← PolyArc.segSrc, ← PolyArc.segTgt, ← PolyArc.segCarrier]; exact hmem
+      rw [← PolygonalArc.segSrc, ← PolygonalArc.segTgt, ← PolygonalArc.segCarrier]; exact hmem
     have hsecond : β.verts (Fin.last β.numSegs)
         ∈ segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hlt⟩)) := by
       have hcast : (Fin.castSucc ⟨(i : ℕ) + 1, hlt⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
         Fin.ext (by simp [Fin.val_succ])
       have hseg : β.segCarrier ⟨(i : ℕ) + 1, hlt⟩
           = segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hlt⟩)) := by
-        rw [PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+        rw [PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt, hcast]
       rw [← hseg, hclast]; exact hvL
     have hsingle := hmeet ⟨hfirst, hsecond⟩
     rw [Set.mem_singleton_iff] at hsingle
@@ -685,9 +685,9 @@ theorem exists_pos_nonadjacent_sep :
         ≤ g (i, j) := Finset.inf'_le g (Finset.mem_univ _)
       _ < dist x y := hg (i, j) hij x hx y hy
 
-end PolyArc
+end PolygonalArc
 
-/-! ### §L3 sub-node 1(b) — the PL parametrisation `PolyArc → SimpleArc Plane`
+/-! ### §L3 sub-node 1(b) — the PL parametrisation `PolygonalArc → SimpleArc Plane`
 
 We parametrise the arc by the **ramp-sum** form.  With `ρ(u) := min (max u 0) 1`
 (the clamp of `u` to `[0,1]`), the map
@@ -714,9 +714,9 @@ theorem ramp_of_mem {u : ℝ} (h0 : 0 ≤ u) (h1 : u ≤ 1) : ramp u = u := by
 theorem ramp_of_one_le {u : ℝ} (h : 1 ≤ u) : ramp u = 1 := by
   unfold ramp; rw [min_eq_right (le_max_of_le_left h)]
 
-namespace PolyArc
+namespace PolygonalArc
 
-variable (β : PolyArc)
+variable (β : PolygonalArc)
 
 /-- The raw PL parametrisation on all of `ℝ` (ramp-sum form). -/
 noncomputable def paramRaw (x : ℝ) : Plane :=
@@ -832,7 +832,7 @@ theorem paramRaw_collapse_of (x : ℝ) (i : Fin β.numSegs) (s : ℝ)
   rw [smul_sub, sub_smul, one_smul]
   abel
 
-end PolyArc
+end PolygonalArc
 
 /-! #### Affine injectivity on a single segment -/
 
@@ -861,9 +861,9 @@ theorem affine_eq_right {A B : Plane} (hAB : A ≠ B) {s : ℝ}
   refine affine_inj hAB (s := s) (s' := 1) ?_
   rw [h]; simp
 
-namespace PolyArc
+namespace PolygonalArc
 
-variable (β : PolyArc)
+variable (β : PolygonalArc)
 
 /-! #### Segment-index assignment and the per-point local coordinate
 
@@ -1118,7 +1118,7 @@ theorem segCarrier_subset_range_param (i : Fin β.numSegs) :
   rw [hps]
 
 /-- **Carrier relation.**  The range of the PL parametrisation is exactly the
-`PolyArc` carrier (the union of its closed segments). -/
+`PolygonalArc` carrier (the union of its closed segments). -/
 theorem range_toSimpleArc : Set.range β.toSimpleArc = β.carrier := by
   apply Set.Subset.antisymm
   · rintro z ⟨t, rfl⟩
@@ -1131,7 +1131,7 @@ theorem range_toSimpleArc : Set.range β.toSimpleArc = β.carrier := by
 /-! #### Endpoint values of the parametrisation
 
 The PL parametrisation `param` carries the two `SimpleArc` endpoints `src = ⟨0,_⟩`,
-`tgt = ⟨1,_⟩` to the first and last `PolyArc` vertices.  These bridge the
+`tgt = ⟨1,_⟩` to the first and last `PolygonalArc` vertices.  These bridge the
 `ArcInRegion` frontier hypotheses (stated for `β.toSimpleArc`'s endpoints) to the PL
 collar's vertex hypotheses (`verts 0 ∈ Rᶜ`, `verts (last) ∈ Rᶜ`). -/
 
@@ -1279,7 +1279,7 @@ theorem verts_last_notMem_arcInterior :
   simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo, SimpleArc.tgt] at hp
   exact absurd hp.2 (by norm_num)
 
-end PolyArc
+end PolygonalArc
 
 
 end CrossingLemma.PlaneArcSeparation

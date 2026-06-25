@@ -175,7 +175,7 @@ because the per-curve block spans several `(α,β,j)` classes, not one sorted li
   `edgeB_match_orientation` all → `[propext, Classical.choice, Quot.sound]`.
   **No `sorryAx`, no `Lean.ofReduceBool`, no custom axioms.** This confirms the proof
   does not depend on the pre-existing `sorry`-declarations in the parked crossing-lemma
-  base (`SzemerediTrotter.lean:4533`, `PLArc.lean:3087`,
+  base (`SzemerediTrotter.lean:4533`, `PolygonalArc.lean:3087`,
   `CrossingLemmaAmplification.lean:1605`, `PlaneArcSeparation.lean:382`) — a `sorryAx`
   would surface in the closure if it did. `Classical.choice` is expected (from
   `goodIntervalsBundle` / `allCurveEdges_provenance` and `open scoped Classical`).

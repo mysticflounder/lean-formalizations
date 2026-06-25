@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 -/
 
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLAssembly
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
@@ -12,13 +12,13 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 # Polygonal collar separation
 
 This module specializes the abstract collar assembly theorem to the concrete
-polygonal collar built in `PLArc`.
+polygonal collar built in `PolygonalArc`.
 
 It deliberately leaves the two genuinely geometric obligations explicit:
 
 * `P5`: each collar side is preconnected.
 
-The routine collar data already proved in `PLArc` is wired in here: openness of
+The routine collar data already proved in `PolygonalArc` is wired in here: openness of
 the collar sides, the `P2` union identity, the tapered tube facts, and nonemptiness
 of the two sides.
 -/
@@ -29,7 +29,7 @@ open Set Topology
 
 /-- **Polygonal collar separation.**
 
-This is the `PolyArc` specialization of `exists_twoSidedPartition_of_collar`.
+This is the `PolygonalArc` specialization of `exists_twoSidedPartition_of_collar`.
 For a simply connected open region `R` and a polygonal crosscut carrier
 `β.carrier`, a concrete collar `collarPlus β R S δ₀ α ρ` /
 `collarMinus β R S δ₀ α ρ` gives a two-sided open partition of
@@ -39,8 +39,8 @@ obligation `P5` (`hTp_pre`, `hTm_pre`) is supplied.
 All other hypotheses are the already-formalized PL collar side conditions used by
 `union_collarPlus_collarMinus`, `collarPlus_nonempty`,
 `collarMinus_nonempty`, and `isPreconnected_taperedTube`. -/
-theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides
-    (β : PolyArc) {R S : Set Plane} {δ₀ α : ℝ}
+theorem exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides
+    (β : PolygonalArc) {R S : Set Plane} {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -96,7 +96,7 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides
 
 /-- **Polygonal collar separation, single-segment (`numSegs = 1`) — `sorry`-free.**
 
-Weaker conclusion than `exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides`
+Weaker conclusion than `exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides`
 (bare `∃ U V, IsTwoSidedPartition ...`, without the `collarPlus ⊆ U`/`collarMinus ⊆ V` witnesses),
 but it routes the `P2` union identity through the `sorry`-free single-segment lemma
 `union_collarPlus_collarMinus_of_numSegs_one` instead of the general
@@ -105,8 +105,8 @@ other ingredient (`exists_twoSidedPartition_of_collar_with_collar_sides`,
 `collarPlus_nonempty`, `isPreconnected_taperedTube`, …) is already `sorry`-free, so a
 theorem feeding this entry point has a Lean-core-only axiom closure.  The vacuous
 `hturn`/`hballV` binders are dropped (they only fed the general union lemma). -/
-theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one
-    (β : PolyArc) (h1 : β.numSegs = 1) {R S : Set Plane} {δ₀ α : ℝ}
+theorem exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides_of_numSegs_one
+    (β : PolygonalArc) (h1 : β.numSegs = 1) {R S : Set Plane} {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -153,7 +153,7 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides
 
 /-- **Polygonal collar separation.**
 
-This is the `PolyArc` specialization of `exists_twoSidedPartition_of_collar`.
+This is the `PolygonalArc` specialization of `exists_twoSidedPartition_of_collar`.
 For a simply connected open region `R` and a polygonal crosscut carrier
 `β.carrier`, a concrete collar `collarPlus β R S δ₀ α ρ` /
 `collarMinus β R S δ₀ α ρ` gives a two-sided open partition of
@@ -163,8 +163,8 @@ obligation `P5` (`hTp_pre`, `hTm_pre`) is supplied.
 All other hypotheses are the already-formalized PL collar side conditions used by
 `union_collarPlus_collarMinus`, `collarPlus_nonempty`,
 `collarMinus_nonempty`, and `isPreconnected_taperedTube`. -/
-theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar
-    (β : PolyArc) {R S : Set Plane} {δ₀ α : ℝ}
+theorem exists_twoSidedPartition_regionMinus_polygonalArc_of_collar
+    (β : PolygonalArc) {R S : Set Plane} {δ₀ α : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -193,21 +193,21 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar
     (hcover : R ∩ β.carrier ⊆ taperedTube R S δ₀) :
     ∃ U V, IsTwoSidedPartition (regionMinusArc R β.toSimpleArc) U V := by
   obtain ⟨U, V, hUV, _, _⟩ :=
-    exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides β ρ
+    exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides β ρ
       hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ hα hα2 hmS hmR
       hturn hband hsrc htgt hballV hballSrc hballTgt hdisj hTp_pre hTm_pre hcover
   exact ⟨U, V, hUV⟩
 
 /-- **Polygonal collar separation with `P5` discharged by sliver-budget collars.**
 
-This is the `PolyArc` specialization of
-`exists_twoSidedPartition_regionMinus_polyArc_of_collar` where the remaining
+This is the `PolygonalArc` specialization of
+`exists_twoSidedPartition_regionMinus_polygonalArc_of_collar` where the remaining
 collar-connectivity obligation `P5` is supplied by the sliver-budget collar
-theorems from `PLArc`.  The explicit hypotheses are therefore the already-used
+theorems from `PolygonalArc`.  The explicit hypotheses are therefore the already-used
 `P1`--`P4` collar data together with the band/sector containment budgets and the
 source/target end-cap sliver-budget hypotheses on both signs. -/
-theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides
-    (β : PolyArc) {R S : Set Plane} {δ₀ α δsep cSrc cTgt : ℝ}
+theorem exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets_with_collar_sides
+    (β : PolygonalArc) {R S : Set Plane} {δ₀ α δsep cSrc cTgt : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -295,7 +295,7 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
         collarPlus β R S δ₀ α ρ ⊆ U ∧
         collarMinus β R S δ₀ α ρ ⊆ V := by
   have hα1 : α < 1 := by linarith
-  refine exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides β ρ
+  refine exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides β ρ
     hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ hα hα2 hmS hmR
     hturn hband hsrc htgt hballV hballSrc hballTgt hdisj ?_ ?_ hcover
   · exact isPreconnected_collarPlus_of_sliver_budgets β R S ρ hturn hδ hα hα3 hα1 hsectorWPlus
@@ -309,14 +309,14 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
 
 /-- **Polygonal collar separation with `P5` discharged by sliver-budget collars.**
 
-This is the `PolyArc` specialization of
-`exists_twoSidedPartition_regionMinus_polyArc_of_collar` where the remaining
+This is the `PolygonalArc` specialization of
+`exists_twoSidedPartition_regionMinus_polygonalArc_of_collar` where the remaining
 collar-connectivity obligation `P5` is supplied by the sliver-budget collar
-theorems from `PLArc`.  The explicit hypotheses are therefore the already-used
+theorems from `PolygonalArc`.  The explicit hypotheses are therefore the already-used
 `P1`--`P4` collar data together with the band/sector containment budgets and the
 source/target end-cap sliver-budget hypotheses on both signs. -/
-theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
-    (β : PolyArc) {R S : Set Plane} {δ₀ α δsep cSrc cTgt : ℝ}
+theorem exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets
+    (β : PolygonalArc) {R S : Set Plane} {δ₀ α δsep cSrc cTgt : ℝ}
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
     (hSR : S ⊆ R) (hSpre : IsPreconnected S) (hS_carrier : S ⊆ β.carrier)
@@ -401,7 +401,7 @@ theorem exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets
     (hcover : R ∩ β.carrier ⊆ taperedTube R S δ₀) :
     ∃ U V, IsTwoSidedPartition (regionMinusArc R β.toSimpleArc) U V := by
   obtain ⟨U, V, hUV, _, _⟩ :=
-    exists_twoSidedPartition_regionMinus_polyArc_of_collar_of_sliver_budgets_with_collar_sides
+    exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_of_sliver_budgets_with_collar_sides
       β ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ hα hα2 hα3 hmS hmR
       hturn hband hsrc htgt hballV hballSrc hballTgt hdisj hδ₀sep hsep
       hadj_tgt hadj_src hsmall hSband hRband hsectorWPlus hsectorWMinus hSrcSep
@@ -416,18 +416,18 @@ For `β.numSegs = 1` the only band/end-cap pieces of `collarPlus` carry the
 β.firstSeg`, `t = β.segTgt β.firstSeg`); the vertex-sector union is empty.  Hence
 every collar point is strictly on the positive side of the segment line. -/
 theorem collarPlus_subset_pos_sideForm_of_numSegs_one
-    (β : PolyArc) (h1 : β.numSegs = 1) (R S : Set Plane) (δ₀ α : ℝ)
+    (β : PolygonalArc) (h1 : β.numSegs = 1) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) :
     collarPlus β R S δ₀ α ρ ⊆
       {z | 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z} := by
   have hlast : β.lastSeg = β.firstSeg := by
-    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg]; omega
+    apply Fin.ext; simp only [PolygonalArc.lastSeg, PolygonalArc.firstSeg]; omega
   rintro z ⟨-, hz2⟩
   rcases hz2 with ((hband | hsector) | hsrc) | htgt
   · -- band strip of the unique segment
     rcases Set.mem_iUnion.mp hband with ⟨i, hzi⟩
     have hieq : i = β.firstSeg := by
-      apply Fin.ext; have := i.isLt; simp only [PolyArc.firstSeg]; omega
+      apply Fin.ext; have := i.isLt; simp only [PolygonalArc.firstSeg]; omega
     subst hieq
     exact hzi.1.2
   · -- vertex-sector union: empty for a single segment
@@ -443,17 +443,17 @@ theorem collarPlus_subset_pos_sideForm_of_numSegs_one
 /-- **Negative single-segment collar lies on the negative side of the segment.**
 See `collarPlus_subset_pos_sideForm_of_numSegs_one`. -/
 theorem collarMinus_subset_neg_sideForm_of_numSegs_one
-    (β : PolyArc) (h1 : β.numSegs = 1) (R S : Set Plane) (δ₀ α : ℝ)
+    (β : PolygonalArc) (h1 : β.numSegs = 1) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) :
     collarMinus β R S δ₀ α ρ ⊆
       {z | sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0} := by
   have hlast : β.lastSeg = β.firstSeg := by
-    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg]; omega
+    apply Fin.ext; simp only [PolygonalArc.lastSeg, PolygonalArc.firstSeg]; omega
   rintro z ⟨-, hz2⟩
   rcases hz2 with ((hband | hsector) | hsrc) | htgt
   · rcases Set.mem_iUnion.mp hband with ⟨i, hzi⟩
     have hieq : i = β.firstSeg := by
-      apply Fin.ext; have := i.isLt; simp only [PolyArc.firstSeg]; omega
+      apply Fin.ext; have := i.isLt; simp only [PolygonalArc.firstSeg]; omega
     subst hieq
     exact hzi.1.2
   · rcases Set.mem_iUnion.mp hsector with ⟨i, hzi⟩
@@ -466,7 +466,7 @@ theorem collarMinus_subset_neg_sideForm_of_numSegs_one
 set_option maxHeartbeats 1600000 in
 /-- **Two-sided partition for a single-segment polygonal crosscut.**
 
-For a `PolyArc` `β` with exactly one segment (`β.numSegs = 1`) the collar
+For a `PolygonalArc` `β` with exactly one segment (`β.numSegs = 1`) the collar
 construction has no interior vertices, so there are no vertex sectors and the
 endpoint-cap turn obstructions are vacuous.  The collar parameters `δ₀` and `ρ`
 are chosen *internally* (a small `δ₀` controlled by the segment geometry and a
@@ -477,9 +477,9 @@ that the caller must supply.
 
 The result is the bare two-sided partition (`P5`-discharged) obtained by handing
 the internally chosen parameters to
-`exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one`. -/
+`exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides_of_numSegs_one`. -/
 theorem exists_twoSidedPartition_of_straightArc
-    (β : PolyArc) (h1 : β.numSegs = 1) {R S : Set Plane} {α : ℝ}
+    (β : PolygonalArc) (h1 : β.numSegs = 1) {R S : Set Plane} {α : ℝ}
     (hα : 0 < α) (hα3 : α < 1 / 3)
     {mR : ℝ} (hmRpos : 0 < mR)
     (hR : IsOpen R) (hRsc : IsSimplyConnected R)
@@ -522,7 +522,7 @@ theorem exists_twoSidedPartition_of_straightArc
   classical
   have hα2 : α < 1 / 2 := by linarith
   have hlast : β.lastSeg = β.firstSeg := by
-    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg]; omega
+    apply Fin.ext; simp only [PolygonalArc.lastSeg, PolygonalArc.firstSeg]; omega
   -- Segment data of the unique edge.
   set s : Plane := β.segSrc β.firstSeg with hs
   set t : Plane := β.segTgt β.firstSeg with ht
@@ -589,7 +589,7 @@ theorem exists_twoSidedPartition_of_straightArc
   -- The reusable single-edge facts that every index argument reduces to.
   have hfirst_dist : dist (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) = L := by rw [hL, hs, ht]
   have hidx : ∀ i : Fin β.numSegs, i = β.firstSeg := by
-    intro i; apply Fin.ext; have := i.isLt; simp only [PolyArc.firstSeg]; omega
+    intro i; apply Fin.ext; have := i.isLt; simp only [PolygonalArc.firstSeg]; omega
   -- Disjointness directly from the segment's `sideForm` sign.
   have hdisj : Disjoint (collarPlus β R S δ₀ α ρ) (collarMinus β R S δ₀ α ρ) := by
     rw [Set.disjoint_left]
@@ -838,7 +838,7 @@ theorem exists_twoSidedPartition_of_straightArc
       0 < Metric.infDist (liftPlus (β.segTgt β.lastSeg) (β.segSrc β.lastSeg) c 0) Rᶜ :=
     fun c hc => hTgtRpos c (hsub hc)
   -- `P5` (preconnectedness) of each collar side, via the `sorry`-free sliver-budget
-  -- collar theorems in `PLArc` (no dependence on the sorried union lemma).
+  -- collar theorems in `PolygonalArc` (no dependence on the sorried union lemma).
   have hTp_pre : IsPreconnected (collarPlus β R S δ₀ α ρ) :=
     isPreconnected_collarPlus_of_sliver_budgets β R S ρ hturn hδ₀pos hα hα3 hα1
       hsectorWPlus (le_refl δ₀) hsep hadj_tgt hadj_src hsmall hSband' hRband hsrc htgt
@@ -850,7 +850,7 @@ theorem exists_twoSidedPartition_of_straightArc
       hSrcSep hSrcSpine' hSrcNear hρpos hSrcRpos' hSrcSliver hTgtSep hTgtSpine' hTgtNear
       hρpos hTgtRpos' hTgtSliver
   -- Feed the `sorry`-free single-segment entry point.
-  exact exists_twoSidedPartition_regionMinus_polyArc_of_collar_with_collar_sides_of_numSegs_one
+  exact exists_twoSidedPartition_regionMinus_polygonalArc_of_collar_with_collar_sides_of_numSegs_one
     β h1 ρ hR hRsc hSR hSpre hS_carrier hsrc0 hsrcL hδ₀pos hα hα2 hmS hmR
     hband hsrc htgt hballSrc hballTgt hdisj hTp_pre hTm_pre (hcover δ₀ hδ₀pos)
 
@@ -882,29 +882,29 @@ theorem exists_twoSidedPartition_prefixStep
     ∃ (R U V : Set (ℝ × ℝ)),
       IsOpen R ∧ IsSimplyConnected R ∧ p₁ ∈ Rᶜ ∧ p₂ ∈ Rᶜ ∧
       IsTwoSidedPartition
-        (regionMinusArc R ((straightPolyArc p₁ p₂ hne).toSimpleArc)) U V := by
+        (regionMinusArc R ((straightPolygonalArc p₁ p₂ hne).toSimpleArc)) U V := by
   classical
-  set β := straightPolyArc p₁ p₂ hne with hβ
-  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
+  set β := straightPolygonalArc p₁ p₂ hne with hβ
+  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolygonalArc]
   have hLpos : 0 < dist p₁ p₂ := dist_pos.mpr hne
   -- Segment data for the unique edge (mirrors `exists_twoSidedPartition_unitSegment`).
-  have hverts0 : β.verts 0 = p₁ := by rw [hβ]; simp [straightPolyArc]
+  have hverts0 : β.verts 0 = p₁ := by rw [hβ]; simp [straightPolygonalArc]
   have hvertsLast : β.verts (Fin.last β.numSegs) = p₂ := by
-    show (straightPolyArc p₁ p₂ hne).verts
-        (Fin.last (straightPolyArc p₁ p₂ hne).numSegs) = _
-    simp [straightPolyArc, Fin.last]
+    show (straightPolygonalArc p₁ p₂ hne).verts
+        (Fin.last (straightPolygonalArc p₁ p₂ hne).numSegs) = _
+    simp [straightPolygonalArc, Fin.last]
   have hsrc : β.segSrc β.firstSeg = p₁ := by
-    rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
+    rw [hβ]; simp [straightPolygonalArc, PolygonalArc.segSrc, PolygonalArc.firstSeg, Fin.castSucc]
   have htgt : β.segTgt β.firstSeg = p₂ := by
-    rw [hβ]; simp [straightPolyArc, PolyArc.segTgt, PolyArc.firstSeg, Fin.succ]
+    rw [hβ]; simp [straightPolygonalArc, PolygonalArc.segTgt, PolygonalArc.firstSeg, Fin.succ]
   have hlast : β.lastSeg = β.firstSeg := by
-    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg, hβnum]
+    apply Fin.ext; simp only [PolygonalArc.lastSeg, PolygonalArc.firstSeg, hβnum]
   have hsrcLast : β.segSrc β.lastSeg = p₁ := by rw [hlast]; exact hsrc
   have htgtLast : β.segTgt β.lastSeg = p₂ := by rw [hlast]; exact htgt
   have hcarr : β.carrier = segment ℝ p₁ p₂ := by
-    rw [hβ]; exact straightPolyArc_carrier _ _ hne
+    rw [hβ]; exact straightPolygonalArc_carrier _ _ hne
   have hsegCarr : β.segCarrier β.firstSeg = segment ℝ p₁ p₂ := by
-    rw [PolyArc.segCarrier, hsrc, htgt]
+    rw [PolygonalArc.segCarrier, hsrc, htgt]
   have hsegCarrLast : β.segCarrier β.lastSeg = segment ℝ p₁ p₂ := by
     rw [hlast]; exact hsegCarr
   -- Region = open ball about the segment midpoint; spine = whole open segment.
@@ -1125,31 +1125,31 @@ arc-complement exists. -/
 theorem exists_twoSidedPartition_unitSegment :
     ∃ U V, IsTwoSidedPartition
       (regionMinusArc (Metric.ball ((1/2, 0) : ℝ × ℝ) (1/2))
-        (straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ)
+        (straightPolygonalArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ)
           (by simp : ((0,0):ℝ×ℝ) ≠ (1,0))).toSimpleArc)
       U V := by
   classical
   -- The straight one-segment arc and its computed segment data.
   have hne : ((0,0):ℝ×ℝ) ≠ (1,0) := by simp
-  let β := straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne
-  have hβ : β = straightPolyArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne := rfl
-  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolyArc]
+  let β := straightPolygonalArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne
+  have hβ : β = straightPolygonalArc ((0,0) : ℝ × ℝ) ((1,0) : ℝ × ℝ) hne := rfl
+  have hβnum : β.numSegs = 1 := by rw [hβ]; simp [straightPolygonalArc]
   have hv0 : β.verts 0 = ((0,0) : ℝ × ℝ) := by
-    rw [hβ]; simp [straightPolyArc]
+    rw [hβ]; simp [straightPolygonalArc]
   have hvL : β.verts (Fin.last β.numSegs) = ((1,0) : ℝ × ℝ) := by
-    show (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).verts
-        (Fin.last (straightPolyArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).numSegs) = _
-    simp [straightPolyArc, Fin.last]
+    show (straightPolygonalArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).verts
+        (Fin.last (straightPolygonalArc ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) hne).numSegs) = _
+    simp [straightPolygonalArc, Fin.last]
   have hsrc : β.segSrc β.firstSeg = ((0,0) : ℝ × ℝ) := by
-    rw [hβ]; simp [straightPolyArc, PolyArc.segSrc, PolyArc.firstSeg, Fin.castSucc]
+    rw [hβ]; simp [straightPolygonalArc, PolygonalArc.segSrc, PolygonalArc.firstSeg, Fin.castSucc]
   have htgt : β.segTgt β.firstSeg = ((1,0) : ℝ × ℝ) := by
-    rw [hβ]; simp [straightPolyArc, PolyArc.segTgt, PolyArc.firstSeg, Fin.succ]
+    rw [hβ]; simp [straightPolygonalArc, PolygonalArc.segTgt, PolygonalArc.firstSeg, Fin.succ]
   have hlast : β.lastSeg = β.firstSeg := by
-    apply Fin.ext; simp only [PolyArc.lastSeg, PolyArc.firstSeg, hβnum]
+    apply Fin.ext; simp only [PolygonalArc.lastSeg, PolygonalArc.firstSeg, hβnum]
   have hsrcLast : β.segSrc β.lastSeg = ((0,0) : ℝ × ℝ) := by rw [hlast]; exact hsrc
   have htgtLast : β.segTgt β.lastSeg = ((1,0) : ℝ × ℝ) := by rw [hlast]; exact htgt
   have hcarr : β.carrier = segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) := by
-    rw [hβ]; exact straightPolyArc_carrier _ _ hne
+    rw [hβ]; exact straightPolygonalArc_carrier _ _ hne
   -- The region (open sup-ball = open unit square) and the spine (whole open segment).
   set R : Set (ℝ × ℝ) := Metric.ball ((1/2, 0) : ℝ × ℝ) (1/2) with hR_def
   set S : Set (ℝ × ℝ) :=
@@ -1173,7 +1173,7 @@ theorem exists_twoSidedPartition_unitSegment :
   have hst : ((0,0):ℝ×ℝ) ≠ ((1,0):ℝ×ℝ) := hne
   -- The unique edge's carrier is the closed segment `[(0,0),(1,0)]`.
   have hsegCarr : β.segCarrier β.firstSeg = segment ℝ ((0,0):ℝ×ℝ) ((1,0):ℝ×ℝ) := by
-    rw [PolyArc.segCarrier, hsrc, htgt]
+    rw [PolygonalArc.segCarrier, hsrc, htgt]
   -- `Rᶜ` is nonempty (the source endpoint lies in it).
   have hsrc0 : β.verts 0 ∈ Rᶜ := by
     rw [hv0, Set.mem_compl_iff]

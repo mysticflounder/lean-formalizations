@@ -3,15 +3,15 @@ Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Adam McKenna
 
-PLArc shard 2/7 — **CollarConstruction**: §L3 sub-node 2 (tapered collar tube),
+PolygonalArc shard 2/7 — **CollarConstruction**: §L3 sub-node 2 (tapered collar tube),
 sub-node 3 (the side function `g`, slab/disk glue), the per-edge band model,
 corner glue, the tube cover, the two-sided collar `collarPlus`/`collarMinus`,
-and the P2 union. Second foundation of the PLArc DAG. Carries the one labelled
+and the P2 union. Second foundation of the PolygonalArc DAG. Carries the one labelled
 `sorry` (interior-vertex disk branch of `union_collarPlus_collarMinus`). Split
-out of `PLArc.lean`; see that coordinator module's doc for the overview.
+out of `PolygonalArc.lean`; see that coordinator module's doc for the overview.
 -/
 import Mathlib
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc.Foundations
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc.Foundations
 
 namespace CrossingLemma.PlaneArcSeparation
 
@@ -807,7 +807,7 @@ barycentric coordinate `b = footParam`; trichotomy on `b` against the cutoff `α
 The three side conditions form the radius budget the final assembly will discharge by
 choosing `δ₀` small.  The statement is generic in the spine `S ⊆ carrier`, so it
 applies to the assembly's `arcInterior` tube via monotonicity. -/
-theorem taperedTube_subset_bands_union_disks (β : PolyArc) (R S : Set Plane)
+theorem taperedTube_subset_bands_union_disks (β : PolygonalArc) (R S : Set Plane)
     (hS : S ⊆ β.carrier) {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ)
     (hα : 0 < α)
     (hband : ∀ i : Fin β.numSegs,
@@ -826,9 +826,9 @@ theorem taperedTube_subset_bands_union_disks (β : PolyArc) (R S : Set Plane)
   have hdzp : dist z p < δ₀ := lt_of_lt_of_le (Metric.mem_ball.mp hzp) (min_le_left _ _)
   have hdpz : dist p z < δ₀ := by rwa [dist_comm] at hdzp
   have hpc := hS hpS
-  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  rw [PolygonalArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
-  rw [PolyArc.segCarrier] at hpi
+  rw [PolygonalArc.segCarrier] at hpi
   set s := β.segSrc i with hs
   set t := β.segTgt i with ht
   have hts : t ≠ s := β.segTgt_ne_segSrc i
@@ -884,7 +884,7 @@ theorem taperedTube_subset_bands_union_disks (β : PolyArc) (R S : Set Plane)
       linarith
 
 /-- Each edge has positive ℓ¹ length (its direction is nonzero). -/
-theorem segDir_l1_pos (β : PolyArc) (i : Fin β.numSegs) :
+theorem segDir_l1_pos (β : PolygonalArc) (i : Fin β.numSegs) :
     0 < |(β.segTgt i).1 - (β.segSrc i).1| + |(β.segTgt i).2 - (β.segSrc i).2| := by
   rcases lt_or_eq_of_le (add_nonneg (abs_nonneg ((β.segTgt i).1 - (β.segSrc i).1))
       (abs_nonneg ((β.segTgt i).2 - (β.segSrc i).2))) with h | h
@@ -901,7 +901,7 @@ theorem segDir_l1_pos (β : PolyArc) (i : Fin β.numSegs) :
 edge, there is a single tube radius `δ₀ > 0` making all three budget families of
 `taperedTube_subset_bands_union_disks` hold simultaneously.  `δ₀` is half the finite
 minimum over edges of `min(α·‖Δ‖²/‖Δ‖₁, ρ(castSucc i) − α·distᵢ, ρ(succ i) − α·distᵢ)`. -/
-theorem exists_delta_cover_budget (β : PolyArc) {α : ℝ} (hα : 0 < α)
+theorem exists_delta_cover_budget (β : PolygonalArc) {α : ℝ} (hα : 0 < α)
     (ρ : Fin (β.numSegs + 1) → ℝ)
     (hρsrc : ∀ i, α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.castSucc i))
     (hρtgt : ∀ i, α * dist (β.segSrc i) (β.segTgt i) < ρ (Fin.succ i)) :
@@ -1276,7 +1276,7 @@ the **forward** side of the incident edge (foot `> 0` at the source, `< 1` at th
 The endpoint forward sign is the pinch: routing to an endpoint disk happens only through
 the `b<α` / `b>1−α` branch of the endpoint-incident edge, where the spine witness is on
 that edge and the tube taper gives `dist z p < infDist p Rᶜ / 2 ≤ dist p (endpoint) / 2`. -/
-theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
+theorem taperedTube_subset_midBands_union_disks (β : PolygonalArc) (R S : Set Plane)
     (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
     (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
     {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
@@ -1305,9 +1305,9 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
   have hdz_inf : dist z p < Metric.infDist p Rᶜ / 2 := lt_of_lt_of_le hball (min_le_right _ _)
   have hdpz : dist p z < δ₀ := by rwa [dist_comm] at hdzp
   have hpc := hS hpS
-  rw [PolyArc.carrier, Set.mem_iUnion] at hpc
+  rw [PolygonalArc.carrier, Set.mem_iUnion] at hpc
   obtain ⟨i, hpi⟩ := hpc
-  rw [PolyArc.segCarrier] at hpi
+  rw [PolygonalArc.segCarrier] at hpi
   have hts : β.segTgt i ≠ β.segSrc i := β.segTgt_ne_segSrc i
   have hpseg : p ∈ segment ℝ (β.segSrc i) (β.segTgt i) := hpi
   obtain ⟨a, b, ha, hb, hab, hp⟩ := hpi
@@ -1326,7 +1326,7 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
     · -- i = 0: source endpoint, pinch
       have hie : i = (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) := Fin.ext hi0
       have hsv : β.segSrc i = β.verts 0 := by
-        rw [PolyArc.segSrc, hie]; rfl
+        rw [PolygonalArc.segSrc, hie]; rfl
       have hcast : (Fin.castSucc i) = (0 : Fin (β.numSegs + 1)) := by rw [hie]; rfl
       have hinf : Metric.infDist p Rᶜ ≤ dist p (β.segSrc i) := by
         rw [hsv]; exact Metric.infDist_le_dist_of_mem hsrc0
@@ -1352,7 +1352,7 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
           add_nonneg (abs_nonneg _) (abs_nonneg _)
         have hle := mul_le_mul_of_nonneg_left (le_of_lt hdpz) hMnn
         linarith [hband i]
-      · rw [PolyArc.segCarrier]
+      · rw [PolygonalArc.segCarrier]
         exact lt_of_le_of_lt (Metric.infDist_le_dist_of_mem hpseg) hdzp
     · -- near the target vertex `succ i`
       have hpt : dist p (β.segTgt i) = (1 - b) * dist (β.segSrc i) (β.segTgt i) := by
@@ -1374,7 +1374,7 @@ theorem taperedTube_subset_midBands_union_disks (β : PolyArc) (R S : Set Plane)
         have hsucc : (Fin.succ i) = (Fin.last β.numSegs) := by
           apply Fin.ext; simp [Fin.val_succ, Fin.val_last]; omega
         have htv : β.segTgt i = β.verts (Fin.last β.numSegs) := by
-          rw [PolyArc.segTgt, hsucc]
+          rw [PolygonalArc.segTgt, hsucc]
         have hinf : Metric.infDist p Rᶜ ≤ dist p (β.segTgt i) := by
           rw [htv]; exact Metric.infDist_le_dist_of_mem hsrcL
         have hpinchrev : 0 < footParam (β.segTgt i) (β.segSrc i) z := by
@@ -1406,7 +1406,7 @@ compacts (the edges meet only at the vertex, `consecutive_meet`), hence separate
 some `σ > 0`; take `δ = min (r/2) (σ/2)`.  A point within `δ` of both edges either is
 already within `r` of the vertex, or has near-points in both trimmed pieces, forcing
 those within `2δ ≤ σ` — impossible. -/
-theorem exists_delta_corner_confine (β : PolyArc) (i : Fin β.numSegs)
+theorem exists_delta_corner_confine (β : PolygonalArc) (i : Fin β.numSegs)
     (hi1 : (i : ℕ) + 1 < β.numSegs) {r : ℝ} (hr : 0 < r) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ z : Plane,
       Metric.infDist z (β.segCarrier i) < δ →
@@ -1417,9 +1417,9 @@ theorem exists_delta_corner_confine (β : PolyArc) (i : Fin β.numSegs)
   set A : Set Plane := β.segCarrier i with hA
   set B : Set Plane := β.segCarrier ⟨(i : ℕ) + 1, hi1⟩ with hB
   have hAne : A.Nonempty := by
-    rw [hA, PolyArc.segCarrier]; exact ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
+    rw [hA, PolygonalArc.segCarrier]; exact ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
   have hBne : B.Nonempty := by
-    rw [hB, PolyArc.segCarrier]; exact ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
+    rw [hB, PolygonalArc.segCarrier]; exact ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
   have hfarclosed : IsClosed {w : Plane | r / 2 ≤ dist w v} :=
     isClosed_le continuous_const (continuous_id.dist continuous_const)
   set Afar : Set Plane := A ∩ {w | r / 2 ≤ dist w v} with hAfar
@@ -1432,10 +1432,10 @@ theorem exists_delta_corner_confine (β : PolyArc) (i : Fin β.numSegs)
     have hcast : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i :=
       Fin.ext (by simp [Fin.val_succ])
     have hAeq : A = segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) := by
-      rw [hA, PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt]
+      rw [hA, PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt]
     have hBeq : B = segment ℝ (β.verts (Fin.succ i))
         (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) := by
-      rw [hB, PolyArc.segCarrier, PolyArc.segSrc, PolyArc.segTgt, hcast]
+      rw [hB, PolygonalArc.segCarrier, PolygonalArc.segSrc, PolygonalArc.segTgt, hcast]
     intro w hw
     have hwmem : w ∈ segment ℝ (β.verts (Fin.castSucc i)) (β.verts (Fin.succ i)) ∩
         segment ℝ (β.verts (Fin.succ i)) (β.verts (Fin.succ ⟨(i : ℕ) + 1, hi1⟩)) := by
@@ -1481,7 +1481,7 @@ sides of far edges have disjoint supports, so the only cross-overlaps to reconci
 the adjacent ones (handled by `exists_delta_corner_confine` + the corner glue).  Proof:
 take `δ = d_sep/2` from `exists_pos_nonadjacent_sep`; near-points (`infDist_lt_iff`) in
 both edges would be `< 2δ = d_sep` apart, contradicting the separation. -/
-theorem exists_delta_nonadjacent_tube_sep (β : PolyArc) :
+theorem exists_delta_nonadjacent_tube_sep (β : PolygonalArc) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ i j : Fin β.numSegs, (i : ℕ) + 1 < (j : ℕ) →
       ∀ z : Plane, Metric.infDist z (β.segCarrier i) < δ →
         Metric.infDist z (β.segCarrier j) < δ → False := by
@@ -1515,11 +1515,11 @@ cut `W` into its two sides as a union of three families mirroring the cover
 
 /-- Positive band-strip of edge `i`: the narrowed positive band carrying the strip
 certificate `infDist z (segCarrier i) < δ₀`. -/
-noncomputable def bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+noncomputable def bandStripPlus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
   edgePlusMid (β.segSrc i) (β.segTgt i) α ∩ {z | Metric.infDist z (β.segCarrier i) < δ₀}
 
 /-- Negative band-strip of edge `i`. -/
-noncomputable def bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
+noncomputable def bandStripMinus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) : Set Plane :=
   edgeMinusMid (β.segSrc i) (β.segTgt i) α ∩ {z | Metric.infDist z (β.segCarrier i) < δ₀}
 
 /-- Positive vertex sector at the shared vertex `verts (i+1)` of segments `i, i+1`.
@@ -1544,14 +1544,14 @@ intersection demand) needs `δ₀ > αL/2`.  Adjacent disjointness (the glue,
 sector⁺/sector⁻ disjointness is recovered from the **angular sign on the shared edge** (the
 reverse-glue σ-sign lemmas `vertexPlus/Minus_sideForm_outgoing/incoming_*`), not from
 strip-separation.  See region-face-bridge-plan §9. -/
-noncomputable def sectorPlus (β : PolyArc) (δ₀ : ℝ)
+noncomputable def sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
   vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
     ∩ ({z | Metric.infDist z (β.segCarrier i) < δ₀}
         ∪ {z | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀})
 
 /-- Negative vertex sector at the shared vertex of segments `i, i+1`.  See `sectorPlus`. -/
-noncomputable def sectorMinus (β : PolyArc) (δ₀ : ℝ)
+noncomputable def sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
   vertexMinus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
     ∩ ({z | Metric.infDist z (β.segCarrier i) < δ₀}
@@ -1565,7 +1565,7 @@ collar-facing variant clips each strip arm by a `footParam` margin `α`, trimmin
 outgoing edge `i+1` (shared vertex at foot `0`) keeps `foot < 1 − α` — preserving the shared-corner
 reach.  `sectorPlusClipped ⊆ sectorPlus`, so every `sectorPlus` disjointness lemma transfers to
 the clipped piece via `Disjoint.mono`. -/
-noncomputable def sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+noncomputable def sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
   vertexPlus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
     ∩ ( ({z | Metric.infDist z (β.segCarrier i) < δ₀}
@@ -1575,7 +1575,7 @@ noncomputable def sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
                 < 1 - α}))
 
 /-- **Clipped negative sector** (collar-facing).  See `sectorPlusClipped`. -/
-noncomputable def sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+noncomputable def sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) : Set Plane :=
   vertexMinus (β.segSrc i) (β.segTgt i) (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)
     ∩ ( ({z | Metric.infDist z (β.segCarrier i) < δ₀}
@@ -1585,21 +1585,21 @@ noncomputable def sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
                 < 1 - α}))
 
 /-- The clipped positive sector sits inside the unclipped one (drop the `footParam` constraints). -/
-theorem sectorPlusClipped_subset_sectorPlus (β : PolyArc) (δ₀ α : ℝ)
+theorem sectorPlusClipped_subset_sectorPlus (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorPlusClipped β δ₀ α i hi1 ⊆ sectorPlus β δ₀ i hi1 := by
   rintro z ⟨hzV, hz⟩
   exact ⟨hzV, hz.imp (fun h => h.1) (fun h => h.1)⟩
 
 /-- The clipped negative sector sits inside the unclipped one. -/
-theorem sectorMinusClipped_subset_sectorMinus (β : PolyArc) (δ₀ α : ℝ)
+theorem sectorMinusClipped_subset_sectorMinus (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     sectorMinusClipped β δ₀ α i hi1 ⊆ sectorMinus β δ₀ i hi1 := by
   rintro z ⟨hzV, hz⟩
   exact ⟨hzV, hz.imp (fun h => h.1) (fun h => h.1)⟩
 
 /-- The clipped positive sector is open. -/
-theorem isOpen_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
+theorem isOpen_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     IsOpen (sectorPlusClipped β δ₀ α i hi1) :=
   (isOpen_vertexPlus _ _ _).inter
@@ -1609,7 +1609,7 @@ theorem isOpen_sectorPlusClipped (β : PolyArc) (δ₀ α : ℝ)
         (isOpen_lt (continuous_footParam _ _) continuous_const)))
 
 /-- The clipped negative sector is open. -/
-theorem isOpen_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
+theorem isOpen_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     IsOpen (sectorMinusClipped β δ₀ α i hi1) :=
   (isOpen_vertexMinus _ _ _).inter
@@ -1619,32 +1619,32 @@ theorem isOpen_sectorMinusClipped (β : PolyArc) (δ₀ α : ℝ)
         (isOpen_lt (continuous_footParam _ _) continuous_const)))
 
 /-- Positive end cap at the source endpoint `verts 0` (edge `firstSeg`, foot `> 0`). -/
-noncomputable def endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+noncomputable def endCapSrcPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   Metric.ball (β.verts 0) (ρ 0)
     ∩ {z | 0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
     ∩ {z | 0 < sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
 
 /-- Negative end cap at the source endpoint. -/
-noncomputable def endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+noncomputable def endCapSrcMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   Metric.ball (β.verts 0) (ρ 0)
     ∩ {z | 0 < footParam (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z}
     ∩ {z | sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z < 0}
 
 /-- Positive end cap at the target endpoint `verts last` (edge `lastSeg`, foot `< 1`). -/
-noncomputable def endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+noncomputable def endCapTgtPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs))
     ∩ {z | footParam (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 1}
     ∩ {z | 0 < sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z}
 
 /-- Negative end cap at the target endpoint. -/
-noncomputable def endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
+noncomputable def endCapTgtMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   Metric.ball (β.verts (Fin.last β.numSegs)) (ρ (Fin.last β.numSegs))
     ∩ {z | footParam (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 1}
     ∩ {z | sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z < 0}
 
 /-- The **positive collar side**: the tube-minus-carrier intersected with the union of
 all positive band strips, vertex sectors, and end caps. -/
-noncomputable def collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+noncomputable def collarPlus (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   (taperedTube R S δ₀ \ β.carrier) ∩
     ( (⋃ i, bandStripPlus β α δ₀ i)
@@ -1653,7 +1653,7 @@ noncomputable def collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
       ∪ endCapTgtPlus β ρ )
 
 /-- The **negative collar side**. -/
-noncomputable def collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+noncomputable def collarMinus (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : Set Plane :=
   (taperedTube R S δ₀ \ β.carrier) ∩
     ( (⋃ i, bandStripMinus β α δ₀ i)
@@ -1661,57 +1661,57 @@ noncomputable def collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
       ∪ endCapSrcMinus β ρ
       ∪ endCapTgtMinus β ρ )
 
-theorem isOpen_bandStripPlus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem isOpen_bandStripPlus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     IsOpen (bandStripPlus β α δ₀ i) :=
   (isOpen_edgePlusMid _ _ _).inter
     (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const)
 
-theorem isOpen_bandStripMinus (β : PolyArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
+theorem isOpen_bandStripMinus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.numSegs) :
     IsOpen (bandStripMinus β α δ₀ i) :=
   (isOpen_edgeMinusMid _ _ _).inter
     (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const)
 
-theorem isOpen_sectorPlus (β : PolyArc) (δ₀ : ℝ)
+theorem isOpen_sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     IsOpen (sectorPlus β δ₀ i hi1) :=
   (isOpen_vertexPlus _ _ _).inter
     ((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).union
       (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const))
 
-theorem isOpen_sectorMinus (β : PolyArc) (δ₀ : ℝ)
+theorem isOpen_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
     (i : Fin β.numSegs) (hi1 : (i : ℕ) + 1 < β.numSegs) :
     IsOpen (sectorMinus β δ₀ i hi1) :=
   (isOpen_vertexMinus _ _ _).inter
     ((isOpen_lt (Metric.continuous_infDist_pt _) continuous_const).union
       (isOpen_lt (Metric.continuous_infDist_pt _) continuous_const))
 
-theorem isOpen_endCapSrcPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem isOpen_endCapSrcPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     IsOpen (endCapSrcPlus β ρ) :=
   (Metric.isOpen_ball.inter (isOpen_lt continuous_const (continuous_footParam _ _))).inter
     (isOpen_lt continuous_const (continuous_sideForm _ _))
 
-theorem isOpen_endCapSrcMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem isOpen_endCapSrcMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     IsOpen (endCapSrcMinus β ρ) :=
   (Metric.isOpen_ball.inter (isOpen_lt continuous_const (continuous_footParam _ _))).inter
     (isOpen_lt (continuous_sideForm _ _) continuous_const)
 
-theorem isOpen_endCapTgtPlus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem isOpen_endCapTgtPlus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     IsOpen (endCapTgtPlus β ρ) :=
   (Metric.isOpen_ball.inter (isOpen_lt (continuous_footParam _ _) continuous_const)).inter
     (isOpen_lt continuous_const (continuous_sideForm _ _))
 
-theorem isOpen_endCapTgtMinus (β : PolyArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
+theorem isOpen_endCapTgtMinus (β : PolygonalArc) (ρ : Fin (β.numSegs + 1) → ℝ) :
     IsOpen (endCapTgtMinus β ρ) :=
   (Metric.isOpen_ball.inter (isOpen_lt (continuous_footParam _ _) continuous_const)).inter
     (isOpen_lt (continuous_sideForm _ _) continuous_const)
 
 /-- The ground set `W = taperedTube R S δ₀ \ β.carrier` is open. -/
-theorem isOpen_collarGround (β : PolyArc) (R S : Set Plane) (δ₀ : ℝ) :
+theorem isOpen_collarGround (β : PolygonalArc) (R S : Set Plane) (δ₀ : ℝ) :
     IsOpen (taperedTube R S δ₀ \ β.carrier) :=
   (isOpen_taperedTube R S δ₀).inter β.isClosed_carrier.isOpen_compl
 
 /-- **P1⁺ (open).** -/
-theorem isOpen_collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem isOpen_collarPlus (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : IsOpen (collarPlus β R S δ₀ α ρ) := by
   refine (isOpen_collarGround β R S δ₀).inter ?_
   refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcPlus β ρ)).union
@@ -1720,7 +1720,7 @@ theorem isOpen_collarPlus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
   · exact isOpen_iUnion (fun i => isOpen_iUnion (fun hi1 => isOpen_sectorPlusClipped β δ₀ α i hi1))
 
 /-- **P1⁻ (open).** -/
-theorem isOpen_collarMinus (β : PolyArc) (R S : Set Plane) (δ₀ α : ℝ)
+theorem isOpen_collarMinus (β : PolygonalArc) (R S : Set Plane) (δ₀ α : ℝ)
     (ρ : Fin (β.numSegs + 1) → ℝ) : IsOpen (collarMinus β R S δ₀ α ρ) := by
   refine (isOpen_collarGround β R S δ₀).inter ?_
   refine (((?_ : IsOpen _).union ?_).union (isOpen_endCapSrcMinus β ρ)).union
@@ -1782,7 +1782,7 @@ theorem mem_openSegment_of_sideForm_zero_ball' {s t z : Plane} (h : t ≠ s)
 
 /-- **P2 (union).** The interior-vertex disk branch (line ~3140) carries one labelled
 `sorry`; band and endpoint branches are proven. -/
-theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
+theorem union_collarPlus_collarMinus (β : PolygonalArc) (R S : Set Plane)
     (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
     (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
     {δ₀ α : ℝ} (ρ : Fin (β.numSegs + 1) → ℝ) (hα : 0 < α)
@@ -1822,9 +1822,9 @@ theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
         have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
       have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨i, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         rw [← edgeBand_inter_sideForm_zero_eq_openSegment hts]
         exact ⟨show footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo (0 : ℝ) 1 from
@@ -1848,12 +1848,12 @@ theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
       have hfs : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) = β.firstSeg := rfl
       rw [hfs] at hpinch
       have hts := β.segTgt_ne_segSrc β.firstSeg
-      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolygonalArc.segSrc, PolygonalArc.firstSeg]; rfl
       have hsf0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         apply mem_openSegment_of_sideForm_zero_ball hts h0 hpinch
         have hd : dist z (β.segSrc β.firstSeg) < ρ 0 := by
@@ -1870,14 +1870,14 @@ theorem union_collarPlus_collarMinus (β : PolyArc) (R S : Set Plane)
       rw [hls] at hpinch
       have hts := β.segTgt_ne_segSrc β.lastSeg
       have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
-        rw [PolyArc.segTgt]; congr 1
+        rw [PolygonalArc.segTgt]; congr 1
         apply Fin.ext
-        simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+        simp only [Fin.val_succ, PolygonalArc.lastSeg, Fin.val_last]; omega
       have hsf0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨β.lastSeg, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         apply mem_openSegment_of_sideForm_zero_ball' hts h0 hpinch
         have hd : dist z (β.segTgt β.lastSeg) < ρ (Fin.last β.numSegs) := by
@@ -1898,7 +1898,7 @@ disjunct demands a `j : Fin (β.numSegs + 1)` with `0 < (j : ℕ) < β.numSegs =
 copied verbatim from the general proof, so this lemma's axiom closure is the Lean core
 only — feeding it (rather than the general lemma) is what keeps the single-segment
 two-sided-partition theorem `sorryAx`-free. -/
-theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolyArc) (h1 : β.numSegs = 1)
+theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolygonalArc) (h1 : β.numSegs = 1)
     (R S : Set Plane)
     (hS : S ⊆ β.carrier) (hsrc0 : β.verts 0 ∈ Rᶜ)
     (hsrcL : β.verts (Fin.last β.numSegs) ∈ Rᶜ)
@@ -1933,9 +1933,9 @@ theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolyArc) (h1 : β.numS
         have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
       have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨i, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         rw [← edgeBand_inter_sideForm_zero_eq_openSegment hts]
         exact ⟨show footParam (β.segSrc i) (β.segTgt i) z ∈ Set.Ioo (0 : ℝ) 1 from
@@ -1953,12 +1953,12 @@ theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolyArc) (h1 : β.numS
       have hfs : (⟨0, β.numSegs_pos⟩ : Fin β.numSegs) = β.firstSeg := rfl
       rw [hfs] at hpinch
       have hts := β.segTgt_ne_segSrc β.firstSeg
-      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolyArc.segSrc, PolyArc.firstSeg]; rfl
+      have hsv : β.segSrc β.firstSeg = β.verts 0 := by rw [PolygonalArc.segSrc, PolygonalArc.firstSeg]; rfl
       have hsf0 : sideForm (β.segSrc β.firstSeg) (β.segTgt β.firstSeg) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         apply mem_openSegment_of_sideForm_zero_ball hts h0 hpinch
         have hd : dist z (β.segSrc β.firstSeg) < ρ 0 := by
@@ -1975,14 +1975,14 @@ theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolyArc) (h1 : β.numS
       rw [hls] at hpinch
       have hts := β.segTgt_ne_segSrc β.lastSeg
       have htv : β.segTgt β.lastSeg = β.verts (Fin.last β.numSegs) := by
-        rw [PolyArc.segTgt]; congr 1
+        rw [PolygonalArc.segTgt]; congr 1
         apply Fin.ext
-        simp only [Fin.val_succ, PolyArc.lastSeg, Fin.val_last]; omega
+        simp only [Fin.val_succ, PolygonalArc.lastSeg, Fin.val_last]; omega
       have hsf0 : sideForm (β.segSrc β.lastSeg) (β.segTgt β.lastSeg) z ≠ 0 := by
         intro h0
-        apply hzC; rw [PolyArc.carrier]
+        apply hzC; rw [PolygonalArc.carrier]
         refine Set.mem_iUnion.mpr ⟨β.lastSeg, ?_⟩
-        rw [PolyArc.segCarrier]
+        rw [PolygonalArc.segCarrier]
         apply openSegment_subset_segment ℝ _ _
         apply mem_openSegment_of_sideForm_zero_ball' hts h0 hpinch
         have hd : dist z (β.segTgt β.lastSeg) < ρ (Fin.last β.numSegs) := by

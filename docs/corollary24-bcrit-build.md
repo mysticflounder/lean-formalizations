@@ -143,7 +143,7 @@ Built with `./lake-build.sh` (elan toolchain v4.30.0, mathlib v4.30.0).
 | `LeanFormalizations` (root aggregator, module registered) | 8590 | Build completed successfully |
 
 The aggregator build emits pre-existing `sorry` warnings in **other** modules
-(`PlaneArcSeparation`, `ComponentSplit`, `CrossingLemmaAmplification`, `PLArc`,
+(`PlaneArcSeparation`, `ComponentSplit`, `CrossingLemmaAmplification`, `PolygonalArc`,
 `SzemerediTrotter`, `IncidenceAssembly/Bridge`) — none from `CriticalPointBound.lean`.
 The new module rebuilds with no warnings and no errors.
 

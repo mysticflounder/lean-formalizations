@@ -101,7 +101,7 @@ mR  := ε / 4                      (margin for infDist bound)
 
 R   := {p₁ + t•v + s•ε•n | t ∈ Ioo(0,1), s ∈ Ioo(-1,1)}     (open strip)
 S   := {p₁ + t•v         | t ∈ Ioo(0, 1)}                   (1D spine, WHOLE open segment)
-β   := straightPolyArc p₁ p₂ hne                              (one-segment polyarc)
+β   := straightPolygonalArc p₁ p₂ hne                              (one-segment polyarc)
 ```
 
 (`cSrc`/`cTgt` were removed with the `Ioc → Ioo` interface change — `of_straightArc`
@@ -216,11 +216,11 @@ the tube, then Obligation B (local→global gluing) lifts U,V to `poolRegion`,
   — its 19 hypotheses are what need to be discharged
 - **Discharge template** `exists_twoSidedPartition_unitSegment` (sorry-free, closes the
   full bundle for the unit segment with whole-edge S): `PLCollarSeparation.lean:1166`
-- `liftPlus_zero_eq_affineComb` (`liftPlus s t c 0 = (1-c)•s + c•t`): `PLArc.lean:7203`
-- `PolyArc` namespace for `firstSeg`, `segCarrier`, `segSrc`, `segTgt`, `src`, `tgt`,
-  `firstMid`, `carrier`: `PLArc.lean:550-644`
-- `dotp` definition: `PLArc.lean:1458` (no associated lemmas beyond `dotp_smul_left`)
-- `liftPlus`, `footParam`, `taperedTube`: defined in `PLArc.lean` (search for them)
+- `liftPlus_zero_eq_affineComb` (`liftPlus s t c 0 = (1-c)•s + c•t`): `PolygonalArc.lean:7203`
+- `PolygonalArc` namespace for `firstSeg`, `segCarrier`, `segSrc`, `segTgt`, `src`, `tgt`,
+  `firstMid`, `carrier`: `PolygonalArc.lean:550-644`
+- `dotp` definition: `PolygonalArc.lean:1458` (no associated lemmas beyond `dotp_smul_left`)
+- `liftPlus`, `footParam`, `taperedTube`: defined in `PolygonalArc.lean` (search for them)
 - `isOpen_regionAt`: `RegionFaceBridge.lean:121-123`
 - Bridge wiring (ST:4713): `SzemerediTrotter.lean:4678-4719`
 
@@ -273,8 +273,8 @@ hsegSrc_last / hsegTgt_last / hsegCarrier_last (derived from above)
 
 ### Key learnings
 
-1. **`simp [straightPolyArc]` does NOT work** for computing segment data fields (segSrc, segTgt, firstSeg, segCarrier, verts). Use explicit `dsimp` or the helper lemmas above.
+1. **`simp [straightPolygonalArc]` does NOT work** for computing segment data fields (segSrc, segTgt, firstSeg, segCarrier, verts). Use explicit `dsimp` or the helper lemmas above.
 2. **`abel` on vector expressions with `•`** (scalar multiplication) is unreliable. For the convexity linearity step, try `simp` with `add_smul` and `smul_smul` to break down the scalar multiplications, then `abel` on the pure additive part, then `simp [hab]`.
 3. **`max_eq_left`/`max_eq_right`** — use `apply max_eq_left; linarith` rather than `max_eq_left h` (which has type mismatch issues in this mathlib version).
 4. **`sq_abs`** — use `simpa using (sq_abs v.1).symm` rather than `rw [(sq_abs v.1).symm]` directly.
-5. **`Metric.infDist_pos.mpr`** — doesn't exist in this mathlib version. Use `(hR_open.isClosed_compl.notMem_iff_infDist_pos ⟨p₁, hp₁_notin⟩).mpr` instead (pattern from PLArc.lean).
+5. **`Metric.infDist_pos.mpr`** — doesn't exist in this mathlib version. Use `(hR_open.isClosed_compl.notMem_iff_infDist_pos ⟨p₁, hp₁_notin⟩).mpr` instead (pattern from PolygonalArc.lean).

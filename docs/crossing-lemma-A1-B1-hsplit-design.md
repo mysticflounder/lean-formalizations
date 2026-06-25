@@ -15,7 +15,7 @@ and corrects two framings in it (§3 and §7) that the source does not support.
 > A follow-up prover pass (validated against source) found two errors in §5/§8/§9
 > below, both PROVEN:
 > 1. **The N1a target object `convexSector a p b ∩ Metric.ball p ε` is the wrong
->    shape (REFUTED).** `convexSector` is the `< π` convex cone (`PLArc.lean:198`,
+>    shape (REFUTED).** `convexSector` is the `< π` convex cone (`PolygonalArc.lean:198`,
 >    intersection of two half-planes through the apex). It is **∅** for a
 >    collinear apex — a degree-2 collinear vertex, i.e. an interior point of a
 >    single line, which is the Szemerédi–Trotter main case — and it selects the
@@ -356,7 +356,7 @@ derivable from the recursion's invariants. It requires a fresh object:
 
 This object is **absent**. The PL angular wedge machinery it would build on
 *does* exist and is the right shape — `convexSector a v b`
-(`PLArc.lean:198`, open, convex, preconnected, nonempty for `IsCorner`),
+(`PolygonalArc.lean:198`, open, convex, preconnected, nonempty for `IsCorner`),
 `vertexPlus/vertexMinus` (`:2391/:2395`), `sectorPlus/Minus`
 (`:2849/:2856`), with the sector→collar containments
 `sectorPlus_subset_collarPlus_of_subset_ground` (`:11071`) — but **no bridge from
@@ -394,7 +394,7 @@ EMPIRICALLY (memory `38R2S1`/`G2GJCE`, 2026-06-17/18, "kernel-checked
 `exists_twoSidedPartition_of_straightArc` (`:480`) are **PROVEN sorry-free** for
 the straight single-segment arc. The remaining `sorry`s in the PL layer
 (`PlaneArcSeparation.lean:385` `exists_twoSidedPartition_of_arc`,
-`PLArc.lean:3148` interior-vertex disk branch) are in the **curved/multi-segment**
+`PolygonalArc.lean:3148` interior-vertex disk branch) are in the **curved/multi-segment**
 branch, which is out of scope. **CONJECTURED (not independently re-verified here):**
 the specific straight path is sorry-free; this rests on the cited memory claim and
 the route-fork doc, not on a build I can run. A `lake`/`#print axioms` check is the
@@ -595,7 +595,7 @@ Compute/prove: for `G` a `DrawnMultigraph`, `hARR : ArcsRotationRegular G`,
 `q ∈ convexSector a p b ∩ Metric.ball p ε` with `q ∉ arcUnion G`, where `a,b` are
 the first-crossing points of `d` and `vertexRotation`-successor of `d` at radius
 `ε`. Inputs: the ARR first-crossing data (`arrAngle_firstCrossing`,
-`CrossingLemma.lean:469`), `convexSector` API (`PLArc.lean:198`–`244`),
+`CrossingLemma.lean:469`), `convexSector` API (`PolygonalArc.lean:198`–`244`),
 compactness of `arcUnion` (`DartSectorPoint.lean:106`). Output: the point `q`
 (noncomputable witness) + membership proof. This is the irreducible geometric
 residual of all of B1/B2 for the straight-line drawing.
@@ -613,7 +613,7 @@ residual of all of B1/B2 for the straight-line drawing.
 | `hsame` is free from `hsep m` + `hregion` | **PROVEN** | harness `:563`–`:565` |
 | §3 circularity (no level-`m+1` Edmonds in `hgeo`) | **PROVEN** | harness `:554`–`:556`, `:599`–`:602` |
 | Single irreducible residual = `dartSectorPoint` + membership + `dr = regionAt` | **SUPERSEDED** → TWO residuals (N1a′ + `hreal`) | corrected 2026-06-22; `prefixStepSameRegion` `:186` hyps, `dr` def `:314`, `DartSectorPoint.lean` header |
-| `convexSector a p b ∩ ball` is the right N1a target object | **REFUTED** | `convexSector` is the `<π` cone (`PLArc.lean:198`/`:233`): ∅ for collinear apex, wrong wedge when gap `>π`; see N1-dartsectorpoint doc §1 |
+| `convexSector a p b ∩ ball` is the right N1a target object | **REFUTED** | `convexSector` is the `<π` cone (`PolygonalArc.lean:198`/`:233`): ∅ for collinear apex, wrong wedge when gap `>π`; see N1-dartsectorpoint doc §1 |
 | `angleAt`-interval wedge (N1a′) needs **no** mathlib-v4.30-absent infra (no Jordan) | **CONJECTURED** | `Complex.arg` API present; thin `angleAt` API + δ-separation, not built; N1-dartsectorpoint doc §3 |
 | `hreal` step-maintenance is a SECOND open node (Edmonds bridge), not mechanical | **PROVEN** | `∅` base (`:541`) refutes add-on; `stepPoolRegion∘splitClass` = cross-level Edmonds equality; N1-dartsectorpoint doc §5 |
 | `exists_twoSidedPartition_prefixStep` straight path is sorry-free | **CONJECTURED** | memory `38R2S1`/`G2GJCE`, route-fork doc; not build-verified here |

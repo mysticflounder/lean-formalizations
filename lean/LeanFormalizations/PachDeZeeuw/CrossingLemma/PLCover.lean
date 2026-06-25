@@ -16,7 +16,7 @@ along it (simple connectivity), and extract a continuous `σ : ↥V₀ → ZMod 
 is `0` on `Pp` and `1` on `Pm`.
 
 This is the *only* place simple connectivity and covering theory are used; the
-collar (`PLArc.lean`) supplies the geometric instance (`V₀ = regionMinusArc`,
+collar (`PolygonalArc.lean`) supplies the geometric instance (`V₀ = regionMinusArc`,
 `V₁ = collar`, `Pp = collarPlus`, `Pm = collarMinus`) separately.
 
 # Total space model

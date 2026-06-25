@@ -202,9 +202,9 @@ distinct chain that DOES connect to ARR:
 ARR residual. The **arbitrary-arc** `exists_twoSidedPartition_of_arc` (`:385`) is off
 the path. Investing in `:385` does not advance the M-form (or even Szemerédi–Trotter).
 
-### 3a. `PLArc.lean:3148` is OFF the straight-line path
+### 3a. `PolygonalArc.lean:3148` is OFF the straight-line path
 
-`union_collarPlus_collarMinus` (`PLArc.lean:3087`) carries a `sorry` at `:3148` (the
+`union_collarPlus_collarMinus` (`PolygonalArc.lean:3087`) carries a `sorry` at `:3148` (the
 interior-vertex disk branch of the P2 union, for `numSegs ≥ 2`). The straight-line
 ST graph builds edges as single segments (`segmentArc`, `numSegs = 1`), so the
 PL-collar entry point used by ARR routes through the **single-segment** variant
@@ -213,11 +213,11 @@ PL-collar entry point used by ARR routes through the **single-segment** variant
 `union_collarPlus_collarMinus` is referenced only at `PLCollarSeparation.lean:81`
 (the multi-segment collar, not the straight-arc entry).
 
-**Conclusion (PROVEN).** `PLArc.lean:3148` does **not** gate the straight-line ARR
+**Conclusion (PROVEN).** `PolygonalArc.lean:3148` does **not** gate the straight-line ARR
 planarization. It is the `ROUTE_C_PLAN.md §7` "BLOCKED for numSegs ≥ 2" residual of
-the *arbitrary-PolyArc* collar (with the machine-checked `L₂² ≤ L₁·L∞` budget
+the *arbitrary-PolygonalArc* collar (with the machine-checked `L₂² ≤ L₁·L∞` budget
 collision documented there), needed only if one closes
-`exists_twoSidedPartition_of_polyArc` for general PolyArcs — which is *also* off the
+`exists_twoSidedPartition_of_polygonalArc` for general PolygonalArcs — which is *also* off the
 wired path.
 
 ---
@@ -293,7 +293,7 @@ Complete `sorry`-tactic inventory in the relevant files:
 |---|---|---|
 | `SzemerediTrotter.lean:4644` | `straightLineCanonicalComponentResidualMapPlanarityOfARR` (`:4533`) | Obligation B: region family `dr` + per-step `hstepCrosscut` (Edmonds same-region⇒same-cycle) for the straight-line residual map |
 | `PlaneArcSeparation.lean:385` | `exists_twoSidedPartition_of_arc` (`:382`) | arbitrary-continuous-arc crosscut separation (Schoenflies-strength; OFF the wired path) |
-| `PLArc.lean:3148` | `union_collarPlus_collarMinus` (`:3087`) | multi-segment (numSegs ≥ 2) PolyArc collar P2 interior-vertex disk branch (OFF the straight-line path) |
+| `PolygonalArc.lean:3148` | `union_collarPlus_collarMinus` (`:3087`) | multi-segment (numSegs ≥ 2) PolygonalArc collar P2 interior-vertex disk branch (OFF the straight-line path) |
 | `CrossingLemmaAmplification.lean:1612` | `vertexSubsetAveraging_bound` (`:1605`) | integer-averaging double count; PROVEN-obstructed for exact constant; NOT a producer |
 | `ComponentSplit.lean:72` | `componentCount_le_totalDegree` (`:69`) | ≤ d distinct irreducible factors of a degree-d curve |
 | `ComponentSplit.lean:96` | `lineCircle_components_meet_finite` (`:86`) | line/circle components meet a no-3-collinear set in O_d(1) points |
@@ -438,7 +438,7 @@ For each of {the 3 `ComponentSplit.lean` sorries, `vertexSubsetAveraging_bound`}
   (`Bridge.lean`), so the M-form is load-bearing and the M = 1 ST route does not
   substitute for it.
 - **PL restriction.** The wired plane-separation input is *polygonal* arcs
-  (`PolyArc`, `exists_twoSidedPartition_of_straightArc`); `ROUTE_C_PLAN §0` notes this
+  (`PolygonalArc`, `exists_twoSidedPartition_of_straightArc`); `ROUTE_C_PLAN §0` notes this
   is free for straight-line ST but the arbitrary-arc residual (`:385`) is
   Schoenflies-strength and unwired. The curved Edge-B lift (B1) re-opens this as
   OPEN-DIFFICULT.
@@ -467,9 +467,9 @@ For each of {the 3 `ComponentSplit.lean` sorries, `vertexSubsetAveraging_bound`}
    it is unavoidable for a *curved* drawing. B2 is the algebraic-arc rotation
    regularity. Sequence after A1.
 
-4. **Do NOT invest in `exists_twoSidedPartition_of_arc` (`:385`) or `PLArc.lean:3148`
+4. **Do NOT invest in `exists_twoSidedPartition_of_arc` (`:385`) or `PolygonalArc.lean:3148`
    as standalone targets.** `:385` is the arbitrary-arc Schoenflies statement, off the
-   wired path; `:3148` is the multi-segment PolyArc collar, off the straight-line path.
+   wired path; `:3148` is the multi-segment PolygonalArc collar, off the straight-line path.
    Neither advances Szemerédi–Trotter or the M-form on its own. (`:385` becomes
    relevant only *inside* B1, as the curved plane-separation input, where it would be
    restated for the specific Edge-B arcs.)

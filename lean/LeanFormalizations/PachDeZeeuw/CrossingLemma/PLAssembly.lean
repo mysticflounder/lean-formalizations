@@ -17,7 +17,7 @@ the covering-space output of `PLCover` (the abstract ℤ/2 separation lemma) to 
 componentology of `PlaneArcSeparation`, producing an `IsTwoSidedPartition` of
 `R ∖ C` from a *collar* `Tp ⊔ Tm` around the cut `C`.
 
-It is deliberately decoupled from the PL collar construction (`PLArc.lean`): it
+It is deliberately decoupled from the PL collar construction (`PolygonalArc.lean`): it
 takes the collar sides `Tp, Tm`, the tube `T`, and their topological properties as
 *hypotheses*. With the internal component-boundary argument below, this leaves
 exactly one geometric obligation for the concrete PL collar:

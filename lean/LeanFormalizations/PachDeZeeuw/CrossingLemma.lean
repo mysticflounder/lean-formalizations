@@ -72,7 +72,7 @@ import LeanFormalizations.Combinatorics.CombinatorialMap.Basic
 import LeanFormalizations.Combinatorics.CombinatorialMap.EdgeInsertion
 import LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PlaneArcSeparation
-import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLArc
+import LeanFormalizations.PachDeZeeuw.CrossingLemma.PolygonalArc
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCover
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLAssembly
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.PLCollarSeparation
