@@ -514,8 +514,8 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Szemerédi, E. and Trotter, W.T. "Extremal problems in discrete geometry."
   *Combinatorica* **3** (1983), no. 3–4, 381–392. DOI: 10.1007/BF02579194.
 - Pach, J. and Sharir, M. "On the number of incidences between points and
-  curves." *Combin. Probab. Comput.* **7** (1998), 121–127. (Journal DOI not
-  directly confirmed.)
+  curves." *Combin. Probab. Comput.* **7** (1998), no. 1, 121–127.
+  DOI: 10.1017/S0963548397003192.
 
 ### Crossing numbers & combinatorial maps — `Combinatorics/CombinatorialMap/`, `PachDeZeeuw/CrossingLemma/`
 
@@ -532,8 +532,9 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   arXiv:1801.00721. (SoCG 2018.)
 - Lando, S.K. and Zvonkin, A.K. *Graphs on Surfaces and Their Applications.*
   Encyclopaedia of Mathematical Sciences **141**, Springer, 2004.
-  DOI: 10.1007/978-3-540-38361-1. (Dart-permutation map model; §1.3.3,
-  Prop. 1.3.16 — section/proposition location not independently re-verified.)
+  DOI: 10.1007/978-3-540-38361-1. (Dart-permutation map model; §1.3.3
+  "Maps: Permutational Model" — the dart set and permutations σ/α/ϕ are
+  introduced there; the formal combinatorial-map definition is Def. 1.3.23.)
 - Newman, M.H.A. *Elements of the Topology of Plane Sets of Points.* 2nd ed.,
   Cambridge University Press, 1951. (Crosscut theorem.)
 - Pommerenke, Ch. *Boundary Behaviour of Conformal Maps.* Grundlehren der math.
@@ -553,10 +554,11 @@ identifiers that could not be confirmed directly are noted rather than guessed.
   Near Enemy Theorem *minimizes*; they use it for upper bounds, the minimization
   direction is ours.)
 - Erdős, P., Füredi, Z., Pach, J., and Ruzsa, I.Z. "The grid revisited."
-  *Discrete Math.* **111** (1993), no. 1–3, 189–196. (Source of the "near enemy"
+  *Discrete Math.* **111** (1993), no. 1–3, 189–196.
+  DOI: 10.1016/0012-365X(93)90155-M. (Source of the "near enemy"
   set — the lattice-sphere slice and its generic planar projection — and of the
   general-position distinct-distance bound `n·2^{O(√log n)}` that the Near Enemy
-  sphere-slice corollary reduces to. DOI not independently confirmed.)
+  sphere-slice corollary reduces to.)
 - Solymosi, J. and Tao, T. "An incidence theorem in higher dimensions."
   *Discrete Comput. Geom.* **48** (2012), no. 2, 255–280.
   DOI: 10.1007/s00454-012-9420-x. arXiv:1103.2926. (§5.1 — the canonical "generic

@@ -63,7 +63,7 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 | 9 | Elekes–Sharir 2011, *CPC* 20(4), 571–608, DOI 10.1017/S0963548311000137, arXiv:1005.0982 | OK | ElekesSharir L3/L4/L5 generic lemmas; rotation-energy channels; ESGK base | Direct✅ | FAITHFUL | faithfulness doc §3 (trivial-ceiling framing disclosed) |
 | 10 | Guth–Katz 2015, *Ann. of Math.* 181(1), 155–190, DOI 10.4007/annals.2015.181.1.2, arXiv:1011.4105 | OK | ESGK **base reduction** formalized; the `n/log n` distinct-distances theorem itself is **not** | Direct✅ / Background | NOT-CLAIMED (headline) | faithfulness doc §3: "trivial ceiling, NOT the Guth–Katz theorem" — must not be read as encoding GK |
 | 11 | Szemerédi–Trotter 1983, *Combinatorica* 3(3–4), 381–392, DOI 10.1007/BF02579194 | OK | Point–line incidence bound (`PachSharir.SzemerediTrotter`, §3 incidence) | Direct✅ / Deferred🟡 | FAITHFUL | README L512–513 |
-| 12 | Pach–Sharir 1998, *CPC* 7, 121–127 | **DOI?** | Point–curve incidence bound (§3 incidence engine, deferred `PachSharir/`) | Deferred🟡 | FAITHFUL | README L514–516; journal DOI flagged |
+| 12 | Pach–Sharir 1998, *CPC* 7, no. 1, 121–127, DOI 10.1017/S0963548397003192 | OK | Point–curve incidence bound (§3 incidence engine, deferred `PachSharir/`) | Deferred🟡 | FAITHFUL | README L514–516; DOI confirmed 2026-06-27 via Cambridge Core |
 
 ## Crossing numbers & combinatorial maps — `Combinatorics/CombinatorialMap/`, `PachDeZeeuw/CrossingLemma/`
 
@@ -73,7 +73,7 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 | 14 | Leighton 1983, *Complexity Issues in VLSI* (MIT Press), ISBN 978-0-262-12104-0 | BOOK | Independent crossing-lemma origin | Background | CONTEXTUAL | README L523–524 |
 | 15 | Székely 1997, *CPC* 6(3), 353–358, DOI 10.1017/S0963548397002976 | OK | Crossing-number method for Erdős problems | Background | CONTEXTUAL | README L525–527 |
 | 16 | Pach–Tóth 2020, *DCG* 63, 918–933, DOI 10.1007/s00454-018-00052-z, arXiv:1801.00721 | OK | CombinatorialMap planar edge bound (✅); crossing lemma for multigraphs (Thm 23 / Cor 24, deferred) | Direct✅ / Deferred🟡 | FAITHFUL | README L528–530 |
-| 17 | Lando–Zvonkin 2004, *Graphs on Surfaces* (Springer), DOI 10.1007/978-3-540-38361-1 | **LOC?** | Dart-permutation map model (CombinatorialMap def) | Direct✅ | FAITHFUL | README L531–534; §1.3.3 / Prop 1.3.16 location flagged |
+| 17 | Lando–Zvonkin 2004, *Graphs on Surfaces* (Springer), DOI 10.1007/978-3-540-38361-1 | OK | Dart-permutation map model (CombinatorialMap def) | Direct✅ | FAITHFUL | README L531–536; §1.3.3 "Maps: Permutational Model" confirmed (Def. 1.3.23 for formal map definition; Prop 1.3.16 gives ϕ=α⁻¹σ⁻¹ formula — not the definition); README updated to cite §1.3.3 + Def. 1.3.23 |
 | 18 | Newman 1951, *Elements of the Topology of Plane Sets*, 2nd ed. (CUP) | BOOK | Crosscut theorem (crossing-lemma A1 region recursion) | Deferred🟡 | FAITHFUL | README L535–536 |
 | 19 | Pommerenke 1992, *Boundary Behaviour of Conformal Maps* (Springer), ISBN 978-3-540-54751-8 | BOOK | Conformal-map boundary behaviour (crossing-lemma WIP) | Deferred🟡 | FAITHFUL | README L537–538 |
 
@@ -83,7 +83,7 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 |---|---|---|---|---|---|---|
 | 20 | Mazur–Ulam 1932, *C. R. Acad. Sci. Paris* 194, 946–948 | BOOK | Linear reduction for two-point isometry classification; the "≤2 isometries fix two points in ℝ²" count is an elementary corollary | Direct✅ | REFINEMENT | README L542–546: count is folklore, not attributed to the MU paper |
 | 21 | Lund–Sheffer–de Zeeuw 2016, *DCG* 56(2), 337–356, DOI 10.1007/s00454-016-9783-5, arXiv:1411.6868, SoCG DOI 10.4230/LIPIcs.SOCG.2015.537 | OK | Bisector-energy notion the Near Enemy Theorem **minimizes** | Direct✅ | REFINEMENT | README L547–552: they use it for upper bounds; minimization + floor `2n(n−1)` are ours |
-| 22 | Erdős–Füredi–Pach–Ruzsa 1993, *Discrete Math.* 111(1–3), 189–196 | **DOI?** | "Near enemy" lattice-sphere slice + generic projection (formalized); the external `n·2^{O(√log n)}` GP bound the corollary reduces to (**not** formalized) | Direct✅ / Background | FAITHFUL + NOT-CLAIMED | README L553–557, L117: external arithmetic "not formalized and not claimed" |
+| 22 | Erdős–Füredi–Pach–Ruzsa 1993, *Discrete Math.* 111(1–3), 189–196, DOI 10.1016/0012-365X(93)90155-M | OK | "Near enemy" lattice-sphere slice + generic projection (formalized); the external `n·2^{O(√log n)}` GP bound the corollary reduces to (**not** formalized) | Direct✅ / Background | FAITHFUL + NOT-CLAIMED | README L553–559, L117: external arithmetic "not formalized and not claimed"; DOI confirmed 2026-06-27 via ScienceDirect + Wikidata |
 | 23 | Solymosi–Tao 2012, *DCG* 48(2), 255–280, DOI 10.1007/s00454-012-9420-x, arXiv:1103.2926 | OK | §5.1 generic-projection-keeps-general-position trick (Near Enemy construction) | Direct✅ | FAITHFUL | README L558–561 (issue corrected 48(3)→48(2)) |
 | 24 | **Dumitrescu 2006**, *DCG* 36(4), 503–509, DOI 10.1007/s00454-006-1262-y | OK | eq. (5) isosceles count `(11n²−18n)/12` — headline of `IsoscelesCounting/` | Direct✅ | REFINEMENT | faithfulness doc §1 (scout-firsthand): circumscribed branch is a disclosed conditional restriction; naming hazards resolved |
 | 25 | Nivasch–Pach–Pinchasi–Zerbib 2013, *J. Comput. Geom.* 4(1), 1–12, DOI 10.20382/jocg.v4i1a1, arXiv:1207.1266 | OK | Independent secondary confirmation of Dumitrescu's constant (credits + sharpens) | Background | CONTEXTUAL | faithfulness doc §1.2; README L573–576 |
@@ -108,16 +108,8 @@ source · `NOT-CLAIMED` = cited result explicitly not formalized/claimed ·
 
 ## Open bibliographic gaps (the `DOI?` / `LOC?` residue)
 
-These are the entries where the README records an unverified identifier; resolving
-them needs a live publisher/arXiv lookup. None affects a faithfulness verdict —
-every flagged entry has venue + (where applicable) arXiv recorded, and the
-unverified item is a secondary identifier.
-
-| # | Reference | Gap |
-|---|---|---|
-| 12 | Pach–Sharir 1998 | journal DOI (CPC 7, 121–127) not directly confirmed; no arXiv |
-| 17 | Lando–Zvonkin 2004 | book DOI confirmed; §1.3.3 / Prop 1.3.16 *location* not re-verified |
-| 22 | Erdős–Füredi–Pach–Ruzsa 1993 | DOI not confirmed (venue *Discrete Math.* 111 present) |
+**All gaps resolved as of 2026-06-27.** Originally 3 flagged entries after the
+2026-06-24 pass; the remaining 3 resolved via publisher/Wikidata lookups 2026-06-27.
 
 **Resolved 2026-06-24** (journal DOIs confirmed via dblp + publisher pages):
 | # | Reference | Resolution |
@@ -125,6 +117,13 @@ unverified item is a secondary identifier.
 | 21 | Lund–Sheffer–de Zeeuw 2016 | DOI 10.1007/s00454-016-9783-5 (DCG 56(2), 337–356) confirmed |
 | 23 | Solymosi–Tao 2012 | DOI 10.1007/s00454-012-9420-x confirmed; **issue corrected 48(3)→48(2)** |
 | 25 | Nivasch–Pach–Pinchasi–Zerbib 2013 | DOI 10.20382/jocg.v4i1a1 (JoCG 4(1), 1–12) confirmed |
+
+**Resolved 2026-06-27** (Cambridge Core, ScienceDirect, Wikidata, Lando–Zvonkin text):
+| # | Reference | Resolution |
+|---|---|---|
+| 12 | Pach–Sharir 1998 | DOI 10.1017/S0963548397003192 confirmed via Cambridge Core; issue no. 1 added |
+| 17 | Lando–Zvonkin 2004 | §1.3.3 "Maps: Permutational Model" confirmed; Prop 1.3.16 gives ϕ=α⁻¹σ⁻¹ (not the definition — that is Def. 1.3.23); README corrected |
+| 22 | Erdős–Füredi–Pach–Ruzsa 1993 | DOI 10.1016/0012-365X(93)90155-M confirmed via ScienceDirect + Wikidata |
 
 ## Provenance — what this consolidates
 
@@ -141,8 +140,8 @@ unverified item is a secondary identifier.
 ## Coverage
 
 31 reference rows over 7 areas; every README §References entry represented.
-Bib-ID: 28 `OK`/`BOOK`, 3 flagged (`DOI?`×2, `LOC?`×1) after the 2026-06-24
-journal-DOI pass (rows 21/23/25 resolved). Claim-support verdicts:
+Bib-ID: all 31 rows `OK`/`BOOK` — zero flagged as of 2026-06-27 (rows 12/17/22
+resolved; rows 21/23/25 resolved 2026-06-24). Claim-support verdicts:
 no OVERCLAIM, no WRONG-CONSTANT; 5 REFINEMENT (each disclosed in source), 2
 NOT-CLAIMED (Guth–Katz headline; EFPR external bound — both explicitly excluded),
 rest FAITHFUL/CONTEXTUAL.
