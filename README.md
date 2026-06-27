@@ -7,9 +7,9 @@ ideally as mathlib contributions. Everything builds against **mathlib only**
 
 Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`).
 
-## Verification status (2026-06-23)
+## Verification status (2026-06-26)
 
-- **Build:** green — `lake build` completes all **8621 jobs**.
+- **Build:** green — `lake build` completes all **8642 jobs** (CI-verified 2026-06-25).
 - **Verified core:** the **65** theorems on the axiom gate (a superset of the
   `✅ VERIFIED` rows below) are mechanically re-verified axiom-clean — each
   depends only on a subset of the
@@ -264,7 +264,9 @@ lake exe cache get
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
 depends on `sorryAx` or a custom axiom. Last run (2026-06-23): all 65 listed
 theorems clean (each depends only on a subset of
-`[propext, Classical.choice, Quot.sound]`), full build green (8621 jobs). The
+`[propext, Classical.choice, Quot.sound]`), full build green (8621 jobs;
+subsequent refactoring commits verified by CI at 8642 jobs 2026-06-25 with no
+change to the verified core). The
 verified core defines no custom `axiom` and uses no `native_decide` / `unsafe` /
 `@[extern]` / `@[implemented_by]`, so the only disallowed axiom that could appear
 is `sorryAx`.

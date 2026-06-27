@@ -57,9 +57,7 @@ jobs:
     name: leanprover/comparator (nanoda + default kernel)
     runs-on: ubuntu-latest
     # Tag-pinned to the project's lean-toolchain; the pairing + default-kernel leg
-    # are validated locally. Kept non-blocking until a first green CI run confirms
-    # the real-landrun + nanoda legs on the runner; make `required` in branch
-    # protection after that.
+    # are validated locally. The real-landrun + nanoda legs run here on Linux.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -89,7 +87,7 @@ jobs:
           # with this repo's own comparator/ directory.
           # landrun (real sandbox, Linux only) — built from source per the README.
           git clone --depth 1 https://github.com/Zouuup/landrun "$RUNNER_TEMP/landrun"
-          ( cd "$RUNNER_TEMP/landrun" && (go build -o landrun ./... || go build -o landrun .) )
+          ( cd "$RUNNER_TEMP/landrun" && go build -o landrun ./cmd/landrun )
           echo "COMPARATOR_LANDRUN=$RUNNER_TEMP/landrun/landrun" >> "$GITHUB_ENV"
           # comparator AT THE TAG matching this repo's lean-toolchain, so its
           # bundled lean4export builds against the SAME Lean as the project.

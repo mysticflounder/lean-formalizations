@@ -29,7 +29,7 @@ These are distinct from **kernel verification** (compiles, `#print axioms` clean
 - `docs/references/TaoVu.AddComb.pdf` — Tao & Vu, *Additive Combinatorics* (CUP 2006). **Local-only, gitignored (copyrighted).**
 - `docs/references/FoxSudakov_DependentRandomChoice_arxiv_0909.3271v2.pdf` — Fox & Sudakov, *Dependent Random Choice*, *RS&A* 38 (2011) 68–99, arXiv:0909.3271. Gitignored PDF (arXiv source is redistributable; track the link).
 
-Last updated: 2026-06-18. **BSG live path: 100% line-verified** against Tao–Vu §6.4
+Last updated: 2026-06-26. **BSG live path: 100% line-verified** against Tao–Vu §6.4
 + Fox–Sudakov §5 (done 2026-06-01, build then 8475 jobs); all 3 public theorems
 empirically axiom-clean (`[propext, Classical.choice, Quot.sound]`, verified — not
 inferred). **2026-06-18:** the full advertised verified surface (53 theorems) was
@@ -67,6 +67,13 @@ closure is conditional (`SectionThreeAssembly.lean`, threaded through the three
 named §3 inputs) and is **not** on the unconditional axiom gate. Full library
 re-verified via `scripts/check-axioms.sh`: all **65** gated theorems axiom-clean
 (`[propext, Classical.choice, Quot.sound]`); build green **8621 jobs**.
+
+**2026-06-25 (CI re-verification):** the crossing-lemma / PachSharir WIP modules were
+refactored (PLArc → PolygonalArc rename; PLArc.lean, ResidualMapProperties, SzemerediTrotter
+each sharded into bounded sub-modules + coordinator). 204 linter warnings cleared and 49
+inaccurate docstrings corrected across 37 files. No changes to the verified core or the axiom
+gate. Full build CI-verified at **8642 jobs**; all 65 gated theorems remain axiom-clean
+(verified by the `conformance` CI job on every push).
 
 ---
 
