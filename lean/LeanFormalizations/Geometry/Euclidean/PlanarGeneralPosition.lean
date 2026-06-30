@@ -1,7 +1,14 @@
 /-
+Copyright 2025 The Formal Conjectures Authors.
 Copyright (c) 2026 Adam McKenna. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Adam McKenna
+Authors: The Formal Conjectures Authors, Adam McKenna
+
+The definitions in this file are copied verbatim from the formal-conjectures
+project (https://github.com/google-deepmind/formal-conjectures), Apache 2.0.
+Original files: FormalConjecturesForMathlib/Geometry/2d.lean and
+FormalConjecturesForMathlib/Data/Set/Triplewise.lean.
+Adam McKenna: selection, adaptation note, and integration into this project.
 -/
 import Mathlib
 
