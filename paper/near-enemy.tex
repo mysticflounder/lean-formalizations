@@ -1,0 +1,413 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage[margin=1.1in]{geometry}
+
+% ----------------------------------------------------------------
+% Theorem environments
+% ----------------------------------------------------------------
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% ----------------------------------------------------------------
+% Notation
+% ----------------------------------------------------------------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathrm{E}}         % bisector energy
+\newcommand{\Erot}{\mathrm{E}_{\mathrm{rot}}} % rotation energy
+\newcommand{\bis}[2]{\beta(#1,#2)}  % perpendicular bisector
+\newcommand{\ip}[2]{\langle #1,#2\rangle}
+\newcommand{\norm}[1]{\|#1\|}
+\DeclareMathOperator{\card}{card}
+
+% ----------------------------------------------------------------
+\begin{document}
+
+\title{The minimum bisector energy of a planar point set}
+\author{Adam McKenna}
+\date{}
+\maketitle
+
+% ----------------------------------------------------------------
+\begin{abstract}
+The \emph{bisector energy} $\E(P)$ of a finite point set $P\subset\R^2$, introduced
+by Lund, Sheffer, and de~Zeeuw, counts ordered quadruples of distinct point pairs
+sharing a perpendicular bisector.
+We prove that $\E(P)\ge 2n(n-1)$ for every $n$-point planar set,
+with equality if and only if every two distinct point pairs have distinct
+perpendicular bisectors (\emph{bisector-injective}).
+The bound is tight: for every finite set $G$ in any Euclidean space with no
+three collinear points, a single linear projection $T\colon\R^d\to\R^2$ exists
+such that the image $T(G)$ is bisector-injective, hence attains the floor
+$\E(T(G))=2n(n-1)$.
+The projected set also has zero rotational energy and its distance multiset
+is in bijection with the $\pm$-difference classes of $G$.
+The proof is verified in Lean~4 against standard Mathlib axioms only
+(propext, Classical.choice, Quot.sound).
+\end{abstract}
+
+% ----------------------------------------------------------------
+\section{Introduction}
+
+For a finite set $P\subset\R^2$ with $|P|=n$, define the \emph{bisector energy}
+\[
+  \E(P) \;=\;
+  \bigl|\{(a,b,c,e)\in P^4 : a\ne b,\; c\ne e,\;
+         \bis{a}{b} = \bis{c}{e}\}\bigr|,
+\]
+where $\bis{p}{q} = \{x\in\R^2 : |x-p|=|x-q|\}$ is the perpendicular bisector
+of the pair $(p,q)$.
+This quantity was introduced by Lund, Sheffer, and de~Zeeuw~\cite{LSdZ16},
+who proved the upper bound
+\[
+  \E(P) \;=\; O\!\left(M(n)^{2/5}\,n^{12/5+\varepsilon}+M(n)\,n^2\right),
+\]
+where $M(n)$ is the maximum number of points of $P$ on any line or circle,
+and applied it to obtain structural results about point sets with few distinct
+distances.
+
+The present note addresses the complementary question: \emph{how small can
+$\E(P)$ be?}
+
+Every unordered pair $\{a,b\}\subseteq P$ ($a\ne b$) contributes exactly four
+ordered quadruples to $\E(P)$ by taking both orderings of each pair:
+$(a,b,a,b)$, $(a,b,b,a)$, $(b,a,a,b)$, $(b,a,b,a)$.
+These \emph{trivial quadruples} account for $4\binom{n}{2}=2n(n-1)$ contributions,
+so $\E(P)\ge 2n(n-1)$ for every $P$.
+A nontrivial contribution arises precisely when two distinct unordered pairs
+share a perpendicular bisector.
+We say $P$ is \emph{bisector-injective} if no such coincidence occurs,
+i.e.\ the map $\{a,b\}\mapsto \bis{a}{b}$ is injective on unordered pairs.
+
+The main theorem shows that the floor $2n(n-1)$ is attained.
+
+\begin{theorem}[Near Enemy Theorem for Bisector Energy]
+\label{thm:main}
+Let $G$ be a finite set in a Euclidean space $\R^d$ with no three collinear
+points, and let $n=|G|$.  There exists a linear map
+$T\colon\R^d\to\R^2$ such that:
+\begin{enumerate}
+  \item[\rm(a)] $T$ is injective on $G$;
+  \item[\rm(b)] $\E(T(G)) = 2n(n-1)$ \emph{(bisector-energy floor)};
+  \item[\rm(c)] $\E(T(G))\le \E(P')$ for every $n$-point planar set $P'$
+        \emph{(absolute minimality)};
+  \item[\rm(d)] $T(G)$ has no three collinear points and no four concyclic
+        points \emph{(full general position)};
+  \item[\rm(e)] $\Erot(T(G))=0$ \emph{(zero rotational energy)};
+  \item[\rm(f)] the distance multiset of $T(G)$ is in bijection with
+        the $\pm$-difference classes of $G$
+        \emph{(distance transport)}.
+\end{enumerate}
+\end{theorem}
+
+The EFPR construction---the lattice-sphere slice $G=\{x\in[-h,h]^d\cap\Z^d :
+\norm{x}^2=R\}$ of Erd\H{o}s, F\"{u}redi, Pach, and Ruzsa~\cite{EFPR93}---satisfies
+the no-three-collinear hypothesis (a line meets a sphere in at most two points),
+so the theorem applies.  The projected EFPR family is the canonical minimizer.
+
+\medskip
+\noindent\textbf{Notation.}
+We write $\ip{\cdot}{\cdot}$ for the standard inner product on $\R^d$,
+$\norm{\cdot}$ for the induced norm, and $|S|$ for the cardinality of a
+finite set $S$.
+For a linear map $T\colon\R^d\to\R^2$ we write $T_1,T_2\in\R^d$ for its
+two row vectors, so $T(v)=({\ip{T_1}{v}},{\ip{T_2}{v}})$.
+The \emph{$\pm$-difference classes} of $G$ are the equivalence classes of
+$G{-}G\setminus\{0\}:=\{a-b:a,b\in G,\,a\ne b\}$ under $u\sim v$ iff $u=\pm v$.
+
+% ----------------------------------------------------------------
+\section{Definitions and the lower bound}
+
+\begin{definition}
+A finite set $P\subset\R^2$ is \emph{bisector-injective} if
+$\bis{a}{b}\ne\bis{c}{e}$ for every two distinct unordered pairs
+$\{a,b\},\{c,e\}\subseteq P$ with $a\ne b$ and $c\ne e$.
+\end{definition}
+
+\begin{lemma}[Floor and equality]
+\label{lem:floor}
+For every $n$-point set $P\subset\R^2$:
+\[
+  \E(P) \;\ge\; 2n(n-1),
+\]
+with equality if and only if $P$ is bisector-injective.
+\end{lemma}
+
+\begin{proof}
+For each ordered pair $(a,b)$ with $a\ne b$, the quadruples $(a,b,a,b)$ and
+$(a,b,b,a)$ both lie in the defining set of $\E(P)$ since $\bis{a}{b}=\bis{b}{a}$.
+As $(a,b)$ ranges over the $n(n-1)$ ordered pairs with $a\ne b$, these $2n(n-1)$
+quadruples are pairwise distinct (the first ordered pair $(a,b)$ and the swap bit
+together uniquely determine the quadruple), so $\E(P)\ge 2n(n-1)$.
+
+If $P$ is bisector-injective then every quadruple counted by $\E(P)$ has
+$\bis{a}{b}=\bis{c}{e}$, hence $\{a,b\}=\{c,e\}$ as unordered pairs,
+so the quadruple is trivial.  Thus $\E(P)=2n(n-1)$.
+
+Conversely, if $P$ is not bisector-injective there exist distinct unordered
+pairs $\{a,b\}\ne\{c,e\}$ with $\bis{a}{b}=\bis{c}{e}$.
+The four ordered quadruples $(a,b,c,e)$, $(a,b,e,c)$, $(b,a,c,e)$, $(b,a,e,c)$
+are all counted by $\E(P)$ and are nontrivial, giving $\E(P)>2n(n-1)$.
+\end{proof}
+
+% ----------------------------------------------------------------
+\section{The key criterion: shared bisectors upstairs}
+
+The proof of Theorem~\ref{thm:main} uses a criterion that translates a shared
+bisector downstairs into algebraic conditions on the preimages upstairs.
+
+\begin{lemma}[Shared-bisector conditions]
+\label{lem:shared-bis}
+Let $p,q,p',q'\in\R^2$.  If $\bis{p}{q}=\bis{p'}{q'}$ then:
+\begin{enumerate}
+  \item[\rm(i)] $q'-p'=t(q-p)$ for some $t\in\R$ \emph{(parallel differences)};
+  \item[\rm(ii)] $\ip{p+q-(p'+q')}{q-p}=0$
+        \emph{(midpoint difference orthogonal to direction)}.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Two perpendicular bisectors are equal as affine subspaces if and only if they
+have the same direction and share a point.
+The direction of $\bis{p}{q}$ is the orthogonal complement of $\R(q-p)$;
+equal directions give (i).
+Both midpoints $\frac{p+q}{2}$ and $\frac{p'+q'}{2}$ lie on the common bisector,
+so their difference lies in its direction subspace, giving (ii).
+\end{proof}
+
+\begin{lemma}[Upstairs line rigidity]
+\label{lem:rigid}
+Let $G\subset\R^d$ have no three collinear points, and let $a,b,c,e\in G$ with
+$a\ne b$ and $c\ne e$.  If
+\begin{enumerate}
+  \item[\rm(i)] $e-c = t(b-a)$ for some $t\in\R$, and
+  \item[\rm(ii)] $\ip{a+b-(c+e)}{b-a}=0$,
+\end{enumerate}
+then $\{a,b\}=\{c,e\}$.
+\end{lemma}
+
+\begin{proof}
+From~(i), all four points lie on the affine line $\{a+s(b-a):s\in\R\}$.
+Write $c=a+s(b-a)$ and $e=a+(s+t)(b-a)$ for some $s\in\R$.
+Substituting into~(ii):
+\[
+  \ip{a+b-(c+e)}{b-a}
+  \;=\; \ip{(1-2s-t)(b-a)}{b-a}
+  \;=\; (1-2s-t)\norm{b-a}^2 \;=\; 0.
+\]
+Since $a\ne b$, we get $t=1-2s$, hence $e=a+(1-s)(b-a)$.
+If $s\notin\{0,1\}$ then $a$, $b$, $c=a+s(b-a)$ are three distinct collinear
+points, contradicting the no-three-collinear hypothesis.
+Hence $s\in\{0,1\}$: if $s=0$ then $c=a$ and $e=b$; if $s=1$ then $c=b$ and $e=a$.
+In either case $\{c,e\}=\{a,b\}$.
+\end{proof}
+
+\begin{remark}
+The sphere-slice case (where $G$ lies on a sphere) gives a cleaner proof of
+Lemma~\ref{lem:rigid}: chords of a sphere with the same midpoint have equal
+length (the parallelogram law expresses $\norm{a-b}^2$ in terms of $\norm{a+b}/2$
+and the radius, both fixed by the common midpoint and sphere).
+Two parallel chords with equal length and the same midpoint then coincide:
+the midpoint pins the foot of the perpendicular from the center, and equal
+length pins the two endpoints symmetrically about it.
+The no-three-collinear hypothesis makes the sphere-slice hypothesis unnecessary
+for the headline theorem, since a sphere already has no three collinear points.
+\end{remark}
+
+% ----------------------------------------------------------------
+\section{Generic projections}
+
+\begin{definition}
+A linear map $T\colon\R^d\to\R^2$ is \emph{generic for $G$} if:
+\begin{enumerate}
+  \item[(inj)] $T(a)\ne T(b)$ for all distinct $a,b\in G$;
+  \item[(avoid)] for every $a,b,c,e\in G$ with $a\ne b$, $c\ne e$, and
+        $\{a,b\}\ne\{c,e\}$: it is not the case that both
+        $T(e)-T(c)=t\cdot(T(b)-T(a))$ for some $t\in\R$ \emph{and}
+        $\ip{T(a)+T(b)-(T(c)+T(e))}{T(b)-T(a)}=0$;
+  \item[(sep)] for every $a,b,c,e\in G$ with $a-b\ne\pm(c-e)$:
+        $\norm{T(a-b)}^2\ne\norm{T(c-e)}^2$.
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}[Generic projection implies bisector-injectivity]
+\label{lem:gen-implies-inj}
+If $T$ is generic for $G$ then $T(G)$ is bisector-injective.
+\end{lemma}
+
+\begin{proof}
+Suppose $T(a),T(b),T(c),T(e)\in T(G)$ satisfy
+$\bis{T(a)}{T(b)}=\bis{T(c)}{T(e)}$ with $T(a)\ne T(b)$ and $T(c)\ne T(e)$.
+By injectivity of $T$ on $G$, we have $a\ne b$ and $c\ne e$.
+By Lemma~\ref{lem:shared-bis}, conditions (i) and (ii) hold downstairs.
+Linearity of $T$ lifts them: $T(e-c)=tT(b-a)$ and $\ip{T(a+b-(c+e))}{T(b-a)}=0$.
+The avoid condition then forces $\{a,b\}=\{c,e\}$, hence $\{T(a),T(b)\}=\{T(c),T(e)\}$.
+\end{proof}
+
+\begin{lemma}[Existence of a generic projection]
+\label{lem:exists-gen}
+If $G\subset\R^d$ is a finite set with no three collinear points, a generic
+projection $T\colon\R^d\to\R^2$ for $G$ exists.
+\end{lemma}
+
+\begin{proof}
+We view the rows $T_1,T_2\in\R^d$ as $2d$ free real variables.
+For each off-pair quadruple $(a,b,c,e)$ (with $a\ne b$, $c\ne e$, $\{a,b\}\ne\{c,e\}$),
+define two polynomials in $(T_1,T_2)$:
+\begin{align*}
+  D(a,b,c,e) &= \ip{T_1}{b-a}\ip{T_2}{e-c} - \ip{T_2}{b-a}\ip{T_1}{e-c}, \\
+  H(a,b,c,e) &= \ip{T_1}{a+b-(c+e)}\ip{T_1}{b-a}
+                +\ip{T_2}{a+b-(c+e)}\ip{T_2}{b-a}.
+\end{align*}
+If both $D=0$ and $H=0$ at some $T$, then condition~(avoid) fails,
+and the proof of Lemma~\ref{lem:gen-implies-inj} would give $\{a,b\}=\{c,e\}$,
+contradicting the off-pair assumption.
+Hence for each off-pair quadruple, $D^2+H^2$ is a nonzero polynomial in $2d$ variables;
+its real zero-set has measure zero.
+Similarly, for each pair of distinct $\pm$-difference classes $[u]\ne[v]$ in $G{-}G\setminus\{0\}$,
+the polynomial $\sum_k\ip{T_k}{u-v}\ip{T_k}{u+v}$ (encoding condition~(sep)) is nonzero:
+since $u\ne\pm v$, both $u-v\ne 0$ and $u+v\ne 0$, so neither linear factor vanishes
+identically, and their inner product $\norm{Tu}^2-\norm{Tv}^2$ is a nonzero degree-2
+polynomial. Likewise the injectivity condition~(inj) cuts out a measure-zero set.
+
+The set of $(T_1,T_2)\in\R^{2d}$ satisfying all three conditions is the complement
+of finitely many measure-zero algebraic sets, hence nonempty (in fact dense)~\cite{ST12}.
+\end{proof}
+
+% ----------------------------------------------------------------
+\section{Proof of Theorem~\ref{thm:main}}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Parts (a)--(c) combine Lemmas~\ref{lem:floor}, \ref{lem:gen-implies-inj},
+and~\ref{lem:exists-gen}: take $T$ generic for $G$, which exists by
+Lemma~\ref{lem:exists-gen}.  Then $T$ is injective on $G$ (a), $T(G)$ is
+bisector-injective so $\E(T(G))=2n(n-1)$ by Lemma~\ref{lem:floor} (b),
+and $2n(n-1)$ is the global minimum by the lower bound of
+Lemma~\ref{lem:floor} (c).
+
+For part (d), one adds two more avoidance conditions to the definition of generic:
+no collinear triple and no concyclic quadruple in $T(G)$.
+For collinear triples: $T(a),T(b),T(c)$ are collinear iff
+$D_{abc}(T)=\ip{T_1}{b-a}\ip{T_2}{c-a}-\ip{T_2}{b-a}\ip{T_1}{c-a}=0$.
+Since $a,b,c$ are not collinear in $G$, the vectors $b-a$ and $c-a$ are linearly
+independent, so $D_{abc}$ is a nonzero polynomial.
+For concyclic quadruples: the $4\times 4$ circle determinant is likewise a nonzero
+polynomial in $(T_1,T_2)$, provided no three of the four upstairs points are
+collinear---a condition guaranteed by the no-three-collinear hypothesis on $G$.
+The same measure-zero argument applies.
+
+For part (e), write $\Erot(T(G))$ as the count of ordered quadruples
+$(p,q,r,s)\in T(G)^4$ with $p\ne q$, $r\ne s$, $|p-q|=|r-s|$, and
+$p-q\notin\{r-s,-(r-s)\}$.  The condition $|p-q|=|r-s|$ is equivalent to
+$\norm{T(a-b)}=\norm{T(c-e)}$, which expands as
+$\norm{T(a-b)}^2 - \norm{T(c-e)}^2
+ = \sum_k \ip{T_k}{(a-b)-(c-e)}\ip{T_k}{(a-b)+(c-e)} = 0$.
+Condition~(sep) forces $a-b=\pm(c-e)$,
+i.e.\ $p-q=\pm(r-s)$, so the proper-rotation channel is empty and
+$\Erot(T(G))=0$.
+
+For part (f), the same separation argument shows that the map
+$T(G)-T(G)\setminus\{0\}\to G-G\setminus\{0\}$ preserves $\pm$-classes,
+giving a bijection between the sets of distinct distances.
+\end{proof}
+
+% ----------------------------------------------------------------
+\section{Corollaries}
+
+\begin{corollary}[Sphere-slice form]
+\label{cor:sphere}
+Let $G$ be a finite subset of a sphere in $\R^d$, $|G|=n$.  Then a linear map
+$T\colon\R^d\to\R^2$ exists satisfying {\rm(a)}--{\rm(f)} of
+Theorem~\ref{thm:main}.
+\end{corollary}
+
+\begin{proof}
+A line meets a sphere in at most two points, so $G$ has no three collinear
+points.  Apply Theorem~\ref{thm:main}.
+\end{proof}
+
+\begin{corollary}[EFPR minimizer]
+The EFPR lattice-sphere-slice family $G = \{x\in[-h,h]^d\cap\Z^d :
+\norm{x}^2=R\}$~\cite{EFPR93} admits a planar projection that attains the
+bisector-energy floor.  In particular, the minimum bisector energy of an
+$n$-point planar set is exactly $2n(n-1)$.
+\end{corollary}
+
+\begin{proof}
+Apply Corollary~\ref{cor:sphere} to the EFPR lattice points on a sphere.
+\end{proof}
+
+\begin{remark}[Relation to LSdZ]
+Lund, Sheffer, and de~Zeeuw~\cite{LSdZ16} remark in passing that
+$\E(P) = \Omega(n^2)$, but do not extract the constant $2n(n-1)$, state the
+floor, or characterize equality.
+The minimization direction (Lemma~\ref{lem:floor}), the equality condition
+(bisector-injectivity), and the identification of the EFPR projection as
+a minimizer (Corollary~\ref{cor:sphere}) appear to be new.
+\end{remark}
+
+\begin{remark}[Rotation energy]
+Part~(e) says the near-enemy projection has zero rotational energy in the
+sense of the Elekes--Sharir / Guth--Katz framework~\cite{ES11,GK15}: every
+congruent quadruple $(a,b,c,e)$ in $T(G)$ is realized by a translation
+($a-b=c-e$) or half-turn ($a-b=-(c-e)$), never by a proper rotation.
+This is the strongest possible statement: a set with any two congruent pairs
+at a proper-rotation angle apart contributes to the rotation channel.
+\end{remark}
+
+% ----------------------------------------------------------------
+\section{Verification}
+
+All results in this paper are verified in Lean~4 using Mathlib.
+The Lean source is
+\texttt{NearEnemyTheorem.lean} in the \texttt{NearEnemy} namespace
+of the \texttt{lean-formalizations} repository.
+The headline Lean theorem corresponding to Theorem~\ref{thm:main} is
+\begin{center}
+\texttt{nearEnemy\_noThreeCollinear\_exists\_bisectorEnergy\_minimal}\\
+\texttt{\_image\_generalPosition\_distanceTransport}.
+\end{center}
+Running \texttt{\#print axioms} on this theorem confirms that the proof
+depends only on \texttt{propext}, \texttt{Classical.choice}, and
+\texttt{Quot.sound} --- the standard Lean/Mathlib axioms.
+No \texttt{sorry} appears anywhere in the proof chain.
+
+% ----------------------------------------------------------------
+\begin{thebibliography}{9}
+
+\bibitem{EFPR93}
+P.~Erd\H{o}s, Z.~F\"{u}redi, J.~Pach, and I.~Z.~Ruzsa,
+\emph{The grid revisited},
+Discrete Math.\ \textbf{111} (1993), no.\ 1--3, 189--196.
+
+\bibitem{ES11}
+G.~Elekes and M.~Sharir,
+\emph{Incidences in three dimensions and distinct distances in the plane},
+Combin.\ Probab.\ Comput.\ \textbf{20} (2011), no.\ 4, 571--608.
+
+\bibitem{GK15}
+L.~Guth and N.~H.~Katz,
+\emph{On the Erd\H{o}s distinct distances problem in the plane},
+Ann.\ of Math.\ (2)\ \textbf{181} (2015), no.\ 1, 155--190.
+
+\bibitem{LSdZ16}
+B.~Lund, A.~Sheffer, and F.~de~Zeeuw,
+\emph{Bisector energy and few distinct distances},
+Discrete Comput.\ Geom.\ \textbf{56} (2016), no.\ 2, 337--356.
+arXiv:1411.6868.
+
+\bibitem{ST12}
+J.~Solymosi and T.~Tao,
+\emph{An incidence theorem in higher dimensions},
+Discrete Comput.\ Geom.\ \textbf{48} (2012), no.\ 2, 255--280.
+arXiv:1103.2926.
+
+\end{thebibliography}
+
+\end{document}
