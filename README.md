@@ -58,7 +58,8 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 | [`threeAPFree_of_forall_not_collinear`](lean/LeanFormalizations/Combinatorics/Additive/ThreeAPFreeOfNoThreeCollinear.lean#L24) | In a real vector space, no three collinear points ⟹ `ThreeAPFree`: since `a + c = 2b` makes `b` the midpoint of `a` and `c`, a no-three-collinear set carries no nontrivial 3-term AP. The geometric source of `ThreeAPFree` hypotheses for additive-energy arguments. |
 
 `BSGEnergyToGraph.lean` supplies the supporting energy → popular-difference-graph
-connector. mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine
+connector, implementing the dependent-random-choice graph argument of Fox-Sudakov
+[2011]. mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine
 gap while reusing mathlib's `Finset.addEnergy`. **All theorems above are
 axiom-clean.**
 
@@ -78,8 +79,10 @@ the bound through a minimum-enclosing-circle cap decomposition, the cyclic-order
 construction for convex-independent sets, the cap-local saving lemmas, and a
 cap-size Cauchy–Schwarz step. The `(11n²−18n)/12` bound is Dumitrescu's
 (eq. (5)); the Lean development of the cap machinery is this project's
-formalization. Ported from a separate project; the problem-specific lower-bound
-/ `K4` / removable-vertex machinery is deliberately **not** included.
+formalization. Nivasch-Pach-Pinchasi-Zerbib [2013] later sharpen this bound;
+only Dumitrescu's original is formalized here. Ported from a separate project;
+the problem-specific lower-bound / `K4` / removable-vertex machinery is
+deliberately **not** included.
 
 | Result | What it asserts |
 |---|---|
@@ -101,7 +104,10 @@ byproducts (a universal zero-rotation-energy projection and an isosceles-free
 sphere projection). Engine: a generic-avoidance compiler -- one master
 `MvPolynomial` product over five constraint-polynomial families, with
 `MvPolynomial.funext` used exactly once. **Both modules are axiom-clean.** The
-Near Enemy module is self-contained: it imports only Mathlib.
+Near Enemy module is self-contained: it imports only Mathlib. A companion
+paper at [`paper/near-enemy.tex`](paper/near-enemy.tex) gives the full proof
+in DCG/arXiv style; it labels the six conclusions (a)-(f) where the summary
+above collapses them to (a)-(d).
 
 **Provenance of the components.** We coined the name "Near Enemy Theorem" for
 the *combination* -- one generic projection simultaneously witnessing the whole
@@ -163,7 +169,9 @@ Bézout-type content. It is **fully `sorry`-free** and confirmed axiom-clean.
 ### `lean/LeanFormalizations/Combinatorics/CombinatorialMap/` -- combinatorial maps + planar edge bound ([arXiv:1801.00721](https://arxiv.org/abs/1801.00721))
 
 A standalone, mathlib-only library (promoted out of the Pach–de Zeeuw tree once
-it was confirmed complete). All headlines axiom-clean:
+it was confirmed complete). The dart-permutation model (`σ/α/ϕ` on a finite
+dart set) follows Lando-Zvonkin [2004], §1.3.3 (Def. 1.3.23). All headlines
+axiom-clean:
 
 | Result | What it asserts |
 |---|---|
@@ -262,7 +270,7 @@ lake exe cache get
 
 `scripts/check-axioms.sh` runs `#print axioms` on the full advertised list
 (maintained in `scripts/axiom-check.lean`) and fails if any listed theorem
-depends on `sorryAx` or a custom axiom. Last run (2026-06-23): all 65 listed
+depends on `sorryAx` or a custom axiom. Last CI run (2026-06-25): all 65 listed
 theorems clean (each depends only on a subset of
 `[propext, Classical.choice, Quot.sound]`), full build green (8621 jobs;
 subsequent refactoring commits verified by CI at 8642 jobs 2026-06-25 with no
@@ -336,11 +344,15 @@ general→irreducible component reduction (`ComponentSplit.lean`, three `sorry`'
 lemmas, currently unwired/deferred). This release is deliberately scoped to the
 irreducible-curve case.
 
-- **`CrossingLemma/`** -- the multigraph crossing lemma. Its complete
+- **`CrossingLemma/`** -- the multigraph crossing lemma, formalizing the
+  Ajtai-Chvátal-Newborn-Szemerédi (1982) / Leighton (1983) / Székely (1997)
+  crossing-number bound line and Pach-Tóth's multigraph extension. Its complete
   combinatorial-map / Euler-bound / edge-insertion substrate has already been
   promoted to the standalone, sorry-free `Combinatorics/CombinatorialMap/` and
   `Combinatorics/SimpleGraph/` libraries above. What remains here is the
-  unfinished drawing→map bridge and its residual-map / plane-topology helpers
+  unfinished drawing→map bridge and its residual-map / plane-topology helpers;
+  the plane-topology arguments invoke the Crosscut theorem [Newman 1951] and
+  boundary arc properties [Pommerenke 1992].
   (`ResidualMapProperties.lean`, `PolygonalArc.lean`, `PLCollarSeparation.lean`,
   `PlaneArcSeparation.lean`, etc.). The full crossing lemma still bottoms out in
   a labelled conjectured geometric residual,
@@ -354,10 +366,11 @@ irreducible-curve case.
   (`sorry`) is a documented dead-end, not used downstream. See `ROUTE_C_PLAN.md`
   for the geometric-residual plan and `docs/AUDIT_MATRIX.md` for the lemma-level
   status.
-- **`PachSharir/`** -- the Pach–Sharir incidence bound. `Theorem23.lean` states
+- **`PachSharir/`** -- the Pach–Sharir incidence bound [Pach-Sharir 1998]. `Theorem23.lean` states
   the incidence statement-surfaces ([`Theorem23Statement`](lean/LeanFormalizations/PachDeZeeuw/PachSharir/Theorem23.lean#L76) / [`Corollary24Statement`](lean/LeanFormalizations/PachDeZeeuw/PachSharir/Theorem23.lean#L93),
   `def … : Prop`, sorry-free); the live `sorry`s are in
-  `PachSharir/SzemerediTrotter.lean` (the Szemerédi–Trotter multigraph assembly).
+  `PachSharir/SzemerediTrotter.lean` (the Szemerédi–Trotter multigraph assembly
+  [Szemerédi-Trotter 1983]).
 - **`ComponentSplit.lean` (L2)** -- component split for bounded-degree plane
   curves. Definitions
   [`zeroSet`](lean/LeanFormalizations/PachDeZeeuw/ComponentSplit.lean#L53) /
@@ -488,12 +501,6 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Fox, J. and Sudakov, B. "Dependent random choice." *Random Structures &
   Algorithms* **38** (2011), 68–99. DOI: 10.1002/rsa.20344. arXiv:0909.3271.
   (§5 -- the dependent-random-choice track.)
-- Petridis, G. "New proofs of Plünnecke-type estimates for product sets in
-  groups." *Combinatorica* **32** (2012), no. 6, 721–733.
-  DOI: 10.1007/s00493-012-2818-5. arXiv:1101.3507.
-- Reiher, C. and Schoen, T. "Note on the theorem of Balog, Szemerédi, and
-  Gowers." *Combinatorica* **44** (2024), no. 3, 691–698.
-  DOI: 10.1007/s00493-024-00092-5. arXiv:2308.10245.
 
 ### Distinct distances & incidences -- `PachDeZeeuw/`, `Geometry/ElekesSharir/`, `ElekesSharirGuthKatz/`
 
