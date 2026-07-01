@@ -421,6 +421,20 @@ A partly-verified by-product also lives in this program:
   (`∃ C, …`) form; the **sharp** `≤ d₁·d₂` bound is not yet stated or
   proven -- see `ROADMAP.md`.
 
+## Partial / work-in-progress 🟡 -- `lean/LeanFormalizations/Geometry/Euclidean/CayleyDesignEmptiness.lean`
+
+Formalization in progress of the odd-`n` emptiness of the gauged Cayley
+equal-distance variety (cyclic Cayley design `ℓ(i,j) = i+j` on `ZMod n`; a
+result from a separate research project, PROVEN and adversarially audited
+there). The headline `CayleyDesigns.equalDistanceSystem_empty_of_odd` is
+assembled from two cases, both currently `sorry`: the general odd-`n ≥ 17`
+analytic argument (`equalDistanceSystem_empty_of_ge_17`) and the finite cases
+`n ∈ {7,9,11,13,15}` (`equalDistanceSystem_empty_of_small`, currently only
+verified computationally via an exact-ℚ Gröbner basis, not yet a Lean proof).
+The discrete-Fourier reduction identity that the `n ≥ 17` argument is built on
+(`dft_reduction` and its three specializations `dft_reduction_diag/key/key0`)
+is proven, `sorry`-free, and axiom-clean.
+
 ## Statement-surfaces ⚪ -- `lean/LeanFormalizations/PachDeZeeuw/` (Milnor 1964; Thom 1965; Oleĭnik–Petrovskiĭ 1949)
 
 These define a `Prop` but do **not** prove it -- accepted classical inputs:
