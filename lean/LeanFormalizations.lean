@@ -22,6 +22,12 @@ import LeanFormalizations.Combinatorics.UnitDistance.Counting
 -- absent from mathlib) consumed by the ESGK base layer below.
 import LeanFormalizations.Geometry.Euclidean.PlanarGeneralPosition
 import LeanFormalizations.Geometry.Euclidean.IsometryClassification
+-- Odd-n emptiness of the Cayley equal-distance variety (gauged cyclic Cayley
+-- design ℓ(i,j)=i+j on ZMod n): work in progress, headline theorem currently
+-- `sorry`-scoped into the n≥17 analytic case and the n∈{7,...,15} finite
+-- case (see module docstring). Formalization of erdos-98's
+-- docs/problem-98-klow-odd-cayley-emptiness-2026-06-25.md.
+import LeanFormalizations.Geometry.Euclidean.CayleyDesignEmptiness
 -- Near Enemy Theorem for Bisector Energy: full chain from generic-projection
 -- algebra and sphere-slice rigidity to the unconditional existence theorem
 -- (complete, axiom-clean). Canonical home; consumed by erdos-98 as a lake dep.
