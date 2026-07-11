@@ -46,8 +46,8 @@ The bound is tight: for every finite set $G$ in any Euclidean space with no
 three collinear points, a single linear projection $T\colon\R^d\to\R^2$ exists
 such that the image $T(G)$ is bisector-injective, hence attains the floor
 $\E(T(G))=2n(n-1)$.
-The projected set also has zero rotational energy and its distance multiset
-is in bijection with the $\pm$-difference classes of $G$.
+The projected set also has zero rotational energy and its set of distinct
+distances is in bijection with the $\pm$-difference classes of $G$.
 The proof is verified in Lean~4 against standard Mathlib axioms only
 (propext, Classical.choice, Quot.sound).
 \end{abstract}
@@ -100,7 +100,7 @@ $T\colon\R^d\to\R^2$ such that:
   \item[\rm(d)] $T(G)$ has no three collinear points and no four concyclic
         points \emph{(full general position)};
   \item[\rm(e)] $\Erot(T(G))=0$ \emph{(zero rotational energy)};
-  \item[\rm(f)] the distance multiset of $T(G)$ is in bijection with
+  \item[\rm(f)] the set of distinct distances of $T(G)$ is in bijection with
         the $\pm$-difference classes of $G$
         \emph{(distance transport)}.
 \end{enumerate}
@@ -181,43 +181,19 @@ Both midpoints $\frac{p+q}{2}$ and $\frac{p'+q'}{2}$ lie on the common bisector,
 so their difference lies in its direction subspace, giving (ii).
 \end{proof}
 
-\begin{lemma}[Upstairs line rigidity]
-\label{lem:rigid}
-Let $G\subset\R^d$ have no three collinear points, and let $a,b,c,e\in G$ with
-$a\ne b$ and $c\ne e$.  If
-\begin{enumerate}
-  \item[\rm(i)] $e-c = t(b-a)$ for some $t\in\R$, and
-  \item[\rm(ii)] $\ip{a+b-(c+e)}{b-a}=0$,
-\end{enumerate}
-then $\{a,b\}=\{c,e\}$.
-\end{lemma}
-
-\begin{proof}
-From~(i), all four points lie on the affine line $\{a+s(b-a):s\in\R\}$.
-Write $c=a+s(b-a)$ and $e=a+(s+t)(b-a)$ for some $s\in\R$.
-Substituting into~(ii):
-\[
-  \ip{a+b-(c+e)}{b-a}
-  \;=\; \ip{(1-2s-t)(b-a)}{b-a}
-  \;=\; (1-2s-t)\norm{b-a}^2 \;=\; 0.
-\]
-Since $a\ne b$, we get $t=1-2s$, hence $e=a+(1-s)(b-a)$.
-If $s\notin\{0,1\}$ then $a$, $b$, $c=a+s(b-a)$ are three distinct collinear
-points, contradicting the no-three-collinear hypothesis.
-Hence $s\in\{0,1\}$: if $s=0$ then $c=a$ and $e=b$; if $s=1$ then $c=b$ and $e=a$.
-In either case $\{c,e\}=\{a,b\}$.
-\end{proof}
-
-\begin{remark}
-The sphere-slice case (where $G$ lies on a sphere) gives a cleaner proof of
-Lemma~\ref{lem:rigid}: chords of a sphere with the same midpoint have equal
-length (the parallelogram law expresses $\norm{a-b}^2$ in terms of $\norm{a+b}/2$
-and the radius, both fixed by the common midpoint and sphere).
-Two parallel chords with equal length and the same midpoint then coincide:
-the midpoint pins the foot of the perpendicular from the center, and equal
-length pins the two endpoints symmetrically about it.
-The no-three-collinear hypothesis makes the sphere-slice hypothesis unnecessary
-for the headline theorem, since a sphere already has no three collinear points.
+\begin{remark}[Why a single coincidence is not enough]
+\label{rem:single}
+The orthogonality relation~(ii) is only the scalar consequence of a
+\emph{single} shared bisector, and on its own it does \emph{not} force the
+pairs to coincide: the unit square $\{(0,0),(1,0)\}$, $\{(0,1),(1,1)\}$ has no
+three collinear points and satisfies both (i) and (ii), yet the two pairs are
+distinct (their common bisector is the line $x=\tfrac12$).  Rigidity instead
+requires the full \emph{vector} condition $p+q=p'+q'$ (equal midpoints):
+combined with~(i) it places all four points on one line, so a
+no-three-collinear hypothesis forces the pairs to be equal.  The
+generic-projection argument of the next section supplies exactly this upgrade,
+by making the orthogonality polynomial vanish for \emph{every} projection row
+simultaneously, which promotes the scalar relation to the vector identity.
 \end{remark}
 
 % ----------------------------------------------------------------
@@ -265,11 +241,22 @@ define two polynomials in $(T_1,T_2)$:
   H(a,b,c,e) &= \ip{T_1}{a+b-(c+e)}\ip{T_1}{b-a}
                 +\ip{T_2}{a+b-(c+e)}\ip{T_2}{b-a}.
 \end{align*}
-If both $D=0$ and $H=0$ at some $T$, then condition~(avoid) fails,
-and the proof of Lemma~\ref{lem:gen-implies-inj} would give $\{a,b\}=\{c,e\}$,
-contradicting the off-pair assumption.
-Hence for each off-pair quadruple, $D^2+H^2$ is a nonzero polynomial in $2d$ variables;
-its real zero-set has measure zero.
+Condition~(avoid) fails for this quadruple exactly at those $T$ where both
+$D=0$ and $H=0$, so it suffices to show $D^2+H^2$ is not the zero polynomial;
+its real zero-set then has measure zero.
+We claim $D$ and $H$ cannot both vanish identically.
+First, $D\equiv 0$ (as a polynomial in $T_1,T_2$) if and only if $b-a$ and
+$e-c$ are linearly dependent, i.e.\ $e-c=t(b-a)$ for some $t\in\R$.
+Second, writing $m=a+b-(c+e)$ and $u=b-a\ne 0$, we have
+$H=\sum_k\ip{T_k}{m}\ip{T_k}{u}$, whose associated symmetric form is
+$\tfrac12(mu^\top+um^\top)$; this vanishes identically if and only if $m=0$,
+i.e.\ $a+b=c+e$.
+If both held, then $e-c=t(b-a)$ and $a+b=c+e$: letting $M$ be the common
+midpoint, $a=M-v$, $b=M+v$ with $v=\tfrac12(b-a)\ne 0$, and $c=M-w$, $e=M+w$
+with $w=\tfrac{t}{2}(b-a)=tv$; thus $a,b,c$ all lie on the line $M+\R v$.
+They are distinct (if $t\in\{1,-1\}$ then $\{c,e\}=\{a,b\}$, excluded), so
+$G$ would contain three collinear points, contradiction.
+Hence $D^2+H^2$ is a nonzero polynomial in $2d$ variables.
 Similarly, for each pair of distinct $\pm$-difference classes $[u]\ne[v]$ in $G{-}G\setminus\{0\}$,
 the polynomial $\sum_k\ip{T_k}{u-v}\ip{T_k}{u+v}$ (encoding condition~(sep)) is nonzero:
 since $u\ne\pm v$, both $u-v\ne 0$ and $u+v\ne 0$, so neither linear factor vanishes
@@ -277,7 +264,9 @@ identically, and their inner product $\norm{Tu}^2-\norm{Tv}^2$ is a nonzero degr
 polynomial. Likewise the injectivity condition~(inj) cuts out a measure-zero set.
 
 The set of $(T_1,T_2)\in\R^{2d}$ satisfying all three conditions is the complement
-of finitely many measure-zero algebraic sets, hence nonempty (in fact dense)~\cite{ST12}.
+of finitely many measure-zero algebraic sets, hence nonempty (in fact dense):
+a finite union of proper zero-sets of nonzero polynomials on $\R^{2d}$ has
+Lebesgue measure zero and dense complement.
 \end{proof}
 
 % ----------------------------------------------------------------
@@ -381,15 +370,15 @@ No \texttt{sorry} appears anywhere in the proof chain.
 % ----------------------------------------------------------------
 \begin{thebibliography}{9}
 
-\bibitem{EFPR93}
-P.~Erd\H{o}s, Z.~F\"{u}redi, J.~Pach, and I.~Z.~Ruzsa,
-\emph{The grid revisited},
-Discrete Math.\ \textbf{111} (1993), no.\ 1--3, 189--196.
-
 \bibitem{ES11}
 G.~Elekes and M.~Sharir,
 \emph{Incidences in three dimensions and distinct distances in the plane},
 Combin.\ Probab.\ Comput.\ \textbf{20} (2011), no.\ 4, 571--608.
+
+\bibitem{EFPR93}
+P.~Erd\H{o}s, Z.~F\"{u}redi, J.~Pach, and I.~Z.~Ruzsa,
+\emph{The grid revisited},
+Discrete Math.\ \textbf{111} (1993), no.\ 1--3, 189--196.
 
 \bibitem{GK15}
 L.~Guth and N.~H.~Katz,
@@ -401,12 +390,6 @@ B.~Lund, A.~Sheffer, and F.~de~Zeeuw,
 \emph{Bisector energy and few distinct distances},
 Discrete Comput.\ Geom.\ \textbf{56} (2016), no.\ 2, 337--356.
 arXiv:1411.6868.
-
-\bibitem{ST12}
-J.~Solymosi and T.~Tao,
-\emph{An incidence theorem in higher dimensions},
-Discrete Comput.\ Geom.\ \textbf{48} (2012), no.\ 2, 255--280.
-arXiv:1103.2926.
 
 \end{thebibliography}
 
