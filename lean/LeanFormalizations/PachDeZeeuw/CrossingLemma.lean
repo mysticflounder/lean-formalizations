@@ -91,13 +91,22 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.EdmondsConstruction
 import LeanFormalizations.PachDeZeeuw.CrossingLemma.DartSectorPoint
 
 /-!
-# The multigraph crossing lemma
+# The multigraph crossing-lemma development
 
-Self-contained formalization of the crossing inequality (Székely /
-Ajtai–Chvátal–Newborn–Szemerédi, multigraph form), proved via combinatorial
-maps and the planar Euler bound. Depends only on Mathlib.
+Mathlib-only aggregator for the bounded-multiplicity crossing-lemma statement,
+its conditional amplification, and the drawing-to-combinatorial-map infrastructure.
+This is **not yet a self-contained proof**: `crossingLemma_of_weakBound` proves
+`CrossingLemmaMultigraphStatement` from the literature-backed statement-surface
+`WeakAveragedBound`, but no theorem in this library currently produces that hypothesis.
+The separate drawing-to-map/topology path also retains labelled `sorry` obligations.
 
 Consumed by the `pdz` project (distinct distances on algebraic curves) to
-discharge its incidence bound. The public surface is the frozen crossing
-inequality statement plus its proof.
+state the crossing input to its incidence bound. The exact weak averaged formula is
+from Tóth, _Generalizations of the Crossing Lemma_, Theorem 7 (arXiv v1:
+Theorem 0.3.1), <https://arxiv.org/abs/2509.14074>.
+
+The sorry-free public Lean development `wpegden/crossing-consequences` formalizes
+the simple-graph vertex-sampling argument and locally derives the denominator-`64`
+simple bound. It does not formalize the bounded-multiplicity parallel-class thinning,
+so it is not a producer for `WeakAveragedBound`.
 -/

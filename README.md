@@ -551,6 +551,17 @@ identifiers that could not be confirmed directly are noted rather than guessed.
 - Pach, J. and Tóth, G. "A crossing lemma for multigraphs." *Discrete Comput.
   Geom.* **63** (2020), 918–933. DOI: 10.1007/s00454-018-00052-z.
   arXiv:1801.00721. (SoCG 2018.)
+- Tóth, G. "Generalizations of the Crossing Lemma." In *Sum(m)it280: Surveys
+  in Extremal Combinatorics and Combinatorial Geometry*, Bolyai Society
+  Mathematical Studies **32** (2026), 385–411.
+  DOI: 10.1007/978-3-032-18810-6_16. arXiv:2509.14074. (Theorem 7, numbered
+  Theorem 0.3.1 in arXiv v1, gives the random-thinning proof whose cleared
+  expectation inequality is `CrossingLemma.WeakAveragedBound`.)
+- Pegden, W. [`crossing-consequences`](https://github.com/wpegden/crossing-consequences),
+  commit `8769d142033fce042f502bf2857afb6b1375b5c3`. (Sorry-free Lean 4
+  simple-graph crossing lemma with denominator `100`; the proof derives the
+  denominator-`64` simple-graph inequality internally. It has no multiplicity
+  parameter and does not prove `CrossingLemma.WeakAveragedBound`.)
 - Lando, S.K. and Zvonkin, A.K. *Graphs on Surfaces and Their Applications.*
   Encyclopaedia of Mathematical Sciences **141**, Springer, 2004.
   DOI: 10.1007/978-3-540-38361-1. (Dart-permutation map model; §1.3.3

@@ -80,7 +80,10 @@ Tracked per-declaration in **[docs/AUDIT_MATRIX.md](docs/AUDIT_MATRIX.md)**
   the non-existent "Schoen–Sisask" reference (4 occurrences) → **Reiher–Schoen**,
   *Combinatorica* (2024), arXiv:2308.10245. Petridis confirmed (arXiv:1101.3507).
   Crossing-lemma cites (Székely 1997, ACNS 1982+Leighton, Pach–Tóth 2018/2020)
-  all confirmed. Still open: **Fox–Sudakov** DRC ref; **geometry** two-point
+  all confirmed; Tóth 2026, Theorem 7 is now recorded as the exact source of
+  `WeakAveragedBound`. Pegden's sorry-free public Lean proof covers the simple-graph
+  sampling argument (including a local denominator-`64` intermediate), but not the
+  multiplicity-uniform thinning premise. Still open: **Fox–Sudakov** DRC ref; **geometry** two-point
   isometry text; **Newman/Pommerenke** crosscut cites (deferred with the
   CrossingLemma WIP).
 - [x] **Line-by-line math audit — BSG live path is 100% line-verified**

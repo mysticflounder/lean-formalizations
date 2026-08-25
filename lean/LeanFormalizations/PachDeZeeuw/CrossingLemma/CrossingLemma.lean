@@ -9,9 +9,20 @@ import Mathlib
 /-!
 # Finite multigraph crossing lemma — standalone combinatorial surface
 
-This file freezes the carrier types and the frozen `Prop` statement of the
-finite multigraph crossing inequality (Székely / Ajtai–Chvátal–Newborn–
-Szemerédi, multigraph form) used by the Pach–de Zeeuw incidence development.
+This file freezes the carrier types and the `Prop` statement of the finite
+bounded-multiplicity crossing inequality used by the Pach–de Zeeuw incidence
+development. Székely's 1997 Theorem 7 is the original bounded-multiplicity result.
+The exact `4·M·v` threshold and `1/64` constant represented here are recorded in
+Pach–Tóth, _A crossing lemma for multigraphs_, eq. (1), and follow from the random
+thinning proof in Tóth, _Generalizations of the Crossing Lemma_, Theorem 7
+(arXiv v1: Theorem 0.3.1), <https://arxiv.org/abs/2509.14074>.
+
+For comparison, the sorry-free public Lean 4 development
+`wpegden/crossing-consequences` (commit
+`8769d142033fce042f502bf2857afb6b1375b5c3`) proves a `SimpleGraph` crossing
+lemma with denominator `100` and derives the sharper denominator `64` internally.
+It has no bounded-multiplicity parameter, so it does not prove the proposition
+surface in this file.
 
 It is **mathlib-only**: it imports no `CrossingLemma.*` module. The crossing
 lemma surface mentions no algebraic curves, `auxCurve`, or
@@ -143,14 +154,22 @@ def DrawnMultigraph.CrossingsAreIndependent (G : DrawnMultigraph) : Prop :=
     (interiorOfArc (G.arc i) ∩ interiorOfArc (G.arc j)).Nonempty →
       G.FourDistinctEndpoints i j
 
-/-- Finite multigraph crossing inequality (Székely / ACNS, multigraph form):
-for a plane-drawn multigraph with edge multiplicity ≤ M, whose arcs join their
+/-- Finite bounded-multiplicity crossing inequality: for a plane-drawn multigraph
+with edge multiplicity ≤ M, whose arcs join their
 declared endpoints, that is `WellDrawn` (its `crossings` field is at least the
 true interior-crossing count), and has e ≥ 4·M·v edges, e³ ≤ 64·M·v²·cr. Kept
 entirely in ℕ and cubed (no rpow). The `WellDrawn` hypothesis is load-bearing:
 the conclusion lower-bounds `crossings`, so without it the statement is
 vacuously falsifiable (declare `crossings := 0`). The `ArcsJoinEndpoints`
-hypothesis is the basic drawing-validity condition from the literature. -/
+hypothesis is the basic drawing-validity condition from the literature.
+
+Székely's 1997 Theorem 7 is the original bounded-multiplicity theorem. The exact
+`e³ ≤ 64·M·v²·cr` form is Pach–Tóth, eq. (1); Tóth's 2026 Theorem 7 proof gives
+the random-thinning derivation and the averaged weak formula used by
+`CrossingLemma.crossingLemma_of_weakBound`. This declaration states the proposition;
+it does not prove it. Pegden's public Lean crossing-lemma proof covers only the
+simple-graph (`M = 1`) sampling argument and does not supply the multiplicity-uniform
+random-thinning premise. -/
 def CrossingLemmaMultigraphStatement : Prop :=
   ∀ (G : DrawnMultigraph) (M : ℕ),
     0 < M →
@@ -169,7 +188,13 @@ literature source is the Crossing Lemma of Ajtai--Chvátal--Newborn--Szemerédi
 and Leighton, stated for simple graphs as Theorem 0.2.1 in Tóth's survey
 _Generalizations of the Crossing Lemma_: if `e(G) ≥ 4 n(G)`, then
 `cr(G) ≥ e(G)^3 / (64 n(G)^2)`. This project keeps the conclusion in the
-division-free natural-number form `e³ ≤ 64 v² cr`. -/
+division-free natural-number form `e³ ≤ 64 v² cr`.
+
+The public Lean 4 development `wpegden/crossing-consequences` proves a theorem
+with denominator `100` for its own `SimpleGraph` crossing-number model; its proof
+contains the denominator-`64` inequality as a local intermediate result. Reuse here
+would still require a bridge between its drawing/crossing-number model and
+`DrawnMultigraph`. -/
 def SimpleCrossingLemmaStatement : Prop :=
   ∀ (G : DrawnMultigraph),
     (∀ p q, G.multiplicity p q ≤ 1) →

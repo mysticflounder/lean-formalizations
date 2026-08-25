@@ -9,22 +9,39 @@ import LeanFormalizations.PachDeZeeuw.CrossingLemma.CrossingLemma
 import LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound
 
 /-!
-# PS-CL-3 — derandomized amplification: `CrossingLemmaMultigraphStatement` from a weak bound
+# Cleared-parameter amplification of the bounded-multiplicity crossing lemma
 
-This file proves the **derandomized amplification step** of the multigraph crossing
-lemma (Székely / Ajtai–Chvátal–Newborn–Szemerédi, multigraph form, Pach–Tóth
-constant). It derives the cubed target
+This file proves the arithmetic amplification step of the bounded-multiplicity
+crossing lemma. It derives the cubed target
 
   `CrossingLemmaMultigraphStatement`  :  `e³ ≤ 64·M·v²·cr`
   (when `0 < M`, multiplicity `≤ M`, the arcs join their declared endpoints,
   and `e ≥ 4·M·v`)
 
-(defined in `CrossingLemma.lean`) **from an assumed weak bound** `hweak`. The weak
-bound is the content the drawing→genus-0-map / Euler bridge supplies; discharging it
-is a *separate* concern and is **not** attempted here.
+(defined in `CrossingLemma.lean`) **from an assumed weak bound** `hweak`.
 
-It imports only `Mathlib` and the standalone `CrossingLemma` surface, mentions no
-algebraic curves, and is **not** on the closure aggregator `CrossingLemma.lean`.
+The exact provenance of that weak bound is Géza Tóth, _Generalizations of the Crossing
+Lemma_, Theorem 7 (arXiv v1: Theorem 0.3.1),
+<https://arxiv.org/abs/2509.14074>, DOI
+<https://doi.org/10.1007/978-3-032-18810-6_16>. Its proof first samples vertices with
+probability `p`, then retains at most one edge from each parallel class, with each
+original edge retained with probability `1/M`. Thus edges and crossings survive with
+probabilities `p²/M` and `p⁴/M²`, respectively. Applying the simple planar weak bound
+to the resulting simple graph gives the formula encoded by `WeakAveragedBound` below.
+That random-thinning producer is **not yet formalized here**.
+
+A public Lean 4 comparison is the sorry-free development
+[`wpegden/crossing-consequences`](https://github.com/wpegden/crossing-consequences),
+commit `8769d142033fce042f502bf2857afb6b1375b5c3`. Its
+`Tablet.CrossingLemma` theorem is stated for `SimpleGraph` with denominator `100`,
+and its proof locally derives the sharper simple-graph inequality
+`e³ ≤ 64·v²·cr`. It therefore formalizes the `M = 1` vertex-sampling argument,
+but it has no multiplicity parameter and does not prove `WeakAveragedBound`.
+
+It imports `Mathlib`, the standalone `CrossingLemma` surface, and the standalone
+combinatorial-map planar edge bound. It mentions no algebraic curves. The umbrella
+module `PachDeZeeuw.CrossingLemma` imports this file, but that does not turn the
+assumed `WeakAveragedBound` into a proof.
 
 ## The mathematics, and why `hweak` has the shape it does (read before trusting the constant)
 
@@ -35,21 +52,19 @@ then *probabilistic amplification* — keep each vertex independently with proba
 distinct endpoints); the weak bound in expectation gives `p⁴ cr ≥ p² e − 3 p v`, and
 `p = 4v/e ≤ 1` (legal since `e ≥ 4v`) yields exactly `cr ≥ e³/(64 v²)`.
 
-**Two facts force the precise shape of `hweak` below; both are PROVEN (exact rational
-arithmetic, off-line, recorded in the agent report).**
+**Two facts explain the precise shape of `hweak` below.**
 
-1. **The single `M` is sharp and is NOT obtainable by averaging a linear multigraph
-   weak bound.** Székely's multigraph statement `cr ≥ e³/(64 m v²)` (`e ≥ 4mv`) has a
-   *single* `m` (Pach–Tóth, *A crossing lemma for multigraphs*, eq. (1); tight on
-   `m`-fold "bundle" blow-ups of the simple extremal graph, where
-   `cr = m²·cr₀, e = m·e₀`). But vertex-subset averaging of the *natural multigraph
-   planar* weak bound `e_S ≤ 3 m v_S + cr_S` yields only the **weaker** `e³ ≤ 64 m² v² cr`
-   (one extra `m`); the naive delete-to-simple yields `e³ ≤ 64 m³ v² cr`. The single-`m`
-   sharpening is genuine multigraph (bundle) content, NOT a corollary of any single
-   linear weak bound. It is therefore correctly the *bridge's* responsibility, and
-   `hweak` below encodes the sharp form (coefficient `M` on `e`, `3M²` on `v`).
+1. **The single `M` comes from thinning parallel classes, not from the linear
+   multigraph weak bound alone.** Vertex-subset averaging of
+   `e_S ≤ 3 M v_S + cr_S` yields the weaker `e³ ≤ 64 M² v² cr`. Tóth's Theorem 7
+   proof obtains the sharp single-`M` dependence by the additional `1/M` edge-thinning
+   step above. Székely's 1997 Theorem 7 is the original bounded-multiplicity theorem;
+   Pach–Tóth, _A crossing lemma for multigraphs_, eq. (1), records the final
+   `cr ≥ e³/(64 M v²)` consequence. Neither is the source of the intermediate formula:
+   that formula occurs explicitly in Tóth's proof.
 
-2. **The integer optimal-`s` choice is genuinely obstructed; the real `p` is essential.**
+2. **The integer optimal-`s` choice is genuinely obstructed; the rational sampling
+   parameter `p` is essential.**
    The *derandomized* (sum-over-size-`s`-subsets) version replaces `p` by `s/v` with
    integer `s ∈ {4,…,v}` and uses the double-count identities
    `Σ_{|S|=s} e_S = e·C(v−2,s−2)`, `Σ_{|S|=s} cr_S = cr·C(v−4,s−4)`,
@@ -57,8 +72,8 @@ arithmetic, off-line, recorded in the agent report).**
    `s* = 4·M·v²/e` falls **below 4** (large-`e` regime, e.g. `v=8, e=332, M=1` gives
    `s* ≈ 0.77`), no admissible integer `s ≥ 4` exists, and the integer averaging loses
    up to a factor ≈ 2 in the constant — so the *exact* `1/64` is **not** recoverable by
-   pure integer averaging. The real-valued parameter is essential. Accordingly `hweak`
-   is stated as the **cleared, division-free real-`p` (rational `a/b`) form**, which the
+   pure integer averaging. The variable rational parameter is essential. Accordingly
+   `hweak` is stated as the **cleared, division-free rational-`p` form**, which the
    averaging/probabilistic argument supplies directly and which the single substitution
    `p = 4Mv/e` turns into the exact target in clean ℕ arithmetic — no discretization.
 
@@ -70,10 +85,10 @@ Writing `p = a/b` and multiplying the real bound `p⁴ cr ≥ M p² e − 3 M² 
   `M · a² · b² · e  ≤  a⁴ · cr  +  3 · M² · a · b³ · v`     (for all `0 < a ≤ b`).
 
 At `a = 4·M·v`, `b = e` this reduces (cancel `4 M³ v²`) to exactly `e³ ≤ 64 M v² cr`.
-This is `WeakAveragedBound` below. **PROVEN** (exact arithmetic) that this `hweak`
-implies the target; **CONJECTURED-in-Lean / PROVEN-in-literature** that the bridge can
-supply this `hweak` (it is the expectation form of ACNS/Székely averaging over random
-vertex subsets, sharpened to single `M` by the multigraph bundle structure).
+This is `WeakAveragedBound` below. Tóth's Theorem 7 proof derives it in the form
+`p⁴/M² · cr ≥ p²/M · e - 3p · v`; multiplying by `M²` and clearing `p = a/b`
+gives the displayed natural-number inequality. Lean proves that this hypothesis implies
+the target, but the global `M`-uniform producer for the hypothesis remains open.
 
 ## Honest status
 
@@ -85,6 +100,10 @@ vertex subsets, sharpened to single `M` by the multigraph bundle structure).
   `IndependentSimpleInducedWeakBound → IndependentSimpleWeakAveragedBound`, including
   the cleared finite-sum double counts for `E[v_p] = pv`, `E[e_p] = p²e`, and
   `E[cr_p] = p⁴cr`.
+* **STATEMENT-SURFACE:** `WeakAveragedBound` — supported by Tóth's Theorem 7
+  proof, but not produced by any theorem in this library. Pegden's public
+  simple-graph formalization covers the `M = 1` sampling argument only; it does
+  not supply the parallel-class thinning quantified here.
 * **Scaffolding, sorry-free:** the surviving-count definitions
   (`edgesOn`, `crossingPairs`, `crossingsOn`) and endpoint-set count lemmas used by
   the rational-parameter averaging proof.
@@ -110,7 +129,7 @@ The cleared, division-free real-`p` averaging bound. Quantified over all `G` and
 so it can serve as a single hypothesis of the top theorem; the substance is the
 per-`(a,b)` inequality, with `p = a/b` ranging over `(0,1]`. -/
 
-/-- **`WeakAveragedBound`** — the assumed weak bound the bridge must supply.
+/-- **`WeakAveragedBound`** — the bounded-multiplicity averaged weak bound.
 
 For every drawn multigraph `G` and multiplicity cap `M > 0` with
 `G.multiplicity ≤ M` everywhere, `G.ArcsJoinEndpoints`, and `G` `WellDrawn`,
@@ -121,10 +140,17 @@ and for every rational sampling parameter `p = a/b ∈ (0,1]` (encoded as
 
 where `e = G.numEdges`, `v = G.V.card`, `cr = G.crossings`.
 
-This is the subtraction-free integer form of the expectation inequality
-`p⁴·cr ≥ M·p²·e − 3·M²·p·v` of the (sharpened, single-`M`) ACNS/Székely vertex-subset
-averaging argument. See the module docstring for why the coefficients are `M` and
-`3M²` (the single-`M` sharpening) rather than `1` and `3M` (the lossy planar form). -/
+Literature provenance: Tóth, _Generalizations of the Crossing Lemma_, Theorem 7
+(arXiv v1: Theorem 0.3.1), derives
+`p⁴/M² · cr ≥ p²/M · e - 3p · v`. Multiplying by `M²`, setting `p = a/b`, and
+clearing `b⁴` gives exactly the displayed inequality. The factors `M` and `3M²`
+come from retaining at most one edge per parallel class after vertex sampling.
+
+This declaration is a literature-backed statement-surface: no theorem in this library
+currently proves it. The sorry-free public Lean development
+`wpegden/crossing-consequences` proves the simple-graph sampling argument (and derives
+the `1/64` simple-graph inequality internally), but it does not quantify a multiplicity
+cap or formalize Tóth's parallel-class thinning. -/
 def WeakAveragedBound : Prop :=
   ∀ (G : DrawnMultigraph) (M : ℕ),
     0 < M →
@@ -139,7 +165,8 @@ def WeakAveragedBound : Prop :=
 
 This is the cleared, rational-parameter form of the expectation inequality in
 the standard ACNS/Leighton proof of the Crossing Lemma, as stated in Theorem
-0.2.1 of Tóth's survey _Generalizations of the Crossing Lemma_. For a simple
+0.2.1 of the arXiv version of Tóth's _Generalizations of the Crossing Lemma_
+(<https://arxiv.org/abs/2509.14074>). For a simple
 drawn graph (`multiplicity ≤ 1`) whose arcs join their declared endpoints and
 `p = a / b ∈ (0,1]`, the weak bound `cr(G') ≥ e(G') - 3 n(G')` on the random
 induced subgraph gives
@@ -202,12 +229,14 @@ theorem numEdges_eq_zero_of_no_vertices (G : DrawnMultigraph) (hV : G.V.card = 0
   rw [hV] at hmem
   exact (Finset.notMem_empty _) hmem
 
-/-- **PS-CL-3 — derandomized amplification [PROVEN, sorry-free].**
+/-- **Cleared-parameter amplification [PROVEN, sorry-free].**
 
 `CrossingLemmaMultigraphStatement` follows from the assumed weak bound
-`WeakAveragedBound`. This is the multigraph crossing lemma `e³ ≤ 64·M·v²·cr`
-(Székely / ACNS / Pach–Tóth constant) obtained by the derandomized averaging
-substitution `p = 4·M·v/e`, carried entirely in `ℕ`.
+`WeakAveragedBound`. The target `e³ ≤ 64·M·v²·cr` is the exact-constant
+bounded-multiplicity consequence recorded in Pach–Tóth, eq. (1), while the assumed
+weak formula comes from Tóth's Theorem 7 proof. This theorem formalizes only the
+substitution `p = 4·M·v/e` and its cancellation, carried entirely in `ℕ`; it does not
+prove `WeakAveragedBound`.
 
 The proof: with `v := G.V.card`, `e := G.numEdges`, `cr := G.crossings`:
 * if `v = 0` then `e = 0` and the target is `0 ≤ 0`;
@@ -1053,9 +1082,11 @@ as Theorem 0.2.1 in Tóth's survey), and in the branching-multigraph setting it
 appears as Pach--Tóth, *A crossing lemma for multigraphs*, Lemma 2.1 and
 Corollary 2.2 (`c(G) ≥ e - 3n + 6`).
 
-This file proves the averaging theorem from this local inequality. The remaining
-work is the geometric planarization/Euler layer that supplies this proposition
-for actual drawings. -/
+This file proves the simple `M = 1` averaging theorem from this local inequality.
+This deterministic proposition is a planar prerequisite, not the multigraph
+`WeakAveragedBound`: Tóth's Theorem 7 proof additionally thins every parallel class.
+The remaining work here is the geometric planarization/Euler layer that supplies this
+proposition for actual drawings. -/
 def IndependentSimpleInducedWeakBound : Prop :=
   ∀ (G : DrawnMultigraph),
     (∀ p q, G.multiplicity p q ≤ 1) →
