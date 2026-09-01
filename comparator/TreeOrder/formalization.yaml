@@ -8,9 +8,9 @@
 # This is a lightweight reporting schema, not a closed validation schema.
 #
 # Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
-# fill - the canonical repo URL, per-entry cost figures, and the attribution a
-# registry entry should declare where the repository asserts none. Do not treat a
-# marker as a fact.
+# fill - per-entry cost figures. The canonical repo URL and the source attribution
+# were both settled on 2026-08-31 and are no longer marked. Do not treat a marker as
+# a fact.
 
 version: "v0.3"
 
@@ -19,12 +19,7 @@ project:
   name: "lean-formalizations/TreeOrder"                    # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
-  repo_note: >
-    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
-    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
-    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
-    is canonical before registry submission.
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
   subproject: "TreeOrder"
   subproject_note: >
     The finite-tree leaf-order cluster of the lean-formalizations collection: 3 of the
@@ -38,20 +33,34 @@ msc2020: ["05C05", "05C40"]
 
 # sources - what was formalized.
 sources:                                            # [required]
-  - title: "No originating paper asserted: classical / folklore graph theory"
+  - title: "Elementary finite-graph facts: classical, no originating paper"
     authors: []
     id: null
     type: "folklore"
     note: >
-      These are elementary finite-graph facts — every finite tree admits a
-      leaf-insertion order, prefixes of such an order induce connected subgraphs, and a
-      labelling constant across every adjacency is constant on a connected graph. The
-      repo-root formalization.yaml attributes no source to them and no citation is
-      invented here. README.md files the module under the crossing-lemma /
-      combinatorial-map program (Pach–Tóth, arXiv:1801.00721) because that program
-      consumes these helpers, not because that paper states them.
-      {{NEEDS_ADAM_INPUT}} If a specific attribution is intended for registry purposes,
-      supply it; it is not derivable from the repository.
+      All three are textbook finite-graph facts. Every finite tree admits a
+      leaf-insertion order (standard leaf-peeling, reversed); each prefix of such an
+      order induces a connected subgraph; and a labelling constant across every
+      adjacency is constant on a connected graph (a short corollary of reachability
+      induction). No source is asserted for any of them, and none is invented here.
+      The lemmas were written as helpers for a tree-cotree decomposition layer,
+      extracted from a separate research program.
+    do_not_cite: >
+      README.md heads this module with arXiv:1801.00721 (Pach, J. and Tóth, G.,
+      "A crossing lemma for multigraphs", Discrete Comput. Geom. 63 (2020) 918–933).
+      That is the PROGRAM header for the surrounding work, which CONSUMES these
+      helpers. That paper does not state any of the three lemmas, so it must not be
+      carried as this entry's source.
+    context_only: >
+      The tree-cotree layer these helpers serve cites Jeff Erickson, Computational
+      Topology, Lecture 10, "Tree-Cotree Decompositions", and Lando, S.K. and
+      Zvonkin, A.K., Graphs on Surfaces and Their Applications, §1.3.3,
+      Proposition 1.3.16. Both back the spanning-tree/spanning-cotree complement
+      theorem, which is a DIFFERENT statement and is not formalized here. Neither
+      states the three gated lemmas. Recorded as context, not as a source.
+      {{NEEDS_RESEARCH}} The Erickson lecture notes carry no stable identifier in the
+      repository (course number, institution, year); a formal bibliographic entry would
+      have to be read off the PDF title page.
 
 # project status
 status:

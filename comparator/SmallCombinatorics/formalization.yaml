@@ -8,9 +8,9 @@
 # This is a lightweight reporting schema, not a closed validation schema.
 #
 # Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
-# fill - the canonical repo URL, per-entry cost figures, and the attribution a
-# registry entry should declare where the repository asserts none. Do not treat a
-# marker as a fact.
+# fill - per-entry cost figures. The canonical repo URL and the source attribution
+# were both settled on 2026-08-31 and are no longer marked. Do not treat a marker as
+# a fact.
 
 version: "v0.3"
 
@@ -19,12 +19,7 @@ project:
   name: "lean-formalizations/SmallCombinatorics"                    # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
-  repo_note: >
-    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
-    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
-    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
-    is canonical before registry submission.
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
   subproject: "SmallCombinatorics"
   subproject_note: >
     Two standalone discrete-geometry counting lemmas of the lean-formalizations
@@ -38,21 +33,32 @@ msc2020: ["52C10", "11B25"]
 
 # sources - what was formalized.
 sources:                                            # [required]
-  - title: "No originating paper asserted: classical / folklore"
+  # The two gated lemmas have different origins and are grouped only by size.
+  - title: "no-three-collinear ⟹ ThreeAPFree: elementary, no originating paper"
     authors: []
     id: null
     type: "folklore"
     note: >
-      Neither result is attributed to a source in the repo-root formalization.yaml, and
-      no citation is invented here. (1) no-three-collinear ⟹ ThreeAPFree is the
-      elementary observation that a + c = 2•b makes b the midpoint of a and c; the
-      repository asserts no originating paper. (2) The unit-distance elimination-order
-      count is the classical degeneracy argument; README.md records it as having no
-      single originating paper, surveyed (but with the specific bound not attributed
-      there) in Brass, P., Moser, W. and Pach, J., Research Problems in Discrete
-      Geometry, Springer, 2005.
-      {{NEEDS_ADAM_INPUT}} If a specific attribution is intended for either lemma for
-      registry purposes, supply it; it is not derivable from the repository.
+      The elementary observation that a + c = 2•b makes b the midpoint of a and c, so
+      a three-term progression in the plane is a collinear triple. There is nothing to
+      cite. The lemma was written as the geometry input to the translation/half-turn
+      channel of a distance-energy decomposition in a separate research program, and
+      its specification records it as proven pen-and-paper with no source.
+      Caution for future editors: README.md lists this lemma in a table under a
+      Balog–Szemerédi–Gowers heading. That heading is a DIRECTORY label, not an
+      attribution for this row.
+  - title: "Unit-distance elimination-order counting: classical degeneracy argument"
+    authors: []
+    id: null
+    type: "folklore"
+    note: >
+      A classical degeneracy-counting argument with no single originating paper. It
+      reached this repository from a separate research program, whose own notes call it
+      a counting bridge and give no external source. README.md and
+      docs/citation-verification-matrix-2026-06-23.md both record it as classical, and
+      name Brass, P., Moser, W. and Pach, J., Research Problems in Discrete Geometry,
+      Springer, 2005 as a general SURVEY only -- the specific bound is not attributed
+      there. Do not promote that survey to the source of this bound.
 
 # project status
 status:

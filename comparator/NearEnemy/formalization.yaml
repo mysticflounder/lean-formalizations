@@ -8,9 +8,9 @@
 # This is a lightweight reporting schema, not a closed validation schema.
 #
 # Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
-# fill - the canonical repo URL, per-entry cost figures, and the attribution a
-# registry entry should declare where the repository asserts none. Do not treat a
-# marker as a fact.
+# fill - per-entry cost figures. The canonical repo URL and the source attribution
+# were both settled on 2026-08-31 and are no longer marked. Do not treat a marker as
+# a fact.
 
 version: "v0.3"
 
@@ -19,12 +19,7 @@ project:
   name: "lean-formalizations/NearEnemy"                    # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
-  repo_note: >
-    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
-    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
-    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
-    is canonical before registry submission.
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
   subproject: "NearEnemy"
   subproject_note: >
     The bisector-energy / Near Enemy cluster of the lean-formalizations collection: 4 of
@@ -37,20 +32,37 @@ arxiv_categories: ["math.MG", "math.CO"]
 msc2020: ["52C10", "51M04"]
 
 # sources - what was formalized.
-# The repo-root formalization.yaml attributes no source to this cluster. The entries
-# below are the notion-level sources recorded in README.md ("Euclidean geometry"
-# references, verified there against publisher pages); no citation is invented, and no
-# source below is claimed to state the formalized theorems.
+# The gated theorems are original to this project; the first entry states that and
+# scopes the claim. Every entry after it is a COMPONENT the argument stands on, not a
+# statement of a gated theorem. All are recorded in README.md's component-provenance
+# table and verified there against publisher pages. No citation is invented.
 sources:                                            # [required]
-  - title: "Original result of this project (the Near Enemy Theorem for bisector energy); no prior source states it"
+  - title: "The Near Enemy Theorem for bisector energy — original to this project"
     authors: ["Adam McKenna"]
     id: null
     type: "original"
     note: >
-      README.md records the Near Enemy Theorem as an original result of this project.
-      The two existence results gated here are that theorem's noThreeCollinear and
-      sphereSlice forms; the bisector-energy floor and its equality case are its
-      supporting inequalities. No external paper is claimed to prove them.
+      What is claimed as this project's own is the COMBINATION, not the components.
+      Ours: the bisector-energy MINIMIZATION direction; the floor 2n(n−1) (all
+      perpendicular bisectors distinct); the bisector-injectivity equality
+      characterization; the rotationEnergy = 0 statistic; and the single-witness
+      bundle (one generic projection, every no-three-collinear set, any dimension,
+      kernel-checked). All four gated theorems fall in that set. Every component the
+      argument stands on is attributed separately below, and README.md carries the
+      same split as a component-provenance table.
+    novelty_check: >
+      Literature absence checked 2026-06-26: 20 forward citations of arXiv:1411.6868
+      were surveyed, and the floor 2n(n−1), the bisector-injectivity equality
+      characterization, and the use of the Erdős–Füredi–Pach–Ruzsa configuration as a
+      minimizer are absent from all of them. This is a bounded survey of the forward
+      citations of one paper, not a proof of priority.
+    prior_attribution_correction: >
+      An earlier draft of this repository attributed the construction and the
+      general-position distinct-distance bound to Dumitrescu. That was wrong and was
+      corrected on 2026-06-18: both are Erdős–Füredi–Pach–Ruzsa 1993 (see below).
+      Dumitrescu 2008 (Periodica Math. Hungarica 57, 165–176) proves a different
+      result about parallelogram-free general-position sets. Do not reintroduce the
+      Dumitrescu attribution here.
   - title: "Bisector energy and few distinct distances (source of the bisector-energy notion)"
     authors: ["Ben Lund", "Adam Sheffer", "Frank de Zeeuw"]
     id: "arXiv:1411.6868; Discrete Comput. Geom. 56 (2016), no. 2, 337–356; DOI 10.1007/s00454-016-9783-5"
@@ -63,17 +75,27 @@ sources:                                            # [required]
     id: "Discrete Math. 111 (1993), no. 1–3, 189–196; DOI 10.1016/0012-365X(93)90155-M"
     type: "article"
     note: >
-      Source of the lattice-sphere slice and its generic planar projection — the
-      configuration the sphereSlice corollary is stated about.
-  - title: "{{NEEDS_ADAM_INPUT}} intended registry attribution"
-    authors: []
-    id: null
-    type: "marker"
+      Source of the lattice-sphere slice — the configuration the sphereSlice corollary
+      is stated about. Also the source of the general-position distinct-distance bound
+      n·2^{O(√log n)} that the corollary ultimately reduces to. That bound is external
+      arithmetic: it is NOT formalized here and NOT claimed here.
+  - title: "An incidence theorem in higher dimensions (source of the generic-projection trick)"
+    authors: ["József Solymosi", "Terence Tao"]
+    id: "arXiv:1103.2926; Discrete Comput. Geom. 48 (2012), no. 2, 255–280; DOI 10.1007/s00454-012-9420-x"
+    type: "preprint"
     note: >
-      The repo-root formalization.yaml declares no source for this cluster. The three
-      entries above are carried from README.md. Confirm which of them (if any) should
-      appear as the registry entry's declared source, given that the theorems
-      themselves are original to this project.
+      §5.1 is the canonical statement of the folklore fact that a generic projection
+      keeps points in general position (injective, no three collinear, no four
+      concyclic in the image). The Near Enemy construction uses that trick; it is not
+      this project's.
+  - title: "Congruent point-pair decomposition by isometry type (behind the rotationEnergy statistic)"
+    authors: ["György Elekes", "Micha Sharir", "Larry Guth", "Nets Hawk Katz"]
+    id: "arXiv:1005.0982 (Elekes–Sharir 2011); arXiv:1011.4105 (Guth–Katz 2015)"
+    type: "preprint"
+    note: >
+      Source of the decomposition of congruent point-pair quadruples by isometry type
+      (translation, half-turn, proper rotation). The decomposition is theirs; the
+      "rotation channel = 0 for the image" statistic built on it is this project's.
 
 # project status
 status:

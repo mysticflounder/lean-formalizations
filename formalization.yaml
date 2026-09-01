@@ -16,7 +16,7 @@ project:
   name: "lean-formalizations"                       # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # update if the canonical remote differs
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
 
 # sources - what was formalized. Collection repo: one entry per principal source
 # behind the comparator-verified headline results. This is the collection-level

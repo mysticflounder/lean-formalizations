@@ -22,13 +22,13 @@ algebraic geometry and graph theory cannot supply honestly.
 |---|---|---|---|
 | [`Bsg/`](Bsg/) | 4 | Balog–Szemerédi–Gowers | Balog–Szemerédi 1994; Gowers 1998 |
 | [`Isometry2D/`](Isometry2D/) | 2 | 2D two-point isometry classification | Mazur–Ulam 1932 |
-| [`SmallCombinatorics/`](SmallCombinatorics/) | 2 | no-3-collinear ⟹ 3-AP-free; unit-distance counting | classical / in-project |
+| [`SmallCombinatorics/`](SmallCombinatorics/) | 2 | no-3-collinear ⟹ 3-AP-free; unit-distance counting | classical, no originating paper |
 | [`ConvexSlicing/`](ConvexSlicing/) | 6 | convex slicing, convex polygon, isosceles counting | Dumitrescu, DCG 36 (2006) |
-| [`TreeOrder/`](TreeOrder/) | 3 | tree order | classical / in-project |
+| [`TreeOrder/`](TreeOrder/) | 3 | tree order | classical, no originating paper |
 | [`DistinctDistances/`](DistinctDistances/) | 19 | Elekes–Sharir program (linear algebra, geometry, ESGK) | arXiv:1005.0982 |
-| [`NearEnemy/`](NearEnemy/) | 4 | Near Enemy bisector energy | in-project |
+| [`NearEnemy/`](NearEnemy/) | 4 | Near Enemy bisector energy | original to this project (components cited) |
 | [`PachDeZeeuw/`](PachDeZeeuw/) | 7 | real-algebraic geometry / Bézout | arXiv:1308.0177 |
-| [`PlanarMaps/`](PlanarMaps/) | 6 | combinatorial maps / planar edge bound | in-project |
+| [`PlanarMaps/`](PlanarMaps/) | 6 | combinatorial maps / planar edge bound | classical; model def. Lando–Zvonkin 2004 |
 | | **53** | | |
 
 Every directory has the same five files:

@@ -8,9 +8,9 @@
 # This is a lightweight reporting schema, not a closed validation schema.
 #
 # Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
-# fill - the canonical repo URL, per-entry cost figures, and the attribution a
-# registry entry should declare where the repository asserts none. Do not treat a
-# marker as a fact.
+# fill - per-entry cost figures. The canonical repo URL and the source attribution
+# were both settled on 2026-08-31 and are no longer marked. Do not treat a marker as
+# a fact.
 
 version: "v0.3"
 
@@ -19,12 +19,7 @@ project:
   name: "lean-formalizations/Bsg"                    # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
-  repo_note: >
-    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
-    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
-    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
-    is canonical before registry submission.
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
   subproject: "Bsg"
   subproject_note: >
     The Balog–Szemerédi–Gowers cluster of the lean-formalizations collection: 4 of the

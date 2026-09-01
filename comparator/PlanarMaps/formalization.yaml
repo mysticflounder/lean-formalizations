@@ -8,9 +8,9 @@
 # This is a lightweight reporting schema, not a closed validation schema.
 #
 # Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
-# fill - the canonical repo URL, per-entry cost figures, and the attribution a
-# registry entry should declare where the repository asserts none. Do not treat a
-# marker as a fact.
+# fill - per-entry cost figures. The canonical repo URL and the source attribution
+# were both settled on 2026-08-31 and are no longer marked. Do not treat a marker as
+# a fact.
 
 version: "v0.3"
 
@@ -19,12 +19,7 @@ project:
   name: "lean-formalizations/PlanarMaps"                    # [required]
   authors: ["Adam McKenna"]                         # [required]
   license: "Apache-2.0"                             # [required]
-  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
-  repo_note: >
-    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
-    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
-    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
-    is canonical before registry submission.
+  repo: "https://github.com/mysticflounder/lean-formalizations"  # verified against the configured git remote, 2026-08-31
   subproject: "PlanarMaps"
   subproject_note: >
     The combinatorial-map / planar edge-bound cluster of the lean-formalizations
@@ -58,18 +53,21 @@ sources:                                            # [required]
       §1.3.3 "Maps: Permutational Model" introduces the dart set and the permutations
       σ/α/ϕ; the formal combinatorial-map definition followed here is Def. 1.3.23.
       This is the source of the definition, not of the six gated theorems.
-  - title: "{{NEEDS_ADAM_INPUT}} intended registry attribution"
-    authors: []
-    id: null
-    type: "marker"
+  - title: "A crossing lemma for multigraphs — the consuming program, recorded as context only"
+    authors: ["János Pach", "Géza Tóth"]
+    id: "arXiv:1801.00721; Discrete Comput. Geom. 63 (2020) 918–933; DOI 10.1007/s00454-018-00052-z"
+    type: "preprint"
+    relation: "consumes, does not originate"
     note: >
-      README.md files this module under the crossing-lemma program (Pach, J. and Tóth,
-      G., "A crossing lemma for multigraphs", Discrete Comput. Geom. 63 (2020) 918–933,
-      DOI 10.1007/s00454-018-00052-z, arXiv:1801.00721) because that program consumes
-      the multiplicity edge bound, not because that paper is the source of these
-      statements. Confirm whether the registry entry should carry that citation as
-      context or declare the cluster as classical with the Lando–Zvonkin model source
-      only.
+      README.md heads this module with this paper because the multigraph crossing-lemma
+      program CONSUMES the multiplicity edge bound. Checked against the paper's full
+      text: its Lemma 2.1 states e ≤ 3n − 6 for a branching topological multigraph with
+      n ≥ 3 vertices in which no two edges cross, and its proof is the same textbook
+      count (2e as the sum of face sizes, each face at least 3, then Euler) presented
+      as known material. The paper contains NO bound of the form e ≤ m(3n − 6); the
+      only multiplicity-m bound in it is Székely's crossing bound. So this paper
+      restates one of the six in a drawing setting and originates none of them. It is
+      recorded here as context and must not be promoted to this entry's source.
 
 # project status
 status:
@@ -254,9 +252,19 @@ acknowledgements: >
 # vendored upstream files in this entry's dependency closure - credited, not authored here.
 vendored_dependencies: >
   One vendored upstream file carries this entry: the combinatorial-map carrier
-  lean/LeanFormalizations/Combinatorics/CombinatorialMap/Basic.lean is vendored from
-  mathlib4 PR #16074 (commit 2b154fb, 2026-05-25), Apache-2.0, original authors Kyle
-  Miller and Rida Hamadani. It carries its original copyright header and is not
-  authored here; the six gated theorems above are built on top of it. The file will be
-  dropped for the upstream import once the project bumps to a Mathlib containing that
-  PR.
+  lean/LeanFormalizations/Combinatorics/CombinatorialMap/Basic.lean, taken from
+  mathlib4 PR #16074 "feat: combinatorial maps and planar graphs" at head commit
+  2b154fb93c498d33df78f9a0429da9356848e6d7, Apache-2.0, original authors Kyle Miller
+  and Rida Hamadani. It carries its original copyright header and is not authored here.
+  The definitions three of the six gated theorems are stated over — eulerCharacteristic,
+  IsPlanar and dual — are that PR's, not this project's.
+
+  Two facts a reader should have. First, PR #16074 was opened 2024-08-22 and is still
+  OPEN and unmerged, so this is a vendored copy of proposed, not accepted, mathlib
+  code; the file is meant to be dropped once the project bumps to a Mathlib that
+  contains it. Second, the file is no longer a pure copy: five declarations were added
+  locally after the vendoring — facePerm_sameCycle_of_card_face_eq_one and
+  card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one, then
+  Iso.permCongr_facePerm, sameCycle_permCongr_iff and Iso.facePerm_sameCycle_iff.
+  None of the six gated theorems is among them, so the gate is unaffected, but the
+  file's own "VENDORED" header overstates the case and should be corrected.
