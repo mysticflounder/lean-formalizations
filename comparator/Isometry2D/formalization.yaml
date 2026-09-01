@@ -1,0 +1,189 @@
+# formalization.yaml (v0.3): per-formalization metadata for one member of the
+# lean-formalizations collection. Split out of the repo-root formalization.yaml so
+# this formalization can be registered as its own entry.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill - the canonical repo URL, per-entry cost figures, and the attribution a
+# registry entry should declare where the repository asserts none. Do not treat a
+# marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations/Isometry2D"                    # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
+  repo_note: >
+    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
+    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
+    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
+    is canonical before registry submission.
+  subproject: "Isometry2D"
+  subproject_note: >
+    The 2D two-point isometry classification of the lean-formalizations collection: 2 of
+    the 53 mathlib-only headline claims packaged across the nine per-formalization
+    comparator configurations.
+
+# classification - for registry indexing. arXiv categories and MSC 2020 codes chosen
+# to fit this entry's mathematics; short lists are deliberate (no padding).
+arxiv_categories: ["math.MG", "math.FA"]
+msc2020: ["51M04", "46B04"]
+
+# sources - what was formalized.
+sources:                                            # [required]
+  - title: "Sur les transformations isométriques d'espaces vectoriels normés (the Mazur–Ulam theorem)"
+    authors: ["Stanisław Mazur", "Stanisław Ulam"]
+    id: "C. R. Acad. Sci. Paris 194 (1932), 946–948"
+    type: "article"
+    note: >
+      Mazur–Ulam supplies the reduction of a surjective isometry to its linear part.
+      The formalized headline — at most 2 isometries of the Euclidean plane send a
+      labeled segment to a congruent labeled segment — is an elementary corollary and
+      is folklore: the repository asserts no single originating paper for the count
+      itself (see README.md, "Euclidean geometry" references).
+
+# project status
+status:
+  scope: >
+    Two-point-pinned isometries of EuclideanSpace ℝ (Fin 2): for a ≠ b with
+    dist a b = dist c d, the set of isometries sending a ↦ c and b ↦ d has ncard ≤ 2,
+    and that set is Finite. The proof reduces to the linear part (Mazur–Ulam) and then
+    uses a right-angle-rotation argument specific to two dimensions. mathlib-only
+    dependencies: no project axioms, no custom axiom, no native_decide, no sorry.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  axioms_note: >
+    #print axioms closure of both gated results is a subset of
+    {propext, Classical.choice, Quot.sound}. The repository's 8 open `sorry`
+    declarations are all in the separate Pach–Sharir / Szemerédi–Trotter incidence
+    route; none of them is in this formalization or reachable from it.
+  theorems:
+    - "Headline.twoPoint_isometry_ncard_le_two"
+    - "Headline.twoPoint_isometry_set_finite"
+  main_results:
+  - declaration: "Headline.twoPoint_isometry_ncard_le_two, Headline.twoPoint_isometry_set_finite (2 mathlib-only headline claims)"
+    file: "comparator/Isometry2D/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/Isometry2D/config.json"
+    literature_dependencies: ["Mazur–Ulam, C. R. Acad. Sci. Paris 194 (1932), 946–948 (linear-reduction step)"]
+  - declaration: "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
+    file: "lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/Isometry2D/config.json"
+  gate_note: >
+    The artifacts this entry points at exist in comparator/Isometry2D/: Challenge.lean
+    (mathlib-only statements as sorry stubs, module Isometry2D.Challenge), Solution.lean
+    (module Isometry2D.Solution, import LeanFormalizations), config.json (theorem_names is
+    exactly the 2 Headline names listed above) and axiom-audit.lean (one #print
+    axioms line per gated theorem). These nine per-group configurations replace the
+    former single collection-level config that listed all 53 names at once. This file
+    asserts the content of those artifacts and the in-repo axiom audit; the outcome of
+    an authoritative leanprover/comparator run is reported by CI
+    (.github/workflows/comparator.yml), not by this file.
+
+# how it was produced. Extra per-entry fields are allowed.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
+# IMPORTANT: every figure in this block is a REPO-WIDE total for the whole
+# lean-formalizations collection (all nine formalizations plus the open incidence
+# route), carried over unchanged from the repo-root formalization.yaml. The session
+# logs do not attribute tokens, spend, or wall time to individual formalizations.
+# {{NEEDS_ADAM_INPUT}} if the registry requires per-entry cost figures.
+automation:                                          # [required]
+  figures_scope: "repo-wide totals for the whole lean-formalizations collection, not this entry alone"
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
+      cost:
+        wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
+        spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "input 4.03M, output 36.80M, cache-write 109.2M, cache-read 1.452B"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["openai/codex (ChatGPT Pro plan)"]
+      framework: "Codex CLI"
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
+      cost:
+        wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
+        spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "total 2.632B (input 2.608B of which 2.482B cached; output 15.60M; reasoning 11.40M)"
+    - method: "agent"
+      models: ["deepseek-v4-pro", "local MLX: Qwen3.6 / gemma-4 / DeepSeek-Prover-V2"]
+      framework: "OpenCode"
+      tool_setup: "10 sessions; 7 via deepseek-v4-pro (metered), 3 via local MLX models ($0)."
+      cost:
+        wall_time: "10 sessions over 2026-06-16..06-18; ~19 active agent-hours"
+        spend_usd: "$13.27 (metered, actual out-of-pocket)"
+        hardware: "API (DeepSeek) + local MLX (Apple-silicon, no cloud GPU)"
+        tokens: "input 1.92M, output 0.49M, reasoning 0.63M, cache-read 454.7M"
+  spend_usd: >
+    Repo-wide, not per entry. Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered)
+    plus flat-rate Claude Max and ChatGPT/Codex Pro subscriptions. Notional API-equivalent
+    of the Claude portion ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
+  notes: >
+    Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
+
+# fidelity
+fidelity:
+  divergences: >
+    None known for these 2 claims. Statements are mathlib-only: Isometry on
+    EuclideanSpace ℝ (Fin 2), Set.ncard, Set.Finite. The Mazur–Ulam reduction is used
+    inside the proof; the headline statement is the plane-specific count, which the
+    repository documents as an elementary folklore corollary rather than as a result of
+    the 1932 paper.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the repository's headline theorems (these 2
+    among them) are axiom-clean. The authoritative external check is a leanprover/comparator
+    run verifying statement identity (Challenge ≡ Solution in a shared Headline namespace)
+    and axiom compliance, re-running the nanoda and Lean default kernels (CI:
+    .github/workflows/comparator.yml; validated locally on Lean v4.30.0 through the default
+    kernel). That run has so far been performed on the collection-level config, not on an
+    Isometry2D-only config.
+
+# alignment - source statements ↦ formal declarations.
+alignment:
+  namespace: "EuclideanGeometry (comparator restatements under Headline)"
+  statements:
+    - source: "2D two-point isometry rigidity (≤ 2 isometries fix a labeled congruent segment)"
+      lean: "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
+      module: "LeanFormalizations.Geometry.Euclidean.IsometryClassification"
+      status: "proved"
+    - source: "Finiteness of the two-point-pinned isometry set"
+      lean: "EuclideanGeometry.twoPoint_isometry_set_finite"
+      module: "LeanFormalizations.Geometry.Euclidean.IsometryClassification"
+      status: "proved"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.

@@ -1,0 +1,201 @@
+# formalization.yaml (v0.3): per-formalization metadata for one member of the
+# lean-formalizations collection. Split out of the repo-root formalization.yaml so
+# this formalization can be registered as its own entry.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill - the canonical repo URL, per-entry cost figures, and the attribution a
+# registry entry should declare where the repository asserts none. Do not treat a
+# marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations/TreeOrder"                    # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
+  repo_note: >
+    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
+    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
+    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
+    is canonical before registry submission.
+  subproject: "TreeOrder"
+  subproject_note: >
+    The finite-tree leaf-order cluster of the lean-formalizations collection: 3 of the
+    53 mathlib-only headline claims packaged across the nine per-formalization
+    comparator configurations.
+
+# classification - for registry indexing. arXiv categories and MSC 2020 codes chosen
+# to fit this entry's mathematics; short lists are deliberate (no padding).
+arxiv_categories: ["math.CO"]
+msc2020: ["05C05", "05C40"]
+
+# sources - what was formalized.
+sources:                                            # [required]
+  - title: "No originating paper asserted: classical / folklore graph theory"
+    authors: []
+    id: null
+    type: "folklore"
+    note: >
+      These are elementary finite-graph facts — every finite tree admits a
+      leaf-insertion order, prefixes of such an order induce connected subgraphs, and a
+      labelling constant across every adjacency is constant on a connected graph. The
+      repo-root formalization.yaml attributes no source to them and no citation is
+      invented here. README.md files the module under the crossing-lemma /
+      combinatorial-map program (Pach–Tóth, arXiv:1801.00721) because that program
+      consumes these helpers, not because that paper states them.
+      {{NEEDS_ADAM_INPUT}} If a specific attribution is intended for registry purposes,
+      supply it; it is not derivable from the repository.
+
+# project status
+status:
+  scope: >
+    Leaf-removal and leaf-insertion orders for finite trees, and the connectivity
+    invariants they carry: existence of a leaf-insertion order on a finite tree, the
+    prefix-connectedness invariant (each prefix of a leaf-insertion order induces a
+    connected subgraph through its parent edge), and label transport on a connected
+    graph (a labelling constant across every adjacency is globally constant).
+    mathlib-only dependencies: no project axioms, no custom axiom, no native_decide,
+    no sorry.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  axioms_note: >
+    #print axioms closure of each of the 3 gated results is a subset of
+    {propext, Classical.choice, Quot.sound}. The repository's 8 open `sorry`
+    declarations are all in the separate Pach–Sharir / Szemerédi–Trotter incidence
+    route; none of them is in this formalization or reachable from it.
+  theorems:
+    - "Headline.tree_exists_leaf_insertion_order"
+    - "Headline.connected_induce_take_of_leaf_insertion_parent"
+    - "Headline.connected_apply_eq_of_forall_adj"
+  main_results:
+  - declaration: "3 mathlib-only headline claims (see status.theorems)"
+    file: "comparator/TreeOrder/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/TreeOrder/config.json"
+    literature_dependencies: []
+  - declaration: "SimpleGraph.IsTree.exists_leaf_insertion_order, SimpleGraph.connected_induce_take_of_leaf_insertion_parent, SimpleGraph.Connected.apply_eq_of_forall_adj"
+    file: "lean/LeanFormalizations/Combinatorics/SimpleGraph/TreeOrder.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/TreeOrder/config.json"
+  gate_note: >
+    The artifacts this entry points at exist in comparator/TreeOrder/: Challenge.lean
+    (mathlib-only statements as sorry stubs, module TreeOrder.Challenge), Solution.lean
+    (module TreeOrder.Solution, import LeanFormalizations), config.json (theorem_names is
+    exactly the 3 Headline names listed above) and axiom-audit.lean (one #print
+    axioms line per gated theorem). These nine per-group configurations replace the
+    former single collection-level config that listed all 53 names at once. This file
+    asserts the content of those artifacts and the in-repo axiom audit; the outcome of
+    an authoritative leanprover/comparator run is reported by CI
+    (.github/workflows/comparator.yml), not by this file.
+
+# how it was produced. Extra per-entry fields are allowed.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
+# IMPORTANT: every figure in this block is a REPO-WIDE total for the whole
+# lean-formalizations collection (all nine formalizations plus the open incidence
+# route), carried over unchanged from the repo-root formalization.yaml. The session
+# logs do not attribute tokens, spend, or wall time to individual formalizations.
+# {{NEEDS_ADAM_INPUT}} if the registry requires per-entry cost figures.
+automation:                                          # [required]
+  figures_scope: "repo-wide totals for the whole lean-formalizations collection, not this entry alone"
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
+      cost:
+        wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
+        spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "input 4.03M, output 36.80M, cache-write 109.2M, cache-read 1.452B"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["openai/codex (ChatGPT Pro plan)"]
+      framework: "Codex CLI"
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
+      cost:
+        wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
+        spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "total 2.632B (input 2.608B of which 2.482B cached; output 15.60M; reasoning 11.40M)"
+    - method: "agent"
+      models: ["deepseek-v4-pro", "local MLX: Qwen3.6 / gemma-4 / DeepSeek-Prover-V2"]
+      framework: "OpenCode"
+      tool_setup: "10 sessions; 7 via deepseek-v4-pro (metered), 3 via local MLX models ($0)."
+      cost:
+        wall_time: "10 sessions over 2026-06-16..06-18; ~19 active agent-hours"
+        spend_usd: "$13.27 (metered, actual out-of-pocket)"
+        hardware: "API (DeepSeek) + local MLX (Apple-silicon, no cloud GPU)"
+        tokens: "input 1.92M, output 0.49M, reasoning 0.63M, cache-read 454.7M"
+  spend_usd: >
+    Repo-wide, not per entry. Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered)
+    plus flat-rate Claude Max and ChatGPT/Codex Pro subscriptions. Notional API-equivalent
+    of the Claude portion ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
+  notes: >
+    Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
+
+# fidelity
+fidelity:
+  divergences: >
+    None known for these 3 claims. All are stated mathlib-only over SimpleGraph,
+    SimpleGraph.IsTree, SimpleGraph.Connected and List/Finset primitives; no project
+    definition appears in the statements. TreeOrder.lean contains further supporting
+    lemmas (parent-edge enumeration, leaf-peeling exclusion, prefix label constancy)
+    that are not part of this gated set.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the repository's headline theorems (these 3
+    among them) are axiom-clean. The authoritative external check is a leanprover/comparator
+    run verifying statement identity (Challenge ≡ Solution in a shared Headline namespace)
+    and axiom compliance, re-running the nanoda and Lean default kernels (CI:
+    .github/workflows/comparator.yml; validated locally on Lean v4.30.0 through the default
+    kernel). CI (.github/workflows/comparator.yml) runs that check once per group, looping the
+    nine configurations so a failure in one group does not hide the others; this file
+    does not assert the outcome of any particular run.
+
+# alignment - source statements ↦ formal declarations.
+alignment:
+  namespace: "SimpleGraph (comparator restatements under Headline)"
+  statements:
+    - source: "Every finite tree admits a leaf-insertion order"
+      lean: "SimpleGraph.IsTree.exists_leaf_insertion_order"
+      module: "LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder"
+      status: "proved"
+    - source: "Prefix connectedness of a leaf-insertion order through the parent edge"
+      lean: "SimpleGraph.connected_induce_take_of_leaf_insertion_parent"
+      module: "LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder"
+      status: "proved"
+    - source: "A labelling constant across every adjacency is constant on a connected graph"
+      lean: "SimpleGraph.Connected.apply_eq_of_forall_adj"
+      module: "LeanFormalizations.Combinatorics.SimpleGraph.TreeOrder"
+      status: "proved"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.

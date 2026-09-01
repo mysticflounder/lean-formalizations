@@ -1,0 +1,204 @@
+# formalization.yaml (v0.3): per-formalization metadata for one member of the
+# lean-formalizations collection. Split out of the repo-root formalization.yaml so
+# this formalization can be registered as its own entry.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill - the canonical repo URL, per-entry cost figures, and the attribution a
+# registry entry should declare where the repository asserts none. Do not treat a
+# marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations/Bsg"                    # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
+  repo_note: >
+    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
+    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
+    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
+    is canonical before registry submission.
+  subproject: "Bsg"
+  subproject_note: >
+    The Balog–Szemerédi–Gowers cluster of the lean-formalizations collection: 4 of the
+    53 mathlib-only headline claims packaged across the nine per-formalization
+    comparator configurations.
+
+# classification - for registry indexing. arXiv categories and MSC 2020 codes chosen
+# to fit this entry's mathematics; short lists are deliberate (no padding).
+arxiv_categories: ["math.CO", "math.NT"]
+msc2020: ["11B30", "11P70"]
+
+# sources - what was formalized.
+sources:                                            # [required]
+  - title: "A statistical theorem of set addition / A new proof of Szemerédi's theorem for arithmetic progressions of length four (the Balog–Szemerédi–Gowers theorem)"
+    authors: ["Antal Balog", "Endre Szemerédi", "W. T. Gowers"]
+    id: "Balog–Szemerédi, Combinatorica 14 (1994) 263–268, DOI 10.1007/BF01212974; Gowers, Geom. Funct. Anal. 8 (1998) 529–551, DOI 10.1007/s000390050065"
+    type: "article"
+    prior_work: "Modern dependent-random-choice exposition: arXiv:0909.3271 (Fox–Sudakov); arXiv:2308.10245 (Reiher–Schoen)"
+    note: >
+      Gowers 1998 is the source of the graph-energy form that the live proof path
+      follows; the exposition tracked in-repo is Tao–Vu, Additive Combinatorics
+      (CUP 2006), §6.4.
+
+# project status
+status:
+  scope: >
+    The Balog–Szemerédi–Gowers theorem over Finset.addEnergy in an arbitrary
+    AddCommGroup: the two-set (asymmetric) form, the single-set (symmetric) form, an
+    asymmetric form with explicit polynomial-in-η constants in place of ∃-quantified
+    ones, and the supporting energy → popular-difference-graph step. mathlib-only
+    dependencies: no project axioms, no custom axiom, no native_decide, no sorry.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  axioms_note: >
+    #print axioms closure of each of the 4 gated results is a subset of
+    {propext, Classical.choice, Quot.sound}. The repository's 8 open `sorry`
+    declarations are all in the separate Pach–Sharir / Szemerédi–Trotter incidence
+    route; none of them is in this formalization or reachable from it.
+  theorems:
+    - "Headline.bsg_asymmetric"
+    - "Headline.bsg_symmetric"
+    - "Headline.bsg_asymmetric_explicit"
+    - "Headline.energy_to_popular_graph"
+  main_results:
+  - declaration: "Headline.bsg_asymmetric, Headline.bsg_symmetric, Headline.bsg_asymmetric_explicit, Headline.energy_to_popular_graph (4 mathlib-only headline claims)"
+    file: "comparator/Bsg/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/Bsg/config.json"
+    literature_dependencies: []
+  - declaration: "Finset.balog_szemeredi_gowers_asymmetric (and symmetric/explicit variants)"
+    file: "lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/Bsg/config.json"
+  - declaration: "Finset.energy_to_popular_graph"
+    file: "lean/LeanFormalizations/Combinatorics/Additive/BSGEnergyToGraph.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/Bsg/config.json"
+  gate_note: >
+    The artifacts this entry points at exist in comparator/Bsg/: Challenge.lean
+    (mathlib-only statements as sorry stubs, module Bsg.Challenge), Solution.lean
+    (module Bsg.Solution, import LeanFormalizations), config.json (theorem_names is
+    exactly the 4 Headline names listed above) and axiom-audit.lean (one #print
+    axioms line per gated theorem). These nine per-group configurations replace the
+    former single collection-level config that listed all 53 names at once. This file
+    asserts the content of those artifacts and the in-repo axiom audit; the outcome of
+    an authoritative leanprover/comparator run is reported by CI
+    (.github/workflows/comparator.yml), not by this file.
+
+# how it was produced. Extra per-entry fields are allowed.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
+# IMPORTANT: every figure in this block is a REPO-WIDE total for the whole
+# lean-formalizations collection (all nine formalizations plus the open incidence
+# route), carried over unchanged from the repo-root formalization.yaml. The session
+# logs do not attribute tokens, spend, or wall time to individual formalizations.
+# {{NEEDS_ADAM_INPUT}} if the registry requires per-entry cost figures.
+automation:                                          # [required]
+  figures_scope: "repo-wide totals for the whole lean-formalizations collection, not this entry alone"
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
+      cost:
+        wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
+        spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "input 4.03M, output 36.80M, cache-write 109.2M, cache-read 1.452B"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["openai/codex (ChatGPT Pro plan)"]
+      framework: "Codex CLI"
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
+      cost:
+        wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
+        spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "total 2.632B (input 2.608B of which 2.482B cached; output 15.60M; reasoning 11.40M)"
+    - method: "agent"
+      models: ["deepseek-v4-pro", "local MLX: Qwen3.6 / gemma-4 / DeepSeek-Prover-V2"]
+      framework: "OpenCode"
+      tool_setup: "10 sessions; 7 via deepseek-v4-pro (metered), 3 via local MLX models ($0)."
+      cost:
+        wall_time: "10 sessions over 2026-06-16..06-18; ~19 active agent-hours"
+        spend_usd: "$13.27 (metered, actual out-of-pocket)"
+        hardware: "API (DeepSeek) + local MLX (Apple-silicon, no cloud GPU)"
+        tokens: "input 1.92M, output 0.49M, reasoning 0.63M, cache-read 454.7M"
+  spend_usd: >
+    Repo-wide, not per entry. Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered)
+    plus flat-rate Claude Max and ChatGPT/Codex Pro subscriptions. Notional API-equivalent
+    of the Claude portion ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
+  notes: >
+    Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
+
+# fidelity
+fidelity:
+  divergences: >
+    None known for these 4 claims. Statements are mathlib-only: Finset.addEnergy over
+    an arbitrary AddCommGroup, with subsets and sumset cardinalities as the conclusion,
+    so Challenge.lean is readable without trusting any project definition. The
+    asymmetric_explicit variant strengthens the ∃-quantified constants of the
+    asymmetric form to explicit polynomials in η; it does not weaken it.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the repository's headline theorems (these 4
+    among them) are axiom-clean. The authoritative external check is a leanprover/comparator
+    run verifying statement identity (Challenge ≡ Solution in a shared Headline namespace)
+    and axiom compliance, re-running the nanoda and Lean default kernels (CI:
+    .github/workflows/comparator.yml; validated locally on Lean v4.30.0 through the default
+    kernel). CI (.github/workflows/comparator.yml) runs that check once per group, looping the
+    nine configurations so a failure in one group does not hide the others; this file
+    does not assert the outcome of any particular run.
+
+# alignment - source statements ↦ formal declarations.
+alignment:
+  namespace: "Finset (comparator restatements under Headline)"
+  statements:
+    - source: "Balog–Szemerédi–Gowers theorem, two-set (asymmetric) form"
+      lean: "Finset.balog_szemeredi_gowers_asymmetric"
+      module: "LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers"
+      status: "proved"
+    - source: "Balog–Szemerédi–Gowers theorem, single-set (symmetric) form"
+      lean: "Finset.balog_szemeredi_gowers_symmetric"
+      module: "LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers"
+      status: "proved"
+    - source: "Balog–Szemerédi–Gowers, asymmetric form with explicit constants"
+      lean: "Finset.balog_szemeredi_gowers_asymmetric_explicit"
+      module: "LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers"
+      status: "proved"
+    - source: "Energy ⟹ popular-difference-graph step (Gowers' graph proof)"
+      lean: "Finset.energy_to_popular_graph"
+      module: "LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph"
+      status: "proved"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.

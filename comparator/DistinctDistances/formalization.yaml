@@ -1,0 +1,311 @@
+# formalization.yaml (v0.3): per-formalization metadata for one member of the
+# lean-formalizations collection. Split out of the repo-root formalization.yaml so
+# this formalization can be registered as its own entry.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill - the canonical repo URL, per-entry cost figures, and the attribution a
+# registry entry should declare where the repository asserts none. Do not treat a
+# marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations/DistinctDistances"                    # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
+  repo_note: >
+    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
+    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
+    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
+    is canonical before registry submission.
+  subproject: "DistinctDistances"
+  subproject_note: >
+    The Elekes–Sharir / Elekes–Sharir–Guth–Katz reduction layer of the
+    lean-formalizations collection: 19 of the 53 mathlib-only headline claims packaged
+    across the nine per-formalization comparator configurations.
+
+# classification - for registry indexing. arXiv categories and MSC 2020 codes chosen
+# to fit this entry's mathematics; short lists are deliberate (no padding).
+arxiv_categories: ["math.CO", "math.MG"]
+msc2020: ["52C10", "52C35", "15A03"]
+
+# sources - what was formalized.
+sources:                                            # [required]
+  - title: "Incidences in three dimensions and distinct distances in the plane (the Elekes–Sharir framework)"
+    authors: ["György Elekes", "Micha Sharir"]
+    id: "arXiv:1005.0982; Combin. Probab. Comput. 20 (2011), no. 4, 571–608; DOI 10.1017/S0963548311000137"
+    type: "preprint"
+    prior_work: >
+      The reduction feeds the Guth–Katz bound (Guth, L. and Katz, N.H., "On the Erdős
+      distinct distances problem in the plane", Ann. of Math. 181 (2015), no. 1,
+      155–190, DOI 10.4007/annals.2015.181.1.2, arXiv:1011.4105), which README.md cites
+      alongside arXiv:1005.0982 for the ElekesSharirGuthKatz base layer. The underlying
+      problem is Erdős, P., "On sets of distances of n points", Amer. Math. Monthly 53
+      (1946), 248–250, DOI 10.2307/2305092. Only the base reduction layer is formalized
+      here; no distinct-distances bound is claimed.
+
+# project status
+status:
+  scope: >
+    The base layer of the Elekes–Sharir reduction of the planar distinct-distances
+    problem, in three parts. (1) Linear-algebra core (6): rank–nullity bounds for a
+    linear functional and for the three-dimensional case, pullback nondegeneracy, and
+    the conic normal-form identities for the quadratic part. (2) Geometric core (5):
+    the two-pinned determinant is affine and splits as constant plus linear;
+    equal-squared-distance and isometry-graph pairs intersect or are parallel; a skew
+    ruling of the isometry graph carries at most one line. (3) Elekes–Sharir–Guth–Katz
+    base layer (8): the Cauchy–Schwarz energy lower bound for few distances, existence
+    of a general-position configuration, the ordered-multiplicity and distance-energy
+    ceilings, the distinct-distance count from the ceiling, the all-configs to
+    h-indexed transfer, the level-sum bridge identity, and the assembled decomposition.
+    mathlib-only dependencies: no project axioms, no custom axiom, no native_decide,
+    no sorry. This is the reduction layer only: the polynomial-partitioning /
+    incidence half of Guth–Katz is not formalized, and no distinct-distances lower
+    bound is claimed here.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  axioms_note: >
+    #print axioms closure of each of the 19 gated results is a subset of
+    {propext, Classical.choice, Quot.sound}. The repository's 8 open `sorry`
+    declarations are all in the separate Pach–Sharir / Szemerédi–Trotter incidence
+    route; none of them is in this formalization or reachable from it.
+  theorems:
+    - "Headline.finrank_ker_functional_ge"
+    - "Headline.finrank_ker_ge_two_of_finrank_eq_three"
+    - "Headline.pullback_nondegenerate"
+    - "Headline.quadraticPart_eq"
+    - "Headline.dotProduct_mulVec_self_eq_zero_iff"
+    - "Headline.quadraticPart_vanishes_iff"
+    - "Headline.twoPinnedDet_affine"
+    - "Headline.twoPinnedDet_eq_const_add_linear"
+    - "Headline.intersect_or_parallel_of_dist2_eq"
+    - "Headline.intersect_or_parallel_of_isometryGraph"
+    - "Headline.atMostOneLine_of_skewRuling_isometryGraph"
+    - "Headline.energy_lower_bound_of_few_distances"
+    - "Headline.gp_config_nonempty"
+    - "Headline.orderedMultiplicity_le_three_mul"
+    - "Headline.distanceEnergy_le_three_mul_cube"
+    - "Headline.numDistances_ge_of_ceiling"
+    - "Headline.all_configs_lower_bound_to_hIndexed_lower_bound"
+    - "Headline.distanceEnergy_eq_sum_energyAtLevel"
+    - "Headline.elekes_sharir_guth_katz_decomposition"
+  main_results:
+  - declaration: "19 mathlib-only headline claims (see status.theorems)"
+    file: "comparator/DistinctDistances/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/DistinctDistances/config.json"
+    literature_dependencies: ["Elekes–Sharir, arXiv:1005.0982"]
+  - declaration: "ElekesSharir linear-algebra core (finrank_ker_functional_ge, finrank_ker_ge_two_of_finrank_eq_three, pullback_nondegenerate, quadraticPart_eq, dotProduct_mulVec_self_eq_zero_iff, quadraticPart_vanishes_iff)"
+    file: "lean/LeanFormalizations/Geometry/ElekesSharir/"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/DistinctDistances/config.json"
+  - declaration: "ElekesSharir geometric core (twoPinnedDet_affine, twoPinnedDet_eq_const_add_linear, intersect_or_parallel_of_dist2_eq, intersect_or_parallel_of_isometryGraph, atMostOneLine_of_skewRuling_isometryGraph)"
+    file: "lean/LeanFormalizations/Geometry/ElekesSharir/"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/DistinctDistances/config.json"
+  - declaration: "Esgk base layer (energy_lower_bound_of_few_distances, gp_config_nonempty, orderedMultiplicity_le_three_mul, distanceEnergy_le_three_mul_cube, numDistances_ge_of_ceiling, all_configs_lower_bound_to_hIndexed_lower_bound, distanceEnergy_eq_sum_energyAtLevel, elekes_sharir_guth_katz_decomposition)"
+    file: "lean/LeanFormalizations/ElekesSharirGuthKatz/"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/DistinctDistances/config.json"
+  gate_note: >
+    The artifacts this entry points at exist in comparator/DistinctDistances/: Challenge.lean
+    (mathlib-only statements as sorry stubs, module DistinctDistances.Challenge), Solution.lean
+    (module DistinctDistances.Solution, import LeanFormalizations), config.json (theorem_names is
+    exactly the 19 Headline names listed above) and axiom-audit.lean (one #print
+    axioms line per gated theorem). These nine per-group configurations replace the
+    former single collection-level config that listed all 53 names at once. This file
+    asserts the content of those artifacts and the in-repo axiom audit; the outcome of
+    an authoritative leanprover/comparator run is reported by CI
+    (.github/workflows/comparator.yml), not by this file.
+
+# how it was produced. Extra per-entry fields are allowed.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
+# IMPORTANT: every figure in this block is a REPO-WIDE total for the whole
+# lean-formalizations collection (all nine formalizations plus the open incidence
+# route), carried over unchanged from the repo-root formalization.yaml. The session
+# logs do not attribute tokens, spend, or wall time to individual formalizations.
+# {{NEEDS_ADAM_INPUT}} if the registry requires per-entry cost figures.
+automation:                                          # [required]
+  figures_scope: "repo-wide totals for the whole lean-formalizations collection, not this entry alone"
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
+      cost:
+        wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
+        spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "input 4.03M, output 36.80M, cache-write 109.2M, cache-read 1.452B"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["openai/codex (ChatGPT Pro plan)"]
+      framework: "Codex CLI"
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
+      cost:
+        wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
+        spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "total 2.632B (input 2.608B of which 2.482B cached; output 15.60M; reasoning 11.40M)"
+    - method: "agent"
+      models: ["deepseek-v4-pro", "local MLX: Qwen3.6 / gemma-4 / DeepSeek-Prover-V2"]
+      framework: "OpenCode"
+      tool_setup: "10 sessions; 7 via deepseek-v4-pro (metered), 3 via local MLX models ($0)."
+      cost:
+        wall_time: "10 sessions over 2026-06-16..06-18; ~19 active agent-hours"
+        spend_usd: "$13.27 (metered, actual out-of-pocket)"
+        hardware: "API (DeepSeek) + local MLX (Apple-silicon, no cloud GPU)"
+        tokens: "input 1.92M, output 0.49M, reasoning 0.63M, cache-read 454.7M"
+  spend_usd: >
+    Repo-wide, not per entry. Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered)
+    plus flat-rate Claude Max and ChatGPT/Codex Pro subscriptions. Notional API-equivalent
+    of the Claude portion ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
+  notes: >
+    Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
+
+# fidelity
+fidelity:
+  divergences: >
+    Coverage, not statement, is where this entry stops short of the literature: only
+    the reduction layer of Elekes–Sharir and the base layer of the
+    Elekes–Sharir–Guth–Katz argument are formalized. The polynomial-partitioning and
+    incidence half of Guth–Katz is not formalized, and the separate Pach–Sharir /
+    Szemerédi–Trotter incidence route in the repository is still open (8 sorries) and
+    underlies none of these claims. The project predicates used by the Esgk statements
+    (dist2, esLine, Intersect, Parallel, J, and the Esgk energy/configuration
+    predicates) are inlined into the mathlib-only Challenge statements rather than
+    imported; docs/skeptic-Challenge-2026-06-20.md records each as read at its
+    definition site and matching the inlined expression.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the repository's headline theorems (these 19
+    among them) are axiom-clean; docs/skeptic-Challenge-2026-06-20.md records a read of the
+    inlined ElekesSharir/Esgk definitions against their definition sites. The authoritative
+    external check is a leanprover/comparator run verifying statement identity
+    (Challenge ≡ Solution in a shared Headline namespace) and axiom compliance, re-running
+    the nanoda and Lean default kernels (CI: .github/workflows/comparator.yml; validated
+    locally on Lean v4.30.0 through the default kernel). CI (.github/workflows/comparator.yml) runs that check once per group, looping the
+    nine configurations so a failure in one group does not hide the others; this file
+    does not assert the outcome of any particular run.
+
+# alignment - source statements ↦ formal declarations.
+alignment:
+  namespace: "ElekesSharir, Esgk (comparator restatements under Headline)"
+  statements:
+    - source: "Elekes–Sharir rank–nullity for a linear functional"
+      lean: "ElekesSharir.finrank_ker_functional_ge"
+      module: "LeanFormalizations.Geometry.ElekesSharir.OmegaRankCollapse"
+      status: "proved"
+    - source: "Kernel dimension ≥ 2 in the three-dimensional case"
+      lean: "ElekesSharir.finrank_ker_ge_two_of_finrank_eq_three"
+      module: "LeanFormalizations.Geometry.ElekesSharir.OmegaRankCollapse"
+      status: "proved"
+    - source: "Nondegeneracy of the pullback form"
+      lean: "ElekesSharir.pullback_nondegenerate"
+      module: "LeanFormalizations.Geometry.ElekesSharir.OmegaRankCollapse"
+      status: "proved"
+    - source: "Conic normal form: identification of the quadratic part"
+      lean: "ElekesSharir.quadraticPart_eq"
+      module: "LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm"
+      status: "proved"
+    - source: "Vanishing criterion for the associated quadratic form"
+      lean: "ElekesSharir.dotProduct_mulVec_self_eq_zero_iff"
+      module: "LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm"
+      status: "proved"
+    - source: "Vanishing criterion for the quadratic part"
+      lean: "ElekesSharir.quadraticPart_vanishes_iff"
+      module: "LeanFormalizations.Geometry.ElekesSharir.ConicNormalForm"
+      status: "proved"
+    - source: "The two-pinned determinant is affine"
+      lean: "ElekesSharir.twoPinnedDet_affine"
+      module: "LeanFormalizations.Geometry.ElekesSharir.ChordCurve"
+      status: "proved"
+    - source: "Two-pinned determinant splits as constant plus linear"
+      lean: "ElekesSharir.twoPinnedDet_eq_const_add_linear"
+      module: "LeanFormalizations.Geometry.ElekesSharir.ChordCurve"
+      status: "proved"
+    - source: "Equal squared distances ⟹ the two lines intersect or are parallel"
+      lean: "ElekesSharir.intersect_or_parallel_of_dist2_eq"
+      module: "LeanFormalizations.Geometry.ElekesSharir.RulingSkewness"
+      status: "proved"
+    - source: "Isometry-graph form of the intersect-or-parallel dichotomy"
+      lean: "ElekesSharir.intersect_or_parallel_of_isometryGraph"
+      module: "LeanFormalizations.Geometry.ElekesSharir.RulingSkewness"
+      status: "proved"
+    - source: "A skew ruling of the isometry graph carries at most one line"
+      lean: "ElekesSharir.atMostOneLine_of_skewRuling_isometryGraph"
+      module: "LeanFormalizations.Geometry.ElekesSharir.RulingSkewness"
+      status: "proved"
+    - source: "Cauchy–Schwarz energy lower bound from few distinct distances"
+      lean: "Esgk.energy_lower_bound_of_few_distances"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.CauchyEnergy"
+      status: "proved"
+    - source: "Existence of a general-position configuration"
+      lean: "Esgk.gp_config_nonempty"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.FiniteMinimum"
+      status: "proved"
+    - source: "Ordered-multiplicity ceiling"
+      lean: "Esgk.orderedMultiplicity_le_three_mul"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.EnergyCeiling"
+      status: "proved"
+    - source: "Distance-energy ceiling"
+      lean: "Esgk.distanceEnergy_le_three_mul_cube"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.EnergyCeiling"
+      status: "proved"
+    - source: "Distinct-distance count from the energy ceiling"
+      lean: "Esgk.numDistances_ge_of_ceiling"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.EnergyCeiling"
+      status: "proved"
+    - source: "Transfer from an all-configurations bound to the h-indexed bound"
+      lean: "Esgk.all_configs_lower_bound_to_hIndexed_lower_bound"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.FiniteMinimum"
+      status: "proved"
+    - source: "Level-sum bridge identity for the distance energy"
+      lean: "Esgk.distanceEnergy_eq_sum_energyAtLevel"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.BridgeIdentity"
+      status: "proved"
+    - source: "Elekes–Sharir–Guth–Katz base decomposition"
+      lean: "Esgk.elekes_sharir_guth_katz_decomposition"
+      module: "LeanFormalizations.ElekesSharirGuthKatz.Decomposition"
+      status: "proved"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.
+
+# vendored upstream files in this entry's dependency closure - credited, not authored here.
+vendored_dependencies: >
+  One vendored upstream file sits in the dependency closure of this entry:
+  lean/LeanFormalizations/Geometry/Euclidean/PlanarGeneralPosition.lean, taken from
+  google-deepmind/formal-conjectures (FormalConjecturesForMathlib/Geometry/2d.lean and
+  Data/Set/Triplewise.lean), Apache-2.0, original authors "The Formal Conjectures
+  Authors". It carries its original copyright header and is not authored here.

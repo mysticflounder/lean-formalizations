@@ -2,26 +2,34 @@ name: comparator
 
 # Zulip auditability gate for the AI-authored headline results.
 #
+# The comparator set is split into one configuration per formalization. Each
+# group <Group> has a directory comparator/<Group>/ with its own Challenge.lean,
+# Solution.lean, config.json and axiom-audit.lean, and lakefile.toml declares
+# one lean_lib per group. The 53 headline theorems are spread over the 9 groups.
+#
 # Two jobs:
-#   conformance — VALIDATED locally. Builds the project + the two comparator
-#                 modules (Challenge, Solution) and runs
-#                 comparator/check-conformance.sh: both build and every Solution
-#                 theorem is axiom-clean (⊆ {propext, Classical.choice,
+#   conformance — VALIDATED locally. Builds the project + all group libraries
+#                 (Challenge and Solution roots) and runs
+#                 comparator/check-conformance.sh: every group builds and every
+#                 Solution theorem is axiom-clean (⊆ {propext, Classical.choice,
 #                 Quot.sound}). Statement identity is checked by the comparator job.
-#   comparator  — the authoritative leanprover/comparator run: statement
-#                 identity + axiom compliance + nanoda and Lean default-kernel
-#                 re-check, ending in "Your solution is okay!". The comparator is
-#                 checked out at the TAG matching this repo's lean-toolchain, so
-#                 its bundled lean4export is built against the same Lean as the
-#                 project (this resolves the earlier toolchain-pairing concern).
-#                 The pairing + default-kernel leg are validated locally (macOS,
-#                 fake-landrun dev shim); the real-landrun + nanoda legs run here
-#                 on Linux.
+#   comparator  — the authoritative leanprover/comparator run, once per group:
+#                 statement identity + axiom compliance + nanoda and Lean
+#                 default-kernel re-check, ending in "Your solution is okay!".
+#                 The tools are built once and the job then loops the 9 configs,
+#                 so a failure in one group does not hide the other groups. The
+#                 comparator is checked out at the TAG matching this repo's
+#                 lean-toolchain, so its bundled lean4export is built against the
+#                 same Lean as the project (this resolves the earlier
+#                 toolchain-pairing concern). The pairing + default-kernel leg
+#                 are validated locally (macOS, fake-landrun dev shim); the
+#                 real-landrun + nanoda legs run here on Linux.
 
 on:
   push:
     branches: [main]
     paths:
+      # comparator/** also covers the per-group directories comparator/<Group>/.
       - 'comparator/**'
       - 'lean/**'
       - 'lakefile.toml'
@@ -29,6 +37,12 @@ on:
       - '.github/workflows/comparator.yml'
   pull_request:
   workflow_dispatch:
+
+# The full group list. To add a group, add its name to this list.
+env:
+  COMPARATOR_GROUPS: >-
+    Bsg Isometry2D SmallCombinatorics ConvexSlicing TreeOrder
+    DistinctDistances NearEnemy PachDeZeeuw PlanarMaps
 
 jobs:
   conformance:
@@ -47,10 +61,11 @@ jobs:
       - name: Fetch mathlib build cache
         run: lake exe cache get
 
-      - name: Build project + comparator modules
-        run: ./lake-build.sh Challenge Solution
+      - name: Build project + all comparator groups
+        # Unquoted on purpose: the group list is one build target per word.
+        run: ./lake-build.sh $COMPARATOR_GROUPS
 
-      - name: Offline pre-flight (build + axiom audit)
+      - name: Offline pre-flight (build + axiom audit, all groups)
         run: comparator/check-conformance.sh
 
   comparator:
@@ -72,10 +87,11 @@ jobs:
       - name: Fetch mathlib build cache
         run: lake exe cache get
 
-      - name: Pre-build project + comparator modules
+      - name: Pre-build project + all comparator groups
         # A pre-built .lake means the comparator does not rebuild Solution.lean,
         # so its guarantee no longer rests on landrun's sandbox (README assumption 6).
-        run: ./lake-build.sh Challenge Solution
+        # Unquoted on purpose: the group list is one build target per word.
+        run: ./lake-build.sh $COMPARATOR_GROUPS
 
       - name: Install Rust (for nanoda)
         uses: dtolnay/rust-toolchain@stable
@@ -101,9 +117,21 @@ jobs:
           ( cd "$RUNNER_TEMP/nanoda" && cargo build --release )
           echo "COMPARATOR_NANODA=$RUNNER_TEMP/nanoda/target/release/nanoda_bin" >> "$GITHUB_ENV"
 
-      - name: Run comparator on the 19 headline theorems
+      - name: Run comparator on the 53 headline theorems (one config per group)
         run: |
           set -euo pipefail
-          # Invoked from the project dir so `lake env` resolves Challenge/Solution.
-          lake env "$COMPARATOR_BIN" comparator/config.json
-          # Success ends with "Your solution is okay!".
+          # One comparator run per group. Invoked from the project dir so
+          # `lake env` resolves each group's Challenge and Solution modules.
+          # Every group runs; the step fails at the end if any group failed.
+          failed=""
+          for g in $COMPARATOR_GROUPS; do
+            echo "== comparator: $g =="
+            if ! lake env "$COMPARATOR_BIN" "comparator/$g/config.json"; then
+              failed="$failed $g"
+            fi
+          done
+          if [ -n "$failed" ]; then
+            echo "FAIL: comparator failed for these groups:$failed" >&2
+            exit 1
+          fi
+          # Success ends with "Your solution is okay!" for every group.

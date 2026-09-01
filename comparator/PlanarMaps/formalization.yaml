@@ -1,0 +1,262 @@
+# formalization.yaml (v0.3): per-formalization metadata for one member of the
+# lean-formalizations collection. Split out of the repo-root formalization.yaml so
+# this formalization can be registered as its own entry.
+# Requiredness/conformance:
+#   - Fields marked [required] should be present and filled.
+#   - Fields not marked [required] are examples/recommended metadata only; they may be omitted.
+#   - Projects may add extra YAML keys at any level. Readers should tolerate unknown keys.
+# This is a lightweight reporting schema, not a closed validation schema.
+#
+# Markers below ({{NEEDS_ADAM_INPUT}}) flag values that only the project owner can
+# fill - the canonical repo URL, per-entry cost figures, and the attribution a
+# registry entry should declare where the repository asserts none. Do not treat a
+# marker as a fact.
+
+version: "v0.3"
+
+# project - the formalization itself (not the source).
+project:
+  name: "lean-formalizations/PlanarMaps"                    # [required]
+  authors: ["Adam McKenna"]                         # [required]
+  license: "Apache-2.0"                             # [required]
+  repo: "https://github.com/AdamMcKenna/lean-formalizations"  # value carried from the repo-root formalization.yaml
+  repo_note: >
+    {{NEEDS_ADAM_INPUT}} The repo-root formalization.yaml records
+    github.com/AdamMcKenna/lean-formalizations; the configured git remote of this
+    working copy is github.com/mysticflounder/lean-formalizations. Confirm which URL
+    is canonical before registry submission.
+  subproject: "PlanarMaps"
+  subproject_note: >
+    The combinatorial-map / planar edge-bound cluster of the lean-formalizations
+    collection: 6 of the 53 mathlib-only headline claims packaged across the nine
+    per-formalization comparator configurations.
+
+# classification - for registry indexing. arXiv categories and MSC 2020 codes chosen
+# to fit this entry's mathematics; short lists are deliberate (no padding).
+arxiv_categories: ["math.CO"]
+msc2020: ["05C10", "05C40"]
+
+# sources - what was formalized.
+# The repo-root formalization.yaml attributes no source to this cluster. The entries
+# below record what README.md records, and no citation is invented: the mathematical
+# content is classical, and the model definition has a textbook source.
+sources:                                            # [required]
+  - title: "Euler's formula and the planar edge bound e ≤ 3v − 6: classical, no originating paper asserted"
+    authors: []
+    id: null
+    type: "folklore"
+    note: >
+      Euler characteristic ≤ 2 for a connected map, the simple-graph edge bound
+      e ≤ 3v − 6, its multiplicity lift e ≤ M·(3v − 6), and preservation of planarity
+      and connectivity under duality are textbook facts. No single originating paper is
+      asserted for them.
+  - title: "Graphs on Surfaces and Their Applications (source of the dart-permutation model used as the definition)"
+    authors: ["Sergei K. Lando", "Alexander K. Zvonkin"]
+    id: "Encyclopaedia of Mathematical Sciences 141, Springer, 2004; DOI 10.1007/978-3-540-38361-1"
+    type: "book"
+    note: >
+      §1.3.3 "Maps: Permutational Model" introduces the dart set and the permutations
+      σ/α/ϕ; the formal combinatorial-map definition followed here is Def. 1.3.23.
+      This is the source of the definition, not of the six gated theorems.
+  - title: "{{NEEDS_ADAM_INPUT}} intended registry attribution"
+    authors: []
+    id: null
+    type: "marker"
+    note: >
+      README.md files this module under the crossing-lemma program (Pach, J. and Tóth,
+      G., "A crossing lemma for multigraphs", Discrete Comput. Geom. 63 (2020) 918–933,
+      DOI 10.1007/s00454-018-00052-z, arXiv:1801.00721) because that program consumes
+      the multiplicity edge bound, not because that paper is the source of these
+      statements. Confirm whether the registry entry should carry that citation as
+      context or declare the cluster as classical with the Lando–Zvonkin model source
+      only.
+
+# project status
+status:
+  scope: >
+    Combinatorial maps in the dart-permutation model and the planar edge bound.
+    A combinatorial map on a finite dart set D is three permutations of D
+    (vertexPerm / edgePerm / facePerm) with facePerm * edgePerm * vertexPerm = 1 and
+    edgePerm a fixed-point-free involution; cells are the permutation cycles, counted
+    with Nat.card; planarity is Euler = 2, connectivity is Relation.ReflTransGen,
+    simplicity is no-loop plus no-parallel on dart-level endpoint pairs. Gated results:
+    a connected map has Euler characteristic ≤ 2; the simple planar edge bound
+    e ≤ 3v − 6 and its multiplicity lift e ≤ M·(3v − 6); and preservation of planarity
+    and of connectivity in both directions under duality. mathlib-only dependencies:
+    no project axioms, no custom axiom, no native_decide, no sorry.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  axioms_note: >
+    #print axioms closure of each of the 6 gated results is a subset of
+    {propext, Classical.choice, Quot.sound}. The repository's 8 open `sorry`
+    declarations are all in the separate Pach–Sharir / Szemerédi–Trotter incidence
+    route; none of them is in this formalization or reachable from it.
+  theorems:
+    - "Headline.eulerCharacteristic_le_two"
+    - "Headline.card_edge_le_three_card_vertex_sub_six"
+    - "Headline.dual_isPlanar_iff"
+    - "Headline.dual_connected_iff"
+    - "Headline.connected_dual_iff"
+    - "Headline.planar_multigraph_edge_bound"
+  main_results:
+  - declaration: "6 mathlib-only headline claims (see status.theorems)"
+    file: "comparator/PlanarMaps/Solution.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/PlanarMaps/config.json"
+    literature_dependencies: []
+  - declaration: "CombinatorialMap.eulerCharacteristic_le_two"
+    file: "lean/LeanFormalizations/Combinatorics/CombinatorialMap/EulerBound.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/PlanarMaps/config.json"
+  - declaration: "CombinatorialMap.card_edge_le_three_card_vertex_sub_six, planar_multigraph_edge_bound"
+    file: "lean/LeanFormalizations/Combinatorics/CombinatorialMap/PlanarEdgeBound.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/PlanarMaps/config.json"
+  - declaration: "CombinatorialMap.dual_isPlanar_iff, dual_connected_iff, connected_dual_iff"
+    file: "lean/LeanFormalizations/Combinatorics/CombinatorialMap/DualProperties.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/PlanarMaps/config.json"
+  gate_note: >
+    The artifacts this entry points at exist in comparator/PlanarMaps/: Challenge.lean
+    (mathlib-only statements as sorry stubs, module PlanarMaps.Challenge), Solution.lean
+    (module PlanarMaps.Solution, import LeanFormalizations), config.json (theorem_names is
+    exactly the 6 Headline names listed above) and axiom-audit.lean (one #print
+    axioms line per gated theorem). These nine per-group configurations replace the
+    former single collection-level config that listed all 53 names at once. This file
+    asserts the content of those artifacts and the in-repo axiom audit; the outcome of
+    an authoritative leanprover/comparator run is reported by CI
+    (.github/workflows/comparator.yml), not by this file.
+
+# how it was produced. Extra per-entry fields are allowed.
+# Figures below were reconstructed (2026-06-18) from this project's own session
+# logs across three CLIs. Token counts are exact from the logs; USD is metered for
+# OpenCode and notional API-equivalent (Anthropic list price) for the otherwise-
+# subscription Claude usage. Totals only — no per-run or path detail.
+# IMPORTANT: every figure in this block is a REPO-WIDE total for the whole
+# lean-formalizations collection (all nine formalizations plus the open incidence
+# route), carried over unchanged from the repo-root formalization.yaml. The session
+# logs do not attribute tokens, spend, or wall time to individual formalizations.
+# {{NEEDS_ADAM_INPUT}} if the registry requires per-entry cost figures.
+automation:                                          # [required]
+  figures_scope: "repo-wide totals for the whole lean-formalizations collection, not this entry alone"
+  methods:
+    - method: "agent"                                # AI agents under human direction
+      models: ["claude-opus-4-8"]
+      framework: "Claude Code (with agent-smith multi-agent orchestration)"
+      tool_setup: >
+        Claude Code CLI with project skills/hooks (proof-blueprint, persistent memory,
+        Lean proof-repair/golf/axiom-eliminator subagents, doc-check + Lean-guardrail
+        hooks). Some work was carried in parallel agent sessions.
+      cost:
+        wall_time: "8 sessions over 2026-05-29..06-19; ~51 active agent-hours (15-min idle-gap cap)"
+        spend_usd: "subscription (Claude Max); notional API-equivalent ~$7,050 (out 36.8M tok, cache-rd 1.45B, cache-wr 109M, in 4.0M @ Opus list price)"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "input 4.03M, output 36.80M, cache-write 109.2M, cache-read 1.452B"
+      prompting_notes: >
+        Math-proofs working style: hardest sub-obstruction first; conditional statements
+        over hidden gaps; axiom hygiene gated at every checkpoint; neutral obstruction names.
+    - method: "agent"
+      models: ["openai/codex (ChatGPT Pro plan)"]
+      framework: "Codex CLI"
+      tool_setup: "Parallel agents with checkpoint-commit nudging."
+      cost:
+        wall_time: "19 sessions over 2026-06-04..06-15; ~142 agent-hours summed across concurrent panes (parallel, not human hours)"
+        spend_usd: "subscription (ChatGPT/Codex Pro, flat-rate); not separately metered"
+        hardware: "API-only / local laptop (no GPU)"
+        tokens: "total 2.632B (input 2.608B of which 2.482B cached; output 15.60M; reasoning 11.40M)"
+    - method: "agent"
+      models: ["deepseek-v4-pro", "local MLX: Qwen3.6 / gemma-4 / DeepSeek-Prover-V2"]
+      framework: "OpenCode"
+      tool_setup: "10 sessions; 7 via deepseek-v4-pro (metered), 3 via local MLX models ($0)."
+      cost:
+        wall_time: "10 sessions over 2026-06-16..06-18; ~19 active agent-hours"
+        spend_usd: "$13.27 (metered, actual out-of-pocket)"
+        hardware: "API (DeepSeek) + local MLX (Apple-silicon, no cloud GPU)"
+        tokens: "input 1.92M, output 0.49M, reasoning 0.63M, cache-read 454.7M"
+  spend_usd: >
+    Repo-wide, not per entry. Actual out-of-pocket: $13.27 (OpenCode/DeepSeek, metered)
+    plus flat-rate Claude Max and ChatGPT/Codex Pro subscriptions. Notional API-equivalent
+    of the Claude portion ≈ $7,050 (Opus list price); Codex portion unpriced (subscription).
+  notes: >
+    Human-directed multi-agent autoformalization over ~3 calendar weeks (2026-05-29..06-19),
+    across three CLIs run partly in parallel (Claude Code, Codex CLI, OpenCode). Aggregate
+    agent active-time ≈ 212 agent-hours (heavily overlapping, so far below the sum in human
+    terms). Every checkpoint re-ran the build and the axiom-clean gate; the comparator
+    packaging was the final auditability step. Token totals are exact from session logs.
+
+# fidelity
+fidelity:
+  divergences: >
+    Statement-level: the cluster is gated by unbundling rather than by importing the
+    project structure. The CombinatorialMap structure is restated in Challenge.lean as
+    three permutations of a finite dart set with the composition and involution laws,
+    its cells as Quotient (Equiv.Perm.SameCycle.setoid ·) counted with Nat.card, and
+    Solution.lean reconstructs the structure and bridges the counts through
+    Nat.card_eq_fintype_card. Every ingredient is mathlib-typed, so a reviewer reads
+    Challenge.lean without trusting a project definition. Modelling choice worth
+    naming: planarity here is the Euler-characteristic condition on the combinatorial
+    map, not an embedding in the topological plane; no bridge to a topological
+    planarity notion is claimed.
+
+# review status
+review:
+  status: "self-assessed"                            # [required] axiom-clean gate + comparator statement-identity check; no external peer review yet
+  reviewers: []
+  notes: >
+    Self-audit: scripts/check-axioms.sh asserts the repository's headline theorems (these 6
+    among them) are axiom-clean. The authoritative external check is a leanprover/comparator
+    run verifying statement identity (Challenge ≡ Solution in a shared Headline namespace)
+    and axiom compliance, re-running the nanoda and Lean default kernels (CI:
+    .github/workflows/comparator.yml; validated locally on Lean v4.30.0 through the default
+    kernel). CI (.github/workflows/comparator.yml) runs that check once per group, looping the
+    nine configurations so a failure in one group does not hide the others; this file
+    does not assert the outcome of any particular run.
+
+# alignment - source statements ↦ formal declarations.
+alignment:
+  namespace: "CombinatorialMap (comparator restatements under Headline)"
+  statements:
+    - source: "A connected map has Euler characteristic ≤ 2"
+      lean: "CombinatorialMap.eulerCharacteristic_le_two"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.EulerBound"
+      status: "proved"
+    - source: "Planar simple-graph edge bound e ≤ 3v − 6"
+      lean: "CombinatorialMap.card_edge_le_three_card_vertex_sub_six"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound"
+      status: "proved"
+    - source: "Multiplicity lift of the planar edge bound: e ≤ M·(3v − 6)"
+      lean: "planar_multigraph_edge_bound"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.PlanarEdgeBound"
+      status: "proved"
+    - source: "Planarity is preserved under duality"
+      lean: "CombinatorialMap.dual_isPlanar_iff"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties"
+      status: "proved"
+    - source: "The dual of a connected map is connected"
+      lean: "CombinatorialMap.dual_connected_iff"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties"
+      status: "proved"
+    - source: "A map with connected dual is connected"
+      lean: "CombinatorialMap.connected_dual_iff"
+      module: "LeanFormalizations.Combinatorics.CombinatorialMap.DualProperties"
+      status: "proved"
+
+# acknowledgements - optional credits for libraries, tools, discussions, etc.
+acknowledgements: >
+  Built on mathlib4 (leanprover-community) and Lean 4. Auditability packaging follows
+  the leanprover/comparator gate and the mathlib-initiative/formalization.yaml standard.
+
+# vendored upstream files in this entry's dependency closure - credited, not authored here.
+vendored_dependencies: >
+  One vendored upstream file carries this entry: the combinatorial-map carrier
+  lean/LeanFormalizations/Combinatorics/CombinatorialMap/Basic.lean is vendored from
+  mathlib4 PR #16074 (commit 2b154fb, 2026-05-25), Apache-2.0, original authors Kyle
+  Miller and Rida Hamadani. It carries its original copyright header and is not
+  authored here; the six gated theorems above are built on top of it. The file will be
+  dropped for the upstream import once the project bumps to a Mathlib containing that
+  PR.

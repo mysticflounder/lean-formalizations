@@ -19,7 +19,11 @@ project:
   repo: "https://github.com/AdamMcKenna/lean-formalizations"  # update if the canonical remote differs
 
 # sources - what was formalized. Collection repo: one entry per principal source
-# behind the comparator-verified headline results (comparator/config.json).
+# behind the comparator-verified headline results. This is the collection-level
+# file; the comparator gate is split into nine per-formalization configurations,
+# each with its OWN group-scoped formalization.yaml at
+# comparator/<Group>/formalization.yaml. A registry submission for one
+# formalization names that group's file and config.json, not this one.
 sources:                                            # [required]
   - title: "On sets of integers containing no k elements in arithmetic progression / Balog–Szemerédi–Gowers theorem"
     authors: ["Antal Balog", "Endre Szemerédi", "W. T. Gowers"]
@@ -69,29 +73,29 @@ status:
   axioms_note: >
     The 8 open declarations in the Pach–Sharir / Szemerédi–Trotter route additionally
     depend on `sorryAx`. None of them is a headline claim, is named in
-    scripts/axiom-check.lean, or appears in comparator/config.json `theorem_names`.
+    scripts/axiom-check.lean, or appears in any group's config.json `theorem_names`.
   main_results:
-  - declaration: "comparator/config.json theorem_names (53 mathlib-only headline claims)"
-    file: "comparator/Solution.lean"
+  - declaration: "53 mathlib-only headline claims, partitioned across nine comparator groups"
+    file: "comparator/<Group>/Solution.lean"
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
-    comparator_config: "comparator/config.json"
+    comparator_config: "comparator/{Bsg,Isometry2D,SmallCombinatorics,ConvexSlicing,TreeOrder,DistinctDistances,NearEnemy,PachDeZeeuw,PlanarMaps}/config.json"
     literature_dependencies: []
   - declaration: "Finset.balog_szemeredi_gowers_asymmetric (and symmetric/explicit variants)"
     file: "lean/LeanFormalizations/Combinatorics/Additive/"
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
-    comparator_config: "comparator/config.json"
+    comparator_config: "comparator/Bsg/config.json"
   - declaration: "EuclideanGeometry.twoPoint_isometry_ncard_le_two"
     file: "lean/LeanFormalizations/Geometry/Euclidean/IsometryClassification.lean"
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
-    comparator_config: "comparator/config.json"
+    comparator_config: "comparator/Isometry2D/config.json"
   - declaration: "IsoscelesCounting.iCount_le_of_convexIndep_circumscribed (alias CGN8_circumscribed_iCount_upper_bound)"
     file: "lean/LeanFormalizations/Geometry/IsoscelesCounting/CGN/CGN8.lean"
     sorry_count: 0
     axioms: ["propext", "Classical.choice", "Quot.sound"]
-    comparator_config: null    # quantifies over project-specific structures (iCount, ConvexIndep, MEC); audited in-repo, not in the mathlib-only comparator gate
+    comparator_config: "comparator/ConvexSlicing/config.json"    # gated as Headline.iCount_le_of_convexIndep_circumscribed: iCount and ConvexIndep are inlined and the minimum enclosing circle is unbundled
     literature_dependencies: ["Dumitrescu, Discrete Comput. Geom. 36 (2006) 503–509, eq. (5)"]
   full_audit_note: >
     The complete list of 63 axiom-clean headline theorems and the gate that asserts

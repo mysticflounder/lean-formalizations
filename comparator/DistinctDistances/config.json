@@ -1,0 +1,31 @@
+{
+  "challenge_module": "DistinctDistances.Challenge",
+  "solution_module": "DistinctDistances.Solution",
+  "enable_nanoda": true,
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "theorem_names": [
+    "Headline.finrank_ker_functional_ge",
+    "Headline.finrank_ker_ge_two_of_finrank_eq_three",
+    "Headline.pullback_nondegenerate",
+    "Headline.quadraticPart_eq",
+    "Headline.dotProduct_mulVec_self_eq_zero_iff",
+    "Headline.quadraticPart_vanishes_iff",
+    "Headline.twoPinnedDet_affine",
+    "Headline.twoPinnedDet_eq_const_add_linear",
+    "Headline.intersect_or_parallel_of_dist2_eq",
+    "Headline.intersect_or_parallel_of_isometryGraph",
+    "Headline.atMostOneLine_of_skewRuling_isometryGraph",
+    "Headline.energy_lower_bound_of_few_distances",
+    "Headline.gp_config_nonempty",
+    "Headline.orderedMultiplicity_le_three_mul",
+    "Headline.distanceEnergy_le_three_mul_cube",
+    "Headline.numDistances_ge_of_ceiling",
+    "Headline.all_configs_lower_bound_to_hIndexed_lower_bound",
+    "Headline.distanceEnergy_eq_sum_energyAtLevel",
+    "Headline.elekes_sharir_guth_katz_decomposition"
+  ]
+}

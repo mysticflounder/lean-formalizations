@@ -287,20 +287,28 @@ For the Lean community's auditability standard for AI-authored work (the
 *statement* is expressible in mathlib alone are packaged under
 [`comparator/`](comparator/):
 
-- [`comparator/Challenge.lean`](comparator/Challenge.lean) -- **mathlib-only**,
-  53 headline claims as `sorry` stubs (read this instead of the repo to see
-  exactly what is claimed).
-- [`comparator/Solution.lean`](comparator/Solution.lean) -- imports the project
-  and discharges each stub with the real, axiom-clean theorem.
-  Both declare the 53 under a shared `Headline` namespace, so the comparator
-  finds each `config.json` name in both exports.
-- The authoritative [leanprover/comparator](https://github.com/leanprover/comparator)
-  run checks `Challenge ≡ Solution` for all 53 (statement identity) and re-checks
-  the proofs under the nanoda + Lean default kernels, ending in
-  `Your solution is okay!` (validated locally on Lean v4.30.0; CI-wired).
+The gate is split into **nine configurations, one per formalization** -- `Bsg`,
+`Isometry2D`, `SmallCombinatorics`, `ConvexSlicing`, `TreeOrder`,
+`DistinctDistances`, `NearEnemy`, `PachDeZeeuw` and `PlanarMaps` -- so each can
+be reviewed, and registered on the [Palomar registry](https://palomar-registry.org),
+on its own. Each `comparator/<Group>/` directory holds:
+
+- `Challenge.lean` -- **mathlib-only**, that group's headline claims as `sorry`
+  stubs (read this instead of the repo to see exactly what is claimed).
+- `Solution.lean` -- imports the project and discharges each stub with the real,
+  axiom-clean theorem. Both declare the claims under a shared `Headline`
+  namespace, so the comparator finds each `config.json` name in both exports.
+- `config.json`, `axiom-audit.lean` and a group-scoped `formalization.yaml`.
+
+The 53 gated results are partitioned across the nine groups. The authoritative
+[leanprover/comparator](https://github.com/leanprover/comparator) run checks
+`Challenge ≡ Solution` per group (statement identity) and re-checks the proofs
+under the nanoda + Lean default kernels, ending in `Your solution is okay!`
+(validated locally on Lean v4.30.0; CI-wired).
 
 ```bash
-comparator/check-conformance.sh    # offline pre-flight: build the 2 modules + axiom-audit the 53
+comparator/check-conformance.sh        # offline pre-flight: all nine groups
+comparator/check-conformance.sh Bsg    # just one group
 ```
 
 The combinatorial-map planar edge-bound surface is now stated mathlib-only inside

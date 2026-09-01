@@ -1,0 +1,14 @@
+{
+  "challenge_module": "SmallCombinatorics.Challenge",
+  "solution_module": "SmallCombinatorics.Solution",
+  "enable_nanoda": true,
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "theorem_names": [
+    "Headline.threeAPFree_of_forall_not_collinear",
+    "Headline.unitPairIndexFinset_card_le_mul_of_forward_neighbor_card_le"
+  ]
+}

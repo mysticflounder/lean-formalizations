@@ -17,18 +17,57 @@ name = "LeanFormalizations"
 srcDir = "lean"
 
 # ── Comparator auditability gate (Zulip submission standard) ─────────────────
-# Two out-of-tree modules under comparator/ (not in defaultTargets, so the
-# normal `lake build` is unaffected). Build them explicitly:
-#   lake build Challenge Solution
-# Challenge imports Mathlib only and states the 53 headline results as `sorry`
-# stubs; Solution imports the project and discharges them with identical
-# top-level (bare) names. The leanprover/comparator run checks statement
-# identity and axiom cleanliness across the two exports.
+# Nine per-formalization gates under comparator/<Group>/, one per formalization,
+# so each can be submitted and reviewed on its own. None is in defaultTargets, so
+# the normal `lake build` is unaffected. Build them explicitly, for example:
+#   lake build Bsg
+# Each group has a Challenge module that imports Mathlib only and states that
+# group's headline results as `sorry` stubs, and a Solution module that imports
+# the project and discharges them under identical `Headline.` names. The
+# leanprover/comparator run checks statement identity and axiom cleanliness
+# across each pair. The 53 gated results are partitioned across the nine groups.
 
 [[lean_lib]]
-name = "Challenge"
+name = "Bsg"
 srcDir = "comparator"
+roots = ["Bsg.Challenge", "Bsg.Solution"]
 
 [[lean_lib]]
-name = "Solution"
+name = "Isometry2D"
 srcDir = "comparator"
+roots = ["Isometry2D.Challenge", "Isometry2D.Solution"]
+
+[[lean_lib]]
+name = "SmallCombinatorics"
+srcDir = "comparator"
+roots = ["SmallCombinatorics.Challenge", "SmallCombinatorics.Solution"]
+
+[[lean_lib]]
+name = "ConvexSlicing"
+srcDir = "comparator"
+roots = ["ConvexSlicing.Challenge", "ConvexSlicing.Solution"]
+
+[[lean_lib]]
+name = "TreeOrder"
+srcDir = "comparator"
+roots = ["TreeOrder.Challenge", "TreeOrder.Solution"]
+
+[[lean_lib]]
+name = "DistinctDistances"
+srcDir = "comparator"
+roots = ["DistinctDistances.Challenge", "DistinctDistances.Solution"]
+
+[[lean_lib]]
+name = "NearEnemy"
+srcDir = "comparator"
+roots = ["NearEnemy.Challenge", "NearEnemy.Solution"]
+
+[[lean_lib]]
+name = "PachDeZeeuw"
+srcDir = "comparator"
+roots = ["PachDeZeeuw.Challenge", "PachDeZeeuw.Solution"]
+
+[[lean_lib]]
+name = "PlanarMaps"
+srcDir = "comparator"
+roots = ["PlanarMaps.Challenge", "PlanarMaps.Solution"]
