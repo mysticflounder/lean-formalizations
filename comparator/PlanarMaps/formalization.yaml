@@ -259,12 +259,14 @@ vendored_dependencies: >
   The definitions three of the six gated theorems are stated over — eulerCharacteristic,
   IsPlanar and dual — are that PR's, not this project's.
 
-  Two facts a reader should have. First, PR #16074 was opened 2024-08-22 and is still
-  OPEN and unmerged, so this is a vendored copy of proposed, not accepted, mathlib
-  code; the file is meant to be dropped once the project bumps to a Mathlib that
-  contains it. Second, the file is no longer a pure copy: five declarations were added
-  locally after the vendoring — facePerm_sameCycle_of_card_face_eq_one and
-  card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one, then
-  Iso.permCongr_facePerm, sameCycle_permCongr_iff and Iso.facePerm_sameCycle_iff.
-  None of the six gated theorems is among them, so the gate is unaffected, but the
-  file's own "VENDORED" header overstates the case and should be corrected.
+  Two facts a reader should have, both now stated in the file's own header. First,
+  PR #16074 was opened 2024-08-22 and is still OPEN and unmerged, so this is a vendored
+  copy of proposed, not accepted, mathlib code; that is also why it is vendored at all,
+  since no released mathlib contains it. The file is meant to be dropped once the
+  project bumps to a Mathlib that includes the PR or its successor. Second, the file is
+  not a pure copy: five theorems were written for this project after the vendoring —
+  facePerm_sameCycle_of_card_face_eq_one and
+  card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one (commit 905d468),
+  then Iso.permCongr_facePerm, sameCycle_permCongr_iff and Iso.facePerm_sameCycle_iff
+  (commit a56cc8e). They are authored here, not upstream. None of the six gated
+  theorems is among them; the gated results are stated over the vendored definitions.

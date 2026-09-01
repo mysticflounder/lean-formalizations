@@ -4,11 +4,32 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kyle Miller, Rida Hamadani
 -/
 /-
-VENDORED from mathlib4 PR #16074 (https://github.com/leanprover-community/mathlib4/pull/16074)
-at commit 2b154fb93c498d33df78f9a0429da9356848e6d7, 2026-05-25.
-Reason: combinatorial-maps / planar-graph definitions are not in pinned mathlib v4.27.0.
+VENDORED (with local additions -- see below) from mathlib4 PR #16074
+(https://github.com/leanprover-community/mathlib4/pull/16074) at its head commit
+2b154fb93c498d33df78f9a0429da9356848e6d7, copied into this project 2026-05-25.
+The copyright header above covers that vendored material.
+
+STATUS OF THE UPSTREAM PR: #16074 was opened 2024-08-22 and, as of 2026-08-31, is
+still OPEN and UNMERGED. This is therefore a copy of PROPOSED mathlib code, not of
+accepted mathlib code. It may still change or be rejected upstream. That is also the
+reason it is vendored: because the PR is unmerged, these definitions are in no
+released mathlib, including the v4.30.0 this project pins.
+
+THIS FILE IS NOT A PURE COPY. Five theorems below were written for this project
+after the vendoring and are NOT upstream. They are authored by Adam McKenna and are
+not the work of the upstream authors:
+  * Iso.permCongr_facePerm, sameCycle_permCongr_iff, Iso.facePerm_sameCycle_iff
+      -- added in commit a56cc8e, "Transport face splits through residual prefixes"
+  * facePerm_sameCycle_of_card_face_eq_one,
+    card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one
+      -- added in commit 905d468, "Add residual-map insertion bridges"
+None of the five is in the comparator gate; the gated combinatorial-map results are
+stated over the vendored definitions (eulerCharacteristic, IsPlanar, dual), which are
+upstream.
+
 REMOVE when the project bumps to a mathlib that includes #16074 (or its successor)
-and switch imports to the upstream module.
+and switch imports to the upstream module. At that point the five local theorems
+above must be MOVED to a project module rather than deleted with the rest of the file.
 -/
 import Mathlib.GroupTheory.Perm.Cycle.Basic
 
