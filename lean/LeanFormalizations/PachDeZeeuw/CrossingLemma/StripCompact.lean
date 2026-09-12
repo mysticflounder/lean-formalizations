@@ -181,7 +181,7 @@ theorem cauchyBound_le_cauchyDom (h : PlanePoly) (x : ℝ)
   set f : ℕ → ℝ≥0 := fun i => ‖(Specialized1 x h).coeff i‖₊ with hf
   have hsup_le_sum : (Finset.range D).sup f ≤ ∑ i ∈ Finset.range D, f i :=
     Finset.sup_le (fun i hi =>
-      Finset.single_le_sum (f := f) (fun j _ => zero_le' (a := f j)) hi)
+      Finset.single_le_sum (f := f) (fun j _ => zero_le (a := f j)) hi)
   have hcast : (((Finset.range D).sup f : ℝ≥0) : ℝ)
       ≤ ((∑ i ∈ Finset.range D, f i : ℝ≥0) : ℝ) := by exact_mod_cast hsup_le_sum
   refine hcast.trans (le_of_eq ?_)
@@ -228,7 +228,7 @@ theorem isClosed_strip (h : PlanePoly) (xP xQ : ℝ) : IsClosed (strip h xP xQ) 
   have hslab : IsClosed {xy : ℝ × ℝ | xy.1 ∈ Set.Icc xP xQ} :=
     isClosed_Icc.preimage continuous_fst
   have heq : strip h xP xQ = {xy : ℝ × ℝ | xy.1 ∈ Set.Icc xP xQ} ∩ evalPlaneZeroSet h := by
-    ext xy; simp only [strip, evalPlaneZeroSet, Set.mem_setOf_eq, Set.mem_inter_iff]
+    ext xy; simp only [strip, evalPlaneZeroSet, Set.mem_ofPred_eq, Set.mem_inter_iff]
   rw [heq]
   exact hslab.inter (isClosed_evalPlaneZeroSet h)
 

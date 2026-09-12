@@ -102,7 +102,10 @@ theorem image_shearPoint_evalPlaneZeroSet (s : ℝ) (h : PlanePoly) :
 algebra equivalence `shearAlgEquiv s`). -/
 theorem shearPoly_injective (s : ℝ) : Function.Injective (shearPoly s) := by
   have h : Function.Injective ⇑(shearAlgEquiv s) := (shearAlgEquiv s).injective
-  simpa only [shearAlgEquiv_apply] using h
+  change ∀ ⦃a b : PlanePoly⦄, shearPoly s a = shearPoly s b → a = b
+  intro a b hab
+  apply h
+  simpa only [shearAlgEquiv_apply] using hab
 
 /-! ### The unsheared Edge-B incidence bound -/
 

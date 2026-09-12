@@ -13,7 +13,7 @@ STATUS OF THE UPSTREAM PR: #16074 was opened 2024-08-22 and, as of 2026-08-31, i
 still OPEN and UNMERGED. This is therefore a copy of PROPOSED mathlib code, not of
 accepted mathlib code. It may still change or be rejected upstream. That is also the
 reason it is vendored: because the PR is unmerged, these definitions are in no
-released mathlib, including the v4.30.0 this project pins.
+released mathlib, including the v4.33.1 this project pins.
 
 THIS FILE IS NOT A PURE COPY. Five theorems below were written for this project
 after the vendoring and are NOT upstream. They are authored by Adam McKenna and are
@@ -241,11 +241,8 @@ private noncomputable instance [Fintype D] [DecidableEq D] {w : D} :
 /-- The degree of a vertex is the number of incident darts. -/
 noncomputable def Vertex.deg [Fintype D] [DecidableEq D] (v : M.Vertex) : ℕ :=
   Quotient.lift (fun w ↦ Fintype.card {u | M.vertexPerm.SameCycle w u}) (fun w u h ↦ by
-    simp [Set.coe_setOf]
-    suffices M.vertexPerm.SameCycle w = M.vertexPerm.SameCycle u by
-      classical
-      simp_all only
-      convert rfl
+    apply Fintype.card_congr
+    apply Equiv.setCongr
     ext
     exact ⟨h.symm.trans, h.trans⟩) v
 
@@ -275,7 +272,8 @@ theorem facePerm_sameCycle_of_card_face_eq_one [Fintype D]
   have hsub : Subsingleton M.Face := by
     exact Fintype.card_le_one_iff_subsingleton.mp (by omega)
   have hq : M.Face_mk x = M.Face_mk y := Subsingleton.elim _ _
-  simpa [CombinatorialMap.Face_mk] using (Quotient.eq.mp hq)
+  change (Equiv.Perm.SameCycle.setoid M.facePerm).r x y
+  exact Quotient.eq.mp hq
 
 /-- A planar combinatorial map with at least one vertex and `|E| = |V| - 1`
 has exactly one face. This is the Euler-counting bridge used after the tree

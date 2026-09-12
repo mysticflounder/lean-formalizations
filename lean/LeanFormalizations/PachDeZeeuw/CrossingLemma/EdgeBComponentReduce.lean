@@ -119,9 +119,9 @@ theorem edgeB_crossingInput_2dof
     -- The filtered index set maps into the filtered image set under `f`.
     have hMaps : Set.MapsTo f ↑s ↑t := by
       intro H hH
-      rw [hs, Finset.coe_filter, Set.mem_setOf_eq] at hH
+      rw [hs, Finset.coe_filter, Set.mem_ofPred_eq] at hH
       obtain ⟨hHΓ, hpH, hqH⟩ := hH
-      rw [ht, Finset.coe_filter, Set.mem_setOf_eq]
+      rw [ht, Finset.coe_filter, Set.mem_ofPred_eq]
       exact ⟨Finset.mem_image_of_mem f hHΓ, hpH, hqH⟩
     -- `f` is injective on `s ⊆ Γ` by restricting `hinj`.
     have hsub : (↑s : Set (EdgeBCurve d)) ⊆ ↑Γ := by

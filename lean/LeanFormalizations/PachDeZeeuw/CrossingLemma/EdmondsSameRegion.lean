@@ -235,7 +235,9 @@ theorem prefixStepSameRegion_poolRegion_injective
     | h d₁ =>
       induction f₂ using Quotient.inductionOn with
       | h d₂ =>
-        have hd : drm d₁ = drm d₂ := by simpa [oldFaceRegion] using hEq
+        have hd : drm d₁ = drm d₂ := by
+          change drm d₁ = drm d₂ at hEq
+          exact hEq
         exact Quotient.sound (hsep d₁ d₂ hd)
   · -- Sum.inl / Sum.inr : old face vs new side.  Contradicts `hWold`.
     exfalso

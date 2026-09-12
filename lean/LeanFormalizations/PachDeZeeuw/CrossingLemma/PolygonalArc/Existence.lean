@@ -224,7 +224,7 @@ theorem collarPlus_nonempty (β : PolygonalArc) (R S : Set Plane) {δ₀ α : �
     (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩)))⟩
   rw [bandStripPlus, edgePlusMid]
   refine ⟨⟨?_, ?_⟩, ?_⟩
-  · rw [edgeBandMid, Set.mem_setOf_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
+  · rw [edgeBandMid, Set.mem_ofPred_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
     constructor <;> linarith
   · show 0 < sideForm s t w
     exact hsfpos
@@ -283,7 +283,7 @@ theorem collarMinus_nonempty (β : PolygonalArc) (R S : Set Plane) {δ₀ α : �
     (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_iUnion.mpr ⟨β.firstSeg, ?_⟩)))⟩
   rw [bandStripMinus, edgeMinusMid]
   refine ⟨⟨?_, ?_⟩, ?_⟩
-  · rw [edgeBandMid, Set.mem_setOf_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
+  · rw [edgeBandMid, Set.mem_ofPred_eq, ← hs, ← ht, hfoot, Set.mem_Ioo]
     constructor <;> linarith
   · show sideForm s t w < 0
     exact hsfneg
@@ -532,7 +532,7 @@ theorem footParam_affineComb_pt (s t x y : Plane) {a b : ℝ} (hab : a + b = 1) 
 theorem convex_footParam_gt (s t : Plane) (c : ℝ) :
     Convex ℝ {z : Plane | c < footParam s t z} := by
   rintro x hx y hy a b ha hb hab
-  simp only [Set.mem_setOf_eq] at hx hy ⊢
+  simp only [Set.mem_ofPred_eq] at hx hy ⊢
   rw [footParam_affineComb_pt s t x y hab]
   rcases ha.eq_or_lt with rfl | ha'
   · rw [zero_add] at hab; subst hab; simpa using hy
@@ -545,7 +545,7 @@ theorem convex_footParam_gt (s t : Plane) (c : ℝ) :
 theorem convex_footParam_lt (s t : Plane) (c : ℝ) :
     Convex ℝ {z : Plane | footParam s t z < c} := by
   rintro x hx y hy a b ha hb hab
-  simp only [Set.mem_setOf_eq] at hx hy ⊢
+  simp only [Set.mem_ofPred_eq] at hx hy ⊢
   rw [footParam_affineComb_pt s t x y hab]
   rcases ha.eq_or_lt with rfl | ha'
   · rw [zero_add] at hab; subst hab; simpa using hy
@@ -558,7 +558,7 @@ theorem convex_footParam_lt (s t : Plane) (c : ℝ) :
 theorem convex_edgeBandMid (s t : Plane) (α : ℝ) : Convex ℝ (edgeBandMid s t α) := by
   have e : edgeBandMid s t α
       = {z : Plane | α < footParam s t z} ∩ {z : Plane | footParam s t z < 1 - α} := by
-    ext z; simp only [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo, Set.mem_inter_iff]
+    ext z; simp only [edgeBandMid, Set.mem_ofPred_eq, Set.mem_Ioo, Set.mem_inter_iff]
   rw [e]; exact (convex_footParam_gt s t α).inter (convex_footParam_lt s t (1 - α))
 
 /-- The positive narrowed band is convex. -/
@@ -586,7 +586,7 @@ theorem convex_bandStripPlus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.nu
   have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
   have e : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
          = Metric.thickening δ₀ (β.segCarrier i) := by
-    ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+    ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
   rw [e]
   exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
 
@@ -598,7 +598,7 @@ theorem convex_bandStripMinus (β : PolygonalArc) (α δ₀ : ℝ) (i : Fin β.n
   have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
   have e : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
          = Metric.thickening δ₀ (β.segCarrier i) := by
-    ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+    ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
   rw [e]
   exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
 
@@ -619,7 +619,7 @@ theorem isPreconnected_reflexSector_inter_ball (a v b : Plane) (hcorner : IsCorn
   · have hset : reflexSector a v b ∩ Metric.ball v ρ
         = ({z | cornerTurn a v b * sideForm a v z < 0} ∩ Metric.ball v ρ)
           ∪ ({z | cornerTurn a v b * sideForm v b z < 0} ∩ Metric.ball v ρ) := by
-      rw [reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+      rw [reflexSector, Set.ofPred_or, Set.union_inter_distrib_right]
     rw [hset]
     have hτ : sideForm a v b ≠ 0 := by simpa [IsCorner, cornerTurn] using hcorner
     have hτ' : sideForm v b a ≠ 0 := by rw [← sideForm_cyclic a v b]; exact hτ
@@ -777,13 +777,13 @@ theorem isPreconnected_sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
         ring_nf
         nlinarith [hεpos, mul_self_pos.mpr hτ']
       have hpiece_i : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ i) := by
-        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         exact IsPreconnected.union pt ⟨hptA, hptstrip_i⟩ ⟨hptB, hptstrip_i⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
           ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
       have hpiece_i1 : IsPreconnected (vertexPlus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
-        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         exact IsPreconnected.union pt ⟨hptA, hptstrip_i1⟩ ⟨hptB, hptstrip_i1⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
@@ -863,7 +863,7 @@ theorem isPreconnected_sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
       ext z
       constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz
@@ -873,7 +873,7 @@ theorem isPreconnected_sectorPlus (β : PolygonalArc) (δ₀ : ℝ)
       ext z
       constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) :=
           Metric.infDist_nonneg
         nlinarith
@@ -1042,13 +1042,13 @@ theorem isPreconnected_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
         rw [vertexMinus, if_pos hpos, reflexSector]
         exact Or.inl hptA
       have hpiece_i : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ i) := by
-        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or,
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         exact IsPreconnected.union pt ⟨hptA, hptstrip_i⟩ ⟨hptB, hptstrip_i⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
           ((convex_mul_sideForm_lt v b (cornerTurn a v b) 0).inter hstripConv_i).isPreconnected
       have hpiece_i1 : IsPreconnected (vertexMinus a v b ∩ stripSupport β δ₀ ⟨(i : ℕ) + 1, hi1⟩) := by
-        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or,
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         exact IsPreconnected.union pt ⟨hptA, hptstrip_i1⟩ ⟨hptB, hptstrip_i1⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter hstripConv_i1).isPreconnected
@@ -1061,7 +1061,7 @@ theorem isPreconnected_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
       ext z
       constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz
@@ -1071,7 +1071,7 @@ theorem isPreconnected_sectorMinus (β : PolygonalArc) (δ₀ : ℝ)
       ext z
       constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have hnonneg : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) :=
           Metric.infDist_nonneg
         nlinarith
@@ -1115,7 +1115,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
       have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
       have hEq : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
           = Metric.thickening δ₀ (β.segCarrier i) := by
-        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+        ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
       rw [hEq]; exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
     have hstripConv_j :
         Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} := by
@@ -1123,7 +1123,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
       have hEq : {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
           = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
-        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+        ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
       rw [hEq]
       exact (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
         (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
@@ -1200,7 +1200,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector]; exact Or.inl hptA
       have hpiece_i : IsPreconnected (vertexPlus a v b ∩
           ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
-        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         refine IsPreconnected.union pt ⟨hptA, hptstrip_i, hfoot_i⟩ ⟨hptB, hptstrip_i, hfoot_i⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
@@ -1210,7 +1210,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
       have hpiece_j : IsPreconnected (vertexPlus a v b ∩
           ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
             ∩ {z : Plane | footParam sj b z < 1 - α})) := by
-        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.setOf_or,
+        rw [vertexPlus, if_neg (not_lt.mpr hneg.le), reflexSector, Set.ofPred_or,
           Set.union_inter_distrib_right]
         refine IsPreconnected.union pt ⟨hptA, hptstrip_j, hfoot_j⟩ ⟨hptB, hptstrip_j, hfoot_j⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
@@ -1302,7 +1302,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz; simp at hz
@@ -1310,7 +1310,7 @@ theorem isPreconnected_sectorPlusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
         nlinarith
       · intro hz; simp at hz
@@ -1345,7 +1345,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
       have hne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
       have hEq : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀}
           = Metric.thickening δ₀ (β.segCarrier i) := by
-        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+        ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
       rw [hEq]; exact (convex_segment (β.segSrc i) (β.segTgt i)).thickening δ₀
     have hstripConv_j :
         Convex ℝ {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} := by
@@ -1353,7 +1353,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         ⟨β.segSrc ⟨(i : ℕ) + 1, hi1⟩, left_mem_segment ℝ _ _⟩
       have hEq : {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
           = Metric.thickening δ₀ (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := by
-        ext z; rw [Set.mem_setOf_eq, Metric.mem_thickening_iff_infDist_lt hne]
+        ext z; rw [Set.mem_ofPred_eq, Metric.mem_thickening_iff_infDist_lt hne]
       rw [hEq]
       exact (convex_segment (β.segSrc ⟨(i : ℕ) + 1, hi1⟩)
         (β.segTgt ⟨(i : ℕ) + 1, hi1⟩)).thickening δ₀
@@ -1506,7 +1506,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         rw [vertexMinus, if_pos hpos, reflexSector]; exact Or.inl hptA
       have hpiece_i : IsPreconnected (vertexMinus a v b ∩
           ({z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} ∩ {z : Plane | α < footParam a v z})) := by
-        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.ofPred_or, Set.union_inter_distrib_right]
         refine IsPreconnected.union pt ⟨hptA, hptstrip_i, hfoot_i⟩ ⟨hptB, hptstrip_i, hfoot_i⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
             (hstripConv_i.inter hfootConv_i)).isPreconnected
@@ -1515,7 +1515,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
       have hpiece_j : IsPreconnected (vertexMinus a v b ∩
           ({z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀}
             ∩ {z : Plane | footParam sj b z < 1 - α})) := by
-        rw [vertexMinus, if_pos hpos, reflexSector, Set.setOf_or, Set.union_inter_distrib_right]
+        rw [vertexMinus, if_pos hpos, reflexSector, Set.ofPred_or, Set.union_inter_distrib_right]
         refine IsPreconnected.union pt ⟨hptA, hptstrip_j, hfoot_j⟩ ⟨hptB, hptstrip_j, hfoot_j⟩
           ((convex_mul_sideForm_lt a v (cornerTurn a v b) 0).inter
             (hstripConv_j.inter hfootConv_j)).isPreconnected
@@ -1528,7 +1528,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
     have hstrip_i : {z : Plane | Metric.infDist z (β.segCarrier i) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier i) := Metric.infDist_nonneg
         nlinarith
       · intro hz; simp at hz
@@ -1536,7 +1536,7 @@ theorem isPreconnected_sectorMinusClipped (β : PolygonalArc) (δ₀ α : ℝ)
         {z : Plane | Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) < δ₀} = (∅ : Set Plane) := by
       ext z; constructor
       · intro hz
-        rw [Set.mem_setOf_eq] at hz
+        rw [Set.mem_ofPred_eq] at hz
         have : 0 ≤ Metric.infDist z (β.segCarrier ⟨(i : ℕ) + 1, hi1⟩) := Metric.infDist_nonneg
         nlinarith
       · intro hz; simp at hz
@@ -1607,7 +1607,7 @@ theorem endCapSrcPlus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.num
       have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
       rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
-    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+    simp only [Set.mem_ofPred_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
       Metric.infDist_le_dist_of_mem hzi
     have hb : dist z (β.verts 0) < ρ 0 := Metric.mem_ball.mp hzball
@@ -1629,7 +1629,7 @@ theorem endCapSrcMinus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.nu
       have hzi' : z ∈ β.segCarrier β.firstSeg := hif ▸ hzi
       rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
-    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+    simp only [Set.mem_ofPred_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts 0) (β.segCarrier i) ≤ dist (β.verts 0) z :=
       Metric.infDist_le_dist_of_mem hzi
     have hb : dist z (β.verts 0) < ρ 0 := Metric.mem_ball.mp hzball
@@ -1653,7 +1653,7 @@ theorem endCapTgtPlus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.num
       have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
       rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
-    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+    simp only [Set.mem_ofPred_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
         ≤ dist (β.verts (Fin.last β.numSegs)) z :=
       Metric.infDist_le_dist_of_mem hzi
@@ -1678,7 +1678,7 @@ theorem endCapTgtMinus_subset_compl_carrier (β : PolygonalArc) (ρ : Fin (β.nu
       have hzi' : z ∈ β.segCarrier β.lastSeg := hif ▸ hzi
       rw [PolygonalArc.segCarrier] at hzi'
       exact sideForm_eq_zero_of_mem_segment _ _ hzi'
-    simp only [Set.mem_setOf_eq, hz0, lt_self_iff_false] at hside
+    simp only [Set.mem_ofPred_eq, hz0, lt_self_iff_false] at hside
   · have hd : Metric.infDist (β.verts (Fin.last β.numSegs)) (β.segCarrier i)
         ≤ dist (β.verts (Fin.last β.numSegs)) z :=
       Metric.infDist_le_dist_of_mem hzi

@@ -78,7 +78,7 @@ from a `Point2` critical point, the `⊆` builds the `Point2` critical point as
 theorem critX_eq_image_critPointSet (h : PlanePoly) :
     Crit_x h = (fun p : Point2 => p 0) '' CritPointSet h := by
   ext x
-  simp only [Crit_x, Set.mem_setOf_eq, Set.mem_image, CritPointSet, Set.mem_inter_iff,
+  simp only [Crit_x, Set.mem_ofPred_eq, Set.mem_image, CritPointSet, Set.mem_inter_iff,
     mem_PlaneCurveZeroSet]
   constructor
   · rintro ⟨y, hzero, hpartial⟩

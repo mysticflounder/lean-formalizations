@@ -282,11 +282,11 @@ noncomputable def edgeSetSimpleGraph (S : Finset (ℝ × ℝ))
   Adj p q :=
     p ≠ q ∧ ∃ e ∈ E,
       G.endpoints e = (p.1, q.1) ∨ G.endpoints e = (q.1, p.1)
-  symm := by
+  symm := ⟨by
     intro p q h
     rcases h with ⟨hpq, e, heE, hends | hends⟩
     · exact ⟨hpq.symm, e, heE, Or.inr hends⟩
-    · exact ⟨hpq.symm, e, heE, Or.inl hends⟩
+    · exact ⟨hpq.symm, e, heE, Or.inl hends⟩⟩
   loopless := ⟨by
     intro p h
     exact h.1 rfl⟩
@@ -318,7 +318,18 @@ theorem mem_edgeSetComponentVertexSet {S : Finset (ℝ × ℝ)}
     {C : (edgeSetSimpleGraph G S E).ConnectedComponent} {p : ↥S} :
     (p : ℝ × ℝ) ∈ edgeSetComponentVertexSet G C ↔ p ∈ C.supp := by
   classical
-  simp [edgeSetComponentVertexSet]
+  constructor
+  · intro hp
+    rw [edgeSetComponentVertexSet, Finset.mem_map] at hp
+    obtain ⟨q, hq, hqp⟩ := hp
+    rw [Finset.mem_filter] at hq
+    have hqp' : q = p := Subtype.ext hqp
+    simpa [hqp'] using hq.2
+  · intro hp
+    rw [edgeSetComponentVertexSet, Finset.mem_map]
+    refine ⟨p, ?_, rfl⟩
+    rw [Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, hp⟩
 
 /-- Canonical component vertex sets are subsets of the ambient sample `S`. -/
 theorem edgeSetComponentVertexSet_subset {S : Finset (ℝ × ℝ)}
@@ -500,9 +511,9 @@ theorem edgeSetComponentDrawing_graphConnected {S : Finset (ℝ × ℝ)}
         exact (Relation.ReflTransGen.single (step_of_adj hp hadj)).trans (ih hq hr)
   intro p q
   have hpVc : (p : ℝ × ℝ) ∈ Vc := by
-    simp [D, edgeSetDrawing]
+    simpa [D, edgeSetDrawing] using p.2
   have hqVc : (q : ℝ × ℝ) ∈ Vc := by
-    simp [D, edgeSetDrawing]
+    simpa [D, edgeSetDrawing] using q.2
   let pS : ↥S := ⟨(p : ℝ × ℝ), edgeSetComponentVertexSet_subset G C hpVc⟩
   let qS : ↥S := ⟨(q : ℝ × ℝ), edgeSetComponentVertexSet_subset G C hqVc⟩
   have hpC : pS ∈ C.supp :=
@@ -571,7 +582,9 @@ theorem abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
   let H := edgeSetDrawing G S E hE
   rcases hpl with ⟨D, hD, Mp, hs, hc, hp, hv, hedge⟩
   refine ⟨D, hD, Mp, hs, hc, hp, ?_, ?_⟩
-  · simpa [H, edgeSetDrawing, abstractize, abstractizeEdgeSet] using hv
+  · rw [abstractize_vertex_card] at hv
+    rw [abstractizeEdgeSet_vertex_card]
+    simpa [edgeSetDrawing] using hv
   · have himage :
         Finset.univ.image (abstractizeEdgeSet G S E hE).edgeVerts =
           Finset.univ.image (abstractize H).edgeVerts := by
@@ -583,7 +596,9 @@ theorem abstractizeEdgeSet_has_genus_zero_simple_planarization_of_edgeSetDrawing
         exact Finset.mem_image.mpr
           ⟨Finset.equivFin E e, Finset.mem_univ _, by
             rw [← huv_eq]
-            simp [H, edgeSetDrawing, abstractize, abstractizeEdgeSet]⟩
+            have hinv : (Finset.equivFin E).symm (Finset.equivFin E e) = e :=
+              Equiv.symm_apply_apply (Finset.equivFin E) e
+            simp [H, edgeSetDrawing, abstractize, abstractizeEdgeSet, hinv]⟩
       · intro huv
         obtain ⟨i, _hi, huv_eq⟩ := Finset.mem_image.mp huv
         exact Finset.mem_image.mpr

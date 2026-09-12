@@ -54,7 +54,7 @@ theorem arcInterior_nonempty (β : SimpleArc Plane) : β.arcInterior.Nonempty :=
   refine ⟨β ⟨1 / 2, by norm_num [Set.mem_Icc]⟩, ?_⟩
   rw [SimpleArc.arcInterior]
   exact ⟨⟨1 / 2, by norm_num [Set.mem_Icc]⟩,
-    by simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo]; norm_num, rfl⟩
+    by simp only [Set.mem_ofPred_eq, unitIoo, Set.mem_Ioo]; norm_num, rfl⟩
 
 /-- The interior of a simple arc is preconnected (continuous image of the
 connected open parameter interval). -/
@@ -535,7 +535,7 @@ theorem disjoint_edgePlus_edgeMinus (s t : Plane) :
     Disjoint (edgePlus s t) (edgeMinus s t) := by
   rw [Set.disjoint_left]
   rintro z hp hm
-  simp only [edgePlus, edgeMinus, Set.mem_inter_iff, Set.mem_setOf_eq] at hp hm
+  simp only [edgePlus, edgeMinus, Set.mem_inter_iff, Set.mem_ofPred_eq] at hp hm
   linarith [hp.2, hm.2]
 
 /-- The two edge sides are exactly the band minus its side-functional zero locus
@@ -543,8 +543,8 @@ theorem disjoint_edgePlus_edgeMinus (s t : Plane) :
 theorem edgePlus_union_edgeMinus (s t : Plane) :
     edgePlus s t ∪ edgeMinus s t = edgeBand s t \ {z | sideForm s t z = 0} := by
   ext z
-  simp only [edgePlus, edgeMinus, Set.mem_union, Set.mem_inter_iff, Set.mem_diff,
-    Set.mem_setOf_eq]
+  simp only [edgePlus, edgeMinus, Set.mem_union, Set.mem_inter_iff, Set.mem_sdiff,
+    Set.mem_ofPred_eq]
   constructor
   · rintro (⟨hb, h⟩ | ⟨hb, h⟩)
     · exact ⟨hb, ne_of_gt h⟩
@@ -566,7 +566,7 @@ theorem edgePlus_nonempty {s t : Plane} (h : t ≠ s) : (edgePlus s t).Nonempty 
             (t - s) = dotp (t - s) (t - s) / 2 := by
         simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
       rw [hnum]; field_simp
-    simp only [edgeBand, Set.mem_setOf_eq, hfoot, Set.mem_Ioo]; norm_num
+    simp only [edgeBand, Set.mem_ofPred_eq, hfoot, Set.mem_Ioo]; norm_num
   · show 0 < sideForm s t _
     have hsf : sideForm s t ((s.1 + t.1) / 2 - (t.2 - s.2), (s.2 + t.2) / 2 + (t.1 - s.1))
           = dotp (t - s) (t - s) := by
@@ -584,7 +584,7 @@ theorem edgeMinus_nonempty {s t : Plane} (h : t ≠ s) : (edgeMinus s t).Nonempt
             (t - s) = dotp (t - s) (t - s) / 2 := by
         simp only [dotp, Prod.fst_sub, Prod.snd_sub]; ring
       rw [hnum]; field_simp
-    simp only [edgeBand, Set.mem_setOf_eq, hfoot, Set.mem_Ioo]; norm_num
+    simp only [edgeBand, Set.mem_ofPred_eq, hfoot, Set.mem_Ioo]; norm_num
   · show sideForm s t _ < 0
     have hsf : sideForm s t ((s.1 + t.1) / 2 + (t.2 - s.2), (s.2 + t.2) / 2 - (t.1 - s.1))
           = - dotp (t - s) (t - s) := by
@@ -629,7 +629,7 @@ edgeMinus` once the band is thin enough to avoid the non-incident segments. -/
 theorem edgeBand_inter_sideForm_zero_eq_openSegment {s t : Plane} (h : t ≠ s) :
     edgeBand s t ∩ {z | sideForm s t z = 0} = openSegment ℝ s t := by
   ext z
-  simp only [edgeBand, Set.mem_inter_iff, Set.mem_setOf_eq]
+  simp only [edgeBand, Set.mem_inter_iff, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨hband, hzero⟩
     have hsub := sub_eq_footParam_smul_of_sideForm_zero h hzero
@@ -703,7 +703,7 @@ theorem convexSector_swap (a v b : Plane) : convexSector b v a = convexSector a 
   ext z
   have eτ : cornerTurn b v a = - cornerTurn a v b := by
     rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b]
-  simp only [convexSector, Set.mem_setOf_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
+  simp only [convexSector, Set.mem_ofPred_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
     neg_mul_neg]
   exact And.comm
 
@@ -712,7 +712,7 @@ theorem reflexSector_swap (a v b : Plane) : reflexSector b v a = reflexSector a 
   ext z
   have eτ : cornerTurn b v a = - cornerTurn a v b := by
     rw [cornerTurn, cornerTurn, sideForm_swap v b a, sideForm_cyclic a v b]
-  simp only [reflexSector, Set.mem_setOf_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
+  simp only [reflexSector, Set.mem_ofPred_eq, eτ, sideForm_swap v b z, sideForm_swap a v z,
     neg_mul_neg]
   exact Or.comm
 
@@ -790,7 +790,7 @@ theorem mem_edgeBand_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} (_h
   have hdiff : |footParam s t z - footParam s t p| < α := lt_of_le_of_lt hlip hMP
   rw [Set.mem_Icc] at hp
   rw [abs_lt] at hdiff
-  rw [edgeBand, Set.mem_setOf_eq, Set.mem_Ioo]
+  rw [edgeBand, Set.mem_ofPred_eq, Set.mem_Ioo]
   exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
 
 /-! ### The cover (task iii): the tube is covered by edge bands and vertex disks
@@ -1257,7 +1257,7 @@ theorem mem_edgeBandMid_of_footParam_mem {s t : Plane} (h : t ≠ s) {α : ℝ} 
   have hdiff : |footParam s t z - footParam s t p| < α / 2 := lt_of_le_of_lt hlip hMP
   rw [Set.mem_Icc] at hp
   rw [abs_lt] at hdiff
-  rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo]
+  rw [edgeBandMid, Set.mem_ofPred_eq, Set.mem_Ioo]
   exact ⟨by linarith [hp.1, hdiff.1], by linarith [hp.2, hdiff.2]⟩
 
 /-- Reversing the edge complements the foot parameter: `footParam t s z = 1 − footParam s t z`. -/
@@ -1819,7 +1819,7 @@ theorem union_collarPlus_collarMinus (β : PolygonalArc) (R S : Set Plane)
       have hts := β.segTgt_ne_segSrc i
       have hbm : α < footParam (β.segSrc i) (β.segTgt i) z
           ∧ footParam (β.segSrc i) (β.segTgt i) z < 1 - α := by
-        have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
+        have := hzb; rw [edgeBandMid, Set.mem_ofPred_eq, Set.mem_Ioo] at this; exact this
       have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
         intro h0
         apply hzC; rw [PolygonalArc.carrier]
@@ -1930,7 +1930,7 @@ theorem union_collarPlus_collarMinus_of_numSegs_one (β : PolygonalArc) (h1 : β
       have hts := β.segTgt_ne_segSrc i
       have hbm : α < footParam (β.segSrc i) (β.segTgt i) z
           ∧ footParam (β.segSrc i) (β.segTgt i) z < 1 - α := by
-        have := hzb; rw [edgeBandMid, Set.mem_setOf_eq, Set.mem_Ioo] at this; exact this
+        have := hzb; rw [edgeBandMid, Set.mem_ofPred_eq, Set.mem_Ioo] at this; exact this
       have hsf0 : sideForm (β.segSrc i) (β.segTgt i) z ≠ 0 := by
         intro h0
         apply hzC; rw [PolygonalArc.carrier]

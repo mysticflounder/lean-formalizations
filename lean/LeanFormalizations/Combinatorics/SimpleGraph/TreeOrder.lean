@@ -115,10 +115,17 @@ noncomputable def induceInduceIso {V : Type*} (G : SimpleGraph V) (s : Set V)
       (q := fun x : ↥s => x ∈ t), ?_⟩
   intro a b
   constructor <;> intro h
-  · simpa [SimpleGraph.induce_adj,
-      Equiv.subtypeSubtypeEquivSubtypeExists_apply_coe] using h
-  · simpa [SimpleGraph.induce_adj,
-      Equiv.subtypeSubtypeEquivSubtypeExists_apply_coe] using h
+  · have h' : G.Adj (↑((Equiv.subtypeSubtypeEquivSubtypeExists
+        (fun x : V => x ∈ s) (fun x : ↥s => x ∈ t)) a) : V)
+        (↑((Equiv.subtypeSubtypeEquivSubtypeExists
+        (fun x : V => x ∈ s) (fun x : ↥s => x ∈ t)) b) : V) := by
+      simpa only [SimpleGraph.induce_adj] using h
+    rw [Equiv.subtypeSubtypeEquivSubtypeExists_apply_coe,
+      Equiv.subtypeSubtypeEquivSubtypeExists_apply_coe] at h'
+    exact h'
+  · have h' : (SimpleGraph.induce s G).Adj (a : ↥s) (b : ↥s) := by
+      simpa only [SimpleGraph.induce_adj] using h
+    exact h'
 
 /-- Treehood is preserved when an induced graph is re-expressed as an induced
 graph on the ambient vertex set. -/
@@ -151,7 +158,8 @@ ambient finite type. -/
 theorem card_compl_singleton {V : Type*} [Fintype V] [DecidableEq V] (v : V) :
     Fintype.card ↥({v}ᶜ : Set V) = Fintype.card V - 1 := by
   have h1 : Fintype.card ↥({v} : Set V) = 1 := by
-    convert Fintype.card_subtype_eq (y := v) using 1
+    change Fintype.card {x : V // x = v} = 1
+    exact Fintype.card_subtype_eq (y := v)
   rw [Fintype.card_compl_set, h1]
 
 /-- A finite tree can be peeled one leaf at a time: there is an ordering of the

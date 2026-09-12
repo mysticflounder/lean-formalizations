@@ -79,6 +79,8 @@ theorem exists_implicitGraph_of_partial1
       ContinuousOn ψ (Metric.ball z.1 ε) ∧
       (∀ x ∈ Metric.ball z.1 ε, evalPlane h (x, ψ x) = 0) := by
   -- Mirror the seed `nonsingular_point_has_infinite_zeroSet_of_partial1`.
+  letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
+  letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
   set a : ℝ × ℝ := z with ha_def
   have hcont : ContDiffAt ℝ ⊤ (evalPlane h) a := (evalPlane_contDiff h).contDiffAt
   rcases (show ∃ f' : (ℝ × ℝ) →L[ℝ] ℝ, HasFDerivAt (evalPlane h) f' a by
@@ -97,13 +99,16 @@ theorem exists_implicitGraph_of_partial1
       fin_cases i <;> simp [Function.comp, mkPoint2]
     dsimp [hswap] at hslice
     rw [MvPolynomial.eval_rename] at hslice
-    simpa [g, q, evalPlane, hswapCoords] using hslice
+    rw [hswapCoords] at hslice
+    simpa [g, q, evalPlane, elimCoord, coeffCoord, mkPoint2, hswapCoords] using hslice
   have hinr : HasFDerivAt (fun y : ℝ => (a.1, y))
       (ContinuousLinearMap.inr ℝ ℝ ℝ) a.2 := by
     simpa [ContinuousLinearMap.inr] using
       (hasFDerivAt_const a.1 a.2).prodMk (hasFDerivAt_id a.2)
   have hgfd : HasFDerivAt g (f'.comp (ContinuousLinearMap.inr ℝ ℝ ℝ)) a.2 := by
-    simpa [g] using hfd.comp a.2 hinr
+    convert hfd.comp a.2 hinr using 1
+    funext y
+    rfl
   have hq_deriv : Polynomial.derivative q =
       Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
     simp only [hq_def, Specialized0]
@@ -130,7 +135,7 @@ theorem exists_implicitGraph_of_partial1
       Polynomial.eval a.2 (Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap)) =
           MvPolynomial.eval (fun i => mkPoint2 a.2 a.1 i)
             (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
-            simpa [mkPoint2] using hslice.symm
+            simpa [mkPoint2, elimCoord, coeffCoord] using hslice.symm
       _ = MvPolynomial.eval ((fun i => mkPoint2 a.2 a.1 i) ∘ (Equiv.swap 0 1))
             (MvPolynomial.pderiv (1 : Fin 2) h) := by
               rw [hrename, MvPolynomial.eval_rename]

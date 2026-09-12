@@ -413,10 +413,18 @@ private theorem cyclic_walk_witness_of_flat_chord
       refine convexHull_mono ?_
       intro x hx
       rcases hx with ⟨j, rfl⟩
-      fin_cases j
-      · simpa [tri] using ha
-      · simpa [tri] using hc
-      · simpa [tri] using hu
+      have hmem : tri j ∈ (P.vertices.toFinset : Set V) := by
+        fin_cases j
+        · dsimp [tri]
+          change (![a, c, u] : Fin 3 → V) 0 ∈ (P.vertices.toFinset : Set V)
+          simpa using ha
+        · dsimp [tri]
+          change (![a, c, u] : Fin 3 → V) 1 ∈ (P.vertices.toFinset : Set V)
+          simpa using hc
+        · dsimp [tri]
+          change (![a, c, u] : Fin 3 → V) 2 ∈ (P.vertices.toFinset : Set V)
+          simpa using hu
+      exact hmem
     have hm_interior : m ∈ interior P.hull := interior_mono htri_subset hmtri
     have hdisj : Disjoint (interior P.hull) (frontier P.hull) := disjoint_interior_frontier
     exact (Set.disjoint_left.mp hdisj) hm_interior hmfront
@@ -566,11 +574,10 @@ private theorem cyclic_walk_witness_of_flat_chord
   have hrot1 : ∀ hlen : 1 < (P.vertices.rotate k).length,
       (P.vertices.rotate k).get ⟨1, hlen⟩ = b := by
     intro hlen
-    have hget := List.getElem_rotate P.vertices k 1 hlen
     have hget' :
         (P.vertices.rotate k).get ⟨1, hlen⟩ =
           P.vertices.get ⟨(1 + k) % P.vertices.length, Nat.mod_lt _ hpos⟩ := by
-      convert hget using 2
+      exact List.get_rotate P.vertices k ⟨1, hlen⟩
     by_cases hi0 : i = 0
     · have hk : k = n - 1 := by
         dsimp [k]
@@ -618,11 +625,10 @@ private theorem cyclic_walk_witness_of_flat_chord
   have hrot2 : ∀ hlen : 2 < (P.vertices.rotate k).length,
       (P.vertices.rotate k).get ⟨2, hlen⟩ = succ := by
     intro hlen
-    have hget := List.getElem_rotate P.vertices k 2 hlen
     have hget' :
         (P.vertices.rotate k).get ⟨2, hlen⟩ =
           P.vertices.get ⟨(2 + k) % P.vertices.length, Nat.mod_lt _ hpos⟩ := by
-      convert hget using 2
+      exact List.get_rotate P.vertices k ⟨2, hlen⟩
     by_cases hi0 : i = 0
     · have hk : k = n - 1 := by
         dsimp [k]

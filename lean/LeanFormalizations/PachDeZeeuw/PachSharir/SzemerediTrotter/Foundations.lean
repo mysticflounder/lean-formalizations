@@ -83,7 +83,7 @@ lemma affineLine_eq_of_parallel
     rw [← hp₂, ← hp₁, hlam_a, hlam_b]; ring
   -- Now the two equations are scalar multiples; equate the sets.
   ext q
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   rw [hlam_a, hlam_b, hc]
   constructor
   · intro h
@@ -99,7 +99,7 @@ lemma encard_inter_le_one_of_lines {ℓ₁ ℓ₂ : Set (ℝ × ℝ)}
   obtain ⟨a₁, b₁, c₁, hℓ₁, rfl⟩ := h₁
   obtain ⟨a₂, b₂, c₂, hℓ₂, rfl⟩ := h₂
   intro p hp q hq
-  simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hp hq
+  simp only [Set.mem_inter_iff, Set.mem_ofPred_eq] at hp hq
   obtain ⟨hp₁, hp₂⟩ := hp
   obtain ⟨hq₁, hq₂⟩ := hq
   by_contra hpq
@@ -309,7 +309,7 @@ lemma lineKey_injOn {ℓ : Set (ℝ × ℝ)} (h : IsAffineLine ℓ) :
   set b := h.choose_spec.choose with hb
   set c := h.choose_spec.choose_spec.choose with hc
   obtain ⟨hab, hℓeq⟩ := h.choose_spec.choose_spec.choose_spec
-  rw [hℓeq, Set.mem_setOf_eq] at hp hq
+  rw [hℓeq, Set.mem_ofPred_eq] at hp hq
   have hk : lineKeyCoeff a b p = lineKeyCoeff a b q := by
     rw [lineKey, dif_pos h, lineKey, dif_pos h] at hkey; exact hkey
   exact key_inj_coeff a b c hab p q hp hq hk
@@ -887,7 +887,7 @@ private lemma affineLine_mem_of_sameRay {ℓ : Set (ℝ × ℝ)} (hℓ : IsAffin
     (hsame : SameRay ℝ (complexVec p q) (complexVec p r)) :
     r ∈ ℓ := by
   obtain ⟨a, b, c, _hab, rfl⟩ := hℓ
-  rw [Set.mem_setOf_eq] at hp hq ⊢
+  rw [Set.mem_ofPred_eq] at hp hq ⊢
   have hx : ‖complexVec p q‖ * (r.1 - p.1) = ‖complexVec p r‖ * (q.1 - p.1) := by
     have hnorm := hsame.norm_smul_eq
     have hre := congrArg Complex.re hnorm
@@ -1265,10 +1265,10 @@ lemma interiorOfArc_segmentArc_subset_line {ℓ : Set (ℝ × ℝ)}
     interiorOfArc (segmentArc p q hpq) ⊆ ℓ := by
   intro x hx
   unfold interiorOfArc at hx
-  simp only [Set.mem_image, Set.mem_setOf_eq] at hx
+  simp only [Set.mem_image, Set.mem_ofPred_eq] at hx
   obtain ⟨t, _, rfl⟩ := hx
   obtain ⟨a, b, c, _, rfl⟩ := hℓ
-  rw [Set.mem_setOf_eq] at hp hq ⊢
+  rw [Set.mem_ofPred_eq] at hp hq ⊢
   change a * ((1 - (t : ℝ)) • p.1 + (t : ℝ) • q.1)
         + b * ((1 - (t : ℝ)) • p.2 + (t : ℝ) • q.2) = c
   simp only [smul_eq_mul]
@@ -1298,7 +1298,7 @@ lemma lineKey_of_mem_interior {ℓ : Set (ℝ × ℝ)}
     {p q : ℝ × ℝ} (hpq : p ≠ q) {x : ℝ × ℝ} (hx : x ∈ interiorOfArc (segmentArc p q hpq)) :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ lineKey ℓ x = (1 - t) * lineKey ℓ p + t * lineKey ℓ q := by
   unfold interiorOfArc at hx
-  simp only [Set.mem_image, Set.mem_setOf_eq] at hx
+  simp only [Set.mem_image, Set.mem_ofPred_eq] at hx
   obtain ⟨t, ⟨h0, h1⟩, rfl⟩ := hx
   refine ⟨t.val, h0, h1, ?_⟩
   have heq : (segmentArc p q hpq).param t =

@@ -104,7 +104,7 @@ lemma curveArc_interior_xproj {χ : ℝ → ℝ} {p q : ℝ × ℝ} (hx : p.1 < 
     (hz : z ∈ interiorOfArc (curveArc χ p q hx hcont)) :
     p.1 < z.1 ∧ z.1 < q.1 ∧ z.2 = χ z.1 := by
   unfold interiorOfArc at hz
-  simp only [Set.mem_image, Set.mem_setOf_eq, curveArc_param] at hz
+  simp only [Set.mem_image, Set.mem_ofPred_eq, curveArc_param] at hz
   obtain ⟨t, ⟨ht0, ht1⟩, hparam⟩ := hz
   -- `z.1 = (1-t)p.1 + t q.1`, `z.2 = χ z.1`.
   have hz1 : z.1 = (1 - (t : ℝ)) * p.1 + (t : ℝ) * q.1 := by rw [← hparam]

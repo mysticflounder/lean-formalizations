@@ -549,6 +549,8 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
     (hnonsing :
       MvPolynomial.eval (fun i => z i) (MvPolynomial.pderiv (1 : Fin 2) h) ≠ 0) :
     (PlaneCurveZeroSet h).Infinite := by
+  letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
+  letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
   let a : ℝ × ℝ := (z 0, z 1)
   have hcoords : (fun i : Fin 2 => if i = 0 then a.1 else a.2) = fun i => z i := by
     funext i
@@ -569,13 +571,16 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
       fin_cases i <;> simp [Function.comp, mkPoint2]
     dsimp [hswap] at hslice
     rw [MvPolynomial.eval_rename] at hslice
-    simpa [g, q, evalPlane, hswapCoords] using hslice
+    rw [hswapCoords] at hslice
+    simpa [g, q, evalPlane, elimCoord, coeffCoord, mkPoint2] using hslice
   have hinr : HasFDerivAt (fun y : ℝ => (a.1, y))
       (ContinuousLinearMap.inr ℝ ℝ ℝ) a.2 := by
     simpa [ContinuousLinearMap.inr] using
       (hasFDerivAt_const a.1 a.2).prodMk (hasFDerivAt_id a.2)
   have hgfd : HasFDerivAt g (f'.comp (ContinuousLinearMap.inr ℝ ℝ ℝ)) a.2 := by
-    simpa [g] using hfd.comp a.2 hinr
+    convert hfd.comp a.2 hinr using 1
+    funext y
+    rfl
   have hq_deriv : Polynomial.derivative q =
       Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
     unfold q Specialized0
@@ -599,7 +604,7 @@ lemma nonsingular_point_has_infinite_zeroSet_of_partial1
     calc
       Polynomial.eval a.2 (Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap)) =
           MvPolynomial.eval (fun i => swapPoint z i) (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
-            simpa [a, swapPoint, mkPoint2] using hslice.symm
+            simpa [a, swapPoint, mkPoint2, elimCoord, coeffCoord] using hslice.symm
       _ = MvPolynomial.eval ((fun i => swapPoint z i) ∘ (Equiv.swap 0 1))
             (MvPolynomial.pderiv (1 : Fin 2) h) := by
               rw [hrename, MvPolynomial.eval_rename]
@@ -918,8 +923,9 @@ lemma irreducible_has_nonzero_partial
         rw [← hq] at h0''
         simpa [Polynomial.derivative'_apply] using h0''
       have hqder : Polynomial.derivative q = 0 := by
-        have hqder' := congrArg (fun r : PolynomialModule (Polynomial ℝ) (Polynomial ℝ) => r 0) h0'
-        simpa [PolynomialModule.single_apply] using hqder'
+        have hqder' :=
+          congrArg (fun r : PolynomialModule (Polynomial ℝ) (Polynomial ℝ) => r.coeff 0) h0'
+        simpa [PolynomialModule.coeff_single] using hqder'
       have hq_nat : q.natDegree = 0 :=
         Polynomial.natDegree_eq_zero_of_derivative_eq_zero hqder
       rcases (Polynomial.natDegree_eq_zero.mp hq_nat) with ⟨r, hr⟩
@@ -1102,7 +1108,7 @@ theorem finite_singularities_of_irreducible_bound
         (PlaneCurveZeroSet h ∩ PlaneCurveZeroSet k).ncard ≤ (d + 1) ^ 4 := by
     intro k hk
     have hk' : k ∈ s := by
-      simpa [s] using hk
+      exact Multiset.mem_toFinset.mp hk
     exact factor_intersection_bound h hh hdeg hpi hk'
       (partial_factor_not_associated h k hh hpi hk')
   have hfinite_union :
@@ -1199,16 +1205,17 @@ theorem factorized_bezout_bound
     refine Set.mem_iUnion.2 ?_
     refine ⟨(hpFactor, hqFactor), Set.mem_iUnion.2 ?_⟩
     refine ⟨by
-      simpa [pairs, sp, sq, Finset.mem_product, Multiset.mem_toFinset]
-        using ⟨Multiset.mem_toFinset.mp hpMem, Multiset.mem_toFinset.mp hqMem⟩, ?_⟩
+      exact Finset.mem_product.2 ⟨by
+        exact Multiset.mem_toFinset.mpr (Multiset.mem_toFinset.mp hpMem), by
+        exact Multiset.mem_toFinset.mpr (Multiset.mem_toFinset.mp hqMem)⟩, ?_⟩
     exact ⟨hzhp, hzhq⟩
   have hpairBound : ∀ x ∈ pairs, (pairSet x).Finite ∧ (pairSet x).ncard ≤ (d₁ + d₂ + 1) ^ 5 := by
     intro x hx
     have hx' : x.1 ∈ sp.toFinset ∧ x.2 ∈ sq.toFinset := by
       simpa [pairs] using hx
     rcases hx' with ⟨hx1, hx2⟩
-    have hx1' : x.1 ∈ sp := by simpa [sp] using hx1
-    have hx2' : x.2 ∈ sq := by simpa [sq] using hx2
+    have hx1' : x.1 ∈ sp := Multiset.mem_toFinset.mp hx1
+    have hx2' : x.2 ∈ sq := Multiset.mem_toFinset.mp hx2
     have hirr : Irreducible x.1 := normalized_factor_irreducible (p := p) (h := x.1) hx1'
     have kirr : Irreducible x.2 := normalized_factor_irreducible (p := q) (h := x.2) hx2'
     have hdeg : x.1.totalDegree ≤ d₁ := by
@@ -1324,10 +1331,12 @@ theorem bezout : BezoutFiniteIntersectionStatement := by
       hp0 hq0 hpzero hqzero hno
   have hbound := factorized_bezout_bound (d₁ := d₁) (d₂ := d₂) p q hp0 hq0 hpdeg hqdeg hnoinf
   have hfinite : (C₁ ∩ C₂).Finite := by
-    simpa [hpzero, hqzero] using hbound.1
+    rw [hpzero, hqzero]
+    exact hbound.1
   refine ⟨hfinite, ?_⟩
   have hle : (PlaneCurveZeroSet p ∩ PlaneCurveZeroSet q).ncard ≤ (d₁ + d₂ + 1) ^ 8 + 1 := by
     exact Nat.le_trans hbound.2 (Nat.le_succ _)
-  simpa [hpzero, hqzero] using hle
+  rw [hpzero, hqzero]
+  exact hle
 
 end PachDeZeeuw.Algebraic

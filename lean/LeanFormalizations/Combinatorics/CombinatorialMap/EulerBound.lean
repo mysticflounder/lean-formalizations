@@ -223,12 +223,12 @@ lemma cobound0_mem_ker_const (hc : M.Connected) {g : M.Vertex → R}
   set S : Set D := {a | g (M.Vertex_mk a) = g (M.Vertex_mk d₀)} with hS
   have hd₀ : d₀ ∈ S := by simp [hS]
   have hσ : ∀ a ∈ S, M.vertexPerm a ∈ S := by
-    intro a ha; simp only [hS, Set.mem_setOf_eq, vertexMk_vertexPerm] at ha ⊢; exact ha
+    intro a ha; simp only [hS, Set.mem_ofPred_eq, vertexMk_vertexPerm] at ha ⊢; exact ha
   have hσ' : ∀ a ∈ S, M.vertexPerm⁻¹ a ∈ S := by
-    intro a ha; simp only [hS, Set.mem_setOf_eq, vertexMk_vertexPerm_inv] at ha ⊢; exact ha
+    intro a ha; simp only [hS, Set.mem_ofPred_eq, vertexMk_vertexPerm_inv] at ha ⊢; exact ha
   have hα : ∀ a ∈ S, M.edgePerm a ∈ S := by
     intro a ha
-    simp only [hS, Set.mem_setOf_eq] at ha ⊢
+    simp only [hS, Set.mem_ofPred_eq] at ha ⊢
     rw [cobound0_mem_ker_edge_eq hg a]; exact ha
   exact reachable_mem_of_invariant d₀ hd₀ hσ hσ' hα d (hc d₀ d)
 
@@ -287,20 +287,20 @@ lemma faceCobound_mem_ker_const (hc : M.Connected) {ξ : M.Face → R}
   -- on dart `φ⁻¹ a` equals face of φ⁻¹ a = face of a.
   have hσ : ∀ a ∈ S, M.vertexPerm a ∈ S := by
     intro a ha
-    simp only [hS, Set.mem_setOf_eq] at ha ⊢
+    simp only [hS, Set.mem_ofPred_eq] at ha ⊢
     rw [vertexPerm_eq_edgePerm_facePerm_inv,
       faceCobound_mem_ker_face_eq hξ (M.facePerm⁻¹ a), faceMk_facePerm_inv]
     exact ha
   -- σ⁻¹ a = φ (α a): face of σ⁻¹a equals face of φ(αa) = face of αa, = face of a by constraint.
   have hσ' : ∀ a ∈ S, M.vertexPerm⁻¹ a ∈ S := by
     intro a ha
-    simp only [hS, Set.mem_setOf_eq] at ha ⊢
+    simp only [hS, Set.mem_ofPred_eq] at ha ⊢
     rw [vertexPerm_inv_eq_facePerm_edgePerm, faceMk_facePerm,
       faceCobound_mem_ker_face_eq hξ a]
     exact ha
   have hα : ∀ a ∈ S, M.edgePerm a ∈ S := by
     intro a ha
-    simp only [hS, Set.mem_setOf_eq] at ha ⊢
+    simp only [hS, Set.mem_ofPred_eq] at ha ⊢
     rw [faceCobound_mem_ker_face_eq hξ a]; exact ha
   exact reachable_mem_of_invariant d₀ hd₀ hσ hσ' hα d (hc d₀ d)
 
@@ -548,7 +548,6 @@ theorem eulerCharacteristic_le_two [Fintype D]
   exact hassembly
 
 end CombinatorialMap
-
 
 
 

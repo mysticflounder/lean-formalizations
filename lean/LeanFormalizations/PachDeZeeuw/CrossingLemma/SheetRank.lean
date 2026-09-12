@@ -92,7 +92,8 @@ theorem eventually_continuation_in_box (h : PlanePoly) {K : Set (ℝ × ℝ)} {x
     rw [hy, ← hp_x]
   have hUp_nhds : U p ∈ nhds p := ((hU_mem p hp).2).mem_nhds (hU_mem p hp).1
   have := hcontAt (by rw [hval]; exact hUp_nhds)
-  simpa using this
+  change ∀ᶠ x in nhds x₀, (x, ψ p x) ∈ U p at this
+  exact this
 
 /-- **THE KERNEL — local order-preservation of box continuations.** With the separated-box
 data over a fibre `fibreOver h K x₀`, two fibre points `p, q` with `p.2 < q.2` have their
@@ -263,7 +264,8 @@ theorem sheetRank_eventuallyEq_nhdsWithin (h : PlanePoly) {α β xP xQ xs : ℝ}
       (hU_mem pStar hpStar_fib).1
     have hev_inbox : ∀ᶠ x in nhdsWithin xs (Set.Icc xP xQ), (x, ψ x) ∈ U pStar := by
       have := hcwa (by rw [hval]; exact hUpStar_nhds)
-      simpa using this
+      change ∀ᶠ x in nhdsWithin xs (Set.Icc xP xQ), (x, ψ x) ∈ U pStar at this
+      exact this
     filter_upwards [hev_inbox, self_mem_nhdsWithin] with x hx_inbox hx_Icc
     have hx_curve : evalPlane h (x, ψ x) = 0 := hψ_curve x hx_Icc
     have := (hψbStar_iff (x, ψ x) hx_inbox).mp hx_curve
@@ -296,7 +298,7 @@ theorem sheetRank_eventuallyEq_nhdsWithin (h : PlanePoly) {α β xP xQ xs : ℝ}
     have hmem : (x, ψb (xs, b) x) ∈ U (xs, b) := hx_all (xs, b) hb_fib
     have := (hiff (x, ψb (xs, b) x) hmem).mpr rfl
     show Φ b ∈ Fibre h x
-    rw [Fibre, Set.mem_setOf_eq]; exact this
+    rw [Fibre, Set.mem_ofPred_eq]; exact this
   -- Helper: order on the below-set. `b < ψ xs ↔ Φ b < ψ x`, using hx_order and the ψ-link.
   have hΦ_below : ∀ b ∈ Fibre h xs, (b < ψ xs ↔ Φ b < ψ x) := by
     intro b hb
@@ -387,7 +389,7 @@ theorem sheetRank_const_of_continuous_onCurve (h : PlanePoly) {α β xP xQ : ℝ
         (fun x => sheetRank h x (ψ x) = sheetRank h x₀ (ψ x₀))).2 hpb
       filter_upwards [this] with p hp
       exact hp
-    haveI : PreconnectedSpace s :=
+    have : PreconnectedSpace s :=
       Subtype.preconnectedSpace (by rw [hs_def]; exact isPreconnected_Icc)
     have hxP_mem : xP ∈ s := ⟨le_refl xP, hxle⟩
     intro x hx

@@ -72,9 +72,9 @@ lemma pointsOnSheet_pairwise_lt {P : Finset (ℝ × ℝ)} {h : PlanePoly} {α β
     -- `a.1 = b.1 =: x` is good, both points are on the fibre at rank `j`.
     have hbad : a.1 ∉ Bad h := hgood a.1 ha_io
     have ha_fib : a.2 ∈ Fibre h a.1 := by
-      rw [Fibre, Set.mem_setOf_eq]; simpa using (mem_evalPlaneZeroSet.mp ha_curve)
+      rw [Fibre, Set.mem_ofPred_eq]; simpa using (mem_evalPlaneZeroSet.mp ha_curve)
     have hb_fib : b.2 ∈ Fibre h a.1 := by
-      rw [Fibre, Set.mem_setOf_eq, heq]; simpa using (mem_evalPlaneZeroSet.mp hb_curve)
+      rw [Fibre, Set.mem_ofPred_eq, heq]; simpa using (mem_evalPlaneZeroSet.mp hb_curve)
     have hrank : sheetRank h a.1 a.2 = sheetRank h a.1 b.2 := by rw [ha_rank, heq, hb_rank]
     have hy : a.2 = b.2 := sheetRank_injOn_fibre h hbad ha_fib hb_fib hrank
     exact Prod.ext heq hy
@@ -594,7 +594,7 @@ lemma edgeOfIdx_interior_subset_zeroSet {d : ℕ} (P : Finset (ℝ × ℝ)) (Γ 
   have hzIcc : z.1 ∈ Set.Icc Ed.e.1.1 Ed.e.2.1 := ⟨hz1a.le, hz1b.le⟩
   have honcurve : evalPlane Ed.h (z.1, Ed.chi z.1) = 0 := Ed.chi_spec.2.2.2 z.1 hzIcc
   -- Rewrite `z` as `(z.1, χ z.1)` and the polynomial via `curveOf_h`.
-  rw [Set.mem_setOf_eq, ← curveOf_h P Γ i]
+  rw [Set.mem_ofPred_eq, ← curveOf_h P Γ i]
   have hzeq : z = (z.1, Ed.chi z.1) := by
     ext
     · rfl

@@ -40,7 +40,7 @@ noncomputable instance instFintypeFaceSameCycle [Fintype D] {w : D} :
 /-- The length of a face is the number of darts in its `facePerm` orbit. -/
 noncomputable def Face.length [Fintype D] [DecidableEq D] (f : M.Face) : ℕ :=
   Quotient.lift (fun w ↦ Fintype.card {u | M.facePerm.SameCycle w u}) (fun w u h ↦ by
-    simp [Set.coe_setOf]
+    simp [Set.coe_ofPred]
     suffices M.facePerm.SameCycle w = M.facePerm.SameCycle u by
       classical
       simp_all only
@@ -86,7 +86,7 @@ noncomputable def Edge.ends (e : M.Edge) : Sym2 M.Vertex :=
       have h' : M.edgePerm.SameCycle d d' := h
       rcases (edge_sameCycle_iff d d').1 h' with rfl | rfl
       · rfl
-      · simp only []
+      ·
         have : M.edgePerm (M.edgePerm d) = d := M.edgePerm_involutive d
         rw [this]; exact Sym2.eq_swap)
     e
@@ -140,7 +140,7 @@ lemma sameCycle_edgePerm_iff (d u : D) :
 lemma setOf_sameCycle_edgePerm (d : D) :
     {u | M.edgePerm.SameCycle d u} = {d, M.edgePerm d} := by
   ext u
-  simp only [Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff]
+  simp only [Set.mem_ofPred_eq, Set.mem_insert_iff, Set.mem_singleton_iff]
   exact M.sameCycle_edgePerm_iff d u
 
 /-- Lemma A (ncard). Each `edgePerm`-orbit has exactly two darts. -/
@@ -209,7 +209,7 @@ lemma card_edge_fiber [Fintype D] (e : M.Edge)
       = {u | M.edgePerm.SameCycle d₀ u}.toFinset := by
     ext a
     simp only [Finset.mem_filter, Finset.mem_univ, true_and, Set.mem_toFinset,
-      Set.mem_setOf_eq]
+      Set.mem_ofPred_eq]
     exact M.edge_mk_eq_iff a d₀
   rw [hset, Set.toFinset_card, M.card_setOf_sameCycle_edgePerm d₀]
 
@@ -240,7 +240,7 @@ lemma card_face_fiber [Fintype D] [DecidableEq D] (f : M.Face)
       = {u | M.facePerm.SameCycle d₀ u}.toFinset := by
     ext a
     simp only [Finset.mem_filter, Finset.mem_univ, true_and, Set.mem_toFinset,
-      Set.mem_setOf_eq]
+      Set.mem_ofPred_eq]
     exact M.face_mk_eq_iff a d₀
   rw [hset, Set.toFinset_card]
   rfl

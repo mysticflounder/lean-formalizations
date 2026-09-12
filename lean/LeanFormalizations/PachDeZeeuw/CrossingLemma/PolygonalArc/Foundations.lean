@@ -62,7 +62,7 @@ theorem disjoint_leftSide_rightSide (a b : Plane) :
     Disjoint (leftSide a b) (rightSide a b) := by
   rw [Set.disjoint_left]
   rintro z hz hz'
-  simp only [leftSide, rightSide, Set.mem_setOf_eq] at hz hz'
+  simp only [leftSide, rightSide, Set.mem_ofPred_eq] at hz hz'
   exact lt_asymm hz hz'
 
 /-- Swapping the orientation of the segment negates the side-functional, hence
@@ -72,7 +72,7 @@ theorem sideForm_swap (a b z : Plane) : sideForm b a z = - sideForm a b z := by
 
 theorem leftSide_swap (a b : Plane) : leftSide b a = rightSide a b := by
   ext z
-  simp only [leftSide, rightSide, Set.mem_setOf_eq]
+  simp only [leftSide, rightSide, Set.mem_ofPred_eq]
   rw [sideForm_swap]
   constructor <;> intro h <;> linarith
 
@@ -96,7 +96,7 @@ theorem sideForm_affineComb (a b x y : Plane) {s t : ℝ} (hst : s + t = 1) :
 theorem convex_mul_sideForm_lt (a b : Plane) (k c : ℝ) :
     Convex ℝ {z : Plane | k * sideForm a b z < c} := by
   rintro x hx y hy s t hs ht hst
-  simp only [Set.mem_setOf_eq] at hx hy ⊢
+  simp only [Set.mem_ofPred_eq] at hx hy ⊢
   have key : k * sideForm a b (s • x + t • y)
       = s * (k * sideForm a b x) + t * (k * sideForm a b y) := by
     rw [sideForm_affineComb a b x y hst]; ring
@@ -114,7 +114,7 @@ theorem convex_mul_sideForm_gt (a b : Plane) (k c : ℝ) :
   have h := convex_mul_sideForm_lt a b (-k) (-c)
   have e : {z : Plane | c < k * sideForm a b z}
       = {z : Plane | -k * sideForm a b z < -c} := by
-    ext z; simp only [Set.mem_setOf_eq]; constructor <;> intro hz <;> nlinarith
+    ext z; simp only [Set.mem_ofPred_eq]; constructor <;> intro hz <;> nlinarith
   rw [e]; exact h
 
 /-! ## §L2  The corner local model
@@ -181,7 +181,7 @@ theorem convexSector_nonempty (a v b : Plane) (h : IsCorner a v b) :
     (convexSector a v b).Nonempty := by
   simp only [IsCorner, cornerTurn] at h
   refine ⟨a + b - v, ?_⟩
-  simp only [convexSector, cornerTurn, Set.mem_setOf_eq]
+  simp only [convexSector, cornerTurn, Set.mem_ofPred_eq]
   have e1 : sideForm a v (a + b - v) = sideForm a v b := by
     simp only [sideForm, Prod.fst_add, Prod.snd_add, Prod.fst_sub, Prod.snd_sub]; ring
   have e2 : sideForm v b (a + b - v) = sideForm v b a := by
@@ -302,7 +302,7 @@ theorem compl_sectors_eq_cornerLocus (a v b : Plane) (h : IsCorner a v b) :
   simp only [IsCorner, cornerTurn] at h
   ext z
   simp only [convexSector, reflexSector, cornerLocus, cornerTurn, Set.mem_compl_iff,
-    Set.mem_union, Set.mem_setOf_eq, not_or, not_and, not_lt]
+    Set.mem_union, Set.mem_ofPred_eq, not_or, not_and, not_lt]
   constructor
   · rintro ⟨hc, hr1, hr2⟩
     -- hr1 : 0 ≤ τ·g₁, hr2 : 0 ≤ τ·g₂ ; hc : 0 < τ·g₁ → τ·g₂ ≤ 0
@@ -407,7 +407,7 @@ theorem ball_inter_cornerLocus (a v b : Plane) (h : IsCorner a v b)
     rw [e, norm_smul, Real.norm_eq_abs]
   ext z
   simp only [Set.mem_inter_iff, Metric.mem_ball, cornerLocus, Set.mem_union,
-    Set.mem_setOf_eq, cornerTurn]
+    Set.mem_ofPred_eq, cornerTurn]
   constructor
   · rintro ⟨hball, hloc⟩
     refine ⟨hball, ?_⟩
@@ -1202,8 +1202,21 @@ theorem affineComb_eq_param (i : Fin β.numSegs) {s : ℝ} (hs0 : 0 ≤ s) (hs1 
     have := β.numSegs_pos; exact_mod_cast (by omega : 0 < β.numSegs)
   have hnt : (β.numSegs : ℝ) * (((i : ℝ) + s) / (β.numSegs : ℝ)) = (i : ℝ) + s := by
     field_simp
+  have hile : (i : ℝ) ≤ (β.numSegs : ℝ) - 1 := by
+    have hi : (i : ℕ) ≤ β.numSegs - 1 := by have := i.isLt; omega
+    have hi' : ((i : ℕ) : ℝ) ≤ ((β.numSegs - 1 : ℕ) : ℝ) := by exact_mod_cast hi
+    rw [Nat.cast_sub (by have := β.numSegs_pos; omega)] at hi'
+    push_cast at hi'
+    linarith
+  have hmem : ((i : ℝ) + s) / (β.numSegs : ℝ) ∈ Set.Icc (0 : ℝ) 1 := by
+    constructor
+    · apply div_nonneg _ (le_of_lt hnpos)
+      have hi0 : (0 : ℝ) ≤ (i : ℝ) := by positivity
+      linarith
+    · rw [div_le_one hnpos]
+      linarith
   unfold param
-  rw [show ((⟨((i : ℝ) + s) / (β.numSegs : ℝ), _⟩ : Set.Icc (0 : ℝ) 1) : ℝ)
+  rw [show ((⟨((i : ℝ) + s) / (β.numSegs : ℝ), hmem⟩ : Set.Icc (0 : ℝ) 1) : ℝ)
         = ((i : ℝ) + s) / (β.numSegs : ℝ) from rfl]
   exact (β.paramRaw_collapse_of (((i : ℝ) + s) / (β.numSegs : ℝ)) i s hnt hs0 hs1).symm
 
@@ -1223,7 +1236,7 @@ theorem affineComb_mem_arcInterior (i : Fin β.numSegs) {s : ℝ} (hs0 : 0 ≤ s
   have htvhi : tv < 1 := by rw [htv, div_lt_one hnpos]; linarith
   rw [β.affineComb_eq_param i hs0 hs1]
   refine ⟨⟨tv, htv0, htv1⟩, ?_, ?_⟩
-  · simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo]; exact ⟨htvlo, htvhi⟩
+  · simp only [Set.mem_ofPred_eq, unitIoo, Set.mem_Ioo]; exact ⟨htvlo, htvhi⟩
   · rfl
 
 /-- Each interior shared vertex `verts (succ i)` (for `i + 1 < numSegs`) lies in
@@ -1264,7 +1277,7 @@ theorem verts_zero_notMem_arcInterior : β.verts 0 ∉ β.toSimpleArc.arcInterio
     rw [hpeq]; exact hsrc.symm
   have hpe : p = SimpleArc.src := β.injective_param this
   rw [hpe] at hp
-  simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo, SimpleArc.src] at hp
+  simp only [Set.mem_ofPred_eq, unitIoo, Set.mem_Ioo, SimpleArc.src] at hp
   exact absurd hp.1 (by norm_num)
 
 /-- The target endpoint `verts (last)` is not in `arcInterior β.toSimpleArc`. -/
@@ -1276,7 +1289,7 @@ theorem verts_last_notMem_arcInterior :
     rw [hpeq]; exact htgt.symm
   have hpe : p = SimpleArc.tgt := β.injective_param this
   rw [hpe] at hp
-  simp only [Set.mem_setOf_eq, unitIoo, Set.mem_Ioo, SimpleArc.tgt] at hp
+  simp only [Set.mem_ofPred_eq, unitIoo, Set.mem_Ioo, SimpleArc.tgt] at hp
   exact absurd hp.2 (by norm_num)
 
 end PolygonalArc

@@ -175,7 +175,7 @@ noncomputable def WitnessedPairsAt {m : ℕ} (L : OrderedCap m) (j : Fin m) :
     {p : Fin m × Fin m} :
     p ∈ WitnessedPairsAt L j ↔ WitnessesCapEdgeAt L j p.1 p.2 := by
   classical
-  simp [WitnessedPairsAt, WitnessesCapEdgeAt]
+  simp only [WitnessedPairsAt, Finset.mem_filter, Finset.mem_univ, true_and]
 
 /-- CGN7a, left-endpoint form: a fixed cap vertex witnesses at most one later
 partner for each earlier endpoint. -/

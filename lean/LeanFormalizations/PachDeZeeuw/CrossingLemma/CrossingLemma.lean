@@ -510,13 +510,13 @@ theorem endAnchor_eq_of_mem_incidentEnds (G : DrawnMultigraph)
   · simpa [endAnchor, endParam] using (hjoin i).1.trans he.2
   · simpa [endAnchor, endParam] using (hjoin i).2.trans he.2
 
-  theorem isFirstCrossing_unique_of_arcsJoinEndpoints
-    (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
-    {p : ℝ × ℝ} {e : Fin G.numEdges × Bool} (he : e ∈ incidentEnds G p)
-    {r : ℝ} (hr0 : 0 < r)
-    {t t' : Set.Icc (0 : ℝ) 1}
-    (ht : IsFirstCrossing G p e r t) (ht' : IsFirstCrossing G p e r t') :
-    t = t' := by
+theorem isFirstCrossing_unique_of_arcsJoinEndpoints
+  (G : DrawnMultigraph) (hjoin : G.ArcsJoinEndpoints)
+  {p : ℝ × ℝ} {e : Fin G.numEdges × Bool} (he : e ∈ incidentEnds G p)
+  {r : ℝ} (hr0 : 0 < r)
+  {t t' : Set.Icc (0 : ℝ) 1}
+  (ht : IsFirstCrossing G p e r t) (ht' : IsFirstCrossing G p e r t') :
+  t = t' := by
   have hstart : dist ((G.arc e.1).param (endParam e.2)) p = 0 := by
     change dist (endAnchor (G.arc e.1) e.2) p = 0
     rw [endAnchor_eq_of_mem_incidentEnds G hjoin he]
@@ -829,7 +829,10 @@ noncomputable def incidentEndsPermuteEquiv (π : Equiv.Perm (Fin G.numEdges)) (p
       simpa [DrawnMultigraph.permuteEdges] using hi⟩
   left_inv := by
     rintro ⟨⟨i, b⟩, hi⟩
-    simp
+    apply Subtype.ext
+    apply Prod.ext
+    · exact Equiv.symm_apply_apply π i
+    · rfl
   right_inv := by
     rintro ⟨⟨i, b⟩, hi⟩
     simp
@@ -859,7 +862,7 @@ theorem endAngleKey_injective_permuteEdges
       incidentEndsPermuteEquiv (G := G) π p a =
         incidentEndsPermuteEquiv (G := G) π p b := by
     apply hinj
-    simpa [endAngleKey, incidentEndsPermuteEquiv, DrawnMultigraph.permuteEdges] using hab
+    simpa only [endAngleKey, incidentEndsPermuteEquiv_apply_coe] using hab
   exact (incidentEndsPermuteEquiv (G := G) π p).injective hmap
 
 /-- The local vertex rotation at a fixed admissible radius conjugates along an
@@ -1171,7 +1174,8 @@ noncomputable def incident_ends_prefix_step_endpoint_old_equiv
         apply Prod.ext
         · exact Fin.castSucc_castPred _ _
         · rfl
-      simpa [hd] using hdmem
+      rw [hd]
+      exact hdmem
     refine ⟨(i, d.2), (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) m hm hm').mp hcastmem⟩
   left_inv e := by
     apply Subtype.ext
@@ -1213,8 +1217,7 @@ theorem prefixEdges_crossingFree
   have hijG : Fin.castLE hm i ≠ Fin.castLE hm j := by
     intro h
     apply hij
-    apply Fin.ext
-    simpa using congrArg Fin.val h
+    exact Fin.castLE_injective hm h
   simpa [DrawnMultigraph.prefixEdges] using hcross (Fin.castLE hm i) (Fin.castLE hm j) hijG
 
 /-- The pinned local rotation-regularity witness restricts to every ordered
@@ -1243,8 +1246,7 @@ theorem prefixEdges_arcsRotationRegular
     have hsecond : e₁.2 = e₂.2 := by
       exact congrArg (fun x : Fin G.numEdges × Bool => x.2) hcast
     apply Prod.ext
-    · apply Fin.ext
-      simpa using congrArg Fin.val hfirst
+    · exact Fin.castLE_injective hm hfirst
     · exact hsecond
   · intro e₁ he₁ e₂ he₂ r hr0 hrr r' hr'0 hr'r
     have he₁G : (Fin.castLE hm e₁.1, e₁.2) ∈ incidentEnds G p :=

@@ -149,7 +149,7 @@ theorem fibre_finite_at_bad (h : PlanePoly) (hirr : Irreducible h)
   have hset : Fibre h x = ↑(Specialized1 x h).roots.toFinset := by
     rw [fibre_eq_setOf_isRoot]
     ext y
-    simp only [Set.mem_setOf_eq, Multiset.mem_toFinset, Finset.mem_coe,
+    simp only [Set.mem_ofPred_eq, Multiset.mem_toFinset, Finset.mem_coe,
       Polynomial.mem_roots hne, Polynomial.IsRoot.def]
   rw [hset]
   exact (Specialized1 x h).roots.toFinset.finite_toSet
@@ -186,7 +186,7 @@ theorem badIncident_fibre_card_le {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeB
   -- `Prod.snd` is injective on `Qb` (all points share first coordinate `b`).
   have hinj : Set.InjOn Prod.snd (Qb : Set (ℝ × ℝ)) := by
     intro p hp q hq hpq
-    rw [Finset.coe_filter, Set.mem_setOf_eq] at hp hq
+    rw [Finset.coe_filter, Set.mem_ofPred_eq] at hp hq
     have : p.1 = q.1 := by rw [hp.2, hq.2]
     exact Prod.ext this hpq
   -- The second-coordinate image lands in the (finite) fibre.
@@ -198,7 +198,7 @@ theorem badIncident_fibre_card_le {d : ℕ} (P : Finset (ℝ × ℝ)) (H : EdgeB
     obtain ⟨⟨_, hpZ, _⟩, hpb⟩ := hpQb
     rw [Set.Finite.mem_toFinset]
     -- `p = (b, y)` is on the curve, so `y ∈ Fibre H.1 b`.
-    rw [Fibre, Set.mem_setOf_eq]
+    rw [Fibre, Set.mem_ofPred_eq]
     rw [mem_evalPlaneZeroSet] at hpZ
     rw [← hpb, ← hpy]
     exact hpZ

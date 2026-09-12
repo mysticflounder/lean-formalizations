@@ -1752,6 +1752,7 @@ theorem residualMap_edge_card (hARR : ArcsRotationRegular G) :
     Fintype.card (residualMap G hARR).Edge = G.numEdges := by
   rw [Fintype.card_congr (residualMapEdgeEquiv G hARR), Fintype.card_fin]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Crux for simplicity & connectivity.** Two darts have the same residual
 vertex class iff they have the same anchor vertex (equivalently, lie in the same
 `incidentEnds` block). -/
@@ -1762,6 +1763,7 @@ theorem residualMap_vertexMk_eq_iff (hARR : ArcsRotationRegular G)
   rw [CombinatorialMap.Vertex_mk, CombinatorialMap.Vertex_mk, Quotient.eq'']
   change (residualMap G hARR).vertexPerm.SameCycle d d' ↔ _
   rw [residualMap_vertexPerm, permCongr_sameCycle]
+  simp only [Equiv.symm_symm]
   -- Now `σ`-SameCycle on the sigma type, where `σ = sigmaVertexPerm`.
   rw [sigmaVertexPerm, sigmaCongrRight_sameCycle]
   constructor
@@ -1936,6 +1938,7 @@ theorem residualMap_isPlanar_prefix_of_insertions
     (fun h1 => residualMap_prefix_one_isPlanar (G := G) h1 (hARR 1 h1) hjoin)
     hstep n h1n hn
 
+set_option backward.isDefEq.respectTransparency false in
 /-- If a nonempty ordered drawing admits leaf/same-face insertion witnesses for
 every prefix step after the first edge, then the full drawing has a planar
 residual map for the induced full-prefix ARR witness. -/

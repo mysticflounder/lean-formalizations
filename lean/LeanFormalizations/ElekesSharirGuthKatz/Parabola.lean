@@ -112,24 +112,20 @@ theorem parabolaPoint_not_cospherical {a b c d : ℕ} (hab : a ≠ b) (hac : a �
     simp [parabolaPoint, Fin.sum_univ_two, Real.dist_eq, sq_abs, x, y]
   have sqA : (A - x) ^ 2 + (A ^ 2 - y) ^ 2 = r ^ 2 := by
     have := congrArg (· ^ 2) ha
-    simp at this
     rw [sq_eq a] at this
-    exact this
+    simpa [A] using this
   have sqB : (B - x) ^ 2 + (B ^ 2 - y) ^ 2 = r ^ 2 := by
     have := congrArg (· ^ 2) hb
-    simp at this
     rw [sq_eq b] at this
-    exact this
+    simpa [B] using this
   have sqC : (C - x) ^ 2 + (C ^ 2 - y) ^ 2 = r ^ 2 := by
     have := congrArg (· ^ 2) hc
-    simp at this
     rw [sq_eq c] at this
-    exact this
+    simpa [C] using this
   have sqD : (D - x) ^ 2 + (D ^ 2 - y) ^ 2 = r ^ 2 := by
     have := congrArg (· ^ 2) hd
-    simp at this
     rw [sq_eq d] at this
-    exact this
+    simpa [D] using this
   -- Pairwise hypotheses in ℝ
   have habR : A - B ≠ 0 := by
     apply sub_ne_zero.mpr

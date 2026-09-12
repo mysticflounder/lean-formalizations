@@ -37,7 +37,7 @@ union of two finite pieces:
   univariate `sepPoly p q := C (p.1 − q.1) − C (p.2 − q.2)·X`. This polynomial is nonzero
   when `p ≠ q` (if `p.2 = q.2` then `p.1 ≠ q.1`, so the constant term is nonzero; otherwise
   the `X`-coefficient `−(p.2 − q.2)` is nonzero), so its root set is finite
-  (`Polynomial.finite_setOf_isRoot`). This is the `exists_linearFunctional_injOn` /
+  (`Polynomial.finite_setOfPred_isRoot`). This is the `exists_linearFunctional_injOn` /
   `momentPoly` pattern (`GenericProjection.lean`) specialized to `ℝ × ℝ` and the functional
   `p ↦ p.1 − s·p.2`, with the degree-`≤ 1` separation polynomial built directly.
 
@@ -103,7 +103,7 @@ points.
 
 Proof is the §4 assembly: pick `s` off the finite bad-scalar set
 `B₁ ∪ B₂` (`B₁` = per-curve `∂_y`-degeneracy roots via `partialY_shearPoly_finite_bad`,
-`B₂` = pairwise x-collision roots via `sepPoly_ne_zero` + `Polynomial.finite_setOf_isRoot`),
+`B₂` = pairwise x-collision roots via `sepPoly_ne_zero` + `Polynomial.finite_setOfPred_isRoot`),
 then discharge each clause. The degree and irreducibility clauses use
 `shearPoly_totalDegree_le` and `irreducible_shearPoly_iff` and do not depend on the chosen
 `s`. -/
@@ -133,7 +133,7 @@ theorem exists_good_shear
     refine Set.Finite.biUnion (Finset.finite_toSet _) ?_
     intro pq hpq
     have hne : pq.1 ≠ pq.2 := (Finset.mem_offDiag.mp (Finset.mem_coe.mp hpq)).2.2
-    exact Polynomial.finite_setOf_isRoot (sepPoly_ne_zero hne)
+    exact Polynomial.finite_setOfPred_isRoot (sepPoly_ne_zero hne)
   -- Pick `s` off the finite union.
   obtain ⟨s, hs⟩ := (hB₁_fin.union hB₂_fin).exists_notMem
   rw [Set.mem_union, not_or] at hs
@@ -157,7 +157,7 @@ theorem exists_good_shear
     apply hs₂
     rw [hB₂, Set.mem_iUnion₂]
     refine ⟨(p, q), Finset.mem_offDiag.mpr ⟨Finset.mem_coe.mp hp, Finset.mem_coe.mp hq, hpq⟩, ?_⟩
-    simp only [Set.mem_setOf_eq, Polynomial.IsRoot.def, sepPoly_eval]
+    simp only [Set.mem_ofPred_eq, Polynomial.IsRoot.def, sepPoly_eval]
     -- The x-value equality, unfolded via `shearPoint_apply`.
     simp only [shearPoint_apply] at hpqeq
     linarith [hpqeq]

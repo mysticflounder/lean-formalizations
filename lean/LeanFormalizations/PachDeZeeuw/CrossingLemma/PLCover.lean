@@ -449,7 +449,7 @@ theorem mem_sheet1_iff_q1 {e : D.E} (he : D.p e ∈ D.V₁) {t : ZMod 2} :
 (and locally path connected) and the collar chart `V₁` is preconnected, then the
 chart-`0` side function `σ : ↥V₀ → ZMod 2` takes different values on `Pp` and `Pm`
 — so no path in `V₀` connects `Pp` to `Pm`. -/
-theorem exists_separating_fun [SimplyConnectedSpace B] [LocPathConnectedSpace B]
+theorem exists_separating_fun [SimplyConnectedSpace B] [LocallyPathConnectedSpace B]
     (hV₁ : IsPreconnected D.V₁) :
     ∃ σ : ↥D.V₀ → ZMod 2, Continuous σ ∧
       ∀ x x' : ↥D.V₀, (x : B) ∈ D.Pp → (x' : B) ∈ D.Pm → σ x ≠ σ x' := by

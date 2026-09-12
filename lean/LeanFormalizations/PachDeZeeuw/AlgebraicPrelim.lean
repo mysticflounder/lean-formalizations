@@ -204,23 +204,16 @@ noncomputable instance : NormalizationMonoid XCoeff := by
           (NormalizationMonoid.normUnit (XCoeffEquiv x))
       normUnit_zero := by
         simp [XCoeffEquiv]
-      normUnit_mul := by
-        intro a b ha hb
+      normUnit_one := by
+        simp [XCoeffEquiv]
+      normUnit_mul_units := by
+        intro a u ha
         have ha' : XCoeffEquiv a ≠ 0 := by
           intro h0
           exact ha (XCoeffEquiv.injective (by simpa using h0))
-        have hb' : XCoeffEquiv b ≠ 0 := by
-          intro h0
-          exact hb (XCoeffEquiv.injective (by simpa using h0))
-        have hmul :=
-          (NormalizationMonoid.normUnit_mul (α := Polynomial ℝ) (a := XCoeffEquiv a)
-            (b := XCoeffEquiv b) ha' hb')
-        simpa [XCoeffEquiv, map_mul] using congrArg (Units.map XCoeffEquiv.symm.toMonoidHom) hmul
-      normUnit_coe_units := by
-        intro u
         have hunit :=
-          NormalizationMonoid.normUnit_coe_units (α := Polynomial ℝ)
-            (Units.map XCoeffEquiv.toMonoidHom u)
+          NormalizationMonoid.normUnit_mul_units (α := Polynomial ℝ)
+            (Units.map XCoeffEquiv.toMonoidHom u) ha'
         have hmap :
             Units.map XCoeffEquiv.symm.toMonoidHom
                 (Units.map XCoeffEquiv.toMonoidHom u) = u := by
@@ -237,7 +230,9 @@ noncomputable instance : NormalizationMonoid XCoeff := by
             Units.map XCoeffEquiv.symm.toMonoidHom
               ((Units.map XCoeffEquiv.toMonoidHom u)⁻¹) = u⁻¹ := by
           simpa [hmap]
-        exact hcongr.trans hmapInv }
+        simp only [map_mul] at hcongr
+        rw [hmapInv] at hcongr
+        simpa [XCoeffEquiv, map_mul] using hcongr }
 
 /-- `XCoeff` inherits a normalized GCD monoid structure from `Polynomial ℝ`. -/
 noncomputable instance : NormalizedGCDMonoid XCoeff :=
@@ -250,6 +245,9 @@ lemma coeffEval_eq_eval_XCoeffEquiv (x : ℝ) (r : XCoeff) :
     (motive := fun r => Polynomial.eval x (XCoeffEquiv r) = coeffEval x r) r ?_ ?_ ?_
   · intro a
     simp [XCoeffEquiv, coeffEval, MvPolynomial.finSuccEquiv_apply]
+    change MvPolynomial.coeff (0 : Fin 0 →₀ ℕ) (MvPolynomial.C a) = a
+    rw [MvPolynomial.coeff_C]
+    simp
   · intro r s hr hs
     simp [hr, hs]
   · intro r n hr
@@ -391,18 +389,18 @@ theorem isRelPrime_fraction_map_of_isPrimitive
                (Q.map (algebraMap XCoeff XFrac)) := by
   intro D hDP hDQ
   by_cases hD : D = 0
-  · have hP0 : P ≠ 0 := hPprim.ne_zero
+  · have hPQ0 : P ≠ 0 ∧ Q ≠ 0 := ⟨hPprim.ne_zero, hQprim.ne_zero⟩
     have hmap_inj : Function.Injective (Polynomial.map (algebraMap XCoeff XFrac)) :=
       Polynomial.map_injective _ (IsFractionRing.injective XCoeff XFrac)
-    have hmapP0 : P.map (algebraMap XCoeff XFrac) ≠ 0 := by
+    have hmapQ0 : Q.map (algebraMap XCoeff XFrac) ≠ 0 := by
       intro hzero
-      have hzero' : Polynomial.map (algebraMap XCoeff XFrac) P =
+      have hzero' : Polynomial.map (algebraMap XCoeff XFrac) Q =
           Polynomial.map (algebraMap XCoeff XFrac) 0 := by
         simpa using hzero
-      exact hP0 (hmap_inj hzero')
-    have hzero : P.map (algebraMap XCoeff XFrac) = 0 := by
-      simpa [hD] using hDP
-    exact (hmapP0 hzero).elim
+      exact hPQ0.2 (hmap_inj hzero')
+    have hzero : Q.map (algebraMap XCoeff XFrac) = 0 := by
+      simpa [hD] using hDQ
+    exact (hmapQ0 hzero).elim
   · rcases IsLocalization.integerNormalization_spec (nonZeroDivisors XCoeff) D with
       ⟨b, hb, hnorm⟩
     have hb0 : b ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hb
@@ -493,7 +491,6 @@ theorem isRelPrime_fraction_map_of_isPrimitive
           (p := (IsLocalization.integerNormalization (nonZeroDivisors XCoeff) D).primPart)
           (q := P)
           (Polynomial.isPrimitive_primPart _)
-          hPprim
           hmap_prim_dvd_P
     have hprim_dvd_Q :
         (IsLocalization.integerNormalization (nonZeroDivisors XCoeff) D).primPart ∣ Q := by
@@ -503,7 +500,6 @@ theorem isRelPrime_fraction_map_of_isPrimitive
           (p := (IsLocalization.integerNormalization (nonZeroDivisors XCoeff) D).primPart)
           (q := Q)
           (Polynomial.isPrimitive_primPart _)
-          hQprim
           hmap_prim_dvd_Q
     have hunit_prim :
         IsUnit (IsLocalization.integerNormalization (nonZeroDivisors XCoeff) D).primPart :=
@@ -550,10 +546,10 @@ lemma fiber_finite_of_one_specialization_nonzero
     (h : Specialized0 x p ≠ 0 ∨ Specialized0 x q ≠ 0) :
     (FiberCommonZeros x p q).Finite := by
   rcases h with hp | hq
-  · refine Set.Finite.subset (Polynomial.finite_setOf_isRoot hp) ?_
+  · refine Set.Finite.subset (Polynomial.finite_setOfPred_isRoot hp) ?_
     intro y hy
     exact hy.1
-  · refine Set.Finite.subset (Polynomial.finite_setOf_isRoot hq) ?_
+  · refine Set.Finite.subset (Polynomial.finite_setOfPred_isRoot hq) ?_
     intro y hy
     exact hy.2
 
@@ -584,7 +580,7 @@ lemma fiber_ncard_le_max_totalDegree
     calc
       (FiberCommonZeros x p q).ncard ≤
           ((Specialized0 x p).rootSet ℝ).ncard := by
-            exact Set.ncard_le_ncard hsub (hrootset_eq ▸ Polynomial.finite_setOf_isRoot hp)
+            exact Set.ncard_le_ncard hsub (hrootset_eq ▸ Polynomial.finite_setOfPred_isRoot hp)
       _ ≤ (Specialized0 x p).natDegree := hroot
       _ ≤ p.totalDegree := specialized_natDegree_le_totalDegree p x
       _ ≤ max p.totalDegree q.totalDegree := le_max_left _ _
@@ -609,7 +605,7 @@ lemma fiber_ncard_le_max_totalDegree
     calc
       (FiberCommonZeros x p q).ncard ≤
           ((Specialized0 x q).rootSet ℝ).ncard := by
-            exact Set.ncard_le_ncard hsub (hrootset_eq ▸ Polynomial.finite_setOf_isRoot hq)
+            exact Set.ncard_le_ncard hsub (hrootset_eq ▸ Polynomial.finite_setOfPred_isRoot hq)
       _ ≤ (Specialized0 x q).natDegree := hroot
       _ ≤ q.totalDegree := specialized_natDegree_le_totalDegree q x
       _ ≤ max p.totalDegree q.totalDegree := le_max_right _ _
@@ -641,6 +637,9 @@ lemma coeffLineFactor_dvd_of_specialized_zero
       (motive := fun r => Polynomial.eval x (XCoeffEquiv r) = coeffEval x r) r ?_ ?_ ?_
     · intro a
       simp [XCoeffEquiv, coeffEval, MvPolynomial.finSuccEquiv_apply]
+      change MvPolynomial.coeff (0 : Fin 0 →₀ ℕ) (MvPolynomial.C a) = a
+      rw [MvPolynomial.coeff_C]
+      simp
     · intro r s hr hs
       simp [hr, hs]
     · intro r n hr
@@ -653,6 +652,9 @@ lemma coeffLineFactor_dvd_of_specialized_zero
         Polynomial.X - Polynomial.C x := by
     rw [map_sub]
     simp [XCoeffEquiv, MvPolynomial.finSuccEquiv_apply]
+    change MvPolynomial.coeff (0 : Fin 0 →₀ ℕ) (MvPolynomial.C x) = x
+    rw [MvPolynomial.coeff_C]
+    simp
   have hcoeff_div :
       ∀ n : ℕ, MvPolynomial.X (0 : Fin 1) - MvPolynomial.C x ∣ (Curry0 p).coeff n := by
     intro n
@@ -777,12 +779,17 @@ lemma finite_coeff_roots_of_ne_zero
     rw [Polynomial.mem_rootSet]
     constructor
     · intro hx
-      exact ⟨hr', by
-        simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx⟩
+      refine ⟨hr', ?_⟩
+      change coeffEval x r = 0 at hx
+      change Polynomial.eval x (XCoeffEquiv r) = 0
+      rw [coeffEval_eq_eval_XCoeffEquiv]
+      exact hx
     · intro hx
-      simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx.2
+      change coeffEval x r = 0
+      rw [← coeffEval_eq_eval_XCoeffEquiv]
+      simpa only [Polynomial.coe_aeval_eq_eval] using hx.2
   have hfinRoots : {x : ℝ | Polynomial.IsRoot (XCoeffEquiv r) x}.Finite :=
-    Polynomial.finite_setOf_isRoot hr'
+    Polynomial.finite_setOfPred_isRoot hr'
   have hsubset : (XCoeffEquiv r).rootSet ℝ ⊆ {x : ℝ | Polynomial.IsRoot (XCoeffEquiv r) x} := by
     intro x hx
     rw [Polynomial.mem_rootSet] at hx
@@ -805,15 +812,21 @@ lemma ncard_coeff_roots_le_totalDegree
     rw [Polynomial.mem_rootSet]
     constructor
     · intro hx
-      exact ⟨hr', by
-        simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx⟩
+      refine ⟨hr', ?_⟩
+      change coeffEval x r = 0 at hx
+      change Polynomial.eval x (XCoeffEquiv r) = 0
+      rw [coeffEval_eq_eval_XCoeffEquiv]
+      exact hx
     · intro hx
-      simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx.2
+      change coeffEval x r = 0
+      rw [← coeffEval_eq_eval_XCoeffEquiv]
+      simpa only [Polynomial.coe_aeval_eq_eval] using hx.2
   have hdeg : (XCoeffEquiv r).natDegree ≤ r.totalDegree := by
     calc
       (XCoeffEquiv r).natDegree = ((MvPolynomial.finSuccEquiv ℝ 0) r).natDegree := by
         simpa [XCoeffEquiv] using
           (Polynomial.natDegree_map_eq_of_injective
+            (f := (MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.toRingHom)
             ((MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.injective)
             ((MvPolynomial.finSuccEquiv ℝ 0) r))
       _ = MvPolynomial.degreeOf 0 r := by
@@ -839,10 +852,15 @@ lemma ncard_coeff_roots_le_degreeOf
     rw [Polynomial.mem_rootSet]
     constructor
     · intro hx
-      exact ⟨hr', by
-        simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx⟩
+      refine ⟨hr', ?_⟩
+      change coeffEval x r = 0 at hx
+      change Polynomial.eval x (XCoeffEquiv r) = 0
+      rw [coeffEval_eq_eval_XCoeffEquiv]
+      exact hx
     · intro hx
-      simpa [CoeffRootSet, coeffEval_eq_eval_XCoeffEquiv] using hx.2
+      change coeffEval x r = 0
+      rw [← coeffEval_eq_eval_XCoeffEquiv]
+      simpa only [Polynomial.coe_aeval_eq_eval] using hx.2
   have hroot :
       (CoeffRootSet r).ncard ≤ (XCoeffEquiv r).natDegree := by
     simpa [hrootset_eq] using (Polynomial.ncard_rootSet_le (XCoeffEquiv r) ℝ)
@@ -851,6 +869,7 @@ lemma ncard_coeff_roots_le_degreeOf
       (XCoeffEquiv r).natDegree = ((MvPolynomial.finSuccEquiv ℝ 0) r).natDegree := by
         simpa [XCoeffEquiv] using
           (Polynomial.natDegree_map_eq_of_injective
+            (f := (MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.toRingHom)
             ((MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.injective)
             ((MvPolynomial.finSuccEquiv ℝ 0) r))
       _ = MvPolynomial.degreeOf (0 : Fin 1) r := by
@@ -944,7 +963,7 @@ theorem coeffline_nonvertical_pair_intersection_bound
       exact hnotDiv x hxroot (coeffLineFactor_dvd_of_specialized_zero q x hzero)
     have htarget_finite : ((Specialized0 x q).rootSet ℝ).Finite := by
       have hfinRoots : {y : ℝ | Polynomial.IsRoot (Specialized0 x q) y}.Finite :=
-        Polynomial.finite_setOf_isRoot hqneq
+        Polynomial.finite_setOfPred_isRoot hqneq
       have hsubset : (Specialized0 x q).rootSet ℝ ⊆
           {y : ℝ | Polynomial.IsRoot (Specialized0 x q) y} := by
         intro y hy
@@ -968,7 +987,6 @@ theorem coeffline_nonvertical_pair_intersection_bound
       · exact h
       · exact by
           simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
-    haveI : ((Specialized0 x q).rootSet ℝ).Finite := htarget_finite
     exact Set.Finite.of_injOn hmapsTo hinj htarget_finite
   have hfiber_bound : ∀ x ∈ rootFinset, (fiberSet x).ncard ≤ d₂ := by
     intro x hx
@@ -979,7 +997,7 @@ theorem coeffline_nonvertical_pair_intersection_bound
       exact hnotDiv x hxroot (coeffLineFactor_dvd_of_specialized_zero q x hzero)
     have htarget_finite : ((Specialized0 x q).rootSet ℝ).Finite := by
       have hfinRoots : {y : ℝ | Polynomial.IsRoot (Specialized0 x q) y}.Finite :=
-        Polynomial.finite_setOf_isRoot hqneq
+        Polynomial.finite_setOfPred_isRoot hqneq
       have hsubset : (Specialized0 x q).rootSet ℝ ⊆
           {y : ℝ | Polynomial.IsRoot (Specialized0 x q) y} := by
         intro y hy
@@ -1004,7 +1022,7 @@ theorem coeffline_nonvertical_pair_intersection_bound
       · exact by
           simpa [coeffCoord] using (hz₁.1.trans hz₂.1.symm)
     have hle_root : (fiberSet x).ncard ≤ ((Specialized0 x q).rootSet ℝ).ncard := by
-      haveI : ((Specialized0 x q).rootSet ℝ).Finite := htarget_finite
+      have : ((Specialized0 x q).rootSet ℝ).Finite := htarget_finite
       exact Set.ncard_le_ncard_of_injOn elimCoord hmapsTo hinj
     have hroot : ((Specialized0 x q).rootSet ℝ).ncard ≤ (Specialized0 x q).natDegree := by
       simpa using (Polynomial.ncard_rootSet_le (Specialized0 x q) ℝ)
@@ -1113,11 +1131,13 @@ lemma planeCurveZeroSet_eq_coeffLineZeroSet_of_curry_natDegree_zero
       rw [Specialized0, hC]
       simp [coeffEval]
     rw [mem_CoeffLineZeroSet]
+    change MvPolynomial.eval (fun _ : Fin 1 ↦ coeffCoord z) ((Curry0 h).coeff 0) = 0
     rw [hspec] at hz'
     simpa using hz'
   · intro hz
     rw [mem_PlaneCurveZeroSet]
     rw [eval_eq_specialized_eval h z]
+    change MvPolynomial.eval (fun _ : Fin 1 ↦ coeffCoord z) ((Curry0 h).coeff 0) = 0 at hz
     have hspec :
         Specialized0 (coeffCoord z) h =
           Polynomial.C
@@ -1299,7 +1319,7 @@ lemma zeroCurry_zeroCurry_pair_intersection_bound
 
 /-- The multivariate polynomial ring over `ℝ` is normalized. -/
 noncomputable instance : NormalizationMonoid (MvPolynomial (Fin 2) ℝ) :=
-  UniqueFactorizationMonoid.normalizationMonoid
+  UniqueFactorizationMonoid.strongNormalizationMonoid.toNormalizationMonoid
 
 /-- Associated plane polynomials have the same total degree. -/
 lemma totalDegree_eq_of_associated
@@ -1508,7 +1528,7 @@ lemma zeroSet_subset_normalizedFactor_union
   refine Set.mem_iUnion.2 ?_
   refine ⟨h, ?_⟩
   refine Set.mem_iUnion.2 ?_
-  refine ⟨by simpa [s] using hh, ?_⟩
+  refine ⟨by simpa only [Multiset.mem_toFinset, s] using hh, ?_⟩
   simpa [PlaneCurveZeroSet] using hhz
 
 
@@ -1565,24 +1585,24 @@ theorem boundedDegreeCurve_real_component_cover
       rcases Set.mem_iUnion.mp hcomponent with ⟨hcompmem, hzcomp⟩
       rcases Finset.mem_image.mp hcompmem with ⟨f, hf, rfl⟩
       have hf' : f ∈ UniqueFactorizationMonoid.normalizedFactors p := by
-        simpa [factors] using hf
+        exact UniqueFactorizationMonoid.mem_primeFactors.mp (by simpa [factors] using hf)
       have hdiv : f ∣ p := UniqueFactorizationMonoid.dvd_of_mem_normalizedFactors hf'
       exact PlaneCurveZeroSet_subset_of_dvd hdiv (by simpa using hzcomp)
   · intro component hcomponent
     rcases Finset.mem_image.mp hcomponent with ⟨f, hf, rfl⟩
     have hf' : f ∈ UniqueFactorizationMonoid.normalizedFactors p := by
-      simpa [factors] using hf
+      exact UniqueFactorizationMonoid.mem_primeFactors.mp (by simpa [factors] using hf)
     have hirr : Irreducible f := normalized_factor_irreducible (p := p) (h := f) hf'
     exact ⟨f, hirr.ne_zero, le_rfl, hirr, rfl⟩
   · intro component hcomponent
     rcases Finset.mem_image.mp hcomponent with ⟨f, hf, rfl⟩
     have hf' : f ∈ UniqueFactorizationMonoid.normalizedFactors p := by
-      simpa [factors] using hf
+      exact UniqueFactorizationMonoid.mem_primeFactors.mp (by simpa [factors] using hf)
     exact normalized_factor_totalDegree_pos (p := p) (h := f) hf'
   · intro component hcomponent
     rcases Finset.mem_image.mp hcomponent with ⟨f, hf, rfl⟩
     have hf' : f ∈ UniqueFactorizationMonoid.normalizedFactors p := by
-      simpa [factors] using hf
+      exact UniqueFactorizationMonoid.mem_primeFactors.mp (by simpa [factors] using hf)
     exact le_trans
       (normalized_factor_degree_le (p := p) (h := f) hp0 hf')
       hpdeg

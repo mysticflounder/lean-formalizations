@@ -38,7 +38,7 @@ top monomials have distinct `a` (since `b = D − a`), so `P` is the zero polyno
 `H = 0`; since `D = totalDegree h` and `h ≠ 0`, `P ≠ 0`.
 
 `P` (here `shearTopPoly h`) is a nonzero real univariate polynomial, hence has finitely
-many roots (`Polynomial.finite_setOf_isRoot`). For `s` not a root of `P`, the `y^D`
+many roots (`Polynomial.finite_setOfPred_isRoot`). For `s` not a root of `P`, the `y^D`
 coefficient of `shearPoly s h` is `P(s) ≠ 0`; since `D ≥ 1`, this forces
 `pderiv (1 : Fin 2) (shearPoly s h) ≠ 0` (the chain
 `pderiv 1 g = 0 ⟹ (D : ℝ) · coeff (single 1 D) g = 0 ⟹ coeff (single 1 D) g = 0`, via
@@ -249,7 +249,7 @@ The bad set is contained in the real-root set of `shearTopPoly h`: for a bad `s`
 `coeff_yD_eq_zero_of_pderiv_eq_zero` makes the pure-`y^D` coefficient of `shearPoly s h`
 vanish, which by the identity `coeff_yD_shear_eq_eval` is exactly `(shearTopPoly h).eval s`,
 so `s` is a root. `shearTopPoly h ≠ 0` (`shearTopPoly_ne_zero`, using `h ≠ 0` from
-`1 ≤ totalDegree h`), so its root set is finite (`Polynomial.finite_setOf_isRoot`); the bad
+`1 ≤ totalDegree h`), so its root set is finite (`Polynomial.finite_setOfPred_isRoot`); the bad
 set, a subset, is finite (`Set.Finite.subset`). -/
 theorem partialY_shearPoly_finite_bad (h : PlanePoly) (hpos : 1 ≤ h.totalDegree) :
     {s : ℝ | MvPolynomial.pderiv (1 : Fin 2) (shearPoly s h) = 0}.Finite := by
@@ -258,9 +258,9 @@ theorem partialY_shearPoly_finite_bad (h : PlanePoly) (hpos : 1 ≤ h.totalDegre
     rw [h0, totalDegree_zero] at hpos
     exact absurd hpos (by norm_num)
   have hPne : shearTopPoly h ≠ 0 := shearTopPoly_ne_zero h hh
-  apply Set.Finite.subset (Polynomial.finite_setOf_isRoot hPne)
+  apply Set.Finite.subset (Polynomial.finite_setOfPred_isRoot hPne)
   intro s hs
-  simp only [Set.mem_setOf_eq] at hs ⊢
+  simp only [Set.mem_ofPred_eq] at hs ⊢
   -- s is a root of shearTopPoly h.
   rw [Polynomial.IsRoot.def, ← coeff_yD_shear_eq_eval]
   exact coeff_yD_eq_zero_of_pderiv_eq_zero (shearPoly s h) h.totalDegree hpos hs

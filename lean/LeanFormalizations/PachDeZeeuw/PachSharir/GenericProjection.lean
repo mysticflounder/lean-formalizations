@@ -101,7 +101,7 @@ theorem exists_linearFunctional_injOn (D : ℕ) (P : Finset (EuclideanSpace ℝ 
     have hne : pq.1 - pq.2 ≠ 0 := by
       rw [sub_ne_zero]
       exact (Finset.mem_offDiag.mp (Finset.mem_coe.mp hpq)).2.2
-    exact Polynomial.finite_setOf_isRoot (momentPoly_ne_zero hne)
+    exact Polynomial.finite_setOfPred_isRoot (momentPoly_ne_zero hne)
   obtain ⟨s₀, hs₀⟩ := hbad_fin.exists_notMem
   refine ⟨momentFunctional D s₀, ?_⟩
   intro p hp q hq hpq
@@ -113,7 +113,7 @@ theorem exists_linearFunctional_injOn (D : ℕ) (P : Finset (EuclideanSpace ℝ 
   rw [Set.mem_iUnion₂]
   refine ⟨(p, q), Finset.mem_offDiag.mpr ⟨Finset.mem_coe.mp hp, Finset.mem_coe.mp hq,
     sub_ne_zero.mp hdiff⟩, ?_⟩
-  simp only [Set.mem_setOf_eq, Polynomial.IsRoot.def]
+  simp only [Set.mem_ofPred_eq, Polynomial.IsRoot.def]
   rw [momentPoly_eval, map_sub, hpq, sub_self]
 
 /-- **Headline (node A1).** A generic linear projection is injective on a finite

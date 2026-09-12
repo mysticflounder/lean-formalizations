@@ -120,7 +120,7 @@ theorem InfX_subset_yLeadCoeff_zeroSet (h : PlanePoly) :
     InfX h ⊆ {c : ℝ | MvPolynomial.eval (fun _ : Fin 1 => c) (yLeadCoeff h) = 0} := by
   intro c hc
   by_contra hne
-  rw [Set.mem_setOf_eq] at hne
+  rw [Set.mem_ofPred_eq] at hne
   -- `lc_y(h)` is nonzero throughout a closed interval `[c − ε, c + ε]`.
   obtain ⟨ε, hεpos, hεne⟩ := exists_closedInterval_yLeadCoeff_ne_zero h hne
   -- Hence the strip over `[c − ε, c + ε]` is uniformly `y`-bounded by some `B`.
@@ -144,7 +144,7 @@ theorem yLeadCoeff_zeroSet_eq_isRoot (h : PlanePoly) :
     {c : ℝ | MvPolynomial.eval (fun _ : Fin 1 => c) (yLeadCoeff h) = 0}
       = {c : ℝ | (XCoeffEquiv (yLeadCoeff h)).IsRoot c} := by
   ext c
-  simp only [Set.mem_setOf_eq, Polynomial.IsRoot.def]
+  simp only [Set.mem_ofPred_eq, Polynomial.IsRoot.def]
   rw [coeffEval_eq_eval_XCoeffEquiv c (yLeadCoeff h)]
   rfl
 
@@ -155,7 +155,7 @@ theorem finite_yLeadCoeff_zeroSet (h : PlanePoly) (hlc : yLeadCoeff h ≠ 0) :
   rw [yLeadCoeff_zeroSet_eq_isRoot h]
   have hpne : XCoeffEquiv (yLeadCoeff h) ≠ 0 :=
     fun h0 => hlc (XCoeffEquiv.map_eq_zero_iff.mp h0)
-  exact Polynomial.finite_setOf_isRoot hpne
+  exact Polynomial.finite_setOfPred_isRoot hpne
 
 /-- The zero set of `lc_y(h)` has at most `(XCoeffEquiv (lc_y h)).natDegree` points
 (roots of a nonzero univariate polynomial). -/
@@ -171,7 +171,7 @@ theorem ncard_yLeadCoeff_zeroSet_le (h : PlanePoly) (hlc : yLeadCoeff h ≠ 0) :
       = (↑p.roots.toFinset : Set ℝ) := by
     rw [yLeadCoeff_zeroSet_eq_isRoot h, ← hp]
     ext c
-    simp only [Set.mem_setOf_eq, Multiset.mem_toFinset, Finset.mem_coe,
+    simp only [Set.mem_ofPred_eq, Multiset.mem_toFinset, Finset.mem_coe,
       Polynomial.mem_roots hpne]
   rw [hset, Set.ncard_coe_finset]
   exact (Multiset.toFinset_card_le p.roots).trans (p.card_roots')
@@ -230,6 +230,7 @@ theorem natDegree_XCoeffEquiv_yLeadCoeff_le_totalDegree (h : PlanePoly) (hlc : y
           = ((MvPolynomial.finSuccEquiv ℝ 0) (yLeadCoeff h)).natDegree := by
         simpa [XCoeffEquiv] using
           (Polynomial.natDegree_map_eq_of_injective
+            (f := (MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.toRingHom)
             ((MvPolynomial.isEmptyAlgEquiv ℝ (Fin 0)).toRingEquiv.injective)
             ((MvPolynomial.finSuccEquiv ℝ 0) (yLeadCoeff h)))
       _ = MvPolynomial.degreeOf 0 (yLeadCoeff h) := by

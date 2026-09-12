@@ -101,7 +101,11 @@ theorem xCoeffEquiv_X_sub_C (x : ℝ) :
   congr 1
   · simp [XCoeffEquiv, MvPolynomial.finSuccEquiv_X_zero]
   · show XCoeffEquiv (MvPolynomial.C x) = Polynomial.C x
-    rw [XCoeffEquiv]; simp [MvPolynomial.finSuccEquiv_apply, MvPolynomial.eval₂Hom]
+    rw [XCoeffEquiv]
+    simp [MvPolynomial.finSuccEquiv_apply, MvPolynomial.eval₂Hom]
+    change MvPolynomial.coeff (0 : Fin 0 →₀ ℕ) (MvPolynomial.C x) = x
+    rw [MvPolynomial.coeff_C]
+    simp
 
 /-- If `Curry1 h` is primitive then for **every** `x` the slice `Specialized1 x h` is a
 nonzero univariate polynomial. There is no mathlib lemma "primitive ⟹ specialization
@@ -173,7 +177,7 @@ theorem fibre_card_le_at_bad (h : PlanePoly) (hirr : Irreducible h)
   have hset : Fibre h x = ↑(Specialized1 x h).roots.toFinset := by
     rw [fibre_eq_setOf_isRoot]
     ext y
-    simp only [Set.mem_setOf_eq, Multiset.mem_toFinset, Finset.mem_coe, Polynomial.mem_roots hne]
+    simp only [Set.mem_ofPred_eq, Multiset.mem_toFinset, Finset.mem_coe, Polynomial.mem_roots hne]
   rw [hset, Set.ncard_coe_finset]
   calc (Specialized1 x h).roots.toFinset.card
       ≤ Multiset.card (Specialized1 x h).roots := (Specialized1 x h).roots.toFinset_card_le

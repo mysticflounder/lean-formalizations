@@ -343,7 +343,8 @@ lemma stComponentDrawing_firstCrossing_localRadius_angle
   · have hiff := edgeSetDrawing_isFirstCrossing_iff (G := G) (hE := hEc)
       (p := p) (e := e) (r := r) (t := t)
     simpa [stComponentDrawing, G, hEc] using hiff.mpr hfirst
-  · simpa [stComponentDrawing_incidentAngle, stComponentDrawing, G, hEc] using hangle
+  · simpa [stComponentDrawing_incidentAngle, stComponentDrawing, edgeSetDrawing,
+      edgeSetDrawingEdge, G, hEc] using hangle
 
 /-- The endpoint-direction angle family is injective on incident component
 darts.  This is the component form of `straightLineIncidentAnglesDistinct`,
@@ -532,7 +533,8 @@ lemma stComponentDrawing_prefixPermuteIncidentAngle_injOn
   have hidx : e₁.1 = e₂.1 := by
     apply Fin.ext
     have hcast : Fin.castLE hm e₁.1 = Fin.castLE hm e₂.1 := π.injective hidxπ
-    simpa using congrArg Fin.val hcast
+    change (Fin.castLE hm e₁.1).val = (Fin.castLE hm e₂.1).val
+    exact congrArg (fun i : Fin D.numEdges => i.val) hcast
   have hb : e₁.2 = e₂.2 :=
     congrArg (fun x : Fin D.numEdges × Bool => x.2) hmap
   exact Prod.ext hidx hb

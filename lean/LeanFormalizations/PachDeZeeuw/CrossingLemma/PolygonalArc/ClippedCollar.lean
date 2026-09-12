@@ -63,7 +63,7 @@ theorem sectorPlusClipped_subset_taperedTube (β : PolygonalArc) (R S : Set Plan
     sectorPlusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ := by
   intro z hz
   have h2 := hz.2
-  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq] at h2
+  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_ofPred_eq] at h2
   rcases h2 with ⟨hstrip, hfootz⟩ | ⟨hstrip, hfootz⟩
   · -- incoming arm: δ₀-close to edge `i` with `α < foot i`
     have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
@@ -143,7 +143,7 @@ theorem sectorMinusClipped_subset_taperedTube (β : PolygonalArc) (R S : Set Pla
     sectorMinusClipped β δ₀ α i hi1 ⊆ taperedTube R S δ₀ := by
   intro z hz
   have h2 := hz.2
-  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq] at h2
+  simp only [Set.mem_union, Set.mem_inter_iff, Set.mem_ofPred_eq] at h2
   rcases h2 with ⟨hstrip, hfootz⟩ | ⟨hstrip, hfootz⟩
   · have hsegne : (β.segCarrier i).Nonempty := ⟨β.segSrc i, left_mem_segment ℝ _ _⟩
     obtain ⟨y, hyseg, hyz⟩ := (Metric.infDist_lt_iff hsegne).mp hstrip
@@ -456,7 +456,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δs
       rcases harm with hin | hout
       · -- INCOMING arm: δ₀-thin to edge `i`, foot `> α`.
         obtain ⟨hiδ, hfoot⟩ := hin
-        rw [Set.mem_setOf_eq] at hfoot
+        rw [Set.mem_ofPred_eq] at hfoot
         by_cases hadj : (k : ℕ) + 1 = (i : ℕ)
         · -- ADJACENT: k = i−1.  Corner `e = k`, edges k and k+1 = i share verts(succ k) = segSrc i.
           have he1 : (k : ℕ) + 1 < β.numSegs := by have := i.isLt; omega
@@ -485,7 +485,7 @@ theorem sectorPlusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δs
           · exact hsep i k (by omega) z hiclose hkclose
       · -- OUTGOING arm: δ₀-thin to edge `i+1`, foot `< 1−α`.
         obtain ⟨hi1δ, hfoot⟩ := hout
-        rw [Set.mem_setOf_eq] at hfoot
+        rw [Set.mem_ofPred_eq] at hfoot
         by_cases hadj : (k : ℕ) = (i : ℕ) + 2
         · -- ADJACENT: k = i+2.  Corner `e = i+1`, edges i+1 and (i+1)+1 = k share verts(succ(i+1)).
           have hival : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
@@ -569,7 +569,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δ
       rcases harm with hin | hout
       · -- INCOMING arm: δ₀-thin to edge `i`, foot `> α`.
         obtain ⟨hiδ, hfoot⟩ := hin
-        rw [Set.mem_setOf_eq] at hfoot
+        rw [Set.mem_ofPred_eq] at hfoot
         by_cases hadj : (k : ℕ) + 1 = (i : ℕ)
         · -- ADJACENT: k = i−1.  Corner `e = k`, edges k and k+1 = i share verts(succ k) = segSrc i.
           have he1 : (k : ℕ) + 1 < β.numSegs := by have := i.isLt; omega
@@ -597,7 +597,7 @@ theorem sectorMinusClipped_subset_compl_carrier (β : PolygonalArc) {α δ₀ δ
           · exact hsep i k (by omega) z hiclose hkclose
       · -- OUTGOING arm: δ₀-thin to edge `i+1`, foot `< 1−α`.
         obtain ⟨hi1δ, hfoot⟩ := hout
-        rw [Set.mem_setOf_eq] at hfoot
+        rw [Set.mem_ofPred_eq] at hfoot
         by_cases hadj : (k : ℕ) = (i : ℕ) + 2
         · -- ADJACENT: k = i+2.  Corner `e = i+1`, edges i+1 and (i+1)+1 = k share verts(succ(i+1)).
           have hival : ((⟨(i : ℕ) + 1, hi1⟩ : Fin β.numSegs) : ℕ) = (i : ℕ) + 1 := rfl
@@ -913,7 +913,12 @@ theorem isPreconnected_collarMinus_of_sliver_budgets
       (hturn i hi1) (htgt i)
   · intro i hi1
     exact overlap_sectorMinusClipped_bandStripMinus_tgt β ρ hδ₀ hα hα3 i hi1
-      (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
+      (hturn i hi1) (by
+        have hi : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i := by
+          apply Fin.ext
+          simp
+        rw [← hi]
+        exact hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcMinus_bandStripMinus β ρ hδ₀ hα hα3
       (by simpa [PolygonalArc.firstSeg] using hsrc β.firstSeg)
   · have hlast : Fin.succ β.lastSeg = Fin.last β.numSegs := by
@@ -1012,7 +1017,12 @@ theorem isPreconnected_collarPlus_of_sliver_budgets
       (hturn i hi1) (htgt i)
   · intro i hi1
     exact overlap_sectorPlusClipped_bandStripPlus_tgt β ρ hδ₀ hα hα3 i hi1
-      (hturn i hi1) (by simpa using hsrc ⟨(i : ℕ) + 1, hi1⟩)
+      (hturn i hi1) (by
+        have hi : (Fin.castSucc ⟨(i : ℕ) + 1, hi1⟩ : Fin (β.numSegs + 1)) = Fin.succ i := by
+          apply Fin.ext
+          simp
+        rw [← hi]
+        exact hsrc ⟨(i : ℕ) + 1, hi1⟩)
   · exact overlap_endCapSrcPlus_bandStripPlus β ρ hδ₀ hα hα3
       (by simpa [PolygonalArc.firstSeg] using hsrc β.firstSeg)
   · have hlast : Fin.succ β.lastSeg = Fin.last β.numSegs := by

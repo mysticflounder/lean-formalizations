@@ -253,9 +253,9 @@ theorem countP_curveBlock_eq_zero_of_not_mem {P : Finset (ℝ × ℝ)} (H : Edge
   have hmem := edgesOnSheet_mem P Ed.h Ed.α Ed.β Ed.j Ed.e Ed.hmem
   have hhe := curveBlock_h P H hEd
   have hfst : Ed.e.1 ∈ {z : ℝ × ℝ | evalPlane H.1 z = 0} := by
-    rw [Set.mem_setOf_eq, ← hhe]; exact mem_evalPlaneZeroSet.mp hmem.1.2.1
+    rw [Set.mem_ofPred_eq, ← hhe]; exact mem_evalPlaneZeroSet.mp hmem.1.2.1
   have hsnd : Ed.e.2 ∈ {z : ℝ × ℝ | evalPlane H.1 z = 0} := by
-    rw [Set.mem_setOf_eq, ← hhe]; exact mem_evalPlaneZeroSet.mp hmem.2.2.1
+    rw [Set.mem_ofPred_eq, ← hhe]; exact mem_evalPlaneZeroSet.mp hmem.2.2.1
   rcases hcontra with heq | heq
   · rw [heq] at hfst hsnd; exact ⟨hfst, hsnd⟩
   · rw [heq] at hfst hsnd; exact ⟨hsnd, hfst⟩

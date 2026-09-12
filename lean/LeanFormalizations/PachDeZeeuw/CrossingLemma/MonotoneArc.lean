@@ -71,11 +71,14 @@ implicit-function API consumes. The derivation is the one folded inside
 `exists_implicitGraph_of_partial1` (`LocalArc.lean`); it is extracted here as a reusable
 lemma so both the continuity box and the *bidirectional uniqueness* box can share it. -/
 
+set_option linter.style.haveILetI false in
 /-- At `z` with `∂₁h(z) ≠ 0`, the second-variable partial derivative of `evalPlane h` is
 invertible. -/
 theorem partialY_isInvertible
     (h : PlanePoly) {z : ℝ × ℝ} (hnonsing : partialY h z ≠ 0) :
     ((fderiv ℝ (evalPlane h) z) ∘L (ContinuousLinearMap.inr ℝ ℝ ℝ)).IsInvertible := by
+  letI : AddCommGroup ℝ := Real.normedAddCommGroup.toAddCommGroup
+  letI : Module ℝ ℝ := RCLike.toInnerProductSpaceReal.toModule
   set a : ℝ × ℝ := z with ha_def
   have hcont : ContDiffAt ℝ ⊤ (evalPlane h) a := (evalPlane_contDiff h).contDiffAt
   rcases (show ∃ f' : (ℝ × ℝ) →L[ℝ] ℝ, HasFDerivAt (evalPlane h) f' a by
@@ -93,13 +96,16 @@ theorem partialY_isInvertible
       fin_cases i <;> simp [Function.comp, mkPoint2]
     dsimp [hswap] at hslice
     rw [MvPolynomial.eval_rename] at hslice
-    simpa [g, q, evalPlane, hswapCoords] using hslice
+    rw [hswapCoords] at hslice
+    simpa [g, q, evalPlane, elimCoord, coeffCoord, mkPoint2, hswapCoords] using hslice
   have hinr : HasFDerivAt (fun y : ℝ => (a.1, y))
       (ContinuousLinearMap.inr ℝ ℝ ℝ) a.2 := by
     simpa [ContinuousLinearMap.inr] using
       (hasFDerivAt_const a.1 a.2).prodMk (hasFDerivAt_id a.2)
   have hgfd : HasFDerivAt g (f'.comp (ContinuousLinearMap.inr ℝ ℝ ℝ)) a.2 := by
-    simpa [g] using hfd.comp a.2 hinr
+    convert hfd.comp a.2 hinr using 1
+    funext y
+    rfl
   have hq_deriv : Polynomial.derivative q =
       Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
     simp only [hq_def, Specialized0]
@@ -126,7 +132,7 @@ theorem partialY_isInvertible
       Polynomial.eval a.2 (Specialized0 a.1 (MvPolynomial.pderiv (0 : Fin 2) hswap)) =
           MvPolynomial.eval (fun i => mkPoint2 a.2 a.1 i)
             (MvPolynomial.pderiv (0 : Fin 2) hswap) := by
-            simpa [mkPoint2] using hslice.symm
+            simpa [mkPoint2, elimCoord, coeffCoord] using hslice.symm
       _ = MvPolynomial.eval ((fun i => mkPoint2 a.2 a.1 i) ∘ (Equiv.swap 0 1))
             (MvPolynomial.pderiv (1 : Fin 2) h) := by
               rw [hrename, MvPolynomial.eval_rename]
@@ -306,7 +312,7 @@ theorem finite_fibreOver
     rw [this]; exact hK.inter_right hcl
   -- The fibre is discrete: each point is isolated (isolation lemma).
   have hdisc : IsDiscrete (fibreOver h K m) := by
-    rw [isDiscrete_iff_forall_exists_isOpen]
+    rw [isDiscrete_iff_forall_mem_exists_isOpen]
     intro p hp
     exact isolated_of_partialY h hp (hband p hp)
   exact hfib_compact.finite hdisc
@@ -339,7 +345,7 @@ theorem subset_of_relClopen
     rintro ⟨x, hx⟩ hxT
     have h1 : ∀ᶠ y in 𝓝[s] x, y ∈ T := hT_open x hx hxT
     rw [nhdsWithin_eq_map_subtype_coe hx] at h1
-    simpa using h1
+    simpa [T'] using h1
   -- `T'ᶜ` open: relative-open of the complement pulled into the subspace.
   have hT'c_open : IsOpen T'ᶜ := by
     rw [isOpen_iff_eventually]
@@ -438,7 +444,8 @@ theorem eventually_mem_of_fibre_subset
   have hneBot : (l ⊓ Filter.principal (g ⁻¹' Vᶜ)).NeBot := by
     rw [Filter.frequently_iff_neBot] at hfreq
     -- `g ⁻¹' Vᶜ = {t | g t ∈ Vᶜ}`.
-    convert hfreq using 2
+    change (l ⊓ Filter.principal {t | g t ∈ Vᶜ}).NeBot
+    exact hfreq
   -- This filter maps under g into the compact `K ∩ Vᶜ`.
   set F : Filter ℝ := l ⊓ Filter.principal (g ⁻¹' Vᶜ) with hF_def
   have hKVc_compact : IsCompact (K ∩ Vᶜ) := hK.inter_right hVopen.isClosed_compl

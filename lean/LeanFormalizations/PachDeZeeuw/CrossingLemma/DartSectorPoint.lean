@@ -110,7 +110,8 @@ theorem exists_point_in_complement (m : ℕ) (hm : m ≤ G.numEdges) :
   -- The proof uses that the arc union is a finite union of compact sets, hence bounded.
   have hcompacts : ∀ e : Fin m, IsCompact (arcSet (G.prefixEdges m hm) e) := by
     intro e
-    rw [arcSet, ← Set.image_univ]
+    change IsCompact (Set.range ((G.prefixEdges m hm).arc e).param)
+    rw [← Set.image_univ]
     exact (isCompact_univ).image ((G.prefixEdges m hm).arc e).cont
   have hunion_compact : IsCompact (arcUnion (G.prefixEdges m hm)) := by
     rw [arcUnion]

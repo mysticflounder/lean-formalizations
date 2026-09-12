@@ -124,20 +124,20 @@ theorem endAngleKey_prefix_step_endpoint_old_iff
             ((incident_ends_prefix_step_endpoint_old_equiv
               (G := G) m hm hm' b hpnew hpother a₁).1) =
           endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₁ := by
-      simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
-        incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
-        (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-          (e := a₁.1) a₁.2 hs0 hs_pre hs_succ).symm
+      simp only [endAngleKey]
+      rw [incident_ends_prefix_step_endpoint_old_equiv_apply_val]
+      exact (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+        (e := a₁.1) a₁.2 hs0 hs_pre hs_succ).symm
     have h₂ :
         endAngleKey (G.prefixEdges (m + 1) hm') p
             (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) s
             ((incident_ends_prefix_step_endpoint_old_equiv
               (G := G) m hm hm' b hpnew hpother a₂).1) =
           endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) s a₂ := by
-      simpa [endAngleKey, s, DrawnMultigraph.prefixEdges,
-        incident_ends_prefix_step_endpoint_old_equiv, prefixStepDartEquiv_apply_inl] using
-        (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-          (e := a₂.1) a₂.2 hs0 hs_pre hs_succ).symm
+      simp only [endAngleKey]
+      rw [incident_ends_prefix_step_endpoint_old_equiv_apply_val]
+      exact (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+        (e := a₂.1) a₂.2 hs0 hs_pre hs_succ).symm
     constructor
     · intro h
       rw [h₁, h₂] at h
@@ -266,6 +266,7 @@ theorem exists_vertexRotationAtRadius_prefix_step_endpoint_splice
     simp [R, x, y, c]
   exact hpred
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Transport the leaf-insertion vertex permutation across a prefix step.
 
 This is the concrete bridge from the local endpoint-splice theorem to the
@@ -335,7 +336,11 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
             (Sum.inr ()) *
           (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr 1)
       = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := by
-    simpa [rotation_wellDefined] using hsplice
+    rw [rotation_wellDefined (G := G.prefixEdges m hm) hARR hp
+      (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl] at hsplice
+    rw [rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl] at hsplice
+    exact hsplice
   apply Equiv.ext
   intro d
   rcases (prefixStepDartEquiv m).surjective d with ⟨z, rfl⟩
@@ -407,7 +412,6 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
               incident_ends_prefix_step_endpoint_new_dart, prefixStepDartEquiv,
               prefixStepDartToFun, leafDartA,
               hvc, hva, hrot]
-            rfl
           · have hrot_val :
                 ((vertexRotation (G.prefixEdges m hm) hARR hp) x).1 ≠
                   ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 := by
@@ -577,7 +581,8 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
               ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
                 ((incident_ends_prefix_step_endpoint_equiv
                   (G := G) m hm hm' false hpnew hpother) (Sum.inr ()))).1 := by
-          simpa [incident_ends_prefix_step_endpoint_equiv] using
+          simpa [incident_ends_prefix_step_endpoint_equiv,
+            incident_ends_prefix_step_endpoint_new_dart] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hp
               ((incident_ends_prefix_step_endpoint_equiv
@@ -637,9 +642,16 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMap_vertexPerm
           simpa [xq, hrotq] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hq xq
-        simpa [xq, insertedLeafEdgeMap_vertexPerm, insertedLeafVertexPerm,
-      prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun] using hfix.symm
+        have hsingleton :
+            (insertedLeafEdgeMap (residualMap (G.prefixEdges m hm) hARR) c.1).vertexPerm
+              (Sum.inr (1 : Fin 2)) = Sum.inr (1 : Fin 2) := by
+          rw [insertedLeafEdgeMap_vertexPerm, insertedLeafVertexPerm,
+            Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply]
+          simp [leafDartA, Equiv.swap_apply_def]
+        erw [hsingleton]
+        exact hfix.symm
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Transport the leaf-insertion vertex permutation across a prefix step when
 the old endpoint of the new edge is the second endpoint.
 
@@ -712,7 +724,11 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
             (Sum.inr ()) *
           (vertexRotation (G.prefixEdges m hm) hARR hp).sumCongr 1)
       = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp := by
-    simpa [rotation_wellDefined] using hsplice
+    rw [rotation_wellDefined (G := G.prefixEdges m hm) hARR hp
+      (arrRadius_pos (G := G.prefixEdges m hm) hARR hp) le_rfl] at hsplice
+    rw [rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp) le_rfl] at hsplice
+    exact hsplice
   apply Equiv.ext
   intro d
   rcases (prefixStepDartEquiv m).surjective d with ⟨z, rfl⟩
@@ -784,7 +800,6 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
               incident_ends_prefix_step_endpoint_equiv,
               incident_ends_prefix_step_endpoint_new_dart, prefixStepDartEquiv,
               prefixStepDartToFun, leafThreadDart, hvc, hva, hrot]
-            rfl
           · have hrot_val :
                 ((vertexRotation (G.prefixEdges m hm) hARR hp) x).1 ≠
                   ((vertexRotation (G.prefixEdges m hm) hARR hp) c).1 := by
@@ -956,9 +971,14 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
           simpa [xq, hrotq] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hq xq
-        simpa [xq, insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
-          leafThreadDart, prefixStepDartEquiv, prefixStepDartToFun, prefixStepDartInvFun]
-          using hfix.symm
+        have hsingleton :
+            (insertedLeafEdgeMapAt (residualMap (G.prefixEdges m hm) hARR) c.1 true).vertexPerm
+              (Sum.inr (0 : Fin 2)) = Sum.inr (0 : Fin 2) := by
+          rw [insertedLeafEdgeMapAt_vertexPerm, insertedLeafVertexPermAt,
+            Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply]
+          simp [leafThreadDart, Equiv.swap_apply_def]
+        erw [hsingleton]
+        exact hfix.symm
       · have hpoint := congrArg
           (fun σ => σ
             ((incident_ends_prefix_step_endpoint_equiv
@@ -987,7 +1007,8 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
               ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp)
                 ((incident_ends_prefix_step_endpoint_equiv
                   (G := G) m hm hm' true hpnew hpother) (Sum.inr ()))).1 := by
-          simpa [incident_ends_prefix_step_endpoint_equiv] using
+          simpa [incident_ends_prefix_step_endpoint_equiv,
+            incident_ends_prefix_step_endpoint_new_dart] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hp
               ((incident_ends_prefix_step_endpoint_equiv
@@ -1020,6 +1041,7 @@ theorem prefixStepDartEquiv_permCongr_insertedLeafEdgeMapAt_true_vertexPerm
           simpa using hnew
         exact hleft.trans (hpoint_val.trans hnew'.symm)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Transport the two-corner edge-insertion vertex permutation across a prefix step.
 
 This is the same-face analogue of
@@ -1147,7 +1169,11 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
             (Sum.inr ()) *
           (vertexRotation (G.prefixEdges m hm) hARR hp₁).sumCongr 1)
       = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp₁ := by
-    simpa [rotation_wellDefined] using hsplice₁
+    rw [rotation_wellDefined (G := G.prefixEdges m hm) hARR hp₁
+      (arrRadius_pos (G := G.prefixEdges m hm) hARR hp₁) le_rfl] at hsplice₁
+    rw [rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp₁
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₁) le_rfl] at hsplice₁
+    exact hsplice₁
   have hsplice₂ :=
     vertexRotationAtRadius_prefix_step_endpoint_splice
       (G := G) m hm hm' true (p := p₂) hpnew₂ hpother₂
@@ -1170,7 +1196,11 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
             (Sum.inr ()) *
           (vertexRotation (G.prefixEdges m hm) hARR hp₂).sumCongr 1)
       = vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp₂ := by
-    simpa [rotation_wellDefined] using hsplice₂
+    rw [rotation_wellDefined (G := G.prefixEdges m hm) hARR hp₂
+      (arrRadius_pos (G := G.prefixEdges m hm) hARR hp₂) le_rfl] at hsplice₂
+    rw [rotation_wellDefined (G := G.prefixEdges (m + 1) hm') hARR' hp₂
+      (arrRadius_pos (G := G.prefixEdges (m + 1) hm') hARR' hp₂) le_rfl] at hsplice₂
+    exact hsplice₂
   apply Equiv.ext
   intro d
   rcases (prefixStepDartEquiv m).surjective d with ⟨z, rfl⟩
@@ -1293,12 +1323,12 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
                     (Sum.inr (0 : Fin 2) : Fin m × Bool ⊕ Fin 2) := by
               rw [hswap₂rot]
               exact Equiv.swap_apply_left _ _
-            simpa [x, insertedEdgeMap_vertexPerm, insVertexPerm,
+            simp [x, insertedEdgeMap_vertexPerm, insVertexPerm,
               Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
               incident_ends_prefix_step_endpoint_equiv,
               incident_ends_prefix_step_endpoint_new_dart, prefixStepDartEquiv,
               prefixStepDartToFun, dartA, dartB, hvc₁, hvc₂, hva, hswap₂rot,
-              hrot, hrot_val] using congrArg (prefixStepDartEquiv m) hfire
+              hrot]
           · have hrot_val :
                 ((vertexRotation (G.prefixEdges m hm) hARR hp₁) x).1 ≠
                   ((vertexRotation (G.prefixEdges m hm) hARR hp₁) c₁).1 := by
@@ -1371,10 +1401,9 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
                     (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp₁) x) :
                       ↥(incidentEnds (G.prefixEdges m hm) p₁) ⊕ Unit) :=
               Equiv.swap_apply_of_ne_of_ne hneR₁ hneR₂
-            simpa [insertedEdgeMap_vertexPerm, insVertexPerm,
+            simp [insertedEdgeMap_vertexPerm, insVertexPerm,
               Equiv.Perm.mul_apply, Equiv.sumCongr_apply, dartA, dartB,
-              hvc₁, hvc₂, hva, hswap₂rot, hswapL, hswapR] using
-              congrArg (prefixStepDartEquiv m) hfire
+              hvc₁, hvc₂, hva, hswap₂rot, hswapL, hswapR]
         exact hleft.trans (hpoint_val.trans hnew.symm)
       · by_cases ha₂ : a ∈ incidentEnds (G.prefixEdges m hm) p₂
         · let x : ↥(incidentEnds (G.prefixEdges m hm) p₂) := ⟨a, ha₂⟩
@@ -1577,10 +1606,9 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
                       (Sum.inl ((vertexRotation (G.prefixEdges m hm) hARR hp₂) x) :
                         ↥(incidentEnds (G.prefixEdges m hm) p₂) ⊕ Unit) :=
                 Equiv.swap_apply_of_ne_of_ne hneR₁ hneR₂
-              simpa [insertedEdgeMap_vertexPerm, insVertexPerm,
+              simp [insertedEdgeMap_vertexPerm, insVertexPerm,
                 Equiv.Perm.mul_apply, Equiv.sumCongr_apply, dartA, dartB,
-                hvc₁, hvc₂, hva, hswap₁rot, hswap₂, hswapR] using
-                congrArg (prefixStepDartEquiv m) hfire
+                hvc₁, hvc₂, hva, hswap₁rot, hswap₂, hswapR]
           exact hleft.trans (hpoint_val.trans hnew.symm)
         · let r : ℝ × ℝ := dartAnchor (G.prefixEdges m hm) a
           have hr : r ∈ G.V := by
@@ -1752,11 +1780,10 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
                       Fin m × Bool ⊕ Fin 2) := by
               rw [hswap₂rot]
               exact hswap₁rot
-            simpa [x, insertedEdgeMap_vertexPerm, insVertexPerm,
+            simp [x, insertedEdgeMap_vertexPerm, insVertexPerm,
               Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
               incident_ends_prefix_step_unchanged_equiv, dartA, dartB,
-              hvc₁, hvc₂, hva, hswap₁rot, hswap₂rot] using
-              congrArg (prefixStepDartEquiv m) hfire
+              hvc₁, hvc₂, hva, hswap₁rot, hswap₂rot]
           exact hleft.trans (hpoint_val.trans hnew.symm)
   | inr j =>
       fin_cases j
@@ -1793,7 +1820,8 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
               ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp₁)
                 ((incident_ends_prefix_step_endpoint_equiv
                   (G := G) m hm hm' false hpnew₁ hpother₁) (Sum.inr ()))).1 := by
-          simpa [incident_ends_prefix_step_endpoint_equiv] using
+          simpa [incident_ends_prefix_step_endpoint_equiv,
+            incident_ends_prefix_step_endpoint_new_dart] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hp₁
               ((incident_ends_prefix_step_endpoint_equiv
@@ -1827,7 +1855,8 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
             Equiv.Perm.mul_apply, Equiv.sumCongr_apply,
             incident_ends_prefix_step_endpoint_equiv,
             incident_ends_prefix_step_endpoint_new_dart, dartA, dartB,
-            prefixStepDartEquiv, prefixStepDartToFun, hvc₁, hvc₂, hswapA] using
+            prefixStepDartEquiv, prefixStepDartToFun, hvc₁, hvc₂, hswapA,
+            Equiv.swap_apply_def] using
             (incident_ends_prefix_step_endpoint_old_equiv_apply_val
               (G := G) m hm hm' false hpnew₁ hpother₁
               ((vertexRotation (G.prefixEdges m hm) hARR hp₁) c₁)).symm
@@ -1876,7 +1905,8 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
               ((vertexRotation (G.prefixEdges (m + 1) hm') hARR' hp₂)
                 ((incident_ends_prefix_step_endpoint_equiv
                   (G := G) m hm hm' true hpnew₂ hpother₂) (Sum.inr ()))).1 := by
-          simpa [incident_ends_prefix_step_endpoint_equiv] using
+          simpa [incident_ends_prefix_step_endpoint_equiv,
+            incident_ends_prefix_step_endpoint_new_dart] using
             residualMap_vertexPerm_apply_of_mem
               (G := G.prefixEdges (m + 1) hm') hARR' hp₂
               ((incident_ends_prefix_step_endpoint_equiv
@@ -1942,7 +1972,9 @@ theorem prefixStepDartEquiv_permCongr_insertedEdgeMap_vertexPerm
             incident_ends_prefix_step_endpoint_equiv,
             incident_ends_prefix_step_endpoint_new_dart, dartA, dartB,
             prefixStepDartEquiv, prefixStepDartToFun, hvc₁, hvc₂, hswap₁rot] using
-            congrArg (prefixStepDartEquiv m) hfire
+            (incident_ends_prefix_step_endpoint_old_equiv_apply_val
+              (G := G) m hm hm' true hpnew₂ hpother₂
+              ((vertexRotation (G.prefixEdges m hm) hARR hp₂) c₂)).symm
         have hnew' :
             (residualMap (G.prefixEdges (m + 1) hm') hARR').vertexPerm
                 ((prefixStepDartEquiv m) (Sum.inr (1 : Fin 2))) =

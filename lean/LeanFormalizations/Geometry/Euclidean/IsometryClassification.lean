@@ -137,12 +137,12 @@ theorem linearIsometryEquiv_send_ncard_le_two {u v : ℝ²} (hu : u ≠ 0) :
       simp [Set.ncard_singleton]
     refine le_trans (Set.ncard_le_ncard_of_injOn (fun T ↦ T (J u))
       (fun T hT ↦ ?_) ?_ hpair_finite) hpair_card
-    · simp only [Set.mem_setOf_eq] at hT
+    · simp only [Set.mem_ofPred_eq] at hT
       rcases linearIsometry_J_eq_or hu huv hT with h | h
       · exact h ▸ Set.mem_insert _ _
       · exact h ▸ Set.mem_insert_of_mem _ rfl
     · intro T₁ hT₁ T₂ hT₂ heq
-      simp only [Set.mem_setOf_eq] at hT₁ hT₂
+      simp only [Set.mem_ofPred_eq] at hT₁ hT₂
       apply (o.basisRightAngleRotation u hu).ext_linearIsometryEquiv
       intro i
       have hcoe : ⇑(o.basisRightAngleRotation u hu) = ![u, J u] :=
@@ -159,7 +159,7 @@ theorem linearIsometryEquiv_send_ncard_le_two {u v : ℝ²} (hu : u ≠ 0) :
   · -- ‖u‖ ≠ ‖v‖: the set is empty.
     have hempty : {T : ℝ² ≃ₗᵢ[ℝ] ℝ² | T u = v} = ∅ := by
       ext T
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       intro hT
       apply huv
       rw [← hT, T.norm_map]
@@ -177,12 +177,12 @@ theorem linearIsometryEquiv_send_finite {u v : ℝ²} (hu : u ≠ 0) :
     refine Set.Finite.of_injOn (f := fun T : ℝ² ≃ₗᵢ[ℝ] ℝ² ↦ T (J u))
       (t := ({J v, -J v} : Set ℝ²)) ?_ ?_ hpair_finite
     · intro T hT
-      simp only [Set.mem_setOf_eq] at hT
+      simp only [Set.mem_ofPred_eq] at hT
       rcases linearIsometry_J_eq_or hu huv hT with h | h
       · exact h ▸ Set.mem_insert _ _
       · exact h ▸ Set.mem_insert_of_mem _ rfl
     · intro T₁ hT₁ T₂ hT₂ heq
-      simp only [Set.mem_setOf_eq] at hT₁ hT₂
+      simp only [Set.mem_ofPred_eq] at hT₁ hT₂
       apply (o.basisRightAngleRotation u hu).ext_linearIsometryEquiv
       intro i
       have hcoe : ⇑(o.basisRightAngleRotation u hu) = ![u, J u] :=
@@ -198,7 +198,7 @@ theorem linearIsometryEquiv_send_finite {u v : ℝ²} (hu : u ≠ 0) :
         simpa using heq
   · have hempty : {T : ℝ² ≃ₗᵢ[ℝ] ℝ² | T u = v} = ∅ := by
       ext T
-      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+      simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false]
       intro hT
       apply huv
       rw [← hT, T.norm_map]
@@ -234,12 +234,12 @@ theorem twoPoint_isometry_ncard_le_two
     (fun g₁ hg₁ g₂ hg₂ heq ↦ ?_)
     (linearIsometryEquiv_send_finite (v := v) hu))
     (linearIsometryEquiv_send_ncard_le_two hu)
-  · simp only [Set.mem_setOf_eq] at hg
+  · simp only [Set.mem_ofPred_eq] at hg
     change _ = v
     have h := g.toRealAffineIsometryEquiv.map_vsub b a
     rw [IsometryEquiv.coeFn_toRealAffineIsometryEquiv, hg.1, hg.2] at h
     exact h
-  · simp only [Set.mem_setOf_eq] at hg₁ hg₂
+  · simp only [Set.mem_ofPred_eq] at hg₁ hg₂
     apply IsometryEquiv.ext
     intro x
     have h1 := g₁.toRealAffineIsometryEquiv.map_vsub x a
@@ -269,13 +269,13 @@ theorem twoPoint_isometry_set_finite
     (t := {T : ℝ² ≃ₗᵢ[ℝ] ℝ² | T u = v})
     ?_ ?_ (linearIsometryEquiv_send_finite hu)
   · intro g hg
-    simp only [Set.mem_setOf_eq] at hg
+    simp only [Set.mem_ofPred_eq] at hg
     change _ = v
     have h := g.toRealAffineIsometryEquiv.map_vsub b a
     rw [IsometryEquiv.coeFn_toRealAffineIsometryEquiv, hg.1, hg.2] at h
     exact h
   · intro g₁ hg₁ g₂ hg₂ heq
-    simp only [Set.mem_setOf_eq] at hg₁ hg₂
+    simp only [Set.mem_ofPred_eq] at hg₁ hg₂
     apply IsometryEquiv.ext
     intro x
     have h1 := g₁.toRealAffineIsometryEquiv.map_vsub x a

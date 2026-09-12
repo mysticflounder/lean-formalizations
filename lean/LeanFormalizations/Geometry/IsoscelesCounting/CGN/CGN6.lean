@@ -382,8 +382,9 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
   let qm : ℝ² := L.points (lastIndex (m := m) Packet.hm)
   have hfirst_last : firstIndex (m := m) Packet.hm ≠ lastIndex (m := m) Packet.hm := by
     intro h
+    have hm : 2 ≤ m := Packet.hm
     have hm1 : 1 < m := by
-      simpa using Packet.hm
+      omega
     have hval0 : (firstIndex (m := m) Packet.hm).val = 0 := by simp [firstIndex]
     have hval1 : (lastIndex (m := m) Packet.hm).val = m - 1 := by simp [lastIndex]
     have hne : m - 1 ≠ 0 := Nat.sub_ne_zero_of_lt hm1
@@ -514,7 +515,7 @@ theorem CGN6norm_minorCapChainModel_of_mecCapPacket
       intro p'
       simp [T, sub_eq_add_neg, map_add, add_comm])
     have hmap : T '' (convexHull ℝ S) = convexHull ℝ (T '' S) := by
-      simpa using (AffineMap.image_convexHull Taff S)
+      simpa [Taff, AffineMap.coe_mk'] using (AffineMap.image_convexHull Taff S)
     constructor
     · intro ha
       have himage : T a ∈ T '' convexHull ℝ S := by
@@ -1147,7 +1148,7 @@ theorem CGN6b0_secantEndpointBounds_coords {m : ℕ} (L : MinorCapChainCoords m)
             = y (t + 1) - y t := by
         simpa [mul_div_assoc] using
           (mul_div_cancel_left₀ (b := y (t + 1) - y t) hne)
-      simpa [w, d, x, y, adjSlopeNat, xCoord, yCoord, ht0, ht1] using hmul
+      simpa [slopeAt, w, d, x, y, adjSlopeNat, xCoord, yCoord, ht0, ht1] using hmul
     have hnum : ∑ t ∈ Finset.Ico a b, w t * d t = y b - y a := by
       calc
         ∑ t ∈ Finset.Ico a b, w t * d t = ∑ t ∈ Finset.Ico a b, (y (t + 1) - y t) := by
@@ -1308,7 +1309,7 @@ theorem CGN6b_nonacute_of_minorCapChainCoords {m : ℕ} (L : MinorCapChainCoords
             = y (t + 1) - y t := by
         simpa [mul_div_assoc] using
           (mul_div_cancel_left₀ (b := y (t + 1) - y t) hne)
-      simpa [w, d, x, y, adjSlopeNat, xCoord, yCoord, ht0, ht1] using hmul
+      simpa [slopeAt, w, d, x, y, adjSlopeNat, xCoord, yCoord, ht0, ht1] using hmul
     have hnum : ∑ t ∈ Finset.Ico a b, w t * d t = y b - y a := by
       calc
         ∑ t ∈ Finset.Ico a b, w t * d t = ∑ t ∈ Finset.Ico a b, (y (t + 1) - y t) := by

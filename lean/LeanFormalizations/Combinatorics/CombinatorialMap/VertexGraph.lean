@@ -69,13 +69,13 @@ discarded at the graph level, so this is a simple graph. -/
 def vertexGraph (M : CombinatorialMap D) : SimpleGraph M.Vertex where
   Adj p q :=
     p ≠ q ∧ ∃ e : M.Edge, Edge.ends (M := M) e = s(p, q)
-  symm := by
+  symm := ⟨by
     intro p q hpq
     rcases hpq with ⟨hne, e, he⟩
     exact ⟨hne.symm, e, by
       calc
         Edge.ends (M := M) e = s(p, q) := he
-        _ = s(q, p) := Sym2.eq_swap⟩
+        _ = s(q, p) := Sym2.eq_swap⟩⟩
   loopless := ⟨fun p hp => hp.1 rfl⟩
 
 /-- The face adjacency graph of a combinatorial map: the vertex graph of the
@@ -115,7 +115,7 @@ theorem vertexGraph_connected [Fintype D] [Nonempty M.Vertex]
       · exact Relation.ReflTransGen.single
           ⟨hsame, ⟨M.Edge_mk a, by simpa [vertexGraph] using (Edge.ends_mk (M := M) a)⟩⟩
   rw [SimpleGraph.reachable_iff_reflTransGen]
-  exact Relation.ReflTransGen.lift' M.Vertex_mk hstep (hconn d d')
+  exact (Relation.ReflTransGen.lift' M.Vertex_mk hstep) d d' (hconn d d')
 
 /-- Darts in the same vertex class are connected by `vertexPerm` steps.
 
@@ -196,7 +196,7 @@ noncomputable def vertexGraphEdge (M : CombinatorialMap D)
 /-- Swapping the vertex endpoints does not change the chosen primal edge. -/
 @[simp] theorem vertexGraphEdge_symm (M : CombinatorialMap D)
     {p q : M.Vertex} (h : (M.vertexGraph).Adj p q) :
-    vertexGraphEdge (M := M) (M.vertexGraph.symm h) = vertexGraphEdge (M := M) h := by
+    vertexGraphEdge (M := M) h.symm = vertexGraphEdge (M := M) h := by
   rcases h with ⟨hne, e, he⟩
   simp [vertexGraphEdge, Sym2.eq_swap]
 
@@ -949,7 +949,7 @@ noncomputable def faceGraphEdge (M : CombinatorialMap D)
 /-- Swapping the face endpoints does not change the chosen dual edge. -/
 @[simp] theorem faceGraphEdge_symm (M : CombinatorialMap D)
     {p q : M.dual.Vertex} (h : (M.faceGraph).Adj p q) :
-    faceGraphEdge (M := M) (M.faceGraph.symm h) = faceGraphEdge (M := M) h := by
+    faceGraphEdge (M := M) h.symm = faceGraphEdge (M := M) h := by
   rcases h with ⟨hne, e, he⟩
   simp [faceGraphEdge, Sym2.eq_swap]
 
@@ -999,13 +999,13 @@ def faceGraphOnEdgeSet (M : CombinatorialMap D) (S : Set M.Edge) :
     SimpleGraph M.dual.Vertex where
   Adj p q :=
     p ≠ q ∧ ∃ e : M.dual.Edge, dualEdgeEquiv M e ∈ S ∧ Edge.ends (M := M.dual) e = s(p, q)
-  symm := by
+  symm := ⟨by
     intro p q hpq
     rcases hpq with ⟨hne, e, heS, he⟩
     exact ⟨hne.symm, e, heS, by
       calc
         Edge.ends (M := M.dual) e = s(p, q) := he
-        _ = s(q, p) := Sym2.eq_swap⟩
+        _ = s(q, p) := Sym2.eq_swap⟩⟩
   loopless := ⟨fun p hp => hp.1 rfl⟩
 
 /-- A face adjacency carried by `S` is in particular an ordinary face
@@ -1036,7 +1036,7 @@ noncomputable def faceGraphOnEdgeSetEdge (M : CombinatorialMap D) (S : Set M.Edg
 /-- Swapping the face endpoints does not change the chosen carried dual edge. -/
 @[simp] theorem faceGraphOnEdgeSetEdge_symm (M : CombinatorialMap D) (S : Set M.Edge)
     {p q : M.dual.Vertex} (h : (M.faceGraphOnEdgeSet S).Adj p q) :
-    faceGraphOnEdgeSetEdge (M := M) S ((M.faceGraphOnEdgeSet S).symm h) =
+    faceGraphOnEdgeSetEdge (M := M) S h.symm =
       faceGraphOnEdgeSetEdge (M := M) S h := by
   rcases h with ⟨hne, e, heS, he⟩
   simp [faceGraphOnEdgeSetEdge, Sym2.eq_swap]
@@ -1074,7 +1074,7 @@ theorem exists_dart_faceGraphOnEdgeSetEdge_faces (M : CombinatorialMap D) (S : S
     rfl
   · have hmem := faceGraphOnEdgeSetEdge_mem (M := M) S h
     rw [← hd] at hmem
-    simpa using hmem
+    simpa [dualEdgeEquiv] using hmem
   · have hends := faceGraphOnEdgeSetEdge_spec (M := M) S h
     rw [← hd, Edge.ends_mk] at hends
     have hmap :

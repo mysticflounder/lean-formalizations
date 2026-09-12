@@ -112,8 +112,12 @@ noncomputable def lineHomeomorph
       (line[ℝ, A, C] : AffineSubspace ℝ V).direction ≃ᴬ[ℝ] line[ℝ, A, C] := by
     refine
       { toAffineEquiv := AffineEquiv.vaddConst (k := ℝ) (P₁ := line[ℝ, A, C]) p
-        continuous_toFun := by simpa using (Continuous.vadd continuous_id continuous_const)
-        continuous_invFun := by simpa using (Continuous.vsub continuous_id continuous_const) }
+        continuous_toFun := by
+          change Continuous (fun v => v +ᵥ p)
+          exact Continuous.vadd continuous_id continuous_const
+        continuous_invFun := by
+          change Continuous (fun x => x -ᵥ p)
+          exact Continuous.vsub continuous_id continuous_const }
   exact (e₁.trans e₂).toHomeomorph
 
 /--

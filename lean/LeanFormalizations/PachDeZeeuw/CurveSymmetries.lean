@@ -126,7 +126,7 @@ private noncomputable def point2ShearLinearMap (c : ℝ) : Point2 →ₗ[ℝ] Po
 /-- Multiply the first coordinate by `a` and the second coordinate by `b`. -/
 private noncomputable def point2DiagLinearEquiv
     (a b : ℝ) (ha : a ≠ 0) (hb : b ≠ 0) : Point2 ≃ₗ[ℝ] Point2 :=
-  LinearEquiv.ofLinear (point2DiagLinearMap a b) (point2DiagLinearMap a⁻¹ b⁻¹)
+  LinearEquiv.ofLinearMap (point2DiagLinearMap a b) (point2DiagLinearMap a⁻¹ b⁻¹)
     (by
       ext x i
       fin_cases i
@@ -140,7 +140,7 @@ private noncomputable def point2DiagLinearEquiv
 
 /-- Swap the two coordinates of the plane. -/
 private noncomputable def point2SwapLinearEquiv : Point2 ≃ₗ[ℝ] Point2 :=
-  LinearEquiv.ofLinear point2SwapLinearMap point2SwapLinearMap
+  LinearEquiv.ofLinearMap point2SwapLinearMap point2SwapLinearMap
     (by
       ext x i
       fin_cases i
@@ -154,7 +154,7 @@ private noncomputable def point2SwapLinearEquiv : Point2 ≃ₗ[ℝ] Point2 :=
 
 /-- Shear the plane by adding `c` times the first coordinate to the second. -/
 private noncomputable def point2ShearLinearEquiv (c : ℝ) : Point2 ≃ₗ[ℝ] Point2 :=
-  LinearEquiv.ofLinear (point2ShearLinearMap c) (point2ShearLinearMap (-c))
+  LinearEquiv.ofLinearMap (point2ShearLinearMap c) (point2ShearLinearMap (-c))
     (by
       ext x i
       fin_cases i

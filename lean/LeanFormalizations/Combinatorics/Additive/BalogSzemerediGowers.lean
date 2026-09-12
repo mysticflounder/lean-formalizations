@@ -174,15 +174,20 @@ lemma popular_pairs_card_lower_bound {G : Type*} [AddCommGroup G] [DecidableEq G
   have hfiber_nat : ∑ s ∈ (X + Y).filter (fun s ↦ θ ≤ X.addConvolution Y s),
         X.addConvolution Y s =
       ((X ×ˢ Y).filter (fun p ↦ θ ≤ X.addConvolution Y (p.1 + p.2))).card := by
-    simp_rw [Finset.addConvolution]
+    simp only [Finset.addConvolution]
     rw [Finset.sum_card_fiberwise_eq_card_filter]
     congr 1
     apply Finset.filter_congr
     rintro ⟨a, b⟩ hp
     rw [Finset.mem_product] at hp
-    rw [Finset.mem_filter]
-    refine ⟨fun h ↦ h.2, fun h ↦ ⟨?_, h⟩⟩
-    exact Finset.add_mem_add hp.1 hp.2
+    constructor
+    · intro h
+      have h' : a + b ∈ (X + Y).filter (fun s ↦ θ ≤ X.addConvolution Y s) := h
+      exact (Finset.mem_filter.mp h').2
+    · intro h
+      have h' : a + b ∈ (X + Y).filter (fun s ↦ θ ≤ X.addConvolution Y s) :=
+        Finset.mem_filter.mpr ⟨Finset.add_mem_add hp.1 hp.2, h⟩
+      exact h'
   have hcombined : η / 2 * (X.card : ℝ) ^ 3 ≤
       (X.card : ℝ) *
       (((X ×ˢ Y).filter (fun p ↦ θ ≤ X.addConvolution Y (p.1 + p.2))).card : ℝ) := by
@@ -471,7 +476,7 @@ lemma path3_count_le_triple_rep_count {G : Type*} [AddCommGroup G] [DecidableEq 
   apply Finset.card_le_card_of_injOn f
   · -- MapsTo: f sends src into tgt.
     intro q hq
-    simp only [hsrc_def, Finset.coe_filter, Set.mem_setOf_eq,
+    simp only [hsrc_def, Finset.coe_filter, Set.mem_ofPred_eq,
       Finset.mem_product] at hq
     obtain ⟨⟨_hq1B, _hq2A⟩, hEab1, hEa1b1, hEa1b⟩ := hq
     have hs1 : a + q.1 ∈ S := hSdef (a, q.1) hEab1

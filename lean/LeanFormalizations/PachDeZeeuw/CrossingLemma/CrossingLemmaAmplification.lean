@@ -591,31 +591,74 @@ theorem abstractizeEdgeSet_pairMultiplicityBound
         (G.endpoints (e : Fin G.numEdges) = (a.val, b.val) ∨
           G.endpoints (e : Fin G.numEdges) = (b.val, a.val)) := by
     intro e
-    simp only [abstractizeEdgeSet, Sym2.eq_iff, Prod.ext_iff, Subtype.ext_iff]
-  have hmaps : Set.MapsTo (fun e : ↥E => (e : Fin G.numEdges))
-      (↑(Finset.univ.filter fun e : ↥E =>
+    let ea : (abstractizeEdgeSet G S E hE).Vertex :=
+      ⟨(G.endpoints (e : Fin G.numEdges)).1, by
+        have he := hE e.property
+        rw [edgeSetOn, Finset.mem_filter] at he
+        exact he.2.1⟩
+    let eb : (abstractizeEdgeSet G S E hE).Vertex :=
+      ⟨(G.endpoints (e : Fin G.numEdges)).2, by
+        have he := hE e.property
+        rw [edgeSetOn, Finset.mem_filter] at he
+        exact he.2.2⟩
+    have heq : s(ea, eb) = s(a, b) ↔
+        ea = a ∧ eb = b ∨ ea = b ∧ eb = a := @Sym2.eq_iff _ ea eb a b
+    change s(ea, eb) = s(a, b) ↔ _
+    constructor
+    · intro h
+      rcases heq.mp h with ⟨ha, hb⟩ | ⟨ha, hb⟩
+      · left
+        apply Prod.ext
+        · exact congrArg Subtype.val ha
+        · exact congrArg Subtype.val hb
+      · right
+        apply Prod.ext
+        · exact congrArg Subtype.val ha
+        · exact congrArg Subtype.val hb
+    · intro h
+      apply heq.mpr
+      rcases h with h | h
+      · left
+        constructor
+        · apply Subtype.ext
+          exact congrArg Prod.fst h
+        · apply Subtype.ext
+          exact congrArg Prod.snd h
+      · right
+        constructor
+        · apply Subtype.ext
+          exact congrArg Prod.fst h
+        · apply Subtype.ext
+          exact congrArg Prod.snd h
+  have hmaps : Set.MapsTo (fun e : (abstractizeEdgeSet G S E hE).Edge =>
+      ((show ↥E from e) : Fin G.numEdges))
+      (↑(Finset.univ.filter fun e : (abstractizeEdgeSet G S E hE).Edge =>
         (abstractizeEdgeSet G S E hE).edgeVerts e = s(a, b)))
       (↑(Finset.univ.filter fun i : Fin G.numEdges =>
         G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val))) := by
     intro e he
-    have he' : e ∈ Finset.univ.filter fun e : ↥E =>
+    have he' : e ∈ Finset.univ.filter fun e : (abstractizeEdgeSet G S E hE).Edge =>
         (abstractizeEdgeSet G S E hE).edgeVerts e = s(a, b) := he
     rw [Finset.mem_filter] at he'
-    change (e : Fin G.numEdges) ∈ Finset.univ.filter fun i : Fin G.numEdges =>
+    change ((show ↥E from e) : Fin G.numEdges) ∈ Finset.univ.filter fun i : Fin G.numEdges =>
         G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val)
     rw [Finset.mem_filter]
-    exact ⟨Finset.mem_univ _, (hpred e).mp he'.2⟩
-  have hinj : (↑(Finset.univ.filter fun e : ↥E =>
-        (abstractizeEdgeSet G S E hE).edgeVerts e = s(a, b)) : Set ↥E).InjOn
-      (fun e : ↥E => (e : Fin G.numEdges)) := by
+    exact ⟨Finset.mem_univ _, (hpred (show ↥E from e)).mp he'.2⟩
+  have hinj : (↑(Finset.univ.filter fun e : (abstractizeEdgeSet G S E hE).Edge =>
+        (abstractizeEdgeSet G S E hE).edgeVerts e = s(a, b)) :
+        Set (abstractizeEdgeSet G S E hE).Edge).InjOn
+      (fun e : (abstractizeEdgeSet G S E hE).Edge => ((show ↥E from e) : Fin G.numEdges)) := by
     intro x _ y _ hxy
-    exact Subtype.ext hxy
+    change (show ↥E from x) = (show ↥E from y)
+    apply Subtype.ext
+    exact hxy
   have hcard_le :
-      (Finset.univ.filter fun e : ↥E =>
+      (Finset.univ.filter fun e : (abstractizeEdgeSet G S E hE).Edge =>
         (abstractizeEdgeSet G S E hE).edgeVerts e = s(a, b)).card ≤
       (Finset.univ.filter fun i : Fin G.numEdges =>
         G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val)).card :=
-    Finset.card_le_card_of_injOn (fun e : ↥E => (e : Fin G.numEdges)) hmaps hinj
+    Finset.card_le_card_of_injOn
+      (fun e : (abstractizeEdgeSet G S E hE).Edge => ((show ↥E from e) : Fin G.numEdges)) hmaps hinj
   have hmulteq :
       (Finset.univ.filter fun i : Fin G.numEdges =>
         G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val)).card

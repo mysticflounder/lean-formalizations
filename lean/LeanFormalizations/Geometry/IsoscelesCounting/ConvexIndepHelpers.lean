@@ -29,7 +29,7 @@ theorem ConvexIndep.mono {A B : Finset ℝ²} (hBA : B ⊆ A)
   intro a haB hmem
   have haA : a ∈ (A : Set ℝ²) := Finset.coe_subset.mpr hBA haB
   have hsub : ((B : Set ℝ²) \ {a}) ⊆ ((A : Set ℝ²) \ {a}) :=
-    Set.diff_subset_diff_left (Finset.coe_subset.mpr hBA)
+    Set.sdiff_subset_sdiff_left (Finset.coe_subset.mpr hBA)
   exact hA a haA (convexHull_mono hsub hmem)
 
 /-- Convex independence survives erasure of an arbitrary point. -/

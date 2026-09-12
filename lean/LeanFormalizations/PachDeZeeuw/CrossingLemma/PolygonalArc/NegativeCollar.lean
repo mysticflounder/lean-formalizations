@@ -341,7 +341,8 @@ theorem taperedTube_inter_endCapSrcMinus_eq_iUnion_slices_of_near_spine
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
     have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
-    have hpseg' : p ∈ segment ℝ s t := by simpa [s, t] using hpseg
+    have hpseg' : p ∈ segment ℝ s t := by
+      simpa [s, t, PolygonalArc.segCarrier] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
       simpa [c] using sub_eq_footParam_smul_of_sideForm_zero hts hpzero

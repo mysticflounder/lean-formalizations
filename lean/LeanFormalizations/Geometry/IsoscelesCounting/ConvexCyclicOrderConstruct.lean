@@ -203,22 +203,22 @@ theorem notMem_convexHull_diff_convexHull_of_notMem
   · -- `A \ {a}` empty ⇒ `↑A ⊆ {a}` ⇒ `(convexHull A) \ {a} = ∅`.
     intro hmem
     have hAsub : (A : Set ℝ²) ⊆ {a} := by
-      rw [Set.diff_eq_empty] at hempty; exact hempty
+      rw [Set.sdiff_eq_empty] at hempty; exact hempty
     have hhull : convexHull ℝ (A : Set ℝ²) ⊆ {a} := by
       rw [← convexHull_singleton (𝕜 := ℝ) a]; exact convexHull_mono hAsub
     have hdiff : ((convexHull ℝ (A : Set ℝ²)) \ {a}) = ∅ := by
-      rw [Set.diff_eq_empty]; exact hhull
+      rw [Set.sdiff_eq_empty]; exact hhull
     rw [hdiff, convexHull_empty] at hmem
     exact hmem
   · set K := convexHull ℝ ((A : Set ℝ²) \ {a}) with hK
     have hKconv : Convex ℝ K := convex_convexHull _ _
     have hKclosed : IsClosed K := by
-      have hfin : ((A : Set ℝ²) \ {a}).Finite := Set.Finite.diff A.finite_toSet
+      have hfin : ((A : Set ℝ²) \ {a}).Finite := Set.Finite.sdiff A.finite_toSet
       exact (hfin.isCompact_convexHull ℝ).isClosed
     obtain ⟨f, u, hfu, hua⟩ := geometric_hahn_banach_closed_point hKconv hKclosed hnotin
     have hjoin : convexHull ℝ (A : Set ℝ²) = convexJoin ℝ {a} K := by
       have hins : (A : Set ℝ²) = insert a ((A : Set ℝ²) \ {a}) := by
-        rw [Set.insert_diff_singleton, Set.insert_eq_self.mpr (by exact_mod_cast ha)]
+        rw [Set.insert_sdiff_singleton, Set.insert_eq_self.mpr (by exact_mod_cast ha)]
       rw [hins, convexHull_insert hne]
     have hsub : (convexHull ℝ (A : Set ℝ²)) \ {a} ⊆ {y | f y < f a} := by
       intro y hy
@@ -237,25 +237,25 @@ theorem notMem_convexHull_diff_convexHull_of_notMem
         · exact h
       have hfy : f y = s * f a + t * f z := by
         rw [← hytz, map_add, map_smul, map_smul, ha', smul_eq_mul, smul_eq_mul]
-      rw [Set.mem_setOf_eq, hfy]
+      rw [Set.mem_ofPred_eq, hfy]
       have hs1 : s = 1 - t := by linarith
       rw [hs1]; nlinarith [hfz, htpos]
     have hconv : Convex ℝ {y : ℝ² | f y < f a} :=
       convex_halfSpace_lt f.toLinearMap.isLinear (f a)
     intro hmem
     have hain : a ∈ {y : ℝ² | f y < f a} := convexHull_min hsub hconv hmem
-    rw [Set.mem_setOf_eq] at hain
+    rw [Set.mem_ofPred_eq] at hain
     exact lt_irrefl _ hain
 
 /-- Convex-independent points of `A` are extreme points of `convexHull A`. This
 is the extreme-point characterization
-`Convex.mem_extremePoints_iff_mem_diff_convexHull_diff` applied to the convex set
+`Convex.mem_extremePoints_iff_mem_sdiff_convexHull_sdiff` applied to the convex set
 `convexHull A`, with the descent lemma bridging the convex-hull-diff condition
 from `A \ {a}` to `(convexHull A) \ {a}`. -/
 theorem mem_extremePoints_of_convexIndep {A : Finset ℝ²}
     (hA : IsoscelesCounting.ConvexIndep A) {a : ℝ²} (ha : a ∈ A) :
     a ∈ Set.extremePoints ℝ (convexHull ℝ (A : Set ℝ²)) := by
-  rw [Convex.mem_extremePoints_iff_mem_diff_convexHull_diff (convex_convexHull _ _)]
+  rw [Convex.mem_extremePoints_iff_mem_sdiff_convexHull_sdiff (convex_convexHull _ _)]
   refine ⟨subset_convexHull _ _ (by exact_mod_cast ha), ?_⟩
   exact notMem_convexHull_diff_convexHull_of_notMem ha (hA a (by exact_mod_cast ha))
 
@@ -632,7 +632,7 @@ theorem directions_not_in_halfplane_of_center_interior
       ⟨fun a b => by rw [inner_add_left], fun r a => by rw [inner_smul_left]; simp⟩ _
   have hAsub : (A : Set ℝ²) ⊆ H := by
     intro a ha
-    simp only [hH, Set.mem_setOf_eq]
+    simp only [hH, Set.mem_ofPred_eq]
     have := h a (by exact_mod_cast ha)
     rw [inner_sub_left] at this; linarith
   have hhull : convexHull ℝ (A : Set ℝ²) ⊆ H := convexHull_min hAsub hHconv
@@ -649,7 +649,7 @@ theorem directions_not_in_halfplane_of_center_interior
         Real.norm_eq_abs, abs_of_pos hδpos, hδ]
     rw [div_mul_cancel₀ _ (ne_of_gt hunorm)]; linarith
   have hxhull : x ∈ H := hhull (hball hxball)
-  simp only [hH, Set.mem_setOf_eq, hx, inner_sub_left, inner_smul_left] at hxhull
+  simp only [hH, Set.mem_ofPred_eq, hx, inner_sub_left, inner_smul_left] at hxhull
   have hinner : (inner ℝ u u : ℝ) = ‖u‖ ^ 2 := real_inner_self_eq_norm_sq u
   rw [RCLike.conj_to_real, hinner] at hxhull
   nlinarith [hxhull, mul_pos hδpos (pow_pos hunorm 2)]
@@ -1500,7 +1500,6 @@ theorem shortGap_ray_endpointChord_hit
     have hBphi : (1 / (Acoef + B)) • B • phi k = (B / S) • phi k := by
       rw [smul_smul, hBcoef]
     have hc0 : (1 - 1 / (Acoef + B)) + (1 / (Acoef + B)) * (1 - (Acoef + B)) = 0 := by
-      dsimp [S]
       field_simp [hSne]
       ring
     let α : ℝ² := (1 - 1 / (Acoef + B)) • c

@@ -101,11 +101,11 @@ theorem edgesOnSheet_fst_lt (P : Finset (ℝ × ℝ)) (h : PlanePoly) {α β : �
     have hbad : p.1 ∉ Bad h := hgood p.1 hp_io
     -- Both `p.2` and `q.2` lie in the fibre over `p.1` (using `q.1 = p.1`).
     have hp2_fib : p.2 ∈ Fibre h p.1 := by
-      rw [Fibre, Set.mem_setOf_eq]
+      rw [Fibre, Set.mem_ofPred_eq]
       have := mem_evalPlaneZeroSet.mp hp_curve
       simpa using this
     have hq2_fib : q.2 ∈ Fibre h p.1 := by
-      rw [Fibre, Set.mem_setOf_eq, heqx]
+      rw [Fibre, Set.mem_ofPred_eq, heqx]
       have := mem_evalPlaneZeroSet.mp hq_curve
       simpa using this
     -- Equal sheet rank over the shared `x = p.1`.

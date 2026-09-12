@@ -143,12 +143,12 @@ def DrawnMultigraph.vertexGraph (G : DrawnMultigraph)
     ∃ e : Fin G.numEdges,
       ((G.endpoints e).1 = (p : ℝ × ℝ) ∧ (G.endpoints e).2 = (q : ℝ × ℝ)) ∨
       ((G.endpoints e).1 = (q : ℝ × ℝ) ∧ (G.endpoints e).2 = (p : ℝ × ℝ))
-  symm := by
+  symm := ⟨by
     intro p q hpq
     rcases hpq with ⟨e, h⟩
     rcases h with h | h
     · exact ⟨e, Or.inr h⟩
-    · exact ⟨e, Or.inl h⟩
+    · exact ⟨e, Or.inl h⟩⟩
   loopless := ⟨fun p hp => by
     rcases hp with ⟨e, h⟩
     rcases h with h | h
@@ -159,6 +159,7 @@ def DrawnMultigraph.vertexGraph (G : DrawnMultigraph)
         simpa using h.1.trans h.2.symm
       exact (DrawnMultigraph.endpoints_ne_of_arcsJoinEndpoints hjoin e) hloop⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Under incident coverage, the residual map's vertex graph is exactly the
 drawing's endpoint graph.
 
@@ -218,8 +219,8 @@ noncomputable def residualMapVertexGraphIsoOfIncident
           s(⟨(G.endpoints edge).1, (G.endpoints_mem edge).1⟩,
             ⟨(G.endpoints edge).2, (G.endpoints_mem edge).2⟩) =
             s(e u, e v) := by
-        simpa only [e, residualMapVertexEquivOfIncident_apply_vertex_mk, dartAnchor,
-          residualMap_edgePerm_apply, Sym2.map_mk] using congrArg (Sym2.map e) hedge
+        simpa [Edge.ends_mk, e, residualMapVertexEquivOfIncident_apply_vertex_mk,
+          dartAnchor, residualMap_edgePerm_apply] using congrArg (Sym2.map e) hedge
       rw [Sym2.eq_iff] at hpair
       rcases hpair with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
       · exact Or.inl ⟨congrArg Subtype.val h₁, congrArg Subtype.val h₂⟩
@@ -229,8 +230,8 @@ noncomputable def residualMapVertexGraphIsoOfIncident
           s(⟨(G.endpoints edge).2, (G.endpoints_mem edge).2⟩,
             ⟨(G.endpoints edge).1, (G.endpoints_mem edge).1⟩) =
             s(e u, e v) := by
-        simpa only [e, residualMapVertexEquivOfIncident_apply_vertex_mk, dartAnchor,
-          residualMap_edgePerm_apply, Sym2.map_mk] using congrArg (Sym2.map e) hedge
+        simpa [Edge.ends_mk, e, residualMapVertexEquivOfIncident_apply_vertex_mk,
+          dartAnchor, residualMap_edgePerm_apply] using congrArg (Sym2.map e) hedge
       have hpair' :
           s(⟨(G.endpoints edge).1, (G.endpoints_mem edge).1⟩,
             ⟨(G.endpoints edge).2, (G.endpoints_mem edge).2⟩) =
@@ -546,6 +547,7 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_treeEdgeOf
     (by simpa [p] using hold)
     hjoin hARR hARR'
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A permuted tree-prefix step is a residual-map leaf insertion.
 
 Suppose the edge permutation places the parent edges selected from the
@@ -692,6 +694,7 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_leaf_of_permuted_t
     (G := H) i.1 hm hm' (p := p) (q := q) hend hqp hleaf hold
     (permuteEdges_arcsJoinEndpoints (G := G) π hjoin) hARR hARR'
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The full permuted tree prefix is incident to every listed drawing vertex.
 
 For the root vertex, the first selected parent edge is incident to it.  For any
@@ -950,6 +953,7 @@ theorem DrawnMultigraph.residualMap_face_card_one_permuted_treePrefix_of_leafOrd
   exact CombinatorialMap.card_face_eq_one_of_isPlanar_of_card_edge_eq_card_vertex_sub_one
     (M := residualMap (H.prefixEdges (l.length - 1) hm) hARRtree) hV hplanar hcard
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The first edge after the permuted tree prefix is a same-face insertion.
 
 After the spanning-tree prefix has been inserted, the predecessor residual map
@@ -990,6 +994,12 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permut
   have hp₂ : p₂ ∈ H.V := by
     simpa [p₂, H, m, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using
       (G.endpoints_mem (π (Fin.castLE hm' (Fin.last m)))).2
+  have hp₁G : p₁ ∈ G.V := by
+    change p₁ ∈ G.V at hp₁
+    exact hp₁
+  have hp₂G : p₂ ∈ G.V := by
+    change p₂ ∈ G.V at hp₂
+    exact hp₂
   have hne :
       ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠
         ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 :=
@@ -1001,13 +1011,13 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permut
       e ∈ incidentEnds (H.prefixEdges m hm) p₁ := by
     have hcov :=
       G.incidentCoverage_permuted_treePrefix_of_leafOrder
-        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₁, by simpa [H] using hp₁⟩
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₁, hp₁G⟩
     simpa [H, m] using hcov
   have hold₂ : ∃ e : Fin m × Bool,
       e ∈ incidentEnds (H.prefixEdges m hm) p₂ := by
     have hcov :=
       G.incidentCoverage_permuted_treePrefix_of_leafOrder
-        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₂, by simpa [H] using hp₂⟩
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₂, hp₂G⟩
     simpa [H, m] using hcov
   have hface :
       Fintype.card (residualMap (H.prefixEdges m hm) (hARR m hm)).Face = 1 := by
@@ -1024,6 +1034,7 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepInsertion_sameFace_of_permut
     (permuteEdges_arcsJoinEndpoints (G := G) π hjoin)
     (hARR m hm) (hARR (m + 1) hm') hface
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Explicit same-face data for the first edge after the permuted tree prefix.
 
 After the spanning-tree prefix has been inserted, the predecessor residual map
@@ -1064,6 +1075,12 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_permuted_tre
   have hp₂ : p₂ ∈ H.V := by
     simpa [p₂, H, m, DrawnMultigraph.prefixEdges, DrawnMultigraph.permuteEdges] using
       (G.endpoints_mem (π (Fin.castLE hm' (Fin.last m)))).2
+  have hp₁G : p₁ ∈ G.V := by
+    change p₁ ∈ G.V at hp₁
+    exact hp₁
+  have hp₂G : p₂ ∈ G.V := by
+    change p₂ ∈ G.V at hp₂
+    exact hp₂
   have hne :
       ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).1 ≠
         ((H.prefixEdges (m + 1) hm').endpoints (Fin.last m)).2 :=
@@ -1075,13 +1092,13 @@ theorem DrawnMultigraph.exists_residualMapPrefixStepSameFaceData_of_permuted_tre
       e ∈ incidentEnds (H.prefixEdges m hm) p₁ := by
     have hcov :=
       G.incidentCoverage_permuted_treePrefix_of_leafOrder
-        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₁, by simpa [H] using hp₁⟩
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₁, hp₁G⟩
     simpa [H, m] using hcov
   have hold₂ : ∃ e : Fin m × Bool,
       e ∈ incidentEnds (H.prefixEdges m hm) p₂ := by
     have hcov :=
       G.incidentCoverage_permuted_treePrefix_of_leafOrder
-        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₂, by simpa [H] using hp₂⟩
+        hjoin hmult T hTsub hl_nodup hl_len hl_two parent hparent hπ hm ⟨p₂, hp₂G⟩
     simpa [H, m] using hcov
   have hface :
       Fintype.card (residualMap (H.prefixEdges m hm) (hARR m hm)).Face = 1 := by
@@ -1890,9 +1907,9 @@ theorem DrawnMultigraph.exists_faceGraphOnEdgeSet_spanningTree_of_treeEdgeOfLeaf
   let eV : M.Vertex ≃ ↥G.V := residualMapVertexEquivOfIncident G hARR hincident
   let T' : SimpleGraph M.Vertex := {
     Adj := fun u v => T.Adj (eV u) (eV v)
-    symm := by
+    symm := ⟨by
       intro u v huv
-      exact T.symm huv
+      exact T.symm.symm _ _ huv⟩
     loopless := ⟨fun u huv => (T.ne_of_adj huv) rfl⟩
   }
   have hT'iso : T' ≃g T := by
@@ -2278,6 +2295,7 @@ theorem card_face_of_iso {D D' : Type*} [Fintype D] [Fintype D']
   simpa [CombinatorialMap.Face, hface] using
     Fintype.card_congr (quotientSameCycleEquivOfPermCongr f.toEquiv M.facePerm)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Face count after a same-face prefix step insertion: face count increases by one. -/
 theorem card_face_residualMap_prefixStep_sameFace
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
@@ -2303,6 +2321,7 @@ theorem card_face_residualMap_prefixStep_sameFace
   rw [hiso] at hFinserted
   simpa [M, M'] using hFinserted
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Face count after a leaf prefix step insertion: face count is unchanged. -/
 theorem card_face_residualMap_prefixStep_leaf
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)

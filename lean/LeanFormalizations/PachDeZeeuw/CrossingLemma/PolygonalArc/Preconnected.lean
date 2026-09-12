@@ -139,8 +139,12 @@ theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : 
   rcases Nat.eq_zero_or_pos n with hn | hn
   · subst hn; exact i.elim0
   set R := fun a b : Fin n => (s a ∩ s b).Nonempty with hRdef
-  have hsymm : Symmetric R := by
-    intro a b h; rw [hRdef]; simp only; rw [Set.inter_comm]; exact h
+  have hsymm : Std.Symm R := ⟨by
+    intro a b h
+    rw [hRdef]
+    simp only
+    rw [Set.inter_comm]
+    exact h⟩
   have hzero : ∀ (kv : ℕ) (hk : kv < n), Relation.ReflTransGen R ⟨0, hn⟩ ⟨kv, hk⟩ := by
     intro kv
     induction kv with
@@ -150,7 +154,9 @@ theorem isPreconnected_iUnion_fin_chain {α : Type*} [TopologicalSpace α] {n : 
       exact (ih (Nat.lt_of_succ_lt hk)).tail (hchain m hk)
   have hi0 : Relation.ReflTransGen R ⟨0, hn⟩ i := by simpa using hzero i.1 i.2
   have hj0 : Relation.ReflTransGen R ⟨0, hn⟩ j := by simpa using hzero j.1 j.2
-  exact (Relation.ReflTransGen.symmetric hsymm hi0).trans hj0
+  letI : Std.Symm (Relation.ReflTransGen R) :=
+    @Relation.ReflTransGen.stdSymm _ _ hsymm
+  exact (Std.Symm.symm _ _ hi0).trans hj0
 
 /-- The `i`-th **chain link** of the positive collar: band `i` together with the connector
 that follows it — the vertex sector at `i+1` (when `i` is not the last segment) or the
@@ -1102,7 +1108,9 @@ theorem taperedTube_inter_endCapSrcPlus_eq_iUnion_slices_of_near_spine
     obtain ⟨hpseg, hpc⟩ := hnear p hpS hpv
     let c : ℝ := footParam s t p
     have hc : c ∈ Set.Ioo (0 : ℝ) c_max := by simpa [c, s, t] using hpc
-    have hpseg' : p ∈ segment ℝ s t := by simpa [s, t] using hpseg
+    have hpseg' : p ∈ segment ℝ s t := by
+      rw [← show β.segCarrier β.firstSeg = segment ℝ s t from rfl]
+      simpa [s, t] using hpseg
     have hpzero : sideForm s t p = 0 := sideForm_eq_zero_of_mem_segment _ _ hpseg'
     have hsub : p - s = c • (t - s) := by
       simpa [c] using sub_eq_footParam_smul_of_sideForm_zero hts hpzero

@@ -538,9 +538,9 @@ theorem not_collinear_of_mem_sphere
     refine ⟨center, R, fun p hp => ?_⟩
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
     rcases hp with rfl | rfl | rfl
-    · simpa using h₁
-    · simpa using h₂
-    · simpa using h₃
+    · exact Metric.mem_sphere.mp h₁
+    · exact Metric.mem_sphere.mp h₂
+    · exact Metric.mem_sphere.mp h₃
   exact affineIndependent_iff_not_collinear_set.mp
     (hcos.affineIndependent_of_ne h₁₂ h₁₃ h₂₃)
 

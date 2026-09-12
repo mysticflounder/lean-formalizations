@@ -106,7 +106,7 @@ theorem finite_critPointSet_of_irreducible_bound
         (PlaneCurveZeroSet h ∩ PlaneCurveZeroSet k).ncard ≤ (d + 1) ^ 4 := by
     intro k hk
     have hk' : k ∈ s := by
-      simpa [s] using hk
+      exact Multiset.mem_toFinset.mp hk
     exact factor_intersection_bound h hh hdeg hpi hk'
       (partial_factor_not_associated h k hh hpi hk')
   have hfinite_union :

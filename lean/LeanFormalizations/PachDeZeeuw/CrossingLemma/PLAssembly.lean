@@ -168,7 +168,7 @@ theorem exists_twoSidedPartition_of_collar_with_collar_sides
     exact ⟨hTR this.1, this.2⟩
   -- ===== Build the GlueData over `B = ↥R`. =====
   haveI : SimplyConnectedSpace ↥R := hRsc.simplyConnectedSpace
-  haveI : LocPathConnectedSpace ↥R := hR.locPathConnectedSpace
+  haveI : LocallyPathConnectedSpace ↥R := hR.locallyPathConnectedSpace
   -- The four chart/overlap sets as subsets of `↥R`.
   set V₀ : Set ↥R := Subtype.val ⁻¹' W with hV₀def
   set V₁ : Set ↥R := Subtype.val ⁻¹' T with hV₁def
@@ -185,7 +185,7 @@ theorem exists_twoSidedPartition_of_collar_with_collar_sides
     rw [hV₀def, hV₁def, hPpdef, hPmdef, ← preimage_inter, ← preimage_union, hpart]
     congr 1
     ext z
-    simp only [mem_inter_iff, mem_diff]
+    simp only [mem_inter_iff, mem_sdiff]
     constructor
     · rintro ⟨⟨_, hzC⟩, hzT⟩; exact ⟨hzT, hzC⟩
     · rintro ⟨hzT, hzC⟩; exact ⟨⟨hTR hzT, hzC⟩, hzT⟩

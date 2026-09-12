@@ -5,11 +5,12 @@ intended as a clean, importable home for lemmas that are useful on their own —
 ideally as mathlib contributions. Everything builds against **mathlib only**
 (`import Mathlib`); there is no other dependency.
 
-Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`, `lakefile.toml`).
+Built against **Lean / mathlib v4.33.1** (see `lean-toolchain`, `lakefile.toml`).
 
-## Verification status (2026-06-26)
+## Verification status (2026-09-11)
 
-- **Build:** green -- `lake build` completes all **8642 jobs** (CI-verified 2026-06-25).
+- **Build:** green -- `./lake-build.sh` completes all **8871 jobs** (locally verified
+  2026-09-11).
 - **Verified core:** the **65** theorems on the axiom gate (a superset of the
   `✅ VERIFIED` rows below) are mechanically re-verified axiom-clean -- each
   depends only on a subset of the

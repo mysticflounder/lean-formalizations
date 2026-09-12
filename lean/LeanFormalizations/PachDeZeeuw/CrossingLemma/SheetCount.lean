@@ -54,13 +54,13 @@ open scoped Topology
 theorem fibre_eq_setOf_isRoot (h : PlanePoly) (x : ℝ) :
     Fibre h x = {y : ℝ | (Specialized1 x h).IsRoot y} := by
   ext y
-  simp only [Fibre, Set.mem_setOf_eq, Polynomial.IsRoot.def, eval_specialized1]
+  simp only [Fibre, Set.mem_ofPred_eq, Polynomial.IsRoot.def, eval_specialized1]
 
 /-- Over a good `x`, `lc_y(h)(x) ≠ 0` (the `InfRoot_x ⊆ Bad` half). -/
 theorem yLeadCoeff_eval_ne_zero_of_not_bad (h : PlanePoly) {x : ℝ} (hx : x ∉ Bad h) :
     MvPolynomial.eval (fun _ : Fin 1 => x) (yLeadCoeff h) ≠ 0 := by
   intro hzero
-  exact hx (Or.inr (by simpa [InfRoot_x, Set.mem_setOf_eq] using hzero))
+  exact hx (Or.inr (by simpa [InfRoot_x, Set.mem_ofPred_eq] using hzero))
 
 /-- **(fibre-card)** Over a good `x` the fibre is finite with at most
 `(Curry1 h).natDegree` points. The fibre is the root set of the slice
@@ -75,7 +75,7 @@ theorem fibre_card (h : PlanePoly) {x : ℝ} (hx : x ∉ Bad h) :
   have hset : Fibre h x = ↑(Specialized1 x h).roots.toFinset := by
     rw [fibre_eq_setOf_isRoot]
     ext y
-    simp only [Set.mem_setOf_eq, Multiset.mem_toFinset, Finset.mem_coe,
+    simp only [Set.mem_ofPred_eq, Multiset.mem_toFinset, Finset.mem_coe,
       Polynomial.mem_roots hne]
   refine ⟨?_, ?_⟩
   · rw [hset]; exact (Specialized1 x h).roots.toFinset.finite_toSet
@@ -184,7 +184,7 @@ the same `ncard` as `Fibre h x`. -/
 theorem fibreOver_strip_eq_image (h : PlanePoly) {xL xR x : ℝ} (hx : x ∈ Set.Icc xL xR) :
     fibreOver h (strip h xL xR) x = (fun y => (x, y)) '' Fibre h x := by
   ext p
-  simp only [fibreOver, strip, mem_evalPlaneZeroSet, Set.mem_inter_iff, Set.mem_setOf_eq,
+  simp only [fibreOver, strip, mem_evalPlaneZeroSet, Set.mem_inter_iff, Set.mem_ofPred_eq,
     Set.mem_image, Fibre]
   constructor
   · rintro ⟨⟨hcurve, _hIcc, _⟩, hfst⟩
@@ -251,7 +251,8 @@ theorem fibre_ncard_le_eventually (h : PlanePoly) {α β x₀ : ℝ}
       rw [hy, ← hp_x]
     have hUp_nhds : U p ∈ nhds p := ((hU_mem p hp).2).mem_nhds (hU_mem p hp).1
     have := hcontAt (by rw [hval]; exact hUp_nhds)
-    simpa using this
+    change (fun x => (x, ψ p x)) ⁻¹' U p ∈ nhds x₀
+    exact this
   -- Combine over the finite fibre.
   have hev_all : ∀ᶠ x in nhds x₀, ∀ p ∈ fibreOver h K x₀, (x, ψ p x) ∈ U p :=
     (hfin.eventually_all).2 hev_box
@@ -272,7 +273,7 @@ theorem fibre_ncard_le_eventually (h : PlanePoly) {α β x₀ : ℝ}
     -- iff at `(x, ψ p x)`: `evalPlane h (x, ψ p x) = 0 ↔ ψ p (x, ψ p x).1 = (x, ψ p x).2`.
     have := (hψp_iff (x, ψ p x) hmem).mpr (by rfl)
     show ψ p x ∈ Fibre h x
-    rw [Fibre, Set.mem_setOf_eq]; exact this
+    rw [Fibre, Set.mem_ofPred_eq]; exact this
   · -- injectivity: distinct fibre points have continuations in disjoint boxes.
     intro p hp q hq hpq
     by_contra hne

@@ -1041,9 +1041,9 @@ theorem theorem23_of_crossingLemma
       Γ.filter (fun γ => p₀ ∈ γ ∧ q₀ ∈ γ) with htΓ
     have hMapsTo : Set.MapsTo (fun f => PlaneCurveZeroSet f) ↑sF ↑tΓ := by
       intro f hf
-      rw [hsF, Finset.coe_filter, Set.mem_setOf_eq] at hf
+      rw [hsF, Finset.coe_filter, Set.mem_ofPred_eq] at hf
       obtain ⟨hfF, hpf, hqf⟩ := hf
-      rw [htΓ, Finset.coe_filter, Set.mem_setOf_eq]
+      rw [htΓ, Finset.coe_filter, Set.mem_ofPred_eq]
       refine ⟨?_, (hbridge f p₀).mp hpf, (hbridge f q₀).mp hqf⟩
       rw [← hF_image_eq]; exact Finset.mem_image_of_mem _ hfF
     have hsub : (↑sF : Set PlanePoly) ⊆ ↑F := by

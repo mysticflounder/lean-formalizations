@@ -1356,8 +1356,8 @@ theorem CGN4g_capData_of_supportCap_oriented
         hpsi_inj hpsi_image h23 hC_interval
         P.center P.radius (le_of_lt P.radius_pos)
         (fun x hx => P.disk_contains_A x (hC_subset hx))
-        (by simpa [psi, hi2] using P.moser_on_boundary_2)
-        (by simpa [psi, hi3] using P.moser_on_boundary_3)
+        (by simpa [psi, hi2, dist_eq_norm] using P.moser_on_boundary_2)
+        (by simpa [psi, hi3, dist_eq_norm] using P.moser_on_boundary_3)
         hcap_side hcenter_neg
     have hturn := CGN4g2_consecutiveTurn_nonpos_of_capBlock Block hneg_shift
     have hproj :
@@ -1488,8 +1488,8 @@ theorem CGN4g_capData_of_supportCap_oriented
         hpsi_inj hpsi_image h32 hC_interval
         P.center P.radius (le_of_lt P.radius_pos)
         (fun x hx => P.disk_contains_A x (hC_subset hx))
-        (by simpa [psi, hi3] using P.moser_on_boundary_3)
-        (by simpa [psi, hi2] using P.moser_on_boundary_2)
+        (by simpa [psi, hi3, dist_eq_norm] using P.moser_on_boundary_3)
+        (by simpa [psi, hi2, dist_eq_norm] using P.moser_on_boundary_2)
         hcap_side hcenter_neg
     have hturn := CGN4g2_consecutiveTurn_nonpos_of_capBlock Block hneg_shift
     have hproj :

@@ -69,7 +69,7 @@ kernel, ending in `Your solution is okay!`. It is wired in CI; to run it locally
 ```bash
 # Build the comparator at the tag matching this repo's lean-toolchain, so its
 # bundled lean4export is built against the SAME Lean as the project.
-TC="$(cut -d: -f2 lean-toolchain)"           # e.g. v4.30.0
+TC="$(cut -d: -f2 lean-toolchain)"           # e.g. v4.33.1
 git clone --branch "$TC" https://github.com/leanprover/comparator /tmp/cmp
 ( cd /tmp/cmp && lake build && lake build lean4export )   # comparator + matched lean4export
 

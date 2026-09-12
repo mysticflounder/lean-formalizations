@@ -19,7 +19,7 @@ Everything builds against `import Mathlib` and nothing else (see
 `lakefile.toml`). If a result needs a dependency beyond mathlib, it does not
 belong in this repo.
 
-Built against **Lean / mathlib v4.30.0** (see `lean-toolchain`). Bumps to a newer
+Built against **Lean / mathlib v4.33.1** (see `lean-toolchain`). Bumps to a newer
 mathlib are fine as their own PR, but a content PR should build against the
 pinned toolchain.
 

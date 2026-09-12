@@ -180,8 +180,8 @@ theorem arrAngle_prefixStep_inl_eq
   obtain ⟨t, ht, hα⟩ := arrAngle_firstCrossing (G := G.prefixEdges m hm) hARR hp he hr0 hr
   have hsuccmem :
       prefixStepDartEquiv m (Sum.inl e) ∈ incidentEnds (G.prefixEdges (m + 1) hm') p := by
-    simpa [prefixStepDartEquiv_apply_inl] using
-      (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm) (hm' := hm')).2 he
+    change (e.1.castSucc, e.2) ∈ incidentEnds (G.prefixEdges (m + 1) hm') p
+    exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm) (hm' := hm')).2 he
   obtain ⟨t', ht', hα'⟩ :=
     arrAngle_firstCrossing (G := G.prefixEdges (m + 1) hm') hARR' hp hsuccmem hr0 hr'
   have heG : (Fin.castLE hm e.1, e.2) ∈ incidentEnds G p :=
@@ -193,8 +193,9 @@ theorem arrAngle_prefixStep_inl_eq
         IsFirstCrossing (G.prefixEdges (m + 1) hm') p
           (prefixStepDartEquiv m (Sum.inl e)) r t' := ht'
     have htmp := (prefixEdges_isFirstCrossing_iff (G := G) (m := m + 1) (hm := hm')).mp htemp
-    simpa [prefixStepDartEquiv_apply_inl, castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] using
-      htmp
+    change IsFirstCrossing G p (Fin.castLE hm' e.1.castSucc, e.2) r t' at htmp
+    rw [castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] at htmp
+    exact htmp
   have ht_eq : t = t' :=
     isFirstCrossing_unique_of_arcsJoinEndpoints G hjoin heG hr0 htG htG'
   calc
@@ -203,8 +204,10 @@ theorem arrAngle_prefixStep_inl_eq
     _ = angleAt p ((G.arc (Fin.castLE hm e.1)).param t') := by rw [ht_eq]
     _ = arrAngle (G.prefixEdges (m + 1) hm') hARR' hp (prefixStepDartEquiv m (Sum.inl e)) r := by
       symm
-      simpa [prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges,
-        castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] using hα'
+      change arrAngle (G.prefixEdges (m + 1) hm') hARR' hp (e.1.castSucc, e.2) r =
+        angleAt p ((G.arc (Fin.castLE hm' e.1.castSucc)).param t') at hα'
+      rw [castLE_castSucc_eq_castLE (hm := hm) (hm' := hm')] at hα'
+      exact hα'
 
 /-- To identify a successor-prefix residual map with a leaf insertion on the
 previous prefix, it is enough to prove the vertex-permutation splice statement.
@@ -225,9 +228,11 @@ noncomputable def insertedLeafEdgeMapIsoOfPrefixStepVertexPerm
       (residualMap (G.prefixEdges (m + 1) hm') hARR') :=
   isoOfPermCongrOfVertexEdge (prefixStepDartEquiv m) hvertex
     (by
-      simpa using
-        (prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
-          (G := G) m hm hm' hARR hARR'))
+      change (prefixStepDartEquiv m).permCongr
+          (insertedLeafEdgePerm (residualMap (G.prefixEdges m hm) hARR)) =
+        (residualMap (G.prefixEdges (m + 1) hm') hARR').edgePerm
+      exact prefixStepDartEquiv_permCongr_residualMap_insertedLeafEdgePerm
+        (G := G) m hm hm' hARR hARR')
 
 /-- To identify a successor-prefix residual map with a same-face insertion on
 the previous prefix, it is enough to prove the vertex-permutation splice
@@ -456,8 +461,9 @@ theorem residualMap_prefixStep_sameFace_face_eq_iff_splitPool_eq
     have hcycle :
         (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
           (prefixStepDartEquiv m x) (prefixStepDartEquiv m y) := by
-      simpa [iso] using (CombinatorialMap.Iso.facePerm_sameCycle_iff iso x y).mpr
-        hcycle_inserted
+      change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
+        (iso.toEquiv x) (iso.toEquiv y)
+      exact (CombinatorialMap.Iso.facePerm_sameCycle_iff iso x y).mpr hcycle_inserted
     exact Quotient.sound hcycle
 
 /-- Current-prefix form of
@@ -1144,7 +1150,8 @@ theorem residualMap_prefixStep_sameFace_old_left_corner_sameCycle_last_true
       (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
     change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
         (iso.toEquiv (Sum.inl c₁)) (iso.toEquiv (dartB : Fin m × Bool ⊕ Fin 2))
-    rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+    apply (CombinatorialMap.Iso.facePerm_sameCycle_iff iso
+      (Sum.inl c₁) (dartB : Fin m × Bool ⊕ Fin 2)).mpr
     exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_left_dartB
       (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
   rw [prefixStepDartEquiv_apply_inr_one] at hcycle
@@ -1173,7 +1180,8 @@ theorem residualMap_prefixStep_sameFace_old_right_corner_sameCycle_last_false
       (G := G) m hm hm' hARR hARR' c₁ c₂ hvertex
     change (residualMap (G.prefixEdges (m + 1) hm') hARR').facePerm.SameCycle
         (iso.toEquiv (Sum.inl c₂)) (iso.toEquiv (dartA : Fin m × Bool ⊕ Fin 2))
-    rw [CombinatorialMap.Iso.facePerm_sameCycle_iff iso]
+    apply (CombinatorialMap.Iso.facePerm_sameCycle_iff iso
+      (Sum.inl c₂) (dartA : Fin m × Bool ⊕ Fin 2)).mpr
     exact CombinatorialMap.EdgeInsertion.insertedEdgeMap_facePerm_sameCycle_inl_right_dartA
       (M := residualMap (G.prefixEdges m hm) hARR) c₁ c₂ hc hsame
   rw [prefixStepDartEquiv_apply_inr_zero] at hcycle
@@ -1311,7 +1319,12 @@ theorem residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm
     have hinsert : I.facePerm.SameCycle (dartA : Fin m × Bool ⊕ Fin 2) dartB := by
       have hiff := CombinatorialMap.Iso.facePerm_sameCycle_iff iso
         (dartA : Fin m × Bool ⊕ Fin 2) dartB
-      exact hiff.mp (by simpa [iso, I, M₁] using htarget)
+      have htarget' : M₁.facePerm.SameCycle (iso.toEquiv dartA) (iso.toEquiv dartB) := by
+        change M₁.facePerm.SameCycle (prefixStepDartEquiv m dartA)
+          (prefixStepDartEquiv m dartB)
+        rw [prefixStepDartEquiv_apply_inr_zero, prefixStepDartEquiv_apply_inr_one]
+        exact htarget
+      exact hiff.mp htarget'
     have hfaceI : I.Face_mk (dartA : Fin m × Bool ⊕ Fin 2) = I.Face_mk dartB :=
       Quotient.sound hinsert
     have himg := congrArg (insertedFaceSplitPoolEquiv M₀ c₁ c₂ hc hsame) hfaceI
@@ -1322,8 +1335,13 @@ theorem residualMap_prefixStep_sameFace_new_edge_faceGraph_adj_of_vertexPerm
     rw [insertedFaceSplitPoolEquiv_mk_dartA_right M₀ c₁ c₂ hc hsame,
       insertedFaceSplitPoolEquiv_mk_dartB_left M₀ c₁ c₂ hc hsame] at himg
     exact (by decide : (1 : Fin 2) ≠ 0) (Sum.inr.inj himg)
-  · simpa [M₁, faceGraph, CombinatorialMap.dual, residualMap_edgePerm_apply]
-      using (Edge.ends_mk (M := M₁.dual) (Fin.last m, false))
+  · have hdual_edge : M₁.dual.edgePerm = M₁.edgePerm := by
+      change M₁.edgePerm⁻¹ = M₁.edgePerm
+      exact M₁.edgePerm_involutive.symm_eq_self_of_involutive
+    change Edge.ends (M := M₁.dual) (M₁.dual.Edge_mk (Fin.last m, false)) =
+      s(M₁.dual.Vertex_mk (Fin.last m, false), M₁.dual.Vertex_mk (Fin.last m, true))
+    rw [Edge.ends_mk, hdual_edge]
+    simp [M₁, residualMap_edgePerm_apply]
 
 /-- The two residual-map insertion alternatives for one ordered prefix step.
 
@@ -1517,7 +1535,7 @@ noncomputable def incident_ends_prefix_step_endpoint_equiv
     (incident_ends_prefix_step_endpoint_equiv
         (G := G) m hm hm' b hpnew hpother (Sum.inl a)).1 =
       prefixStepDartEquiv m (Sum.inl a.1) := by
-  simp [incident_ends_prefix_step_endpoint_equiv]
+  rfl
 
 @[simp] theorem incident_ends_prefix_step_endpoint_equiv_apply_inr_val
     (m : ℕ) (hm : m ≤ G.numEdges) (hm' : m + 1 ≤ G.numEdges)
@@ -1658,9 +1676,9 @@ noncomputable def incident_ends_prefix_step_unchanged_equiv
     (fun a =>
       ⟨prefixStepDartEquiv m (Sum.inl a.1),
         by
-          simpa [prefixStepDartEquiv_apply_inl] using
-            (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
-              (hm' := hm')).2 a.2⟩)
+          change (a.1.1.castSucc, a.1.2) ∈ incidentEnds (G.prefixEdges (m + 1) hm') p
+          exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
+            (hm' := hm')).2 a.2⟩)
     ?_
   constructor
   · intro a1 a2 h
@@ -1669,11 +1687,12 @@ noncomputable def incident_ends_prefix_step_unchanged_equiv
     apply Subtype.ext
     apply Prod.ext
     · have hpair := congrArg Subtype.val h
-      have hfst : Fin.castSucc i1 = Fin.castSucc i2 := by
-        simpa only [prefixStepDartEquiv_apply_inl] using congrArg Prod.fst hpair
-      exact Fin.castSucc_injective _ hfst
+      apply Fin.ext
+      change i1.val = i2.val
+      exact congrArg (fun z => z.1.val) hpair
     · have hpair := congrArg Subtype.val h
-      simpa only [prefixStepDartEquiv_apply_inl] using congrArg Prod.snd hpair
+      change b1 = b2
+      exact congrArg (fun z => z.2) hpair
   · intro e
     rcases e with ⟨⟨i, b⟩, he⟩
     by_cases hlast : i = Fin.last m
@@ -1702,10 +1721,11 @@ noncomputable def incident_ends_prefix_step_unchanged_equiv
           exact hp2 hmem.2
         exact hnot he
     · have hpair : (Fin.castSucc (i.castPred hlast), b) = (i, b) := by
-        ext <;> simp [Fin.castSucc_castPred]
+        exact congrArg (fun j : Fin (m + 1) => (j, b)) (Fin.castSucc_castPred i hlast)
       have hsucc : (Fin.castSucc (i.castPred hlast), b) ∈
           incidentEnds (G.prefixEdges (m + 1) hm') p := by
-        simpa [hpair] using he
+        rw [hpair]
+        exact he
       have hsrc : (i.castPred hlast, b) ∈ incidentEnds (G.prefixEdges m hm) p := by
         exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
           (hm' := hm') (p := p) (e := ⟨i.castPred hlast, b⟩)).mp hsucc
@@ -1756,20 +1776,20 @@ theorem vertexRotationAtRadius_prefix_step_unchanged
         ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) a) =
       endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r a := by
     rcases a with ⟨⟨i, bi⟩, hai⟩
-    simpa [endAngleKey, incident_ends_prefix_step_unchanged_equiv,
-      prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges] using
-      (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-        (e := ⟨i, bi⟩) hai hr0 hr hr').symm
+    simp only [endAngleKey]
+    rw [incident_ends_prefix_step_unchanged_equiv_apply_val]
+    exact (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+      (e := ⟨i, bi⟩) hai hr0 hr hr').symm
   have hb :
       endAngleKey (G.prefixEdges (m + 1) hm') p
         (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
         ((incident_ends_prefix_step_unchanged_equiv (G := G) m hm hm' hp1 hp2) b) =
       endAngleKey (G.prefixEdges m hm) p (arrAngle (G.prefixEdges m hm) hARR hp) r b := by
     rcases b with ⟨⟨i, bi⟩, hbi⟩
-    simpa [endAngleKey, incident_ends_prefix_step_unchanged_equiv,
-      prefixStepDartEquiv_apply_inl, DrawnMultigraph.prefixEdges] using
-      (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
-        (e := ⟨i, bi⟩) hbi hr0 hr hr').symm
+    simp only [endAngleKey]
+    rw [incident_ends_prefix_step_unchanged_equiv_apply_val]
+    exact (arrAngle_prefixStep_inl_eq (G := G) m hm hm' hjoin hARR hARR' hp
+      (e := ⟨i, bi⟩) hbi hr0 hr hr').symm
   change
       endAngleKey (G.prefixEdges (m + 1) hm') p
         (arrAngle (G.prefixEdges (m + 1) hm') hARR' hp) r
@@ -1859,7 +1879,8 @@ theorem incidentEnds_prefix_step_endpoint_card_le_one_of_new_leaf
         · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart]
     · have hsucc : (Fin.castSucc (i.castPred hlast), bi) ∈
           incidentEnds (G.prefixEdges (m + 1) hm') p := by
-          simpa [Fin.castSucc_castPred] using hai
+          rw [Fin.castSucc_castPred i hlast]
+          exact hai
       have hsrc : (i.castPred hlast, bi) ∈ incidentEnds (G.prefixEdges m hm) p := by
         exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
           (hm' := hm') (p := p) (e := ⟨i.castPred hlast, bi⟩)).mp hsucc
@@ -1887,7 +1908,8 @@ theorem incidentEnds_prefix_step_endpoint_card_le_one_of_new_leaf
         · simp [incidentEnds, incident_ends_prefix_step_endpoint_new_dart]
     · have hsucc : (Fin.castSucc (j.castPred hlast), bj) ∈
           incidentEnds (G.prefixEdges (m + 1) hm') p := by
-          simpa [Fin.castSucc_castPred] using hc
+          rw [Fin.castSucc_castPred j hlast]
+          exact hc
       have hsrc : (j.castPred hlast, bj) ∈ incidentEnds (G.prefixEdges m hm) p := by
         exact (mem_incidentEnds_prefixEdges_castSucc_iff (G := G) (m := m) (hm := hm)
           (hm' := hm') (p := p) (e := ⟨j.castPred hlast, bj⟩)).mp hsucc

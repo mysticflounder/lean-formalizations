@@ -126,10 +126,10 @@ theorem dual_connected_iff : M.dual.Connected ↔ M.Connected := by
   constructor
   · intro h d d'
     exact Relation.ReflTransGen.lift' (f := id) (fun a b hstep => dual_step_to_primal (M := M) hstep)
-      (h d d')
+      d d' (h d d')
   · intro h d d'
     exact Relation.ReflTransGen.lift' (f := id) (fun a b hstep => primal_step_to_dual (M := M) hstep)
-      (h d d')
+      d d' (h d d')
 
 /-- The dual of a connected combinatorial map is connected, and conversely. -/
 theorem connected_dual_iff : M.dual.Connected ↔ M.Connected :=

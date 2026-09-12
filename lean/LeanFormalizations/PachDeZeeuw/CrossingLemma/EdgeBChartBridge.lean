@@ -135,7 +135,7 @@ theorem edgeB_crossingInput_euclidean
       {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) H.1 = 0} =
         chartEquiv ⁻¹' evalPlaneZeroSet H.1 := by
     intro H; ext x
-    simp only [Set.mem_setOf_eq, Set.mem_preimage, mem_evalPlaneZeroSet,
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, mem_evalPlaneZeroSet,
                eval_eq_evalPlane_chart]
   -- Rewrite the Euclidean curve family as preimages.
   have hcurve_eq : Γ.image (fun H =>
@@ -164,7 +164,7 @@ theorem edgeB_crossingInput_euclidean
           p₀ ∈ {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) H.1 = 0} ∧
           q₀ ∈ {x : EuclideanSpace ℝ (Fin 2) | MvPolynomial.eval (fun i => x i) H.1 = 0}) := by
       congr 1; ext H
-      simp only [Set.mem_setOf_eq, ← eval_eq_evalPlane_chart]
+      simp only [Set.mem_ofPred_eq, ← eval_eq_evalPlane_chart]
     rw [hfilt_eq]
     exact hpp p₀ hp₀ q₀ hq₀ hpq₀
   -- Transport hcc across chartEquiv.

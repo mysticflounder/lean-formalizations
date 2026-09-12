@@ -60,25 +60,64 @@ theorem abstractize_pairMultiplicityBound (G : DrawnMultigraph) (M : ℕ)
       ((abstractize G).edgeVerts e = s(a, b)) ↔
         (G.endpoints e = (a.val, b.val) ∨ G.endpoints e = (b.val, a.val)) := by
     intro e
-    simp only [abstractize, Sym2.eq_iff, Prod.ext_iff, Subtype.ext_iff]
+    let ea : (abstractize G).Vertex := ⟨(G.endpoints e).1, (G.endpoints_mem e).1⟩
+    let eb : (abstractize G).Vertex := ⟨(G.endpoints e).2, (G.endpoints_mem e).2⟩
+    change s(ea, eb) = s(a, b) ↔ _
+    constructor
+    · intro h
+      rcases (@Sym2.eq_iff _ ea eb a b).mp h with ⟨ha, hb⟩ | ⟨ha, hb⟩
+      · left
+        apply Prod.ext
+        · exact congrArg Subtype.val ha
+        · exact congrArg Subtype.val hb
+      · right
+        apply Prod.ext
+        · exact congrArg Subtype.val ha
+        · exact congrArg Subtype.val hb
+    · intro h
+      apply (@Sym2.eq_iff _ ea eb a b).mpr
+      rcases h with h | h
+      · left
+        constructor
+        · apply Subtype.ext
+          exact congrArg Prod.fst h
+        · apply Subtype.ext
+          exact congrArg Prod.snd h
+      · right
+        constructor
+        · apply Subtype.ext
+          exact congrArg Prod.fst h
+        · apply Subtype.ext
+          exact congrArg Prod.snd h
   -- Rewrite the abstract fiber filter to the drawing-multiplicity filter.
   have hcard :
       (Finset.univ.filter
-        fun e : Fin G.numEdges =>
+        fun e : (abstractize G).Edge =>
           (abstractize G).edgeVerts e = s(a, b)).card
         =
-      (Finset.univ.filter
+      ((Finset.univ : Finset (Fin G.numEdges)).filter
         fun i : Fin G.numEdges =>
           G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val)).card := by
-    apply Finset.card_bij (fun e _ => e)
+    apply Finset.card_bij (fun e _ => (⟨e.val, e.isLt⟩ : Fin G.numEdges))
     · intro e he
+      let e' : Fin G.numEdges := ⟨e.val, e.isLt⟩
       rw [Finset.mem_filter] at he ⊢
-      exact ⟨he.1, (hpred e).mp he.2⟩
+      have hee : (show Fin G.numEdges from e) = e' := by
+        apply Fin.ext
+        rfl
+      have hEdge : (abstractize G).edgeVerts e = (abstractize G).edgeVerts e' := by
+        rfl
+      exact ⟨he.1, (hpred e').mp (by rw [← hEdge]; exact he.2)⟩
     · intro e₁ _ e₂ _ h
-      exact h
+      exact congrArg (fun e : Fin G.numEdges => (⟨e.val, e.isLt⟩ : (abstractize G).Edge)) h
     · intro e he
+      let e' : (abstractize G).Edge := ⟨e.val, e.isLt⟩
       rw [Finset.mem_filter] at he
-      exact ⟨e, by rw [Finset.mem_filter]; exact ⟨he.1, (hpred e).mpr he.2⟩, rfl⟩
+      have he' : e' ∈ Finset.univ.filter
+          (fun i : (abstractize G).Edge => (abstractize G).edgeVerts i = s(a, b)) := by
+        rw [Finset.mem_filter]
+        exact ⟨Finset.mem_univ _, (hpred e).mpr he.2⟩
+      exact ⟨e', he', by apply Fin.ext; rfl⟩
   -- The drawing-multiplicity filter is exactly `G.multiplicity a.val b.val`.
   have hmulteq :
       (Finset.univ.filter
@@ -86,6 +125,19 @@ theorem abstractize_pairMultiplicityBound (G : DrawnMultigraph) (M : ℕ)
           G.endpoints i = (a.val, b.val) ∨ G.endpoints i = (b.val, a.val)).card
         = G.multiplicity a.val b.val := by
     rw [DrawnMultigraph.multiplicity]
+  have huniv :
+      (@Finset.univ (abstractize G).Edge (abstractize G).edgeFintype) =
+        (Finset.univ : Finset (Fin G.numEdges)) := by
+    change (Finset.univ : Finset (Fin G.numEdges)) = Finset.univ
+    rfl
+  have hfilter :
+      (@Finset.univ (abstractize G).Edge (abstractize G).edgeFintype).filter
+          (fun e => (abstractize G).edgeVerts e = s(a, b)) =
+        (Finset.univ : Finset (Fin G.numEdges)).filter
+          (fun e => (abstractize G).edgeVerts e = s(a, b)) := by
+    rw [huniv]
+  rw [hfilter] at hcard
+  rw [hfilter]
   exact (hcard.trans hmulteq).le.trans (hmult a.val b.val)
 
 end CrossingLemma
