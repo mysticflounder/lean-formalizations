@@ -103,7 +103,11 @@ Three versions exist and they are **not** the same document.
   described next does **not** appear in the arXiv version.
 
 **(ii) SoCG 2015 / LIPIcs vol. 34, 537–552**, DOI `10.4230/LIPIcs.SOCG.2015.537`
-— fetched from drops.dagstuhl.de, read pp. 537–539 and 545.
+— fetched from drops.dagstuhl.de, read pp. 537–539 and 545. Now vendored at
+`docs/references/lund-sheffer-de-zeeuw-2015-socg-bisector-energy.pdf`
+(sha256 `93e49989548eb8fa6eae59c7c2fb7cb0fde50746c5595e7816adeb6e2786652a`),
+re-downloaded and re-read independently 2026-09-18 during validation of this
+document; the footnote below is confirmed against that copy.
 
 - **p. 538**, immediately after the definition:
   > "Equivalently, `E(P)` is the number of isosceles trapezoids determined by

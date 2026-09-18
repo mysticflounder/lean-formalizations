@@ -112,14 +112,20 @@ above collapses them to (a)-(d).
 
 **Provenance of the components.** We coined the name "Near Enemy Theorem" for
 the *combination* -- one generic projection simultaneously witnessing the whole
-profile, for every no-three-collinear set in any dimension, kernel-checked. The
-individual ingredients are not ours, and are credited here:
+profile for a given set, kernel-checked. The individual ingredients are not
+ours, and are credited here. A full prior-art search on 2026-09-18
+([`docs/near-enemy-prior-art-2026-09-18.md`](docs/near-enemy-prior-art-2026-09-18.md))
+found that the exact floor `2n(n−1)`, its attainment, and the sufficiency of
+bisector injectivity for equality are **prior art** as well; what survives as
+this project's own is the `rotationEnergy = 0` certificate, the fact that one
+projection carries the bisector floor together with the EFPR general-position
+package, and the formalization itself:
 
 | Component | Source |
 |---|---|
 | The "near enemy" set -- lattice-sphere slice `{x ∈ [−h,h]^d ∩ ℤ^d : ‖x‖² = R}` projected generically to the plane | Erdős–Füredi–Pach–Ruzsa, "The grid revisited" (1993) |
 | A generic projection keeps points in general position (injective, no 3 collinear, no 4 concyclic in the image) | folklore "generic projection trick"; canonical statement Solymosi–Tao (2012) §5.1; used explicitly in Pach–de Zeeuw, "Distinct distances on algebraic curves" |
-| Bisector energy -- the quantity that is minimized | Lund–Sheffer–de Zeeuw (2016), who introduced it and bounded it **both above and below**: their abstract states the lower bound `E(P) = Ω(M(n)n²)`, so a universal quadratic floor is theirs. Ours is the **exact** constant `2n(n−1)` (all perpendicular bisectors distinct), its attainment, the *sufficiency* of bisector injectivity for equality, and the `rotationEnergy = 0` statistic. Revised 2026-09-18; the earlier claim that the *minimization direction* was ours overstated the split |
+| Bisector energy -- the quantity that is minimized | Lund–Sheffer–de Zeeuw (2015/2016), who introduced it **and stated the exact floor**. SoCG 2015, LIPIcs vol. 34, footnote 1 on p. 538: "Note that if each distinct pair of points of `P` determines a distinct bisector, then `E(P) = 2n(n − 1)`, since quadruples of the form `(a,b,a,b)`, `(a,b,b,a)`, `(b,a,a,b)`, and `(b,a,b,a)`, are counted for every `(a,b) ∈ P²`." That is the constant, the injective case and the counting proof. The footnote is **absent** from the arXiv v1 vendored in `docs/references/`, which is why earlier drafts of this table missed it. Their universal asymptotic floor is §3.4 (SoCG p. 545): "an arbitrary point set has `E(P) = Ω(n²)`". Corrected 2026-09-18 — see [`docs/near-enemy-prior-art-2026-09-18.md`](docs/near-enemy-prior-art-2026-09-18.md) |
 | Decomposing congruent point-pair quadruples by isometry type (translation / half-turn / proper rotation), behind [`rotationEnergy`](lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean#L315) | Elekes–Sharir (2011) / Guth–Katz (2015). The "rotation channel `= 0` for the image" statistic is ours |
 | The distinct-distance bound `n·2^{O(√log n)}` for general position that the sphere-slice corollary ultimately reduces to | Erdős–Füredi–Pach–Ruzsa (1993) -- external arithmetic, **not** formalized and **not** claimed here |
 
