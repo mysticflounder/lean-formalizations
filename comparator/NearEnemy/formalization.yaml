@@ -43,19 +43,38 @@ sources:                                            # [required]
     type: "original"
     note: >
       What is claimed as this project's own is the COMBINATION, not the components.
-      Ours: the bisector-energy MINIMIZATION direction; the floor 2n(n−1) (all
-      perpendicular bisectors distinct); the bisector-injectivity equality
-      characterization; the rotationEnergy = 0 statistic; and the single-witness
-      bundle (one generic projection, every no-three-collinear set, any dimension,
-      kernel-checked). All four gated theorems fall in that set. Every component the
-      argument stands on is attributed separately below, and README.md carries the
-      same split as a component-provenance table.
+      Ours: the EXACT floor 2n(n−1) (all perpendicular bisectors distinct) and its
+      attainment; the SUFFICIENCY of bisector injectivity for equality; the
+      rotationEnergy = 0 statistic; and the bundled generic-projection statement
+      (one projection per set carrying injectivity, minimal energy, general
+      position, rotation-freeness and distance transport at once, kernel-checked).
+      All four gated theorems fall in that set. Every component the argument stands
+      on is attributed separately below, and README.md carries the same split as a
+      component-provenance table.
+      NOT ours, corrected 2026-09-18: the bisector-energy minimization DIRECTION at
+      order-of-magnitude precision. Lund–Sheffer–de Zeeuw already derive the lower
+      bound E(P) = Ω(M(n)n²) in the abstract of arXiv:1411.6868, so a universal
+      quadratic floor is theirs; only the exact constant and its attainment are new
+      here. An earlier draft of this file claimed the direction itself.
+      Also corrected 2026-09-18: bisector injectivity is proved SUFFICIENT for
+      equality. The converse is not proved anywhere in this development, so this is
+      not a characterization. Earlier wording said "equality characterization".
+      Also corrected 2026-09-18: the generic projection is chosen per set — its type
+      depends on the ambient dimension — so there is no single witness serving every
+      set. Earlier wording said "single-witness bundle (one generic projection,
+      every no-three-collinear set, any dimension)".
     novelty_check: >
-      Literature absence checked 2026-06-26: 20 forward citations of arXiv:1411.6868
-      were surveyed, and the floor 2n(n−1), the bisector-injectivity equality
-      characterization, and the use of the Erdős–Füredi–Pach–Ruzsa configuration as a
-      minimizer are absent from all of them. This is a bounded survey of the forward
-      citations of one paper, not a proof of priority.
+      SUPERSEDED 2026-09-18 — see docs/near-enemy-prior-art-2026-09-18.md for the
+      full search. Retained here for the record: "Literature absence checked
+      2026-06-26: 20 forward citations of arXiv:1411.6868 were surveyed, and the
+      floor 2n(n−1), the bisector-injectivity equality characterization, and the use
+      of the Erdős–Füredi–Pach–Ruzsa configuration as a minimizer are absent from all
+      of them. This is a bounded survey of the forward citations of one paper, not a
+      proof of priority."
+      Why it is not trusted: it named none of the 20 papers, so it cannot be checked
+      or repeated; and it walked the anchor paper's forward citations without
+      re-reading the anchor paper, which is where the Ω(M(n)n²) lower bound sits.
+      {{NEEDS_RESEARCH}} until the replacement document lands.
     prior_attribution_correction: >
       An earlier draft of this repository attributed the construction and the
       general-position distinct-distance bound to Dumitrescu. That was wrong and was
