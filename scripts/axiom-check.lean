@@ -72,7 +72,7 @@ Keep this list in sync with the README's ✅ VERIFIED claims.
 -- standalone lemmas that no headline above transitively depends on.
 -- ───────────────────────────────────────────────────────────────────────────
 
--- Energy → popular-difference-graph connector (BSGEnergyToGraph)
+-- Energy → popular-sum-graph connector (BSGEnergyToGraph)
 #print axioms Finset.energy_to_popular_graph
 
 -- Elekes–Sharir generic lemmas: L4 rank–nullity collapse (OmegaRankCollapse)

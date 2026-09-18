@@ -23,9 +23,9 @@ statement drift between the two files cannot pass silently.
 
 The Balog-Szemeredi-Gowers theorem over mathlib's `Finset.addEnergy`: the
 asymmetric and symmetric forms, an explicit-constant asymmetric variant, and the
-connector from large additive energy to a popular-difference graph. Finset
-pointwise subtraction comes from `open scoped Pointwise`; the connector is stated
-over mathlib's `SimpleGraph`.
+connector from large additive energy to a popular-sum graph. Finset
+pointwise subtraction comes from `open scoped Pointwise`; the connector states
+its graph as an edge set `Finset (G × G)`, not as a mathlib `SimpleGraph`.
 
 ## Scope
 

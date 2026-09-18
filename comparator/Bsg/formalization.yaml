@@ -49,7 +49,7 @@ status:
     The Balog–Szemerédi–Gowers theorem over Finset.addEnergy in an arbitrary
     AddCommGroup: the two-set (asymmetric) form, the single-set (symmetric) form, an
     asymmetric form with explicit polynomial-in-η constants in place of ∃-quantified
-    ones, and the supporting energy → popular-difference-graph step. mathlib-only
+    ones, and the supporting energy → popular-sum-graph step. mathlib-only
     dependencies: no project axioms, no custom axiom, no native_decide, no sorry.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -188,7 +188,7 @@ alignment:
       lean: "Finset.balog_szemeredi_gowers_asymmetric_explicit"
       module: "LeanFormalizations.Combinatorics.Additive.BalogSzemerediGowers"
       status: "proved"
-    - source: "Energy ⟹ popular-difference-graph step (Gowers' graph proof)"
+    - source: "Energy ⟹ popular-sum-graph step (Tao-Vu, Additive Combinatorics, Lemma 2.30, p. 80)"
       lean: "Finset.energy_to_popular_graph"
       module: "LeanFormalizations.Combinatorics.Additive.BSGEnergyToGraph"
       status: "proved"

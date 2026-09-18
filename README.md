@@ -58,9 +58,9 @@ no domain-specific hypothesis, are re-extracted here mathlib-only.
 | [`Finset.balog_szemeredi_gowers_asymmetric_explicit`](lean/LeanFormalizations/Combinatorics/Additive/BalogSzemerediGowers.lean#L2710) | The asymmetric form with explicit polynomial-in-`η` constants (effective bounds in place of `∃`-quantified ones). |
 | [`threeAPFree_of_forall_not_collinear`](lean/LeanFormalizations/Combinatorics/Additive/ThreeAPFreeOfNoThreeCollinear.lean#L24) | In a real vector space, no three collinear points ⟹ `ThreeAPFree`: since `a + c = 2b` makes `b` the midpoint of `a` and `c`, a no-three-collinear set carries no nontrivial 3-term AP. The geometric source of `ThreeAPFree` hypotheses for additive-energy arguments. |
 
-`BSGEnergyToGraph.lean` supplies the supporting energy → popular-difference-graph
-connector, implementing the dependent-random-choice graph argument of Fox-Sudakov
-[2011]. mathlib (v4.30.0) does **not** contain BSG, so this fills a genuine
+`BSGEnergyToGraph.lean` supplies the supporting energy → popular-sum-graph
+connector (Tao-Vu Lemma 2.30); the dependent-random-choice graph argument of
+Fox-Sudakov [2011] lives in `BalogSzemerediGowers.lean`. mathlib (v4.33.1) does **not** contain BSG, so this fills a genuine
 gap while reusing mathlib's `Finset.addEnergy`. **All theorems above are
 axiom-clean.**
 
