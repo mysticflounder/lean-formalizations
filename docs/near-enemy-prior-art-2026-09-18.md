@@ -1,6 +1,6 @@
 # Near Enemy Theorem — full prior-art search
 
-**Date of search:** 2026-09-18
+**Date of search:** 2026-09-18; completion pass 2026-09-19 (§5)
 **Target:** `lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean`
 **Replaces:** the single `novelty_check` field at `comparator/NearEnemy/formalization.yaml` lines 53–58 (dated 2026-06-26), which named no papers.
 **Scope:** components (a)–(e) below, tested separately.
@@ -40,9 +40,9 @@ From `lean/LeanFormalizations/Geometry/Euclidean/NearEnemyTheorem.lean`
 | Component | Verdict | Citation / what would settle it |
 |---|---|---|
 | **(a)** exact floor `E(P) ≥ 2n(n−1)` | **PRIOR ART FOUND** | Lund–Sheffer–de Zeeuw, *Bisector Energy and Few Distinct Distances*, **Proc. 31st SoCG 2015**, LIPIcs vol. 34, 537–552, **footnote 1 on p. 538** prints the constant `2n(n−1)` and enumerates exactly the trivial quadruples that prove the floor. The same paper, **§3.4, p. 545** (arXiv v1 p. 11), states the universal asymptotic form: "an arbitrary point set has `E(P) = Ω(n²)`". The **inequality** with the exact constant I did **not** find stated as an inequality anywhere; it is a one-word change from the printed footnote. |
-| **(b)** attainment for every `n` | **PRIOR ART FOUND (in substance, not verbatim)** | The same footnote is written conditionally ("if each distinct pair … determines a distinct bisector, then `E(P) = 2n(n−1)`") and does not assert non-emptiness. But the same page (SoCG p. 538) prints "`E(P)` is the number of isosceles trapezoids determined by `P` (not counting isosceles triangles)", and an isosceles trapezoid is concyclic — so any `n`-point set with no four concyclic points attains the floor, and such sets are classical. I did **not** find the join printed in one place. To settle verbatim: Brass–Moser–Pach ch. 5 and Pach–Agarwal ch. 10–12 (unreachable, see §4). |
+| **(b)** attainment for every `n` | **PRIOR ART FOUND (in substance, not verbatim)** | The same footnote is written conditionally ("if each distinct pair … determines a distinct bisector, then `E(P) = 2n(n−1)`") and does not assert non-emptiness. But the same page (SoCG p. 538) prints "`E(P)` is the number of isosceles trapezoids determined by `P` (not counting isosceles triangles)", and an isosceles trapezoid is concyclic — so any `n`-point set with no four concyclic points attains the floor, and such sets are classical. I did **not** find the join printed in one place. Brass–Moser–Pach and Pach–Agarwal were searched inside their full text on 2026-09-19 and do not print it either (§5.1). |
 | **(c)** injectivity is sufficient for `E(P) = 2n(n−1)` | **PRIOR ART FOUND (verbatim)** | Lund–Sheffer–de Zeeuw, SoCG 2015, **footnote 1, p. 538**, quoted in full in §2.1 below. This is the claimed implication, with the same constant, in the same direction, by the authors of the anchor paper. |
-| **(d)** `rotationEnergy` and `rotationEnergy = 0` | **NOVEL** (no prior statement found) | No paper I read names this statistic or uses its vanishing as a certificate. Two named negatives bound the claim: (i) the translation / non-translation split is Guth–Katz, arXiv:1011.4105v3 §2 and **Lemma 2.12, pp. 11–12**, but they do **not** split off half-turns; (ii) the published property "distance Sidon set" (Clemen–Führer–Roche-Newton, arXiv:2606.05841 §1, attributed to Erdős) is strictly stronger and **implies** `rotationEnergy = 0`. |
+| **(d)** `rotationEnergy` and `rotationEnergy = 0` | **NO PRIOR STATEMENT FOUND** (in any source examined through 2026-09-19; see §5.4 for the channels still open) | No paper I read names this statistic or uses its vanishing as a certificate. Two named negatives bound the claim: (i) the translation / non-translation split is Guth–Katz, arXiv:1011.4105v3 §2 and **Lemma 2.12, pp. 11–12**, but they do **not** split off half-turns; (ii) the published property "distance Sidon set" (Clemen–Führer–Roche-Newton, arXiv:2606.05841 §1, attributed to Erdős) is strictly stronger and **implies** `rotationEnergy = 0`. |
 | **(e)** the bundled single-witness statement | **PRIOR ART FOUND (partial)** | Four of the conjuncts — one generic planar projection, injective on the set, image in general position (no three collinear, no four concyclic), with the image's distance count controlled by the upstairs structure — are Erdős–Füredi–Pach–Ruzsa 1993, **confirmed verbatim from EFPR itself** (proof of their Theorem 3.1, p. 193: one chosen plane `Π`, condition (i) injectivity, condition (ii) image in general position, plus `p₁ − p₂ = p₃ − p₄ ⟹ d(p′₁,p′₂) = d(p′₃,p′₄)`; their §3 defines general position as no three collinear and no four concyclic). Quoted in §2.6. The bisector-energy floor, the absolute-minimality conjunct and `rotationEnergy = 0` are not found in any source I read. |
 
 ---
@@ -478,71 +478,80 @@ Remote: `drops.dagstuhl.de/.../LIPIcs.SOCG.2015.537.pdf`; arXiv PDFs
 
 ---
 
-## 5. Explicit limits
+## 5. Completion pass (2026-09-19) and what is still open
 
-**Checked against the local corpora 2026-09-18** (`nthdegree docs list`): neither
-Brass–Moser–Pach nor Pach–Agarwal is in the document library, so limits 1 and 2
-stand. EFPR 1993 *is* in the library and limit 3 is now closed. The SoCG version
-of the anchor paper has been ingested as corpus
-`lund-sheffer-de-zeeuw-2015-socg-bisector-energy`, so footnote 1 is now
-retrievable by search; the previously indexed
-`lsz16-lund-sheffer-de-zeeuw-2016-bisector-energy` corpus is the arXiv text and
-does **not** contain it.
+The 2026-09-18 search left nine named gaps. A second pass on 2026-09-19 closed
+most of them. The full per-source records, with verbatim quotes, every query
+and every failed channel, are in
+[`near-enemy-prior-art-2026-09-19/`](near-enemy-prior-art-2026-09-19/README.md).
+The raw evidence is archived at `/opt/nfs/near-enemy-prior-art-2026-09-19/`
+(`MANIFEST.sha256`), and each paper obtained was ingested into the nthdegree
+document library.
 
-1. **Brass–Moser–Pach, *Research Problems in Discrete Geometry* — not read.**
-   No accessible full text, and not in the local library. This is the single
-   named gap with the highest residual risk for components (b) and (d).
-   `{{NEEDS_RESEARCH}}`
-2. **Pach–Agarwal, *Combinatorial Geometry* — not read.** Same reason.
-   `{{NEEDS_RESEARCH}}`
-3. ~~**Erdős–Füredi–Pach–Ruzsa 1993 — not read.**~~ **CLOSED 2026-09-18.** The
-   publisher blocked it (Elsevier HTTP 403), but the paper is in the nthdegree
-   library as `efpr93-erdos-furedi-pach-ruzsa-1993-the-grid-revisited` and the
-   decisive passage was read there. See §2.6. The lesson: search the local
-   corpora before concluding a source is unreachable.
-4. **The DCG 2016 journal version of the anchor paper — not read.** Springer
-   authentication redirect. Footnote 1 is confirmed in the SoCG/LIPIcs version,
-   now vendored and ingested. `{{NEEDS_RESEARCH}}`
-5. **Seven forward citations not obtained** (items 13–18 of §2.2, plus the Bolyai
-   book chapter form of de Zeeuw's survey). `{{NEEDS_RESEARCH}}`
-6. **Google Scholar unreachable**, so the forward-citation count (18) is a lower
-   bound from OpenAlex ∪ Semantic Scholar, not a census. `{{NEEDS_RESEARCH}}`
-7. **No non-English literature was searched.** Hungarian and Russian discrete
-   geometry of the 1970s–80s is a plausible home for a bisector-quadruple remark
-   and was not covered. `{{NEEDS_RESEARCH}}`
-8. **No search of MathSciNet or zbMATH reviews**, which sometimes quote a paper's
-   incidental remarks. `{{NEEDS_RESEARCH}}`
-9. **Full-text arXiv search was not available** from this session. A genuine
-   full-text arXiv search for `2n(n-1)` near `bisector` would strengthen the (a)
-   and (b) negatives. `{{NEEDS_RESEARCH}}` — note that the *metadata* API does
-   work: `export.arxiv.org/api/query` answers HTTP 301 on plain `http://`, so it
-   needs `https://` or `curl -L`. The empty results reported during this search
-   were that redirect, not an outage. Metadata queries are no substitute for
-   full text, but ID and title checks are available.
+### 5.1 What was closed
 
-### What a further search should cover
+| Gap (2026-09-18) | Result 2026-09-19 |
+|---|---|
+| DCG 2016 version of the anchor paper | **The sentence survives, moved from a footnote into the body.** The Springer page lists exactly three footnotes (checked by the main session), none of them the 2n(n−1) note. The Google Scholar full-text index attributes the phrase "Note that if each distinct pair of points of \(\mathcal P\) determines a distinct bisector, then" to the DCG 2016 Springer record, in Springer's TeX markup. A separate query for `"bisector energy" "2n(n-1)"` returns only that record. Confirmed through the publisher's full-text index. The body itself was not read (paywall). |
+| Later arXiv versions | Only v1 of arXiv:1411.6868 exists (v2–v5 return 404). |
+| Seven forward citations not obtained | All read in full (latest arXiv versions, and Do's MIT thesis). Nothing on (a)–(e). |
+| Forward-citation census | **26 distinct citing works**: OpenAlex, Semantic Scholar, OpenCitations COCI and v2, and Google Scholar ("Cited by 30"). 24 read in full. Every "trivial bound" remark on bisector energy in them is an **upper** bound. |
+| Brass–Moser–Pach 2005 | Searched inside its full text (Google Books), 32 terms, two volume records. "bisector" has one hit (p. 276, the isosceles-triangle upper bound). The "trapezoid" hits (pp. 283, 287) are about Ramsey sets. No floor, no quadruple count, no rotation split. |
+| Pach–Agarwal 1995 | Searched inside its full text (Google Books and Internet Archive), two channels. The bisector hits (pp. 207, 304, 307) are the Szemerédi isosceles upper bound and its exercises. The trapezoid hits (pp. 170–190, 305) are trapezoidal decompositions of line arrangements. Theorem 13.8 restates EFPR. Nothing on (a)–(d). The main session read every hit from the raw results. |
+| EFPR 1993 | Closed 2026-09-18 from the local corpus (§2.6). |
+| Erdős, Ann. Mat. Pura Appl. 103 (1975) | This is the local `er75` corpus (MD5 identical to Rényi archive 1975-25.pdf). Read in full: Szemerédi's point–bisector argument (p. 101) and "degenerate quadruplets" (p. 104, a different statistic, upper bound only). |
+| Erdős, Discrete Math. 60 (1986) | Read in full (Rényi 1986-09). Nothing on (a)–(e). |
+| Non-English literature and review databases | zbMATH Open, 38 queries, including German, French, Russian and Hungarian terms. Reviews are indexed in English or German, so the Cyrillic and Hungarian queries return nothing by construction; the English and German queries cover the reviewed literature in all languages. Nothing new. |
+| Local surveys never opened | Six corpora read in full: Pach handbook ch. 1, Sheffer 2014, Sheffer 2022, Tao 2013, Melotti–Ramassamy–Thévenin 2020, Pach–Tardos 2002. Nothing on (a)–(c). |
+| Also read | Erdős–Purdy I, III, IV, V (IV is LSdZ ref. [8]), Brass 2003, Brass–Pach 2005, Dumitrescu 2008, Croft–Falconer–Guy F10, Moser–Pach 1993 (*New Trends*, ch. XI). All negative. |
 
-- Brass–Moser–Pach ch. 5 and the distinct-distances chapter, page by page.
-  Acquiring it and running `nthdegree docs add` on it is the cheapest route.
-- Pach–Agarwal ch. 10–12. Same.
-- The DCG 2016 version, to confirm footnote 1 survives refereeing.
-- A true full-text index (arXiv bulk, MathSciNet) for the exact string
-  `2n(n-1)` co-occurring with `bisector`.
+### 5.2 Related items found (none changes a verdict)
 
-**Done 2026-09-18, after this document's first draft:**
+- **Lund, PhD thesis, Rutgers 2017, p. 45** (checked by the main session):
+  "A standard application of Cauchy-Schwarz … gives |B| ≥ n²(n − 1)²/|Q|",
+  where |Q| is exactly E(P) and B is the set of bisectors. With the trivial
+  |B| ≤ n(n−1)/2 this gives E(P) ≥ 2n(n−1) in one line. The thesis does not take
+  that step. Supports (a) as prior art; does not state it.
+- **Dumitrescu, Discrete Math. 343 (2020), p. 2** (checked by the main session):
+  "every isosceles trapezoid can be inscribed in a circle" — the concyclicity step
+  behind (b).
+- **Zaslavsky, DCG 27 (2002); Good–Tideman 1977** (as restated in Carbonero et
+  al., arXiv:2106.14140): a generic point set gives an arrangement of all
+  C(n,2) bisectors, so all bisectors are distinct. With (c) this gives (b). This
+  combination is ours, not printed.
+- **Brass, Comput. Geom. 24 (2003), p. 21**: "see which reflection line occurs
+  most frequently" — a multiplicity count of bisectors for an algorithm. No
+  quadruple count, no floor.
+- **Sheffer 2022, §7.2 (pp. 100–101); Pach–Agarwal p. 188**: distance quadruples
+  split into translations and rotations, or left unsplit. No half-turn split. The
+  nearest items to (d).
 
-- ~~EFPR 1993 in full~~ — read from the local corpus; see §2.6 and limit 3.
-- ~~Erdős's problem papers of 1975–1986~~ — four are in the local library
-  (`er46`, `er75`, `er83c`, `er87`) and were searched for a bisector-quadruple
-  count. The nearest hit is Erdős 1975, chunk `5XT36G`: "Take all possible pairs
-  `(xᵢ, xⱼ)` which are equidistant from one of the `xᵢ`'s … Thus the
-  perpendicular bisector of `(xᵢ, xⱼ)` goes through at least `k` `xᵢ`'s." That
-  is Szemerédi's isosceles-triple argument — bisectors through many *points*,
-  not quadruples sharing a *bisector*. It does not state the floor, and it does
-  not change any verdict. The Ann. Mat. Pura Appl. 103 (1975) and Discrete
-  Math. 60 (1986) items cited by LSdZ are still unread.
+### 5.3 Verdicts after the completion pass
 
----
+| Component | Verdict |
+|---|---|
+| (a) exact floor | **PRIOR ART** — LSdZ SoCG 2015 footnote 1 and DCG 2016 body; asymptotic form LSdZ §3.4 |
+| (b) attainment | **PRIOR ART in substance** — LSdZ (trapezoid reading) with classical concyclicity; not printed as one statement |
+| (c) sufficiency | **PRIOR ART, verbatim** — LSdZ SoCG 2015 footnote 1 and DCG 2016 body |
+| (d) `rotationEnergy = 0` certificate | **NO PRIOR STATEMENT FOUND** in any source examined; implied by the distance-Sidon property (§2) |
+| (e) the bundle | **PARTIAL PRIOR ART** — four of six conjuncts are EFPR 1993; the bisector floor, minimality and `rotationEnergy = 0` together in one projection are not found |
+
+### 5.4 Still open, and what closes each
+
+These are the only items not closed. None can change (a), (b) or (c). They bear
+on the negative findings for (d) and (e).
+
+| Item | Why it is open | What closes it |
+|---|---|---|
+| Google Scholar "search within citing articles" (full text of all 30 citing records, paywalled ones included) | Google served a captcha to this machine after heavy use on 2026-09-19. It worked earlier that day. | Rerun once the rate limit clears. `{{NEEDS_RESEARCH}}` |
+| Semantic Scholar full-text snippet search | HTTP 429 on every call for ~40 min; shared unauthenticated quota | A free Semantic Scholar API key. `{{NEEDS_ADAM_INPUT}}` |
+| MathSciNet reviews | Institutional login | Institutional access. zbMATH covers the same literature. `{{NEEDS_ADAM_INPUT}}` |
+| Journal bodies: DCG 2016 (body), de Zeeuw survey chapter (Bolyai 27), journal versions of Do, Walsh ×2, Kong–Tamo | Springer / SIAM / JHU paywalls. Latest arXiv versions were read in full. | Institutional access. `{{NEEDS_ADAM_INPUT}}` |
+| Mansfield, PhD thesis, Bristol 2024, pp. 86 to end | Bristol portal HTTP 403, no archived copy. pp. 1–85 read, which include the passages citing LSdZ. Its published paper is covered (§2.2 item 11). | A request to the repository or the author. `{{NEEDS_ADAM_INPUT}}` |
+| Pach–Sharir 1992; Touchard 1950 | ScienceDirect 403; no open copy found | Institutional access. `{{NEEDS_ADAM_INPUT}}` |
+| CORE full-text search | Server-side error on full-text fields | Retry later. `{{NEEDS_RESEARCH}}` |
+| Moser–Pach mimeographed problem collections (1980s–90s) | No legitimate copy online | Superseded by Brass–Moser–Pach 2005, which was searched. Treated as closed by succession. |
+| Google Scholar record "J Passant" | No document behind the record | Nothing to read. Closed. |
 
 ## 6. Recommendation on wording
 

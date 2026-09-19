@@ -81,5 +81,10 @@ All three are corrected here, in `README.md`, in
 `comparator/NearEnemy/formalization.yaml`, and the full search is
 `docs/near-enemy-prior-art-2026-09-18.md`.
 
-{{NEEDS_RESEARCH}} The DCG 2016 journal version (Springer) has not been read.
-Footnote 1 is confirmed in the SoCG/LIPIcs version only.
+**DCG 2016 journal version (checked 2026-09-19).** The Springer page lists
+exactly three footnotes, and the 2n(n−1) note is not one of them. The Google
+Scholar full-text index attributes "Note that if each distinct pair of points of
+\(\mathcal P\) determines a distinct bisector, then" to the DCG 2016 record, so
+the sentence moved from a footnote into the body. The body itself was not read
+(paywall). Only arXiv v1 exists; v2–v5 return 404. See
+`docs/near-enemy-prior-art-2026-09-18.md` §5.1.
